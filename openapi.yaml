@@ -1,0 +1,30 @@
+openapi: 3.0.3
+info:
+  title: ERP Maga API
+  description: Заглушка схемы API. Заменится реальной схемой из drf-spectacular.
+  version: 0.0.1
+servers:
+  - url: http://localhost:8000/api
+    description: Local Django dev server
+paths:
+  /health/:
+    get:
+      tags: [health]
+      operationId: healthCheck
+      summary: Проверка доступности API
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
