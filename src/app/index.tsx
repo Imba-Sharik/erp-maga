@@ -4,7 +4,7 @@ import { AppRouter } from './router'
 
 export function App() {
   return (
-    <ThemeProvider defaultTheme="system">
+    <ThemeProvider defaultTheme="light">
       <QueryProvider>
         <AppRouter />
       </QueryProvider>
