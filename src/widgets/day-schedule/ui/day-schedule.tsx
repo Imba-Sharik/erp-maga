@@ -1,29 +1,50 @@
-import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
-import { ProjectCard, type Project } from '@/entities/project'
+import { type ScheduleDayRow } from '@/entities/project'
+import { cn } from '@/shared/lib/utils'
 import { Card } from '@/shared/ui/card'
 import { DayScheduleHeader } from './day-schedule-header'
+import { ScheduleDaySection } from './schedule-day-section'
 
 interface DayScheduleProps {
-  selectedDate: Date
-  projects: Project[]
+  scheduleDays: ScheduleDayRow[]
+  /** На широкой вёрстке: ограничить колонку по высоте календаря; контент карточки прокручивается */
+  maxHeightPx?: number
 }
 
-export function DaySchedule({ selectedDate, projects }: DayScheduleProps) {
-  const dateLabel = format(selectedDate, 'd MMMM yyyy', { locale: ru })
+export function DaySchedule({ scheduleDays, maxHeightPx }: DayScheduleProps) {
+  const daysSelectedCount = scheduleDays.length
+  const totalProjects = scheduleDays.reduce((sum, row) => sum + row.projects.length, 0)
+  const heightCapped = maxHeightPx != null && maxHeightPx > 0
 
   return (
-    <div className="flex flex-col gap-4">
-      <DayScheduleHeader count={projects.length} />
-      <Card className="gap-2.5 border-[#B1B1B1] p-2.5 shadow-none">
-        <div className="inline-flex h-10 w-fit items-center rounded-[10px] border border-[#B1B1B1] bg-white px-3.5 text-sm font-semibold text-[#1B1A17]">
-          {dateLabel}
-        </div>
-        {projects.length === 0 ? (
-          <p className="px-1 py-4 text-sm text-[#ACACAC]">На этот день проектов нет</p>
-        ) : (
-          projects.map((p) => <ProjectCard key={p.id} project={p} />)
+    <div
+      className={cn('flex flex-col gap-4', heightCapped && 'min-h-0 overflow-hidden')}
+      style={heightCapped ? { maxHeight: maxHeightPx } : undefined}
+    >
+      <DayScheduleHeader projectsCount={totalProjects} daysSelectedCount={daysSelectedCount} />
+      <Card
+        className={cn(
+          'gap-2.5 border-[#B1B1B1] p-2.5 shadow-none',
+          heightCapped && 'flex min-h-0 flex-1 flex-col overflow-hidden',
         )}
+      >
+        <div className={cn(heightCapped && 'min-h-0 flex-1 overflow-y-auto overscroll-y-contain')}>
+          {daysSelectedCount === 0 ? (
+            <p className="px-1 py-4 text-sm text-[#ACACAC]">
+              Выберите один или несколько дней в календаре слева.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-5">
+              {scheduleDays.map((row, idx) => (
+                <ScheduleDaySection
+                  key={row.key}
+                  date={row.date}
+                  projects={row.projects}
+                  withDivider={idx < daysSelectedCount - 1}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </Card>
     </div>
   )
