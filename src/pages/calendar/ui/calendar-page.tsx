@@ -1,36 +1,64 @@
-import { useMemo, useState } from 'react'
-import { startOfMonth } from 'date-fns'
-import { groupByDay, mockProjects } from '@/entities/project'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { isSameDay, startOfMonth } from 'date-fns'
+import {
+  countProjectsInMonth,
+  getProjectsForDates,
+  groupByDay,
+  mockProjects,
+} from '@/entities/project'
+import { useElementHeight } from '@/shared/hooks/use-element-height'
+import { useMediaQuery } from '@/shared/hooks/use-media-query'
 import { DaySchedule } from '@/widgets/day-schedule'
 import { ProjectCalendar } from '@/widgets/project-calendar'
 
-const TODAY = new Date(2026, 4, 13)
+const WIDE_CALENDAR_QUERY = '(min-width: 1400px)'
 
 export function CalendarPage() {
-  const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(TODAY))
-  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(2026, 4, 15))
+  const {
+    today,
+    visibleMonth: initialVisibleMonth,
+    initialSelectedDates,
+  } = useMemo(() => {
+    const now = new Date()
+    return {
+      today: now,
+      visibleMonth: startOfMonth(now),
+      initialSelectedDates: [now] as Date[],
+    }
+  }, [])
+
+  const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
+  const [selectedDates, setSelectedDates] = useState<Date[]>(initialSelectedDates)
   const [loft, setLoft] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
 
   const projectsByDay = useMemo(() => groupByDay(mockProjects), [])
 
-  const selectedKey = useMemo(() => {
-    const y = selectedDate.getFullYear()
-    const m = String(selectedDate.getMonth() + 1).padStart(2, '0')
-    const d = String(selectedDate.getDate()).padStart(2, '0')
-    return `${y}-${m}-${d}`
-  }, [selectedDate])
+  const toggleSelectedDate = useCallback((date: Date) => {
+    setSelectedDates((prev) => {
+      const exists = prev.some((d) => isSameDay(d, date))
+      if (exists) return prev.filter((d) => !isSameDay(d, date))
+      return [...prev, date].sort((a, b) => a.getTime() - b.getTime())
+    })
+  }, [])
 
-  const dayProjects = projectsByDay.get(selectedKey) ?? []
+  const scheduleDays = useMemo(
+    () => getProjectsForDates(projectsByDay, selectedDates),
+    [projectsByDay, selectedDates],
+  )
 
-  const totalThisMonth = useMemo(() => {
-    const year = visibleMonth.getFullYear()
-    const month = visibleMonth.getMonth()
-    return mockProjects.filter((p) => {
-      const d = new Date(p.date)
-      return d.getFullYear() === year && d.getMonth() === month
-    }).length
-  }, [visibleMonth])
+  const totalThisMonth = useMemo(
+    () => countProjectsInMonth(projectsByDay, visibleMonth),
+    [projectsByDay, visibleMonth],
+  )
+
+  const calendarRef = useRef<HTMLDivElement>(null)
+  const isWideCalendarLayout = useMediaQuery(WIDE_CALENDAR_QUERY)
+  const calendarHeightPx = useElementHeight(calendarRef)
+  const scheduleMaxHeightPx =
+    isWideCalendarLayout && calendarHeightPx != null && calendarHeightPx > 0
+      ? calendarHeightPx
+      : undefined
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,21 +69,25 @@ export function CalendarPage() {
         </p>
       </header>
 
-      <div className="grid gap-6 min-[1400px]:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] min-[1400px]:gap-10">
-        <ProjectCalendar
-          visibleMonth={visibleMonth}
-          selectedDate={selectedDate}
-          today={TODAY}
-          projectsByDay={projectsByDay}
-          loft={loft}
-          hall={hall}
-          onChangeMonth={setVisibleMonth}
-          onSelectDate={setSelectedDate}
-          onChangeLoft={setLoft}
-          onChangeHall={setHall}
-          totalThisMonth={totalThisMonth}
-        />
-        <DaySchedule selectedDate={selectedDate} projects={dayProjects} />
+      <div className="grid gap-6 min-[1400px]:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] min-[1400px]:items-start min-[1400px]:gap-10">
+        <div ref={calendarRef} className="min-h-0 min-w-0">
+          <ProjectCalendar
+            visibleMonth={visibleMonth}
+            selectedDates={selectedDates}
+            today={today}
+            projectsByDay={projectsByDay}
+            loft={loft}
+            hall={hall}
+            onChangeMonth={setVisibleMonth}
+            onToggleDate={toggleSelectedDate}
+            onChangeLoft={setLoft}
+            onChangeHall={setHall}
+            totalThisMonth={totalThisMonth}
+          />
+        </div>
+        <div className="min-h-0 min-w-0">
+          <DaySchedule scheduleDays={scheduleDays} maxHeightPx={scheduleMaxHeightPx} />
+        </div>
       </div>
     </div>
   )

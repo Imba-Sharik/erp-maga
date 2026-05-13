@@ -1,13 +1,7 @@
 import { addMonths, getMonth, getYear, setYear, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 const MONTHS_RU = [
   'Январь',
@@ -32,9 +26,9 @@ interface CalendarToolbarProps {
   visibleMonth: Date
   onChangeMonth: (date: Date) => void
   loft: string | null
-  onChangeLoft: (loft: string) => void
+  onChangeLoft: (loft: string | null) => void
   hall: string | null
-  onChangeHall: (hall: string) => void
+  onChangeHall: (hall: string | null) => void
 }
 
 export function CalendarToolbar({
@@ -75,7 +69,7 @@ export function CalendarToolbar({
           value={String(year)}
           onValueChange={(v) => onChangeMonth(setYear(visibleMonth, Number(v)))}
         >
-          <SelectTrigger className="h-10 w-23 rounded-[10px] border-[#B1B1B1] bg-white text-[#BCBCBC]">
+          <SelectTrigger className="h-10 w-23 rounded-[10px] border-[#B1B1B1] bg-white">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

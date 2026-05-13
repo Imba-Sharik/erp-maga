@@ -6,18 +6,18 @@ import { DayCell } from './day-cell'
 
 interface CalendarGridProps {
   visibleMonth: Date
-  selectedDate: Date
+  selectedKeys: ReadonlySet<string>
   today: Date
   projectsByDay: ProjectsByDay
-  onSelectDate: (date: Date) => void
+  onToggleDate: (date: Date) => void
 }
 
 export function CalendarGrid({
   visibleMonth,
-  selectedDate,
+  selectedKeys,
   today,
   projectsByDay,
-  onSelectDate,
+  onToggleDate,
 }: CalendarGridProps) {
   const days = buildMonthMatrix(visibleMonth)
 
@@ -42,9 +42,9 @@ export function CalendarGrid({
               dayNum={day.dayNum}
               outOfMonth={day.outOfMonth}
               isToday={isSameDay(day.date, today)}
-              isSelected={isSameDay(day.date, selectedDate)}
+              isSelected={selectedKeys.has(day.key)}
               count={count}
-              onSelect={() => onSelectDate(day.date)}
+              onSelect={() => onToggleDate(day.date)}
               colIdx={colIdx}
               isLastRow={isLastRow}
             />
