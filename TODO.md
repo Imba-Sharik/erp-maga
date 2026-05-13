@@ -1,56 +1,44 @@
-# Страница календаря проектов
+# Roadmap страниц
 
-Ветка: `feat/calendar`. Дизайн: Figma node `2451:331` / структурный `2457:2`.
+## ✅ /calendar — MVP в `main`
 
-## Setup
+- [x] entities/project (типы, мок, group-by-day, schedule helpers, pluralProjects)
+- [x] widgets/project-calendar (toolbar, grid, day-cell с состояниями today/selected/out-of-month)
+- [x] widgets/day-schedule (header, DatePill, ScheduleDaySection, ProjectCard)
+- [x] Мульти-выбор дат, реальный `today`, container-query для бейджа счётчика
+- [x] Адаптив: 2 колонки от `min-[1400px]:`, тулбар flex-col → flex-row md+
+- [x] PR #4 / #8 — мерж
 
-- [x] Создать ветку `feat/calendar` от `main`
-- [x] Заглушки страниц `/dashboard`, `/calendar`, `/closing`, `/notifications`
-- [x] Добавить пункты в `AppSidebar`
-- [x] Установить shadcn: `card`, `badge`, `select`
-- [x] Добавить в `badge.tsx` варианты `success` / `info` / `warning` / `counter`
-- [x] Установить `date-fns`
+## 🚧 /projects — текущая ветка `feat/projects-board`
 
-## entities/project
+- [x] Расширить `Project`: `stage`, `email`, `plumCardUrl`, `lastUpdate`
+- [x] `entities/project/lib/stages.ts` — `STAGE_ORDER`, `STAGE_LABELS`, `groupByStage`
+- [x] `entities/project/ui/project-pipeline-card.tsx` — карточка kanban
+- [x] `widgets/projects-board` — composer + toolbar (search + city/hall/loft) + kanban + column
+- [x] `pages/projects` — page header с «Добавить проект» + `<ProjectsBoard />`
+- [x] Адаптив через `@container` на доске: < 1400 → горизонтальный скролл, ≥ 1400 → равные колонки
+- [x] Figma «Code sync — /projects» (`node-id=2474:2`)
+- [ ] Финальная визуальная проверка после перезапуска dev-сервера (нужен `vite-plugin-svgr`)
+- [ ] Коммит + PR
+- [ ] После мержа — обновить «Code sync — /projects» в Figma актуальным скрином
 
-- [ ] `model/types.ts` — `Project`, `ProjectStatus = 'confirmed' | 'signed' | 'expenses'`
-- [ ] `model/mock.ts` — мок-массив проектов на май 2026
-- [ ] `lib/group-by-day.ts` — `Project[] → Map<dateKey, Project[]>`
-- [ ] `ui/project-status-badge.tsx` — Badge `success`/`info`/`warning` + точка + лейбл
-- [ ] `ui/project-count-badge.tsx` — Badge `counter` для ячейки календаря
-- [ ] `ui/project-card.tsx` — карточка в Расписании (title + status, LOFT, тип, компания, телефон)
-- [ ] `index.ts` — публичный API слайса
+## 📋 Следующее (после `/projects`)
 
-## widgets/project-calendar
+- [ ] `/dashboard` — макет от дизайнера, сейчас заглушка
+- [ ] `/closing` — макет от дизайнера, сейчас заглушка
+- [ ] `/notifications` — макет от дизайнера, сейчас заглушка
+- [ ] `features/create-project` — диалог по кнопке «Добавить проект» (вынести из inline в `pages/projects`)
+- [ ] `features/project-card-menu` — Dropdown с «Перенести в этап X», «Открыть в PLUM», «Архивировать»
 
-- [ ] `lib/build-month-matrix.ts` — `date-fns`: 42 ячейки (`startOfWeek` с `weekStartsOn: 1`, `eachDayOfInterval`)
-- [ ] `ui/calendar-toolbar.tsx` — Month с ‹ ›, Year, LOFT, Зал
-- [ ] `ui/calendar-grid.tsx` — CSS grid 7×6, шапка ПН–ВС
-- [ ] `ui/day-cell.tsx` — день + состояния: `today` (тёмный pill), `selected` (градиент + border), `out-of-month` (серый bg), + `ProjectCountBadge`
-- [ ] `ui/project-calendar.tsx` — композиция toolbar + grid
-- [ ] `index.ts`
+## 🔧 Технический долг
 
-## widgets/day-schedule
+- [ ] Хардкод hex-цветов в коде (`#1B1A17`, `#ACACAC`, `#B1B1B1`, `#F3F3F3`, `#5E83E3`, `#454545`) — вынести в oklch-токены в `src/index.css`
+- [ ] `--sidebar-accent-foreground: #000000` в `index.css` — перевести в `oklch(0 0 0)` для консистентности
+- [ ] `bundle > 500 KB` — настроить code-splitting в `vite.config.ts`
+- [ ] `useIsMobile` / `sidebar.tsx` Math.random — мелкие lint-замечания (PR #5 в основном закрыл, но `react-refresh/only-export-components` на `badge.tsx`/`button.tsx` остаётся)
 
-- [ ] `ui/day-schedule-header.tsx` — «Расписание» + «N проектов в этот день» (40px высота для выравнивания с toolbar)
-- [ ] `ui/day-schedule.tsx` — header + Card с DatePill + список `ProjectCard`
-- [ ] `index.ts`
+## После бэка
 
-## pages/calendar
-
-- [ ] Локальный стейт: `selectedDate`, `visibleMonth`, `filters { loft, hall }`
-- [ ] Подключить виджеты, прокинуть данные из мока через `entities/project`
-- [ ] Двухколоночный grid: `ProjectCalendar` + `DaySchedule`
-- [ ] Удалить заглушечный текст из `calendar-page.tsx`
-
-## Финализация
-
-- [ ] Прогнать `pnpm lint`, `pnpm build`
-- [ ] Проверить визуально в браузере: today, selected, out-of-month, бейджи, переключение дня
-- [ ] Коммит и PR в `main`
-
-## После бэка (отложено)
-
-- [ ] Добавить `Project` в `openapi.yaml`
-- [ ] Заменить `entities/project/model/mock.ts` на kubb-хук в `entities/project/api/`
-- [ ] MSW-моки до готовности эндпоинта
+- [ ] Добавить `Project` (+ stage, status) в `openapi.yaml` (drf-spectacular)
+- [ ] Заменить `entities/project/model/mock.ts` на kubb-хуки в `entities/project/api/`
+- [ ] MSW для оффлайн-разработки

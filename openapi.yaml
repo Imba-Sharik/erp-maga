@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: ERP Maga API
+  title: ERP MAG API
   description: Заглушка схемы API. Заменится реальной схемой из drf-spectacular.
   version: 0.0.1
 servers:

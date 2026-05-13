@@ -1,6 +1,7 @@
 import { addMonths, getMonth, getYear, setYear, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 const MONTHS_RU = [
@@ -83,31 +84,20 @@ export function CalendarToolbar({
       </div>
 
       <div className="flex flex-1 items-center gap-2.5 lg:flex-none">
-        <Select value={loft ?? undefined} onValueChange={onChangeLoft}>
-          <SelectTrigger className="h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none">
-            <SelectValue placeholder="Выберите LOFT" />
-          </SelectTrigger>
-          <SelectContent>
-            {LOFT_OPTIONS.map((l) => (
-              <SelectItem key={l} value={l}>
-                {l}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={hall ?? undefined} onValueChange={onChangeHall}>
-          <SelectTrigger className="h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-39.25 lg:flex-none">
-            <SelectValue placeholder="Выберите зал" />
-          </SelectTrigger>
-          <SelectContent>
-            {HALL_OPTIONS.map((h) => (
-              <SelectItem key={h} value={h}>
-                {h}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ClearableSelect
+          placeholder="Выберите LOFT"
+          value={loft}
+          options={LOFT_OPTIONS}
+          onChange={onChangeLoft}
+          triggerClassName="h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none"
+        />
+        <ClearableSelect
+          placeholder="Выберите зал"
+          value={hall}
+          options={HALL_OPTIONS}
+          onChange={onChangeHall}
+          triggerClassName="h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-39.25 lg:flex-none"
+        />
       </div>
     </div>
   )
