@@ -1,4 +1,4 @@
-# ERP Maga
+# ERP MAG
 
 ERP-фронт на React 19 + TypeScript + Vite.
 
