@@ -1,0 +1,159 @@
+/* ==========================================================================
+ * OverlayScrollbars: глобальная кастомизация и утилиты
+ * ==========================================================================
+ *
+ * Здесь живут все стили, относящиеся к плагину `overlayscrollbars`.
+ *
+ * --------------------------------------------------------------------------
+ * Структура DOM, которую генерирует OverlayScrollbars (важно знать):
+ * --------------------------------------------------------------------------
+ *
+ *   <div data-overlayscrollbars="host" class="...">       — host (наш контейнер)
+ *     <div data-overlayscrollbars-viewport class="os-viewport">  — viewport со скроллом
+ *       <div data-overlayscrollbars-content>              — content
+ *         {children}
+ *       </div>
+ *     </div>
+ *     <div class="os-scrollbar os-scrollbar-vertical">    — вертикальный скроллбар
+ *       <div class="os-scrollbar-track">                  — трек
+ *         <div class="os-scrollbar-handle" />             — ползунок
+ *       </div>
+ *     </div>
+ *     <div class="os-scrollbar os-scrollbar-horizontal">  — горизонтальный (аналогично)
+ *   </div>
+ *
+ * --------------------------------------------------------------------------
+ * Доступные CSS-переменные темы (применяются к `.os-scrollbar`):
+ * --------------------------------------------------------------------------
+ *
+ * Размеры/отступы:
+ *   --os-size                              ширина вертикального / высота
+ *                                          горизонтального скроллбара
+ *                                          (по умолчанию 0 — если не задать,
+ *                                          скроллбар будет невидим)
+ *   --os-padding-perpendicular             поперёк оси скроллбара: для вертикального —
+ *                                          отступ ползунка от края трека (левый/правый
+ *                                          внутри полосы). Для горизонтального — сверху/снизу.
+ *   --os-padding-axis                      вдоль оси скроллбара: для вертикального —
+ *                                          верхний и нижний «внутренний» отступ полосы
+ *                                          скроллбара от начала до конца; для горизонтального — слева/справа.
+ *
+ * Трек (фон под ползунком):
+ *   --os-track-border-radius
+ *   --os-track-bg
+ *   --os-track-bg-hover
+ *   --os-track-bg-active
+ *   --os-track-border
+ *   --os-track-border-hover
+ *   --os-track-border-active
+ *
+ * Ползунок (handle):
+ *   --os-handle-border-radius
+ *   --os-handle-bg
+ *   --os-handle-bg-hover
+ *   --os-handle-bg-active
+ *   --os-handle-border
+ *   --os-handle-border-hover
+ *   --os-handle-border-active
+ *   --os-handle-min-size                   минимальный размер ползунка
+ *   --os-handle-max-size                   максимальный размер ползунка
+ *   --os-handle-perpendicular-size         толщина ползунка (0–100%)
+ *   --os-handle-perpendicular-size-hover   толщина при hover
+ *   --os-handle-perpendicular-size-active  толщина при нажатии
+ *   --os-handle-interactive-area-offset    расширение интерактивной зоны
+ *
+ * Способ применения темы:
+ *   1) Через CSS-переменные — задать на каком-то модификаторе и передать его
+ *      имя в `options.scrollbars.theme` (например, theme: "os-theme-app").
+ *   2) Прямым переопределением классов `.os-scrollbar-handle` и пр.
+ *      (как сделано ниже — проще и наглядно).
+ *
+ * --------------------------------------------------------------------------
+ * Полезные классы/состояния, которые ставит сама библиотека:
+ * --------------------------------------------------------------------------
+ *
+ *   .os-scrollbar-visible        — скроллбар отображается
+ *   .os-scrollbar-auto-hide      — включён авто-hide
+ *   .os-scrollbar-auto-hide-hidden  — сейчас скрыт авто-hide'ом
+ *   .os-scrollbar-track-interactive — трек кликабелен
+ *   .os-scrollbar-handle-interactive — handle перетаскиваем
+ *
+ *   [data-overlayscrollbars~="host"]      — корневой контейнер
+ *   [data-overlayscrollbars-viewport]     — viewport
+ *   [data-overlayscrollbars-content]      — контентная обёртка
+ *
+ * --------------------------------------------------------------------------
+ * Паттерн «скроллбар снаружи контейнера»:
+ * --------------------------------------------------------------------------
+ *
+ *   1. На host разрешить переполнение:
+ *        &[data-overlayscrollbars~="host"] { overflow: visible !important; }
+ *      Без этого выходящий за границы host'а скроллбар будет обрезан
+ *      собственным CSS библиотеки.
+ *
+ *   2. Сдвинуть скроллбар наружу через отрицательный margin:
+ *        .os-scrollbar-vertical { margin-inline: -N px; }
+ *
+ *   3) Отступ от контейнера «в сторону» (вынести левее/правее): обычно делают
+ *      через margin у `.os-scrollbar-vertical` / `.os-scrollbar-horizontal`
+ *      (например `margin-inline: -20px` в `.day-schedule-scroll-area`), а не
+ *      только через переменные.
+ * ==========================================================================
+ */
+
+/* --------------------------------------------------------------------------
+ * Глобальная стилизация скроллбаров (применяется ко всем экземплярам)
+ * -------------------------------------------------------------------------- */
+
+/* Где задавать `--os-*`: НЕ на `:root` — в `overlayscrollbars.css` у `.os-scrollbar`
+   уже объявлены `--os-padding-axis: 0` и др., они перекрывают наследование.
+   Задавай переменные на `.os-scrollbar`, `.os-scrollbar-vertical` или внутри
+   своего модификатора (например `.day-schedule-scroll-area .os-scrollbar-vertical`). */
+
+.os-scrollbar-vertical {
+  width: 5px;
+  --os-padding-axis: 0px;
+}
+
+.os-scrollbar-horizontal {
+  height: 5px;
+}
+
+.os-scrollbar-track {
+  background: #e5e5e5;
+  width: 5px;
+}
+
+.os-scrollbar-handle {
+  min-height: 5px;
+  min-width: 5px;
+  border-radius: 9999px;
+  background: #b0b0b0;
+  transition: background-color 0.2s ease;
+}
+
+.os-scrollbar-handle:hover {
+  background: #7a7a7a;
+}
+
+.os-scrollbar-handle:active {
+  background: #7a7a7a;
+}
+
+/* --------------------------------------------------------------------------
+ * Модификатор: скроллбар вынесен наружу контейнера справа.
+ *
+ * Использование:
+ *   <OverlayScrollbarsComponent className="day-schedule-scroll-area">
+ *     ...
+ *   </OverlayScrollbarsComponent>
+ * -------------------------------------------------------------------------- */
+.day-schedule-scroll-area {
+  &[data-overlayscrollbars~='host'] {
+    overflow: visible !important;
+  }
+
+  .os-scrollbar-vertical {
+    margin-inline: -18px;
+  }
+}

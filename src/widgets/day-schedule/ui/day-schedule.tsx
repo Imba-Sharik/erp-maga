@@ -1,3 +1,4 @@
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { type ScheduleDayRow } from '@/entities/project'
 import { cn } from '@/shared/lib/utils'
 import { Card } from '@/shared/ui/card'
@@ -17,17 +18,27 @@ export function DaySchedule({ scheduleDays, maxHeightPx }: DayScheduleProps) {
 
   return (
     <div
-      className={cn('flex flex-col gap-4', heightCapped && 'min-h-0 overflow-hidden')}
+      className={cn('flex flex-col gap-4', heightCapped && 'min-h-0 overflow-visible')}
       style={heightCapped ? { maxHeight: maxHeightPx } : undefined}
     >
       <DayScheduleHeader projectsCount={totalProjects} daysSelectedCount={daysSelectedCount} />
       <Card
         className={cn(
           'gap-2.5 border-[#B1B1B1] p-2.5 shadow-none',
-          heightCapped && 'flex min-h-0 flex-1 flex-col overflow-hidden',
+          heightCapped && 'flex min-h-0 flex-1 flex-col overflow-visible',
         )}
       >
-        <div className={cn(heightCapped && 'min-h-0 flex-1 overflow-y-auto overscroll-y-contain')}>
+        <OverlayScrollbarsComponent
+          options={{
+            overflow: { x: 'hidden', y: 'scroll' },
+            scrollbars: {
+              visibility: 'auto',
+              autoHide: 'never',
+              autoHideDelay: 800,
+            },
+          }}
+          className={cn('day-schedule-scroll-area', heightCapped && 'min-h-0 flex-1')}
+        >
           {daysSelectedCount === 0 ? (
             <p className="px-1 py-4 text-sm text-[#ACACAC]">
               Выберите один или несколько дней в календаре слева.
@@ -44,7 +55,7 @@ export function DaySchedule({ scheduleDays, maxHeightPx }: DayScheduleProps) {
               ))}
             </div>
           )}
-        </div>
+        </OverlayScrollbarsComponent>
       </Card>
     </div>
   )
