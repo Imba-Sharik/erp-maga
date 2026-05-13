@@ -1,4 +1,14 @@
-import { ChevronsUpDown, FolderKanban, LogOut, Settings, User } from 'lucide-react'
+import {
+  Bell,
+  Calendar,
+  ChevronsUpDown,
+  FolderKanban,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  Settings,
+  User,
+} from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -22,7 +32,14 @@ import {
   SidebarMenuItem,
 } from '@/shared/ui/sidebar'
 
-const navItems = [{ title: 'Проекты', url: '/projects', icon: FolderKanban }]
+const navItems = [
+  { title: 'Дашборд', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Календарь', url: '/calendar', icon: Calendar },
+  { title: 'Проекты', url: '/projects', icon: FolderKanban },
+  { title: 'Закрытие', url: '/closing', icon: ListChecks },
+  { title: 'Уведомления', url: '/notifications', icon: Bell },
+  { title: 'Настройки', url: '/settings', icon: Settings },
+]
 
 const user = {
   name: 'Игорь Шарин',
@@ -49,7 +66,7 @@ export function AppSidebar() {
 
       <SidebarContent className="overflow-hidden">
         <SidebarGroup>
-          <SidebarGroupLabel>Навигация</SidebarGroupLabel>
+          <SidebarGroupLabel>ОСНОВНОЕ</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
