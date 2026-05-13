@@ -34,3 +34,6 @@ src/shared/api/generated
 # claude
 .claude/
 CLAUDE.md
+
+# playwright mcp artifacts
+.playwright-mcp/
