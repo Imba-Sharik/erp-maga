@@ -1,7 +1,6 @@
 import {
   Bell,
   Calendar,
-  ChevronsUpDown,
   FolderKanban,
   LayoutDashboard,
   ListChecks,
@@ -10,12 +9,13 @@ import {
   User,
 } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
+import magLogoUrl from '@/shared/assets/mag-logo.svg'
+import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
@@ -30,6 +30,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
 } from '@/shared/ui/sidebar'
 
 const navItems = [
@@ -44,39 +46,61 @@ const navItems = [
 const user = {
   name: 'Игорь Шарин',
   email: 'sharinigor1@gmail.com',
+  roleName: 'Менеджер MAG',
   initials: 'ИШ',
 }
 
 export function AppSidebar() {
   const { pathname } = useLocation()
+  const { state, isMobile } = useSidebar()
+  const showCollapseInSidebar = !isMobile && state === 'expanded'
 
   return (
-    <Sidebar collapsible="icon" className="overflow-hidden">
+    <Sidebar collapsible="icon" className="overflow-hidden pt-1">
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <div className="bg-primary text-primary-foreground flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg font-semibold">
-            M
+        <div className="flex w-full items-center gap-2">
+          <img
+            src={magLogoUrl}
+            alt="ERP Maga"
+            className="aspect-square size-10 shrink-0 rounded-lg object-contain"
+          />
+          <div className="grid min-w-0 flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+            <span className="truncate text-base font-bold">ERP MAG</span>
+            <span className="text-muted-foreground truncate text-xs">Operations console</span>
           </div>
-          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="truncate font-semibold">ERP Maga</span>
-            <span className="text-muted-foreground truncate text-xs">v0.0.1</span>
-          </div>
+          {showCollapseInSidebar && (
+            <span className="animate-sidebar-trigger-from-right ml-auto inline-flex shrink-0">
+              <SidebarTrigger />
+            </span>
+          )}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="overflow-hidden">
-        <SidebarGroup>
-          <SidebarGroupLabel>ОСНОВНОЕ</SidebarGroupLabel>
+        <SidebarGroup className="pt-4">
+          <SidebarGroupLabel className="text-muted-foreground">ОСНОВНОЕ</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
                 const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      isActive={isActive}
+                      className="border border-transparent data-[active=true]:border-[#B1B1B1] data-[active=true]:bg-[#FFFFFF] data-[active=true]:font-normal"
+                    >
                       <Link to={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
+                        <div
+                          className={cn(
+                            'flex min-w-0 flex-1 items-center gap-2 transition-transform duration-200 ease-out',
+                            isActive && (isMobile || state === 'expanded') && 'translate-x-[2px]',
+                          )}
+                        >
+                          <item.icon className="size-4 shrink-0" />
+                          <span className="truncate">{item.title}</span>
+                        </div>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -88,6 +112,10 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
+        <div
+          aria-hidden
+          className="border-sidebar-border mx-3 shrink-0 border-t group-data-[collapsible=icon]:mx-0"
+        />
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -96,14 +124,13 @@ export function AppSidebar() {
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <Avatar className="size-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
+                  <Avatar className="size-10 rounded-full group-data-[collapsible=icon]:size-8">
+                    <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+                    <span className="text-muted-foreground truncate text-xs">{user.roleName}</span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -112,18 +139,6 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
-                    <Avatar className="size-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user.name}</span>
-                      <span className="text-muted-foreground truncate text-xs">{user.email}</span>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/profile">
                     <User />
