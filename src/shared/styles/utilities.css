@@ -1,0 +1,38 @@
+@layer utilities {
+  @keyframes sidebar-trigger-enter-from-left {
+    from {
+      opacity: 0;
+      transform: scale(0.8) translateX(-4rem);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+    }
+  }
+
+  @keyframes sidebar-trigger-enter-from-right {
+    from {
+      opacity: 0;
+      transform: scale(0.8) translateX(4rem);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+    }
+  }
+
+  .animate-sidebar-trigger {
+    animation: sidebar-trigger-enter-from-left 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-sidebar-trigger-from-right {
+    animation: sidebar-trigger-enter-from-right 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-sidebar-trigger,
+    .animate-sidebar-trigger-from-right {
+      animation: none;
+    }
+  }
+}
