@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'overlayscrollbars/overlayscrollbars.css';
 @import './shared/styles/utilities.css';
+@import './shared/styles/scrollbar.css';
 
 @custom-variant dark (&:is(.dark *));
 
