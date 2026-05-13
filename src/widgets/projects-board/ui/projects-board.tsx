@@ -20,7 +20,7 @@ export function ProjectsBoard({ projects }: ProjectsBoardProps) {
   )
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
       <ProjectsBoardToolbar
         search={search}
         city={city}
@@ -31,7 +31,9 @@ export function ProjectsBoard({ projects }: ProjectsBoardProps) {
         onChangeHall={setHall}
         onChangeLoft={setLoft}
       />
-      <ProjectsKanban projects={filtered} />
+      <div className="flex h-full min-h-0 flex-1 flex-col">
+        <ProjectsKanban projects={filtered} />
+      </div>
     </div>
   )
 }

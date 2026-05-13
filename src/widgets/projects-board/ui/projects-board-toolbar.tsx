@@ -31,7 +31,7 @@ export function ProjectsBoardToolbar({
   onChangeLoft,
 }: ProjectsBoardToolbarProps) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+    <div className="flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
       <div className="relative w-full md:w-75">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
         <Input
