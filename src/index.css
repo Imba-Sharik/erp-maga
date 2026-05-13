@@ -104,11 +104,22 @@
     border-color: var(--color-border);
   }
   html {
-    scrollbar-gutter: stable;
+    overflow-y: scroll;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     overflow-x: hidden;
+  }
+  /* Radix Select/Dialog через react-remove-scroll вкручивают <body> правый паддинг
+     (или маргин) на ширину скроллбара. У нас скролл всегда живёт на <html>
+     (`overflow-y: scroll`) и не пропадает — компенсация на body не нужна
+     и приводит только к сдвигу layout-а влево на ширину скроллбара. */
+  body[style*='--removed-body-scroll-bar-size'],
+  body.with-scroll-bars-hidden,
+  body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+    --removed-body-scroll-bar-size: 0px !important;
   }
 }

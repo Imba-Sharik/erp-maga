@@ -1,16 +1,13 @@
 import { Search } from 'lucide-react'
+import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Input } from '@/shared/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select'
 
 const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
 const HALL_OPTIONS = ['MAIN', 'BACKYARD', 'ROOFTOP']
 const LOFT_OPTIONS = ['LOFT#1', 'LOFT#2', 'LOFT#3']
+
+const TRIGGER_CLASS =
+  'h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none'
 
 interface ProjectsBoardToolbarProps {
   search: string
@@ -35,7 +32,7 @@ export function ProjectsBoardToolbar({
 }: ProjectsBoardToolbarProps) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
-      <div className="relative w-full md:w-[300px]">
+      <div className="relative w-full md:w-75">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
         <Input
           type="search"
@@ -47,49 +44,28 @@ export function ProjectsBoardToolbar({
       </div>
 
       <div className="flex flex-1 flex-wrap items-center gap-2.5 md:flex-none">
-        <FilterSelect
+        <ClearableSelect
           placeholder="Выберите город"
           value={city}
           options={CITY_OPTIONS}
           onChange={onChangeCity}
+          triggerClassName={TRIGGER_CLASS}
         />
-        <FilterSelect
+        <ClearableSelect
           placeholder="Выберите зал"
           value={hall}
           options={HALL_OPTIONS}
           onChange={onChangeHall}
+          triggerClassName={TRIGGER_CLASS}
         />
-        <FilterSelect
+        <ClearableSelect
           placeholder="Выберите LOFT"
           value={loft}
           options={LOFT_OPTIONS}
           onChange={onChangeLoft}
+          triggerClassName={TRIGGER_CLASS}
         />
       </div>
     </div>
-  )
-}
-
-interface FilterSelectProps {
-  placeholder: string
-  value: string | null
-  options: readonly string[]
-  onChange: (value: string | null) => void
-}
-
-function FilterSelect({ placeholder, value, options, onChange }: FilterSelectProps) {
-  return (
-    <Select value={value ?? undefined} onValueChange={onChange}>
-      <SelectTrigger className="h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((opt) => (
-          <SelectItem key={opt} value={opt}>
-            {opt}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   )
 }
