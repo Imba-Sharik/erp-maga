@@ -13,6 +13,7 @@ export interface Project {
   date: string
   status: ProjectStatus
   stage: ProjectStage
+  city: string
   loft: string
   hall: string
   manager: string
