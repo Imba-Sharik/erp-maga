@@ -1,15 +1,14 @@
-import {
-  Bell,
-  Calendar,
-  FolderKanban,
-  LayoutDashboard,
-  ListChecks,
-  LogOut,
-  Settings,
-  User,
-} from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import magLogoUrl from '@/shared/assets/mag-logo.svg'
+import {
+  MagLogo,
+  BellIcon,
+  CalendarIcon,
+  DashboardIcon,
+  FolderIcon,
+  ListChecksIcon,
+  SettingsIcon,
+} from '@/shared/assets'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -35,12 +34,12 @@ import {
 } from '@/shared/ui/sidebar'
 
 const navItems = [
-  { title: 'Дашборд', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Календарь', url: '/calendar', icon: Calendar },
-  { title: 'Проекты', url: '/projects', icon: FolderKanban },
-  { title: 'Закрытие', url: '/closing', icon: ListChecks },
-  { title: 'Уведомления', url: '/notifications', icon: Bell },
-  { title: 'Настройки', url: '/settings', icon: Settings },
+  { title: 'Дашборд', url: '/dashboard', icon: DashboardIcon },
+  { title: 'Календарь', url: '/calendar', icon: CalendarIcon },
+  { title: 'Проекты', url: '/projects', icon: FolderIcon },
+  { title: 'Закрытие', url: '/closing', icon: ListChecksIcon },
+  { title: 'Уведомления', url: '/notifications', icon: BellIcon },
+  { title: 'Настройки', url: '/settings', icon: SettingsIcon },
 ]
 
 const user = {
@@ -58,18 +57,14 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">
       <SidebarHeader>
-        <div className="flex w-full items-center gap-2">
-          <img
-            src={magLogoUrl}
-            alt="ERP Maga"
-            className="aspect-square size-10 shrink-0 rounded-lg object-contain"
-          />
+        <div className="text-sidebar-accent-foreground flex w-full items-center gap-2">
+          <MagLogo aria-label="ERP Maga" className="aspect-square size-10 shrink-0 rounded-lg" />
           <div className="grid min-w-0 flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate text-base font-bold">ERP MAG</span>
             <span className="text-muted-foreground truncate text-xs">Operations console</span>
           </div>
           {showCollapseInSidebar && (
-            <span className="animate-sidebar-trigger-from-right ml-auto inline-flex shrink-0">
+            <span className="animate-sidebar-trigger-from-right ml-auto inline-flex shrink-0 self-start">
               <SidebarTrigger />
             </span>
           )}
@@ -89,7 +84,7 @@ export function AppSidebar() {
                       asChild
                       tooltip={item.title}
                       isActive={isActive}
-                      className="border border-transparent data-[active=true]:border-[#B1B1B1] data-[active=true]:bg-[#FFFFFF] data-[active=true]:font-normal"
+                      className="hover:text-sidebar-accent-foreground border border-transparent data-[active=true]:border-[#B1B1B1] data-[active=true]:bg-[#FFFFFF] data-[active=true]:font-normal"
                     >
                       <Link to={item.url}>
                         <div
@@ -147,7 +142,7 @@ export function AppSidebar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/settings">
-                    <Settings />
+                    <SettingsIcon />
                     Настройки
                   </Link>
                 </DropdownMenuItem>
