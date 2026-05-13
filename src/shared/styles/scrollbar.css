@@ -91,13 +91,12 @@
  *      Без этого выходящий за границы host'а скроллбар будет обрезан
  *      собственным CSS библиотеки.
  *
- *   2. Сдвинуть скроллбар наружу через отрицательный margin:
- *        .os-scrollbar-vertical { margin-inline: -N px; }
+ *   2. Сдвинуть скроллбар наружу: вертикальный — `margin-inline: -N px`;
+ *      горизонтальный — `bottom: -N px` (элемент со `position: absolute`), не
+ *      `margin-block`, чтобы не сбивать привязку к низу и угол с вертикалью.
  *
- *   3) Отступ от контейнера «в сторону» (вынести левее/правее): обычно делают
- *      через margin у `.os-scrollbar-vertical` / `.os-scrollbar-horizontal`
- *      (например `margin-inline: -20px` в `.day-schedule-scroll-area`), а не
- *      только через переменные.
+ *   3) Горизонталь: вынос вниз от карточки через `bottom: -Npx` у
+ *      `.os-scrollbar-horizontal` (см. `.projects-kanban-scroll-area`).
  * ==========================================================================
  */
 
@@ -110,34 +109,30 @@
    Задавай переменные на `.os-scrollbar`, `.os-scrollbar-vertical` или внутри
    своего модификатора (например `.day-schedule-scroll-area .os-scrollbar-vertical`). */
 
+/* Трек/ползунок: библиотека задаёт фон через `--os-track-bg*` и `--os-handle-bg*`
+ * (в т.ч. на :hover/:active). Без них свой `background` на handle легко проигрывает их каскаду.
+ * При маленьком `--os-size` и `--os-handle-perpendicular-size` <100% поперёк остаётся субпиксель — «нитка». */
+.os-scrollbar {
+  --os-size: 8px;
+  --os-track-bg: #e5e5e5;
+  --os-track-bg-hover: #e5e5e5;
+  --os-track-bg-active: #e5e5e5;
+  --os-handle-bg: #b0b0b0;
+  --os-handle-bg-hover: #7a7a7a;
+  --os-handle-bg-active: #7a7a7a;
+  --os-handle-perpendicular-size: 100%;
+  --os-handle-perpendicular-size-hover: 100%;
+  --os-handle-perpendicular-size-active: 100%;
+  --os-handle-min-size: 28px;
+}
+
 .os-scrollbar-vertical {
-  width: 5px;
   --os-padding-axis: 0px;
 }
 
-.os-scrollbar-horizontal {
-  height: 5px;
-}
-
-.os-scrollbar-track {
-  background: #e5e5e5;
-  width: 5px;
-}
-
 .os-scrollbar-handle {
-  min-height: 5px;
-  min-width: 5px;
   border-radius: 9999px;
-  background: #b0b0b0;
   transition: background-color 0.2s ease;
-}
-
-.os-scrollbar-handle:hover {
-  background: #7a7a7a;
-}
-
-.os-scrollbar-handle:active {
-  background: #7a7a7a;
 }
 
 /* --------------------------------------------------------------------------
@@ -154,6 +149,30 @@
   }
 
   .os-scrollbar-vertical {
-    margin-inline: -18px;
+    margin-inline: -22px;
+  }
+}
+
+/* Модификатор: вертикальный и горизонтальный скроллбары вынесены наружу (канбан проектов). */
+.projects-kanban-scroll-area {
+  &[data-overlayscrollbars~='host'] {
+    min-height: 0;
+    overflow: visible !important;
+  }
+
+  [data-overlayscrollbars-viewport] {
+    min-height: 0;
+  }
+
+  [data-overlayscrollbars-contents] {
+    @apply rounded-xl;
+  }
+
+  .os-scrollbar-vertical {
+    margin-inline: -14px;
+  }
+
+  .os-scrollbar-horizontal {
+    bottom: -14px;
   }
 }

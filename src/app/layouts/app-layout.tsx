@@ -23,7 +23,7 @@ export function AppLayout() {
       <AppSidebar />
       <SidebarInset>
         <AppLayoutHeader />
-        <main className="flex-1 p-6">
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
           <Outlet />
         </main>
       </SidebarInset>
