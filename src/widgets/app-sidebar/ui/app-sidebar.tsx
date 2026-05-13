@@ -58,7 +58,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">
       <SidebarHeader>
         <div className="text-sidebar-accent-foreground flex w-full items-center gap-2">
-          <MagLogo aria-label="ERP Maga" className="aspect-square size-10 shrink-0 rounded-lg" />
+          <MagLogo
+            aria-label="ERP Maga"
+            className="size-10 shrink-0 rounded-lg transition-[width,height] duration-200 ease-linear group-data-[collapsible=icon]:size-8"
+          />
           <div className="grid min-w-0 flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate text-base font-bold">ERP MAG</span>
             <span className="text-muted-foreground truncate text-xs">Operations console</span>
@@ -119,7 +122,7 @@ export function AppSidebar() {
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <Avatar className="size-10 rounded-full group-data-[collapsible=icon]:size-8">
+                  <Avatar className="size-10 shrink-0 rounded-full transition-[width,height] duration-200 ease-linear group-data-[collapsible=icon]:size-8">
                     <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
