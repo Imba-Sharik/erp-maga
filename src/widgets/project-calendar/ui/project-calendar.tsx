@@ -40,7 +40,7 @@ export function ProjectCalendar({
   )
 
   return (
-    <div className="@container flex flex-col gap-4">
+    <div className="@container/calendar flex flex-col gap-4">
       <CalendarToolbar
         projectSearch={projectSearch}
         onChangeProjectSearch={onChangeProjectSearch}

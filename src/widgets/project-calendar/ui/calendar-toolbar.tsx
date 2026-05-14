@@ -22,8 +22,15 @@ const LOFT_OPTIONS = ['LOFT#1', 'LOFT#2', 'LOFT#3']
 const HALL_OPTIONS = ['MAIN', 'BACKYARD', 'ROOFTOP']
 const YEAR_OPTIONS = [2024, 2025, 2026, 2027]
 
-const SELECT_TRIGGER_ROW =
-  'h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+const SELECT_TRIGGER_BASE =
+  'h-10 min-w-32 flex-1 rounded-[10px] border-[#B1B1B1] bg-white ' +
+  'data-placeholder:text-[#BCBCBC] ' +
+  '@min-[880px]/calendar:flex-none'
+
+const SELECT_TRIGGER_YEAR =
+  'h-10 min-w-20 flex-1 rounded-[10px] border-[#B1B1B1] bg-white ' +
+  'data-placeholder:text-[#BCBCBC] ' +
+  '@min-[880px]/calendar:flex-none'
 
 interface CalendarToolbarProps {
   projectSearch: string
@@ -50,8 +57,8 @@ export function CalendarToolbar({
   const year = getYear(visibleMonth)
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-2.5">
-      <div className="w-full min-w-0 lg:w-[min(100%,300px)] lg:max-w-[300px] lg:shrink-0">
+    <div className="flex flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:items-center @min-[880px]/calendar:justify-between @min-[880px]/calendar:gap-2.5">
+      <div className="w-full min-w-0 @min-[880px]/calendar:w-[min(100%,300px)] @min-[880px]/calendar:max-w-[300px] @min-[880px]/calendar:shrink-0">
         <SearchBar
           placeholder="Поиск проектов"
           value={projectSearch}
@@ -60,29 +67,27 @@ export function CalendarToolbar({
         />
       </div>
 
-      <div className="flex min-w-0 flex-wrap items-center gap-2.5 lg:shrink-0 lg:flex-nowrap">
+      <div className="flex min-w-0 flex-wrap items-center gap-2.5 @min-[880px]/calendar:shrink-0 @min-[880px]/calendar:flex-nowrap">
         <ClearableSelect
           placeholder="Выберите зал"
           value={hall}
           options={HALL_OPTIONS}
           onChange={onChangeHall}
-          triggerClassName={`${SELECT_TRIGGER_ROW} min-w-[9.5rem] lg:w-39.25 lg:flex-none`}
+          triggerClassName={SELECT_TRIGGER_BASE}
         />
         <ClearableSelect
           placeholder="Выберите LOFT"
           value={loft}
           options={LOFT_OPTIONS}
           onChange={onChangeLoft}
-          triggerClassName={`${SELECT_TRIGGER_ROW} min-w-[9.5rem] lg:w-41.5 lg:flex-none`}
+          triggerClassName={SELECT_TRIGGER_BASE}
         />
 
         <Select
           value={String(year)}
           onValueChange={(v) => onChangeMonth(setYear(visibleMonth, Number(v)))}
         >
-          <SelectTrigger
-            className={`${SELECT_TRIGGER_ROW} w-23 flex-none md:flex-1 lg:w-23 lg:flex-none`}
-          >
+          <SelectTrigger className={SELECT_TRIGGER_YEAR}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -98,9 +103,7 @@ export function CalendarToolbar({
           value={String(monthIndex)}
           onValueChange={(v) => onChangeMonth(setMonth(visibleMonth, Number(v)))}
         >
-          <SelectTrigger
-            className={`${SELECT_TRIGGER_ROW} min-w-34 flex-none md:min-w-38 md:flex-1 lg:w-44 lg:flex-none`}
-          >
+          <SelectTrigger className={SELECT_TRIGGER_BASE}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
