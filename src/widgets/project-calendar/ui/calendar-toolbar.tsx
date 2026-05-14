@@ -1,4 +1,5 @@
-import { getMonth, getYear, setMonth, setYear } from 'date-fns'
+import { addMonths, getMonth, getYear, setMonth, setYear } from 'date-fns'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchBar } from '@/shared/ui/search-bar'
@@ -31,6 +32,21 @@ const SELECT_TRIGGER_YEAR =
   'h-10 min-w-20 flex-1 rounded-[10px] border-[#B1B1B1] bg-white ' +
   'data-placeholder:text-[#BCBCBC] ' +
   '@min-[880px]/calendar:flex-none'
+
+const MONTH_NAV_OUTER =
+  'flex h-9 min-w-28 flex-1 items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+  '@min-[880px]/calendar:flex-none'
+
+const MONTH_NAV_ARROW_BTN =
+  'flex h-full w-5 shrink-0 items-center justify-center text-[#3D3D3D] transition-colors ' +
+  'hover:bg-[#F5F5F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset'
+
+const MONTH_SELECT_TRIGGER =
+  'h-full min-w-0 flex-1 justify-center gap-0 rounded-none border-0 bg-transparent px-1 py-0 shadow-none ' +
+  'text-sm font-normal text-[#1B1A17] ' +
+  'focus-visible:z-10 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset ' +
+  '[&>svg]:hidden ' +
+  '[&_[data-slot=select-value]]:w-full [&_[data-slot=select-value]]:justify-center'
 
 interface CalendarToolbarProps {
   projectSearch: string
@@ -99,21 +115,39 @@ export function CalendarToolbar({
           </SelectContent>
         </Select>
 
-        <Select
-          value={String(monthIndex)}
-          onValueChange={(v) => onChangeMonth(setMonth(visibleMonth, Number(v)))}
-        >
-          <SelectTrigger className={SELECT_TRIGGER_BASE}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MONTHS_RU.map((name, i) => (
-              <SelectItem key={name} value={String(i)}>
-                {name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className={MONTH_NAV_OUTER}>
+          <button
+            type="button"
+            className={MONTH_NAV_ARROW_BTN}
+            aria-label="Предыдущий месяц"
+            onClick={() => onChangeMonth(addMonths(visibleMonth, -1))}
+          >
+            <ChevronLeft className="size-4" strokeWidth={2} />
+          </button>
+          <Select
+            value={String(monthIndex)}
+            onValueChange={(v) => onChangeMonth(setMonth(visibleMonth, Number(v)))}
+          >
+            <SelectTrigger className={MONTH_SELECT_TRIGGER}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTHS_RU.map((name, i) => (
+                <SelectItem key={name} value={String(i)}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            type="button"
+            className={MONTH_NAV_ARROW_BTN}
+            aria-label="Следующий месяц"
+            onClick={() => onChangeMonth(addMonths(visibleMonth, 1))}
+          >
+            <ChevronRight className="size-4" strokeWidth={2} />
+          </button>
+        </div>
       </div>
     </div>
   )
