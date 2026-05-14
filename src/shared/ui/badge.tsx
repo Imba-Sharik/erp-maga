@@ -21,6 +21,8 @@ const badgeVariants = cva(
         success: "border-[#B7E4BE] bg-[#E8FBEB] text-[#295935]",
         info: "border-[#B7CCE4] bg-[#E9ECFF] text-[#4B61B9]",
         warning: "border-[#E4D3B7] bg-[#FBF4E8] text-[#AA8540]",
+        funnel:
+          "border-funnel-preproject/35 bg-funnel-preproject/10 text-funnel-preproject [a&]:hover:bg-funnel-preproject/15",
         counter: "border-[#C7C7C7] bg-[#EBEBEB] text-[#1B1A17]",
       },
     },

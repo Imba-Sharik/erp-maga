@@ -24,13 +24,13 @@ export function ProjectPipelineCard({ project }: { project: Project }) {
       <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>
       <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>
       <p className="text-xs text-[#ACACAC]">
-        Телефон: <span className="text-[#5E83E3]">{project.phone}</span>
+        Телефон: <span className="text-funnel-preproject">{project.phone}</span>
       </p>
       <p className="text-xs text-[#ACACAC]">
         Email:{' '}
         <a
           href={`mailto:${project.email}`}
-          className="text-[#5E83E3] underline-offset-2 hover:underline"
+          className="text-funnel-preproject underline-offset-2 hover:underline"
         >
           {project.email}
         </a>
@@ -41,9 +41,9 @@ export function ProjectPipelineCard({ project }: { project: Project }) {
           href={project.plumCardUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-[#5E83E3] underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs text-funnel-preproject underline-offset-2 hover:underline"
         >
-          <span className="inline-flex size-4 items-center justify-center rounded-[5px] bg-[#5E83E3] text-white">
+          <span className="inline-flex size-4 items-center justify-center rounded-[5px] bg-funnel-preproject text-white">
             <Link2 className="size-3" />
           </span>
           Карточка в PLUM

@@ -15,7 +15,7 @@ export function ProjectCard({ project }: { project: Project }) {
       <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>
       <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>
       <p className="text-xs text-[#ACACAC]">
-        Телефон: <span className="text-[#5E83E3]">{project.phone}</span>
+        Телефон: <span className="text-funnel-preproject">{project.phone}</span>
       </p>
     </Card>
   )
