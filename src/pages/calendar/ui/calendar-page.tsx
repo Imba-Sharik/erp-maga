@@ -6,6 +6,7 @@ import {
   groupByDay,
   mockProjects,
 } from '@/entities/project'
+import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import { useElementHeight } from '@/shared/hooks/use-element-height'
 import { useMediaQuery } from '@/shared/hooks/use-media-query'
 import { DaySchedule } from '@/widgets/day-schedule'
@@ -31,8 +32,20 @@ export function CalendarPage() {
   const [selectedDates, setSelectedDates] = useState<Date[]>(initialSelectedDates)
   const [loft, setLoft] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
+  const [projectSearch, setProjectSearch] = useState('')
 
-  const projectsByDay = useMemo(() => groupByDay(mockProjects), [])
+  const projectsByDay = useMemo(
+    () =>
+      groupByDay(
+        filterProjects(mockProjects, {
+          search: projectSearch,
+          city: null,
+          hall,
+          loft,
+        }),
+      ),
+    [projectSearch, hall, loft],
+  )
 
   const toggleSelectedDate = useCallback((date: Date) => {
     setSelectedDates((prev) => {
@@ -72,6 +85,8 @@ export function CalendarPage() {
       <div className="grid gap-6 min-[1400px]:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] min-[1400px]:items-start min-[1400px]:gap-10">
         <div ref={calendarRef} className="min-h-0 min-w-0">
           <ProjectCalendar
+            projectSearch={projectSearch}
+            onChangeProjectSearch={setProjectSearch}
             visibleMonth={visibleMonth}
             selectedDates={selectedDates}
             today={today}
