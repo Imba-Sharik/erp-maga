@@ -54,6 +54,10 @@ export function CalendarPage() {
     })
   }, [])
 
+  const removeSelectedDate = useCallback((date: Date) => {
+    setSelectedDates((prev) => prev.filter((d) => !isSameDay(d, date)))
+  }, [])
+
   const scheduleDays = useMemo(
     () => getProjectsForDates(projectsByDay, selectedDates),
     [projectsByDay, selectedDates],
@@ -100,7 +104,11 @@ export function CalendarPage() {
           />
         </div>
         <div className="min-h-0 min-w-0">
-          <DaySchedule scheduleDays={scheduleDays} maxHeightPx={scheduleMaxHeightPx} />
+          <DaySchedule
+            scheduleDays={scheduleDays}
+            maxHeightPx={scheduleMaxHeightPx}
+            onRemoveSelectedDay={removeSelectedDate}
+          />
         </div>
       </div>
     </div>
