@@ -22,21 +22,16 @@ import { ProjectCalendar } from '@/widgets/project-calendar'
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
 export function CalendarPage() {
-  const {
-    today,
-    visibleMonth: initialVisibleMonth,
-    initialSelectedDates,
-  } = useMemo(() => {
+  const { today, visibleMonth: initialVisibleMonth } = useMemo(() => {
     const now = new Date()
     return {
       today: now,
       visibleMonth: startOfMonth(now),
-      initialSelectedDates: [now] as Date[],
     }
   }, [])
 
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
-  const [selectedDates, setSelectedDates] = useState<Date[]>(initialSelectedDates)
+  const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [loft, setLoft] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [projectSearch, setProjectSearch] = useState('')
