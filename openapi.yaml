@@ -81,6 +81,16 @@ paths:
     get:
       operationId: projects_list
       parameters:
+      - in: query
+        name: event_date_after
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: event_date_before
+        schema:
+          type: string
+          format: date
       - name: limit
         required: false
         in: query
