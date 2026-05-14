@@ -17,6 +17,7 @@ interface ProjectCalendarProps {
   onChangeLoft: (loft: string | null) => void
   onChangeHall: (hall: string | null) => void
   totalThisMonth: number
+  isFetching?: boolean
 }
 
 export function ProjectCalendar({
@@ -33,6 +34,7 @@ export function ProjectCalendar({
   onChangeLoft,
   onChangeHall,
   totalThisMonth,
+  isFetching = false,
 }: ProjectCalendarProps) {
   const selectedKeys = useMemo<ReadonlySet<string>>(
     () => new Set(selectedDates.map(toDayKey)),
@@ -50,6 +52,7 @@ export function ProjectCalendar({
         onChangeLoft={onChangeLoft}
         hall={hall}
         onChangeHall={onChangeHall}
+        isFetching={isFetching}
       />
       <CalendarGrid
         visibleMonth={visibleMonth}

@@ -1,8 +1,9 @@
 import { addMonths, getMonth, getYear, setMonth, setYear } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchBar } from '@/shared/ui/search-bar'
+import { cn } from '@/shared/lib/utils'
 
 const MONTHS_RU = [
   'Январь',
@@ -57,6 +58,7 @@ interface CalendarToolbarProps {
   onChangeLoft: (loft: string | null) => void
   hall: string | null
   onChangeHall: (hall: string | null) => void
+  isFetching?: boolean
 }
 
 export function CalendarToolbar({
@@ -68,18 +70,27 @@ export function CalendarToolbar({
   onChangeLoft,
   hall,
   onChangeHall,
+  isFetching = false,
 }: CalendarToolbarProps) {
   const monthIndex = getMonth(visibleMonth)
   const year = getYear(visibleMonth)
 
   return (
     <div className="flex flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:items-center @min-[880px]/calendar:justify-between @min-[880px]/calendar:gap-2.5">
-      <div className="w-full min-w-0 @min-[880px]/calendar:w-[min(100%,300px)] @min-[880px]/calendar:max-w-[300px] @min-[880px]/calendar:shrink-0">
+      <div className="flex w-full min-w-0 items-center gap-2 @min-[880px]/calendar:w-[min(100%,300px)] @min-[880px]/calendar:max-w-[300px] @min-[880px]/calendar:shrink-0">
         <SearchBar
           placeholder="Поиск проектов"
           value={projectSearch}
           onChange={(e) => onChangeProjectSearch(e.target.value)}
           groupClassName="w-full"
+        />
+        <Loader2
+          aria-hidden={!isFetching}
+          aria-label={isFetching ? 'Загрузка проектов' : undefined}
+          className={cn(
+            'size-4 shrink-0 text-[#ACACAC] transition-opacity',
+            isFetching ? 'animate-spin opacity-100' : 'opacity-0',
+          )}
         />
       </div>
 

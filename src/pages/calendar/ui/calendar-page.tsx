@@ -50,7 +50,7 @@ export function CalendarPage() {
     }
   }, [visibleMonth])
 
-  const { data } = useProjectsList({
+  const { data, isFetching } = useProjectsList({
     event_date_after,
     event_date_before,
     limit: 100,
@@ -128,6 +128,7 @@ export function CalendarPage() {
             onChangeLoft={setLoft}
             onChangeHall={setHall}
             totalThisMonth={totalThisMonth}
+            isFetching={isFetching}
           />
         </div>
         <div className="min-h-0 min-w-0">
