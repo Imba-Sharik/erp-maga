@@ -13,7 +13,7 @@ export function ProjectsKanbanColumn({ title, projects }: ProjectsKanbanColumnPr
           <span className="truncate text-sm text-[#454545]">{title}</span>
           <span className="shrink-0 text-xs text-[#ACACAC]">{projects.length}</span>
         </div>
-        <div className="h-1.25 rounded-b-[5px] bg-[#5E83E3]" />
+        <div className="h-1.25 rounded-b-[5px] bg-funnel-preproject" />
       </div>
       <div className="flex flex-1 flex-col gap-4 p-4">
         {projects.length === 0 ? (
