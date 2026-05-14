@@ -21,7 +21,13 @@ export function ProjectsKanbanColumn({ title, projects }: ProjectsKanbanColumnPr
         {projects.length === 0 ? (
           <p className="text-xs text-[#ACACAC]">Пусто</p>
         ) : (
-          projects.map((p) => <ProjectPipelineCard key={p.id} project={p} />)
+          projects.map((p) => (
+            <ProjectPipelineCard
+              key={p.id}
+              project={p}
+              backOrigin={{ to: '/projects', label: 'Все проекты' }}
+            />
+          ))
         )}
       </div>
     </div>

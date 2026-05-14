@@ -16,7 +16,11 @@ export function ScheduleDaySection({ date, projects, withDivider }: ScheduleDayS
       ) : (
         <div className="flex flex-col gap-2.5">
           {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} />
+            <ProjectCard
+              key={p.id}
+              project={p}
+              backOrigin={{ to: '/calendar', label: 'Календарь' }}
+            />
           ))}
         </div>
       )}
