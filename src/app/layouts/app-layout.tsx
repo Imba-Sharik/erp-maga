@@ -21,7 +21,7 @@ export function AppLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="h-svh max-h-svh min-h-0 overflow-hidden">
         <AppLayoutHeader />
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
           <Outlet />

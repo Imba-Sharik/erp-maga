@@ -21,7 +21,7 @@ export function ProjectsKanban({ projects }: ProjectsKanbanProps) {
             autoHideDelay: 800,
           },
         }}
-        className="projects-kanban-scroll-area h-full min-h-0 flex-1"
+        className="projects-kanban-scroll-area h-full min-h-0 w-full min-w-0 flex-1"
       >
         <div className="flex min-w-fit divide-x divide-[#D3D3D3]">
           {STAGE_ORDER.map((stage) => (
