@@ -7,12 +7,12 @@ import {
   mapBackendProjects,
 } from '@/entities/project'
 import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
-import { useElementHeight } from '@/shared/hooks/use-element-height'
-import { useMediaQuery } from '@/shared/hooks/use-media-query'
+import { useElementSize } from '@/shared/hooks/use-element-size'
+import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import { DaySchedule } from '@/widgets/day-schedule'
 import { ProjectCalendar } from '@/widgets/project-calendar'
 
-const WIDE_CALENDAR_QUERY = '(min-width: 1400px)'
+const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
 export function CalendarPage() {
   const {
@@ -32,13 +32,26 @@ export function CalendarPage() {
   const [selectedDates, setSelectedDates] = useState<Date[]>(initialSelectedDates)
   const [loft, setLoft] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
+  const [projectSearch, setProjectSearch] = useState('')
 
   const { data } = useProjectsList({ limit: 200 })
   const projects = useMemo(
     () => (data ? mapBackendProjects(data.results) : []),
     [data],
   )
-  const projectsByDay = useMemo(() => groupByDay(projects), [projects])
+
+  const projectsByDay = useMemo(
+    () =>
+      groupByDay(
+        filterProjects(projects, {
+          search: projectSearch,
+          city: null,
+          hall,
+          loft,
+        }),
+      ),
+    [projects, projectSearch, hall, loft],
+  )
 
   const toggleSelectedDate = useCallback((date: Date) => {
     setSelectedDates((prev) => {
@@ -46,6 +59,10 @@ export function CalendarPage() {
       if (exists) return prev.filter((d) => !isSameDay(d, date))
       return [...prev, date].sort((a, b) => a.getTime() - b.getTime())
     })
+  }, [])
+
+  const removeSelectedDate = useCallback((date: Date) => {
+    setSelectedDates((prev) => prev.filter((d) => !isSameDay(d, date)))
   }, [])
 
   const scheduleDays = useMemo(
@@ -58,16 +75,16 @@ export function CalendarPage() {
     [projectsByDay, visibleMonth],
   )
 
+  const pageRef = useRef<HTMLDivElement>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
-  const isWideCalendarLayout = useMediaQuery(WIDE_CALENDAR_QUERY)
-  const calendarHeightPx = useElementHeight(calendarRef)
+  const pageSize = useElementSize(pageRef)
+  const calendarSize = useElementSize(calendarRef)
+  const isWideCalendarLayout = (pageSize?.width ?? 0) >= WIDE_LAYOUT_MIN_WRAPPER_PX
   const scheduleMaxHeightPx =
-    isWideCalendarLayout && calendarHeightPx != null && calendarHeightPx > 0
-      ? calendarHeightPx
-      : undefined
+    isWideCalendarLayout && calendarSize?.height ? calendarSize.height : undefined
 
   return (
-    <div className="flex flex-col gap-6">
+    <div ref={pageRef} className="flex flex-col gap-6">
       <header className="flex flex-col gap-1.5">
         <h1 className="text-[22px] font-bold text-[#1B1A17]">Календарь проектов</h1>
         <p className="text-sm text-[#ACACAC]">
@@ -75,9 +92,11 @@ export function CalendarPage() {
         </p>
       </header>
 
-      <div className="grid gap-6 min-[1400px]:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] min-[1400px]:items-start min-[1400px]:gap-10">
+      <div className="grid gap-6 @min-[1400px]/main:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] @min-[1400px]/main:items-start @min-[1400px]/main:gap-10">
         <div ref={calendarRef} className="min-h-0 min-w-0">
           <ProjectCalendar
+            projectSearch={projectSearch}
+            onChangeProjectSearch={setProjectSearch}
             visibleMonth={visibleMonth}
             selectedDates={selectedDates}
             today={today}
@@ -92,7 +111,11 @@ export function CalendarPage() {
           />
         </div>
         <div className="min-h-0 min-w-0">
-          <DaySchedule scheduleDays={scheduleDays} maxHeightPx={scheduleMaxHeightPx} />
+          <DaySchedule
+            scheduleDays={scheduleDays}
+            maxHeightPx={scheduleMaxHeightPx}
+            onRemoveSelectedDay={removeSelectedDate}
+          />
         </div>
       </div>
     </div>

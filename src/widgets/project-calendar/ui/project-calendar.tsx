@@ -4,6 +4,8 @@ import { CalendarGrid } from './calendar-grid'
 import { CalendarToolbar } from './calendar-toolbar'
 
 interface ProjectCalendarProps {
+  projectSearch: string
+  onChangeProjectSearch: (value: string) => void
   visibleMonth: Date
   selectedDates: Date[]
   today: Date
@@ -18,6 +20,8 @@ interface ProjectCalendarProps {
 }
 
 export function ProjectCalendar({
+  projectSearch,
+  onChangeProjectSearch,
   visibleMonth,
   selectedDates,
   today,
@@ -36,8 +40,10 @@ export function ProjectCalendar({
   )
 
   return (
-    <div className="@container flex flex-col gap-4">
+    <div className="@container/calendar flex flex-col gap-4">
       <CalendarToolbar
+        projectSearch={projectSearch}
+        onChangeProjectSearch={onChangeProjectSearch}
         visibleMonth={visibleMonth}
         onChangeMonth={onChangeMonth}
         loft={loft}

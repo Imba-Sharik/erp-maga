@@ -9,9 +9,10 @@ interface DayScheduleProps {
   scheduleDays: ScheduleDayRow[]
   /** На широкой вёрстке: ограничить колонку по высоте календаря; контент карточки прокручивается */
   maxHeightPx?: number
+  onRemoveSelectedDay: (date: Date) => void
 }
 
-export function DaySchedule({ scheduleDays, maxHeightPx }: DayScheduleProps) {
+export function DaySchedule({ scheduleDays, maxHeightPx, onRemoveSelectedDay }: DayScheduleProps) {
   const daysSelectedCount = scheduleDays.length
   const totalProjects = scheduleDays.reduce((sum, row) => sum + row.projects.length, 0)
   const heightCapped = maxHeightPx != null && maxHeightPx > 0
@@ -51,6 +52,7 @@ export function DaySchedule({ scheduleDays, maxHeightPx }: DayScheduleProps) {
                   date={row.date}
                   projects={row.projects}
                   withDivider={idx < daysSelectedCount - 1}
+                  onRemoveSelectedDay={onRemoveSelectedDay}
                 />
               ))}
             </div>
