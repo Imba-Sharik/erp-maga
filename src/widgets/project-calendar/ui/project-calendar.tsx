@@ -17,6 +17,7 @@ interface ProjectCalendarProps {
   onChangeLoft: (loft: string | null) => void
   onChangeHall: (hall: string | null) => void
   totalThisMonth: number
+  isLoading?: boolean
   isFetching?: boolean
 }
 
@@ -34,6 +35,7 @@ export function ProjectCalendar({
   onChangeLoft,
   onChangeHall,
   totalThisMonth,
+  isLoading = false,
   isFetching = false,
 }: ProjectCalendarProps) {
   const selectedKeys = useMemo<ReadonlySet<string>>(
@@ -60,6 +62,7 @@ export function ProjectCalendar({
         today={today}
         projectsByDay={projectsByDay}
         onToggleDate={onToggleDate}
+        isLoading={isLoading}
       />
       <p className="text-right text-sm text-[#ACACAC]">
         {totalThisMonth} {pluralProjects(totalThisMonth)} в этом месяце

@@ -10,6 +10,7 @@ interface CalendarGridProps {
   today: Date
   projectsByDay: ProjectsByDay
   onToggleDate: (date: Date) => void
+  isLoading?: boolean
 }
 
 export function CalendarGrid({
@@ -18,6 +19,7 @@ export function CalendarGrid({
   today,
   projectsByDay,
   onToggleDate,
+  isLoading = false,
 }: CalendarGridProps) {
   const days = buildMonthMatrix(visibleMonth)
 
@@ -47,6 +49,7 @@ export function CalendarGrid({
               onSelect={() => onToggleDate(day.date)}
               colIdx={colIdx}
               isLastRow={isLastRow}
+              isLoading={isLoading}
             />
           )
         })}
