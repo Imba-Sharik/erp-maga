@@ -6,9 +6,17 @@ import { ProjectsKanban } from './projects-kanban'
 
 interface ProjectsBoardProps {
   projects: Project[]
+  onLoadMore?: () => void
+  hasNextPage?: boolean
+  isFetchingNextPage?: boolean
 }
 
-export function ProjectsBoard({ projects }: ProjectsBoardProps) {
+export function ProjectsBoard({
+  projects,
+  onLoadMore,
+  hasNextPage,
+  isFetchingNextPage,
+}: ProjectsBoardProps) {
   const [search, setSearch] = useState('')
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
@@ -32,7 +40,12 @@ export function ProjectsBoard({ projects }: ProjectsBoardProps) {
         onChangeLoft={setLoft}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ProjectsKanban projects={filtered} />
+        <ProjectsKanban
+          projects={filtered}
+          onLoadMore={onLoadMore}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+        />
       </div>
     </div>
   )

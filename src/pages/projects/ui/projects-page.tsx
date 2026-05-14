@@ -2,17 +2,19 @@ import { useMemo } from 'react'
 import { Plus } from 'lucide-react'
 
 import { mapBackendProjects } from '@/entities/project'
-import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
+import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
-import { ProjectsBoard } from '@/widgets/projects-board'
+import { ProjectsBoard, useProjectsBoardQuery } from '@/widgets/projects-board'
 
 export function ProjectsPage() {
-  const { data, isLoading, isError } = useProjectsList({ limit: 100 })
+  const eventDateAfter = useMemo(() => toIsoLocalDay(new Date()), [])
+  const query = useProjectsBoardQuery({ event_date_after: eventDateAfter })
 
-  const projects = useMemo(
-    () => (data ? mapBackendProjects(data.results) : []),
-    [data],
-  )
+  const projects = useMemo(() => {
+    const raw = query.data?.pages.flatMap((p) => p.results) ?? []
+    const mapped = mapBackendProjects(raw)
+    return mapped.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
+  }, [query.data])
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
@@ -29,12 +31,17 @@ export function ProjectsPage() {
         </Button>
       </header>
 
-      {isError ? (
+      {query.isError ? (
         <p className="text-sm text-red-600">Не удалось загрузить проекты.</p>
-      ) : isLoading ? (
+      ) : query.isLoading ? (
         <p className="text-sm text-[#ACACAC]">Загружаем проекты…</p>
       ) : (
-        <ProjectsBoard projects={projects} />
+        <ProjectsBoard
+          projects={projects}
+          onLoadMore={() => query.fetchNextPage()}
+          hasNextPage={query.hasNextPage}
+          isFetchingNextPage={query.isFetchingNextPage}
+        />
       )}
     </div>
   )
