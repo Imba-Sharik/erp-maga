@@ -10,6 +10,7 @@ interface DayCellProps {
   onSelect: () => void
   colIdx: number
   isLastRow: boolean
+  isLoading?: boolean
 }
 
 export function DayCell({
@@ -21,6 +22,7 @@ export function DayCell({
   onSelect,
   colIdx,
   isLastRow,
+  isLoading = false,
 }: DayCellProps) {
   return (
     <button
@@ -51,7 +53,11 @@ export function DayCell({
             {dayNum}
           </span>
         )}
-        <ProjectCountBadge count={count} />
+        {isLoading && !outOfMonth ? (
+          <span className="h-4 w-12 animate-pulse rounded bg-[#E9E6DD] @max-[560px]/calendar:h-3 @max-[560px]/calendar:w-8" />
+        ) : (
+          <ProjectCountBadge count={count} />
+        )}
       </div>
     </button>
   )
