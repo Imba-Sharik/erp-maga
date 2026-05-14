@@ -26,7 +26,7 @@ export default defineConfig({
     }),
     pluginClient({
       output: { path: './clients' },
-      client: { importPath: '@/shared/api/client' },
+      importPath: '@/shared/api/client',
       group: { type: 'tag' },
     }),
     pluginReactQuery({

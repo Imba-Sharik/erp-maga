@@ -11,8 +11,11 @@ export type {
   ContactChannel,
   PlumStatus,
 } from './model/types'
-export { mockProjects } from './model/mock'
-export { mockProjectDetail, getProjectDetailById } from './model/mock-detail'
+export {
+  mapBackendProject,
+  mapBackendProjects,
+  mapBackendProjectDetail,
+} from './lib/from-backend'
 export {
   stageFormSchemas,
   contactChannelLabels,
