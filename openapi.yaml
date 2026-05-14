@@ -1,30 +1,463 @@
 openapi: 3.0.3
 info:
-  title: ERP MAG API
-  description: Заглушка схемы API. Заменится реальной схемой из drf-spectacular.
-  version: 0.0.1
-servers:
-  - url: http://localhost:8000/api
-    description: Local Django dev server
+  title: MAG Backend API
+  version: 1.0.0
+  description: REST API v1 (JWT).
 paths:
-  /health/:
-    get:
-      tags: [health]
-      operationId: healthCheck
-      summary: Проверка доступности API
+  /api/v1/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailTokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailTokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailTokenObtainPairRequest'
+        required: true
       responses:
         '200':
-          description: OK
+          description: No response body
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/token/verify/:
+    post:
+      operationId: auth_token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/:
+    get:
+      operationId: projects_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectList'
+          description: ''
+  /api/v1/projects/{id}/:
+    get:
+      operationId: projects_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/v1/users/me/:
+    get:
+      operationId: users_me_retrieve
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
 components:
   schemas:
-    HealthResponse:
+    EmailTokenObtainPairRequest:
       type: object
-      required: [status]
       properties:
-        status:
+        email:
           type: string
-          enum: [ok]
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    LastActiveStageEnum:
+      enum:
+      - plum_request
+      - primary_contact_done
+      - calculation_prepared
+      - contract_signed
+      - ready_to_event
+      - event_held
+      - expenses_entered
+      - documents_confirmed
+      - feedback_received
+      - data_confirmed
+      - bonus_calculated
+      - bonus_approved
+      - closed
+      - archived
+      - out_of_mag_scope
+      type: string
+      description: |-
+        * `plum_request` - Заявка из Plum
+        * `primary_contact_done` - Первичный контакт выполнен
+        * `calculation_prepared` - Расчёт подготовлен
+        * `contract_signed` - Договор подписан
+        * `ready_to_event` - Готов к проведению
+        * `event_held` - Мероприятие проведено
+        * `expenses_entered` - Расходы внесены
+        * `documents_confirmed` - Документы подтверждены
+        * `feedback_received` - Обратная связь по проекту получена
+        * `data_confirmed` - Данные подтверждены
+        * `bonus_calculated` - Бонус рассчитан
+        * `bonus_approved` - Бонус утверждён
+        * `closed` - Проект закрыт
+        * `archived` - Архив
+        * `out_of_mag_scope` - Вне контура MAG
+    PaginatedProjectList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plum_event_id:
+          type: string
+          title: ID мероприятия Plum
+          maxLength: 64
+        plum_card_url:
+          type: string
+          format: uri
+          title: Ссылка на карточку Plum
+          maxLength: 500
+        plum_last_synced_at:
+          type: string
+          format: date-time
+          title: Дата последней синхронизации
+        plum_event_payload_hash:
+          type: string
+          title: SHA-256 нормализованного JSON мероприятия Plum
+          maxLength: 64
+        event_name:
+          type: string
+          title: Название мероприятия
+          maxLength: 500
+        event_date:
+          type: string
+          format: date
+          title: Дата мероприятия
+        venue:
+          type: string
+          title: Площадка
+          maxLength: 255
+        hall_loft:
+          type: string
+          title: Зал / лофт
+          maxLength: 255
+        city:
+          type: string
+          title: Город
+          maxLength: 255
+        event_type:
+          type: string
+          title: Тип мероприятия
+          maxLength: 255
+        plum_event_status:
+          type: string
+          title: Статус мероприятия в Plum
+          maxLength: 255
+        plum_comment:
+          type: string
+          title: Комментарий из Plum
+        client_company:
+          type: string
+          title: Клиент / название компании
+          maxLength: 500
+        contact_person:
+          type: string
+          title: Контактное лицо
+          maxLength: 255
+        phone:
+          type: string
+          title: Телефон
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        lofthall_manager:
+          type: string
+          title: Менеджер LOFT HALL
+          maxLength: 255
+        mag_manager:
+          type: string
+          title: Менеджер MAG
+          maxLength: 255
+        stage:
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          title: Стадия проекта
+        last_active_stage:
+          allOf:
+          - $ref: '#/components/schemas/LastActiveStageEnum'
+          title: Последняя активная стадия
+        client_company_is_manual:
+          type: boolean
+        contact_person_is_manual:
+          type: boolean
+        phone_is_manual:
+          type: boolean
+        email_is_manual:
+          type: boolean
+        source_payload:
+          title: Последний payload Plum
+        sync_error:
+          type: string
+          title: Ошибка последней синхронизации
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата создания проекта в ERP
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        city_label:
+          type: string
+          readOnly: true
+        plum_event_status_label:
+          type: string
+          readOnly: true
+      required:
+      - city
+      - city_label
+      - created_at
+      - event_date
+      - event_name
+      - hall_loft
+      - id
+      - plum_card_url
+      - plum_event_id
+      - plum_event_status
+      - plum_event_status_label
+      - updated_at
+      - venue
+    StageEnum:
+      enum:
+      - plum_request
+      - primary_contact_done
+      - calculation_prepared
+      - contract_signed
+      - ready_to_event
+      - event_held
+      - expenses_entered
+      - documents_confirmed
+      - feedback_received
+      - data_confirmed
+      - bonus_calculated
+      - bonus_approved
+      - closed
+      - archived
+      - out_of_mag_scope
+      type: string
+      description: |-
+        * `plum_request` - Заявка из Plum
+        * `primary_contact_done` - Первичный контакт выполнен
+        * `calculation_prepared` - Расчёт подготовлен
+        * `contract_signed` - Договор подписан
+        * `ready_to_event` - Готов к проведению
+        * `event_held` - Мероприятие проведено
+        * `expenses_entered` - Расходы внесены
+        * `documents_confirmed` - Документы подтверждены
+        * `feedback_received` - Обратная связь по проекту получена
+        * `data_confirmed` - Данные подтверждены
+        * `bonus_calculated` - Бонус рассчитан
+        * `bonus_approved` - Бонус утверждён
+        * `closed` - Проект закрыт
+        * `archived` - Архив
+        * `out_of_mag_scope` - Вне контура MAG
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          title: Имя пользователя
+          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
+            и символы @/./+/-/_.
+        first_name:
+          type: string
+          readOnly: true
+          title: Имя
+        last_name:
+          type: string
+          readOnly: true
+          title: Фамилия
+        is_staff:
+          type: boolean
+          readOnly: true
+          title: Статус персонала
+          description: Отметьте, если пользователь может входить в административную
+            часть сайта.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата регистрации
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - date_joined
+      - email
+      - first_name
+      - id
+      - is_staff
+      - last_name
+      - updated_at
+      - username
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

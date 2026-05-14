@@ -4,10 +4,11 @@ import {
   countProjectsInMonth,
   getProjectsForDates,
   groupByDay,
-  mockProjects,
+  mapBackendProjects,
 } from '@/entities/project'
-import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
+import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { useElementSize } from '@/shared/hooks/use-element-size'
+import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import { DaySchedule } from '@/widgets/day-schedule'
 import { ProjectCalendar } from '@/widgets/project-calendar'
 
@@ -33,17 +34,23 @@ export function CalendarPage() {
   const [hall, setHall] = useState<string | null>(null)
   const [projectSearch, setProjectSearch] = useState('')
 
+  const { data } = useProjectsList({ limit: 200 })
+  const projects = useMemo(
+    () => (data ? mapBackendProjects(data.results) : []),
+    [data],
+  )
+
   const projectsByDay = useMemo(
     () =>
       groupByDay(
-        filterProjects(mockProjects, {
+        filterProjects(projects, {
           search: projectSearch,
           city: null,
           hall,
           loft,
         }),
       ),
-    [projectSearch, hall, loft],
+    [projects, projectSearch, hall, loft],
   )
 
   const toggleSelectedDate = useCallback((date: Date) => {

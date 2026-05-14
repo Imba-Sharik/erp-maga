@@ -1,9 +1,19 @@
+import { useMemo } from 'react'
 import { Plus } from 'lucide-react'
-import { mockProjects } from '@/entities/project'
+
+import { mapBackendProjects } from '@/entities/project'
+import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { Button } from '@/shared/ui/button'
 import { ProjectsBoard } from '@/widgets/projects-board'
 
 export function ProjectsPage() {
+  const { data, isLoading, isError } = useProjectsList({ limit: 200 })
+
+  const projects = useMemo(
+    () => (data ? mapBackendProjects(data.results) : []),
+    [data],
+  )
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
       <header className="flex shrink-0 flex-wrap items-start justify-between gap-4">
@@ -19,7 +29,13 @@ export function ProjectsPage() {
         </Button>
       </header>
 
-      <ProjectsBoard projects={mockProjects} />
+      {isError ? (
+        <p className="text-sm text-red-600">Не удалось загрузить проекты.</p>
+      ) : isLoading ? (
+        <p className="text-sm text-[#ACACAC]">Загружаем проекты…</p>
+      ) : (
+        <ProjectsBoard projects={projects} />
+      )}
     </div>
   )
 }
