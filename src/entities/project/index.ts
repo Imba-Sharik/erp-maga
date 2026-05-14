@@ -1,4 +1,4 @@
-export type { Project, ProjectStatus, ProjectStage } from './model/types'
+export type { Project, ProjectStatus, ProjectStage, ProjectBackOrigin } from './model/types'
 export { mockProjects } from './model/mock'
 export { groupByDay, toDayKey } from './lib/group-by-day'
 export type { ProjectsByDay } from './lib/group-by-day'

@@ -1,5 +1,10 @@
 export type ProjectStatus = 'confirmed' | 'signed' | 'expenses'
 
+export type ProjectBackOrigin = {
+  to: string
+  label: string
+}
+
 export type ProjectStage =
   | 'plum_request'
   | 'first_contact'
