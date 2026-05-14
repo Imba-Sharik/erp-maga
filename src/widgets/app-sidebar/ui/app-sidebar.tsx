@@ -110,10 +110,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div
-          aria-hidden
-          className="border-sidebar-border mx-3 shrink-0 border-t group-data-[collapsible=icon]:mx-0"
-        />
+        <div className="mx-3 group-data-[collapsible=icon]:hidden">
+          <p className="text-muted-foreground pb-1 text-start text-xs whitespace-nowrap">V 0.0.1</p>
+          <div
+            aria-hidden
+            className="border-sidebar-border shrink-0 border-t group-data-[collapsible=icon]:mx-0"
+          />
+        </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
