@@ -1,8 +1,31 @@
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { BreadcrumbProvider } from '@/shared/hooks/use-breadcrumb'
+import { formatRuHeaderDate } from '@/shared/lib/date/format-ru-header-date'
+import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
+import { cn } from '@/shared/lib/utils'
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from '@/shared/ui/sidebar'
 import { AppBreadcrumb } from '@/widgets/app-breadcrumb'
 import { AppSidebar } from '@/widgets/app-sidebar'
+import { HeaderNotificationsButton } from '@/widgets/header-notifications'
+
+function HeaderTodayDate({ className }: { className?: string }) {
+  const [today, setToday] = useState(() => new Date())
+
+  useEffect(() => {
+    const id = window.setInterval(() => setToday(new Date()), 60_000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  return (
+    <time
+      dateTime={toIsoLocalDay(today)}
+      className={cn('text-muted-foreground text-xs', className)}
+    >
+      {formatRuHeaderDate(today)}
+    </time>
+  )
+}
 
 function AppLayoutHeader() {
   const { state, isMobile } = useSidebar()
@@ -15,7 +38,13 @@ function AppLayoutHeader() {
           <SidebarTrigger />
         </span>
       )}
-      <AppBreadcrumb />
+      <div className="min-w-0 flex-1">
+        <AppBreadcrumb />
+      </div>
+      <div className="flex shrink-0 items-center gap-2 pr-4">
+        <HeaderTodayDate />
+        <HeaderNotificationsButton />
+      </div>
     </header>
   )
 }
