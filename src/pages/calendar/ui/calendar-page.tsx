@@ -1,5 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { isSameDay, startOfMonth } from 'date-fns'
+import {
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameDay,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns'
 import {
   countProjectsInMonth,
   getProjectsForDates,
@@ -34,7 +41,20 @@ export function CalendarPage() {
   const [hall, setHall] = useState<string | null>(null)
   const [projectSearch, setProjectSearch] = useState('')
 
-  const { data } = useProjectsList({ limit: 200 })
+  const { event_date_after, event_date_before } = useMemo(() => {
+    const gridStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 })
+    const gridEnd = endOfWeek(endOfMonth(visibleMonth), { weekStartsOn: 1 })
+    return {
+      event_date_after: format(gridStart, 'yyyy-MM-dd'),
+      event_date_before: format(gridEnd, 'yyyy-MM-dd'),
+    }
+  }, [visibleMonth])
+
+  const { data } = useProjectsList({
+    event_date_after,
+    event_date_before,
+    limit: 100,
+  })
   const projects = useMemo(
     () => (data ? mapBackendProjects(data.results) : []),
     [data],

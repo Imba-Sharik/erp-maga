@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button'
 import { ProjectsBoard } from '@/widgets/projects-board'
 
 export function ProjectsPage() {
-  const { data, isLoading, isError } = useProjectsList({ limit: 200 })
+  const { data, isLoading, isError } = useProjectsList({ limit: 100 })
 
   const projects = useMemo(
     () => (data ? mapBackendProjects(data.results) : []),
