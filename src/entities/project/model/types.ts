@@ -5,12 +5,20 @@ export type ProjectBackOrigin = {
   label: string
 }
 
-export type ProjectStage =
-  | 'plum_request'
-  | 'first_contact'
-  | 'calc_ready'
-  | 'signed'
-  | 'ready'
+/** Воронка до мероприятия (формы и канбан «Проекты»). */
+export type PreprojectStage = 'plum_request' | 'first_contact' | 'calc_ready' | 'signed' | 'ready'
+
+/** Этапы закрытия после проведения (канбан «Закрытие»), совпадают с StageEnum API. */
+export type ClosingStage =
+  | 'event_held'
+  | 'expenses_entered'
+  | 'documents_confirmed'
+  | 'feedback_received'
+  | 'data_confirmed'
+  | 'bonus_calculated'
+  | 'bonus_approved'
+
+export type ProjectStage = PreprojectStage | ClosingStage
 
 export interface Project {
   id: string

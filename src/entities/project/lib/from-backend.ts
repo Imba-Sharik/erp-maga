@@ -12,14 +12,33 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   calculation_prepared: 'calc_ready',
   contract_signed: 'signed',
   ready_to_event: 'ready',
+  event_held: 'event_held',
+  expenses_entered: 'expenses_entered',
+  documents_confirmed: 'documents_confirmed',
+  feedback_received: 'feedback_received',
+  data_confirmed: 'data_confirmed',
+  bonus_calculated: 'bonus_calculated',
+  bonus_approved: 'bonus_approved',
 }
 
-const STATUS_BY_STAGE: Record<ProjectStage, ProjectStatus> = {
-  plum_request: 'confirmed',
-  first_contact: 'confirmed',
-  calc_ready: 'confirmed',
-  signed: 'signed',
-  ready: 'signed',
+function statusForStage(stage: ProjectStage): ProjectStatus {
+  switch (stage) {
+    case 'plum_request':
+    case 'first_contact':
+    case 'calc_ready':
+      return 'confirmed'
+    case 'signed':
+    case 'ready':
+    case 'event_held':
+      return 'signed'
+    case 'expenses_entered':
+    case 'documents_confirmed':
+    case 'feedback_received':
+    case 'data_confirmed':
+    case 'bonus_calculated':
+    case 'bonus_approved':
+      return 'expenses'
+  }
 }
 
 function formatLastUpdate(iso: string | undefined): string {
@@ -39,7 +58,7 @@ export function mapBackendProject(b: BackendProject): Project | null {
     id: String(b.id),
     title: b.event_name,
     date: b.event_date,
-    status: STATUS_BY_STAGE[stage],
+    status: statusForStage(stage),
     stage,
     city: b.city_label || b.city,
     loft: b.venue,
