@@ -14,7 +14,7 @@ export function StageFieldShell({ label, required, className, children }: StageF
     <div className={cn('flex min-w-0 flex-col gap-1.5', className)}>
       <span className="text-xs font-medium text-[#454545]">
         {label}
-        {required ? '*' : ''}
+        {required ? <span className="text-[#D25252]">*</span> : null}
       </span>
       {children}
     </div>

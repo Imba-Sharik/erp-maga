@@ -10,7 +10,12 @@ import {
   type StageHistoryEntry,
 } from '@/entities/project'
 
+import { useUserRole } from '@/entities/user-role'
+
 import { PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import { renderNarrowPairs } from '../lib/render-narrow-pairs'
+import { canEditStage } from '../lib/stage-permissions'
+import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldReadonly } from './stage-field-readonly'
 
 const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
@@ -41,6 +46,10 @@ function readField(entry: StageHistoryEntry, f: StageFieldConfig): string | unde
   return raw
 }
 
+function rawValue(entry: StageHistoryEntry, f: StageFieldConfig): string | undefined {
+  return (entry.data as Record<string, string | undefined>)[f.name] ?? f.mockValue
+}
+
 function spanClass(span: 1 | 2 | 3 | undefined, isMultiline: boolean) {
   if (span === 3) return '@[640px]:col-span-3'
   if (span === 2) return '@[640px]:col-span-2'
@@ -58,6 +67,8 @@ export function StageSectionPassed({ stage, entry }: StageSectionPassedProps) {
   const extras = PASSED_EXTRAS[stage]
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
+  const role = useUserRole()
+  const canEdit = canEditStage(stage, role)
 
   return (
     <Collapsible defaultOpen className="w-full">
@@ -75,17 +86,26 @@ export function StageSectionPassed({ stage, entry }: StageSectionPassedProps) {
             </p>
           ) : (
             <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {fields.map((f) => (
-                <StageFieldReadonly
-                  key={f.name}
-                  label={f.label}
-                  value={readField(entry, f)}
-                  multiline={f.type === 'textarea'}
-                  source={f.source}
-                  isSelect={f.type === 'select'}
-                  className={spanClass(f.span, f.type === 'textarea')}
-                />
-              ))}
+              {renderNarrowPairs(fields, (f) =>
+                f.source === 'manager' && canEdit ? (
+                  <StageFieldDemoEditable
+                    key={f.name}
+                    field={f}
+                    initialValue={rawValue(entry, f)}
+                    className={spanClass(f.span, f.type === 'textarea')}
+                  />
+                ) : (
+                  <StageFieldReadonly
+                    key={f.name}
+                    label={f.label}
+                    value={readField(entry, f)}
+                    multiline={f.type === 'textarea'}
+                    source={canEdit ? f.source : 'system'}
+                    isSelect={f.type === 'select'}
+                    className={spanClass(f.span, f.type === 'textarea')}
+                  />
+                ),
+              )}
               {extras.map((extra) =>
                 extra.source === 'manager' ? (
                   <StageFieldReadonly

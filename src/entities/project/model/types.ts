@@ -44,7 +44,7 @@ export interface Project {
 }
 
 export type ContractType = 'with_vat' | 'without_vat'
-export type ContactChannel = 'messenger' | 'phone' | 'email' | 'meeting'
+export type ContactChannel = 'messenger' | 'phone' | 'meeting'
 export type PlumStatus = 'pending' | 'confirmed'
 
 export type DocumentStatus = 'present' | 'absent' | 'not_required'

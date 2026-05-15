@@ -9,12 +9,16 @@ import {
   ListChecksIcon,
   SettingsIcon,
 } from '@/shared/assets'
+import { USER_ROLES, USER_ROLE_LABELS, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
@@ -45,7 +49,6 @@ const navItems = [
 const user = {
   name: 'Игорь Шарин',
   email: 'sharinigor1@gmail.com',
-  roleName: 'Менеджер MAG',
   initials: 'ИШ',
 }
 
@@ -53,6 +56,9 @@ export function AppSidebar() {
   const { pathname } = useLocation()
   const { state, isMobile } = useSidebar()
   const showCollapseInSidebar = !isMobile && state === 'expanded'
+  const role = useUserRole()
+  const setRole = useUserRoleStore((s) => s.setRole)
+  const roleName = `${USER_ROLE_LABELS[role]} MAG`
 
   return (
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">
@@ -130,7 +136,7 @@ export function AppSidebar() {
                   </Avatar>
                   <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">{user.roleName}</span>
+                    <span className="text-muted-foreground truncate text-xs">{roleName}</span>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -140,6 +146,20 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
+                <DropdownMenuLabel className="text-muted-foreground text-[11px] tracking-wide uppercase">
+                  Войти как (dev)
+                </DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={role}
+                  onValueChange={(v) => setRole(v as UserRole)}
+                >
+                  {USER_ROLES.map((r) => (
+                    <DropdownMenuRadioItem key={r} value={r}>
+                      {USER_ROLE_LABELS[r]}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/profile">
                     <User />
