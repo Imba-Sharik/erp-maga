@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from '@/shared/ui/collapsible'
 import {
+  STAGE_FUNNEL,
   STAGE_LABELS,
   contactChannelLabels,
   contractTypeLabels,
@@ -13,7 +14,7 @@ import {
   type StageHistoryEntry,
 } from '@/entities/project'
 
-import { PASSED_EXTRAS, STAGE_FIELDS } from '../lib/fields-map'
+import { PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
 import { StageFieldReadonly } from './stage-field-readonly'
 
 const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
@@ -29,22 +30,24 @@ function formatDate(value: string | undefined) {
   return DATE_FORMAT.format(d)
 }
 
-function readField(
-  entry: StageHistoryEntry,
-  name: string,
-  type: 'text' | 'textarea' | 'date' | 'select',
-  options?: { value: string; label: string }[],
-): string | undefined {
-  const raw = (entry.data as Record<string, string | undefined>)[name]
+function readField(entry: StageHistoryEntry, f: StageFieldConfig): string | undefined {
+  const raw = (entry.data as Record<string, string | undefined>)[f.name] ?? f.mockValue
   if (!raw) return undefined
 
-  if (type === 'date') return formatDate(raw)
-  if (type === 'select') {
-    if (options) return options.find((o) => o.value === raw)?.label ?? raw
-    if (name === 'contactChannel') return contactChannelLabels[raw as keyof typeof contactChannelLabels] ?? raw
-    if (name === 'contractType') return contractTypeLabels[raw as keyof typeof contractTypeLabels] ?? raw
+  if (f.type === 'date') return formatDate(raw)
+  if (f.type === 'select') {
+    if (f.options) return f.options.find((o) => o.value === raw)?.label ?? raw
+    if (f.name === 'contactChannel') return contactChannelLabels[raw as keyof typeof contactChannelLabels] ?? raw
+    if (f.name === 'contractType') return contractTypeLabels[raw as keyof typeof contractTypeLabels] ?? raw
   }
   return raw
+}
+
+function spanClass(span: 1 | 2 | 3 | undefined, isMultiline: boolean) {
+  if (span === 3) return '@[640px]:col-span-3'
+  if (span === 2) return '@[640px]:col-span-2'
+  if (isMultiline) return '@[640px]:row-span-2'
+  return undefined
 }
 
 interface StageSectionPassedProps {
@@ -55,43 +58,55 @@ interface StageSectionPassedProps {
 export function StageSectionPassed({ stage, entry }: StageSectionPassedProps) {
   const fields = STAGE_FIELDS[stage]
   const extras = PASSED_EXTRAS[stage]
+  const funnelColor =
+    STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
 
   return (
     <Collapsible defaultOpen className="w-full">
       <div className="flex flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
         <CollapsibleTrigger className="flex w-full items-center gap-1.5 text-sm">
           <span className="font-medium text-[#454545]">Этап пройден:</span>
-          <span className="text-funnel-preproject font-semibold">{STAGE_LABELS[stage]}</span>
+          <span className={`${funnelColor} font-semibold`}>{STAGE_LABELS[stage]}</span>
           <ChevronDown className="text-muted-foreground size-3.5" />
         </CollapsibleTrigger>
         <CollapsibleContent className="flex flex-col gap-4">
           <div className="h-px w-full bg-[#F0F0F0]" />
-          <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-            {fields.map((f) => (
-              <StageFieldReadonly
-                key={f.name}
-                label={f.label}
-                value={readField(entry, f.name, f.type, f.options)}
-                multiline={f.type === 'textarea'}
-                className={f.type === 'textarea' ? '@[640px]:row-span-2' : undefined}
-              />
-            ))}
-            {extras.map((extra) =>
-              extra.source === 'manager' ? (
+          {fields.length === 0 && extras.length === 0 ? (
+            <p className="text-muted-foreground text-[13px] italic">
+              Подробное содержимое раздела — в следующей итерации
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+              {fields.map((f) => (
                 <StageFieldReadonly
-                  key="manager"
-                  label={extra.label}
-                  value={entry.managerName}
+                  key={f.name}
+                  label={f.label}
+                  value={readField(entry, f)}
+                  multiline={f.type === 'textarea'}
+                  source={f.source}
+                  isSelect={f.type === 'select'}
+                  className={spanClass(f.span, f.type === 'textarea')}
                 />
-              ) : (
-                <StageFieldReadonly
-                  key="enteredAt"
-                  label={extra.label}
-                  value={formatDate(entry.enteredAt)}
-                />
-              ),
-            )}
-          </div>
+              ))}
+              {extras.map((extra) =>
+                extra.source === 'manager' ? (
+                  <StageFieldReadonly
+                    key="manager"
+                    label={extra.label}
+                    value={entry.managerName || 'Иванов Иван Иванович'}
+                    source="system"
+                  />
+                ) : (
+                  <StageFieldReadonly
+                    key="enteredAt"
+                    label={extra.label}
+                    value={formatDate(entry.enteredAt) ?? '09-05-2026'}
+                    source="system"
+                  />
+                ),
+              )}
+            </div>
+          )}
         </CollapsibleContent>
       </div>
     </Collapsible>

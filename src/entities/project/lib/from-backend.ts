@@ -12,6 +12,13 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   calculation_prepared: 'calc_ready',
   contract_signed: 'signed',
   ready_to_event: 'ready',
+  event_held: 'event_held',
+  expenses_entered: 'expenses_entered',
+  documents_confirmed: 'documents_confirmed',
+  data_confirmed: 'data_confirmed',
+  bonus_calculated: 'bonus_calculated',
+  bonus_approved: 'bonus_approved',
+  closed: 'closed',
 }
 
 const STATUS_BY_STAGE: Record<ProjectStage, ProjectStatus> = {
@@ -20,6 +27,13 @@ const STATUS_BY_STAGE: Record<ProjectStage, ProjectStatus> = {
   calc_ready: 'confirmed',
   signed: 'signed',
   ready: 'signed',
+  event_held: 'expenses',
+  expenses_entered: 'expenses',
+  documents_confirmed: 'expenses',
+  data_confirmed: 'expenses',
+  bonus_calculated: 'expenses',
+  bonus_approved: 'expenses',
+  closed: 'expenses',
 }
 
 function formatLastUpdate(iso: string | undefined): string {
