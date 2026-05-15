@@ -8,15 +8,18 @@ export type ProjectBackOrigin = {
 /** Воронка до мероприятия (формы и канбан «Проекты»). */
 export type PreprojectStage = 'plum_request' | 'first_contact' | 'calc_ready' | 'signed' | 'ready'
 
-/** Этапы закрытия после проведения (канбан «Закрытие»), совпадают с StageEnum API. */
+/**
+ * Этапы закрытия после проведения (канбан «Закрытие»).
+ * По API `feedback_received` не показывается — при маппинге сразу приводится к `data_confirmed`.
+ */
 export type ClosingStage =
   | 'event_held'
   | 'expenses_entered'
   | 'documents_confirmed'
-  | 'feedback_received'
   | 'data_confirmed'
   | 'bonus_calculated'
   | 'bonus_approved'
+  | 'closed'
 
 export type ProjectStage = PreprojectStage | ClosingStage
 

@@ -15,10 +15,12 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   event_held: 'event_held',
   expenses_entered: 'expenses_entered',
   documents_confirmed: 'documents_confirmed',
-  feedback_received: 'feedback_received',
+  /** В канбане колонки нет — отображаем вместе с «Данные подтверждены». */
+  feedback_received: 'data_confirmed',
   data_confirmed: 'data_confirmed',
   bonus_calculated: 'bonus_calculated',
   bonus_approved: 'bonus_approved',
+  closed: 'closed',
 }
 
 function statusForStage(stage: ProjectStage): ProjectStatus {
@@ -33,10 +35,10 @@ function statusForStage(stage: ProjectStage): ProjectStatus {
       return 'signed'
     case 'expenses_entered':
     case 'documents_confirmed':
-    case 'feedback_received':
     case 'data_confirmed':
     case 'bonus_calculated':
     case 'bonus_approved':
+    case 'closed':
       return 'expenses'
   }
 }
