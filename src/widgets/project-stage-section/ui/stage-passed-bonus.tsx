@@ -7,7 +7,9 @@ import {
   CollapsibleTrigger,
 } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
+import { useUserRole } from '@/entities/user-role'
 
+import { canEditStage } from '../lib/stage-permissions'
 import { StageFieldShell } from './stage-field-shell'
 
 type Source = 'manager' | 'system'
@@ -38,49 +40,56 @@ function ReadonlyBox({
   source,
   className,
   align = 'left',
+  icon: IconCmp,
 }: {
   value: string
   source: Source
   className?: string
   align?: 'left' | 'center'
+  icon?: Icon
 }) {
   const isSystem = source === 'system'
   return (
     <div
       title={isSystem ? 'Заполнено системой' : undefined}
       className={cn(
-        'flex h-9 items-center rounded-[10px] border px-3 text-[13px]',
+        'flex h-9 items-center gap-2 rounded-[10px] border px-3 text-[13px]',
         align === 'center' ? 'justify-center' : 'justify-start',
         isSystem
-          ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B] italic'
+          ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
           : 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]',
         className,
       )}
     >
-      {value}
+      {IconCmp ? <IconCmp className="size-4 shrink-0 text-[#6B6B6B]" /> : null}
+      <span className="min-w-0 flex-1 truncate">{value}</span>
     </div>
   )
-}
-
-function IconChip({ icon: Icon }: { icon: Icon }) {
-  return <Icon className="size-4 shrink-0 text-[#6B6B6B]" />
 }
 
 function Operator({ children }: { children: string }) {
   return <span className="text-[#6B6B6B] text-[13px] font-medium px-1">{children}</span>
 }
 
-function ArticleRow({ row }: { row: BonusRow }) {
+function ArticleRow({ row, bonusSource }: { row: BonusRow; bonusSource: Source }) {
   return (
     <div className="grid grid-cols-1 items-end gap-4 @[900px]:grid-cols-[minmax(0,1fr)_88px_120px]">
       <div className="flex flex-col gap-1.5 min-w-0">
         <span className="text-xs font-medium text-[#454545]">{row.label}</span>
         <div className="flex items-center gap-1.5 min-w-0">
-          <IconChip icon={CircleDollarSign} />
-          <ReadonlyBox value={row.sales} source="manager" className="min-w-0 flex-1" />
+          <ReadonlyBox
+            value={row.sales}
+            source="system"
+            icon={CircleDollarSign}
+            className="min-w-0 flex-1"
+          />
           <Operator>−</Operator>
-          <IconChip icon={TrendingDown} />
-          <ReadonlyBox value={row.expense} source="manager" className="min-w-0 flex-1" />
+          <ReadonlyBox
+            value={row.expense}
+            source="system"
+            icon={TrendingDown}
+            className="min-w-0 flex-1"
+          />
           <Operator>=</Operator>
           <ReadonlyBox value={row.netProfit} source="system" className="min-w-0 flex-1" />
         </div>
@@ -91,13 +100,17 @@ function ArticleRow({ row }: { row: BonusRow }) {
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">Бонус по статье</span>
-        <ReadonlyBox value={row.bonusAmount} source="system" />
+        <ReadonlyBox value={row.bonusAmount} source={bonusSource} />
       </div>
     </div>
   )
 }
 
 export function StagePassedBonus() {
+  const role = useUserRole()
+  const canEdit = canEditStage('bonus_calculated', role)
+  const bonusSource: Source = canEdit ? 'manager' : 'system'
+
   return (
     <Collapsible defaultOpen className="w-full">
       <div className="flex flex-col gap-5 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
@@ -118,12 +131,12 @@ export function StagePassedBonus() {
               <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="flex flex-col gap-4 min-w-0">
                   {BONUS_ROWS.map((row, idx) => (
-                    <ArticleRow key={`${row.label}-${idx}`} row={row} />
+                    <ArticleRow key={`${row.label}-${idx}`} row={row} bonusSource={bonusSource} />
                   ))}
                 </div>
-                <div className="flex flex-col justify-between gap-4 @[900px]:border-l @[900px]:border-[#D3D3D3] @[900px]:pl-5">
+                <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
                   <StageFieldShell label="Данные подтверждены руководителем">
-                    <ReadonlyBox value="Иванов Иван Иванович" source="manager" />
+                    <ReadonlyBox value="Иванов Иван Иванович" source="system" />
                   </StageFieldShell>
                   <StageFieldShell label="Итоговый бонус">
                     <ReadonlyBox value="443 330 ₽" source="system" />

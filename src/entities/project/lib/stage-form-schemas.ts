@@ -14,7 +14,7 @@ export const stageFormSchemas = {
   }),
   first_contact: z.object({
     contactComment: required(),
-    contactChannel: z.enum(['messenger', 'phone', 'email', 'meeting']),
+    contactChannel: z.enum(['messenger', 'phone', 'meeting']),
     contactedAt: required(),
   }),
   calc_ready: z.object({
@@ -32,10 +32,9 @@ export const stageFormSchemas = {
 
 export type StageFormValues<S extends PreprojectStage> = z.infer<(typeof stageFormSchemas)[S]>
 
-export const contactChannelLabels: Record<'messenger' | 'phone' | 'email' | 'meeting', string> = {
+export const contactChannelLabels: Record<'messenger' | 'phone' | 'meeting', string> = {
   messenger: 'Мессенджер',
-  phone: 'Телефон',
-  email: 'Email',
+  phone: 'Звонок',
   meeting: 'Встреча',
 }
 

@@ -200,9 +200,44 @@ CTA-кнопки:
 
 ## Пройденные этапы
 
-`StageSectionPassed` — read-only, collapsible. Поля показываются `disabled` (бежевый фон `--field-bg`), значения берутся из `project.history.find(h => h.stage === stage).data`.
+`StageSectionPassed` — collapsible (раскрыт по умолчанию). Поля рендерятся в зависимости от `source` поля:
 
-В MVP — раскрыты все по умолчанию (как в Figma). Collapse — в следующих итерациях.
+- `source: 'system'` — `StageFieldReadonly` с dashed border `#C7C7C7`, bg `#F4F2EC`, text `#6B6B6B`
+- `source: 'manager'` + текущая роль может редактировать → `StageFieldDemoEditable` (интерактивные Input/Select/Textarea с локальным state, без бэка)
+- `source: 'manager'` + не может → `StageFieldReadonly` в системном стиле
+
+Значения берутся из `project.history.find(h => h.stage === stage).data` (для конфигов без `mockValue`).
+
+`PASSED_EXTRAS` (в `fields-map.ts`) — устаревший механизм для «системных хвостов» (Статус перевёл менеджер / Дата перехода в статус). Новые этапы добавляют такие поля прямо в `STAGE_FIELDS[stage]` с `source: 'system'` — это даёт нативное позиционирование в сетке (`signed` уже мигрирован).
+
+### Кастомные секции
+
+Некоторые этапы рендерятся не через generic-механизм, а через отдельные UI-компоненты — в [src/widgets/project-stage-section/ui/project-stage-section.tsx](../../src/widgets/project-stage-section/ui/project-stage-section.tsx) роутится по `stage`:
+
+| Этап                | Компонент                |
+| ------------------- | ------------------------ |
+| `ready`             | `StagePassedReady`       |
+| `expenses_entered`  | `StagePassedExpenses`    |
+| `bonus_calculated`  | `StagePassedBonus`       |
+
+Эти компоненты ведут свой локальный state (например, `backlineAdded` в `ready`/`expenses_entered` для тогла бэклайн-секции) и читают `useUserRole`, чтобы переключать `source` денежных полей между `'manager'` и `'system'` (плюс прятать кнопки `Добавить/Удалить бэклайн` под ролями без прав).
+
+### Поля с `narrow: true`
+
+Если два подряд field-конфига имеют `narrow: true`, рендерер (и в `StageSectionCurrent`, и в `StageSectionPassed`) объединяет их в один grid-cell с внутренней `grid-cols-2`. Используется на `signed`, чтобы «Номер договора» + «Дата договора» занимали одну ячейку.
+
+## Права редактирования по ролям
+
+Источник — [src/widgets/project-stage-section/lib/stage-permissions.ts](../../src/widgets/project-stage-section/lib/stage-permissions.ts). Подробнее в [CLAUDE.md](../../CLAUDE.md), раздел «Права по этапам».
+
+Реализация:
+1. `useUserRole()` из `@/entities/user-role` отдаёт текущую роль (выбирается в дропдауне профиля сайдбара).
+2. `canEditStage(stage, role)` возвращает `boolean`.
+3. В каждой stage-секции (current, passed, custom-passed) при `!canEdit`:
+   - manager-поля принудительно рендерятся как `system`
+   - CTA-кнопки убираются из DOM (а не disabled — чтобы их вовсе не было видно)
+
+Демонстрация: в дропдауне профиля переключай радио «Войти как (dev)» — Менеджер / Бухгалтер / Руководитель. Выбор сохраняется в `localStorage` (`erp-maga:user-role`).
 
 ## Aside-карточки
 
@@ -246,6 +281,10 @@ Container queries для `DetailLayout`:
 | `error`     | Inline error card в LeftStack + кнопка «Повторить». Сайдбар и Topbar остаются интерактивными. |
 | `not_found` | Редирект на `/projects` + toast.                                                              |
 | `forbidden` | Карточка «Нет доступа» (для будущих ролей).                                                  |
+
+## Звёздочки `*` для обязательных полей
+
+`StageFieldShell` принимает `required?: boolean` и рендерит звёздочку красным `#D25252` (см. также `FormLabel` в `StageSectionCurrent`). Для passed-секций флаг прокидывается через `StageFieldDemoEditable` (читает `field.required`). В кастомных компонентах (`ready`/`expenses_entered`/`bonus_calculated`) `ArticleField` по дефолту `required: true`, `SimpleField` — нет.
 
 ## Что есть и чего не хватает
 

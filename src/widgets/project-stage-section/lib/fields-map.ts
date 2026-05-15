@@ -16,6 +16,8 @@ export interface StageFieldConfig {
   mockValue?: string
   /** Колспан на сетке passed-секции (по умолчанию 1 из 3). */
   span?: 1 | 2 | 3
+  /** Два подряд `narrow: true` поля рендерятся внутри одной ячейки сетки. */
+  narrow?: boolean
 }
 
 const docStatusOptions = [
@@ -68,9 +70,8 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'manager',
       options: [
         { value: 'messenger', label: 'Мессенджер' },
-        { value: 'phone', label: 'Телефон' },
-        { value: 'email', label: 'Email' },
         { value: 'meeting', label: 'Встреча' },
+        { value: 'phone', label: 'Звонок' },
       ],
       mockValue: 'messenger',
     },
@@ -105,6 +106,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       required: true,
       source: 'manager',
       mockValue: 'MAG-2026/142',
+      narrow: true,
     },
     {
       name: 'contractDate',
@@ -114,6 +116,14 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'manager',
       placeholder: 'дд-мм-гггг',
       mockValue: '2026-05-11',
+      narrow: true,
+    },
+    {
+      name: 'leadManager',
+      label: 'Статус перевёл менеджер',
+      type: 'text',
+      source: 'system',
+      mockValue: 'Иванов Иван Иванович',
     },
     {
       name: 'legalEntity',
@@ -130,6 +140,13 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'manager',
       placeholder: '—',
     },
+    {
+      name: 'closingFunnelEnteredAt',
+      label: 'Дата перехода в статус',
+      type: 'date',
+      source: 'system',
+      mockValue: '2026-05-09',
+    },
   ],
   ready: [
     { name: 'salesMainTotal', label: 'Итого продажи (основной блок)', type: 'text', source: 'system', mockValue: '1 718 000 ₽' },
@@ -142,7 +159,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   event_held: [
     {
       name: 'postEventComment',
-      label: 'Комментарий после мероприятия*',
+      label: 'Комментарий после мероприятия',
       type: 'textarea',
       source: 'manager',
       mockValue:
@@ -205,9 +222,10 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       name: 'projectDocsStatus',
       label: 'Закрывающие по проекту',
       type: 'select',
+      required: true,
       source: 'manager',
       options: docStatusOptions,
-      mockValue: 'present',
+      mockValue: 'absent',
     },
     {
       name: 'projectDocsConfirmedAt',
@@ -227,9 +245,10 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       name: 'subleaseDocsStatus',
       label: 'Закрывающие по субаренде',
       type: 'select',
+      required: true,
       source: 'manager',
       options: docStatusOptions,
-      mockValue: 'present',
+      mockValue: 'absent',
     },
     {
       name: 'subleaseDocsConfirmedAt',
@@ -249,9 +268,10 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       name: 'staffReceiptsStatus',
       label: 'Расписки по персоналу',
       type: 'select',
+      required: true,
       source: 'manager',
       options: docStatusOptions,
-      mockValue: 'present',
+      mockValue: 'absent',
     },
     {
       name: 'staffReceiptsConfirmedAt',
@@ -272,9 +292,14 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     {
       name: 'dataConfirmedStatus',
       label: 'Статус',
-      type: 'text',
-      source: 'system',
-      mockValue: 'Данные подтверждены',
+      type: 'select',
+      required: true,
+      source: 'manager',
+      options: [
+        { value: 'confirmed', label: 'Данные подтверждены' },
+        { value: 'rejected', label: 'Не приняты' },
+      ],
+      placeholder: '—',
     },
     {
       name: 'dataConfirmedAt',

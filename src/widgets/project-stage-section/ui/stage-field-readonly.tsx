@@ -32,7 +32,7 @@ export function StageFieldReadonly({
           'flex w-full rounded-[10px] border px-3 py-2 text-[13px]',
           multiline ? 'min-h-[90px] items-start' : 'h-9 items-center',
           isSystem
-            ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B] italic'
+            ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
             : 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]',
         )}
         title={isSystem ? 'Заполнено системой' : undefined}
