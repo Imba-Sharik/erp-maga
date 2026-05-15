@@ -2,6 +2,8 @@ export type {
   Project,
   ProjectStatus,
   ProjectStage,
+  PreprojectStage,
+  ClosingStage,
   StageFunnel,
   ProjectBackOrigin,
   ProjectDetail,
@@ -14,11 +16,7 @@ export type {
   EventReadiness,
   PlumStatus,
 } from './model/types'
-export {
-  mapBackendProject,
-  mapBackendProjects,
-  mapBackendProjectDetail,
-} from './lib/from-backend'
+export { mapBackendProject, mapBackendProjects, mapBackendProjectDetail } from './lib/from-backend'
 export {
   stageFormSchemas,
   contactChannelLabels,
@@ -32,13 +30,22 @@ export type { ScheduleDayRow } from './lib/schedule'
 export {
   STAGE_ORDER,
   STAGE_LABELS,
+  ALL_STAGE_LABELS,
   STAGE_FUNNEL,
   FUNNEL_LABELS,
   PRE_PROJECT_STAGES,
   CLOSING_STAGES,
   groupByStage,
+  isPreprojectStage,
 } from './lib/stages'
 export type { ProjectsByStage } from './lib/stages'
+export {
+  CLOSING_STAGE_ORDER,
+  CLOSING_STAGE_LABELS,
+  groupByClosingStage,
+  isClosingStage,
+} from './lib/closing-stages'
+export type { ProjectsByClosingStage } from './lib/closing-stages'
 export { pluralProjects } from './lib/plural'
 export { ProjectCard } from './ui/project-card'
 export { ProjectCountBadge } from './ui/project-count-badge'

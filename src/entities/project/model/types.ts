@@ -5,12 +5,14 @@ export type ProjectBackOrigin = {
   label: string
 }
 
-export type ProjectStage =
-  | 'plum_request'
-  | 'first_contact'
-  | 'calc_ready'
-  | 'signed'
-  | 'ready'
+/** Воронка до мероприятия (формы и канбан «Проекты»). */
+export type PreprojectStage = 'plum_request' | 'first_contact' | 'calc_ready' | 'signed' | 'ready'
+
+/**
+ * Этапы закрытия после проведения (канбан «Закрытие»).
+ * По API `feedback_received` не показывается — при маппинге сразу приводится к `data_confirmed`.
+ */
+export type ClosingStage =
   | 'event_held'
   | 'expenses_entered'
   | 'documents_confirmed'
@@ -18,6 +20,8 @@ export type ProjectStage =
   | 'bonus_calculated'
   | 'bonus_approved'
   | 'closed'
+
+export type ProjectStage = PreprojectStage | ClosingStage
 
 export type StageFunnel = 'pre_project' | 'closing'
 

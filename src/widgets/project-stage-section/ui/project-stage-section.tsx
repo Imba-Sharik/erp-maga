@@ -1,4 +1,5 @@
 import type { ProjectDetail, ProjectStage, StageHistoryEntry } from '@/entities/project'
+import { isPreprojectStage } from '@/entities/project'
 
 import { StagePassedBonus } from './stage-passed-bonus'
 import { StagePassedExpenses } from './stage-passed-expenses'
@@ -12,8 +13,8 @@ interface ProjectStageSectionProps {
 }
 
 export function ProjectStageSection({ project, stage }: ProjectStageSectionProps) {
-  if (project.stage === stage) {
-    return <StageSectionCurrent project={project} />
+  if (project.stage === stage && isPreprojectStage(stage)) {
+    return <StageSectionCurrent project={project} stage={stage} />
   }
 
   if (stage === 'ready') {

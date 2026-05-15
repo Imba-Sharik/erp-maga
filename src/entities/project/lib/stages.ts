@@ -1,6 +1,8 @@
-import type { Project, ProjectStage, StageFunnel } from '../model/types'
+import type { PreprojectStage, Project, ProjectStage, StageFunnel } from '../model/types'
 
-export const PRE_PROJECT_STAGES: readonly ProjectStage[] = [
+import { CLOSING_STAGE_LABELS, CLOSING_STAGE_ORDER } from './closing-stages'
+
+export const STAGE_ORDER: readonly PreprojectStage[] = [
   'plum_request',
   'first_contact',
   'calc_ready',
@@ -8,34 +10,21 @@ export const PRE_PROJECT_STAGES: readonly ProjectStage[] = [
   'ready',
 ] as const
 
-export const CLOSING_STAGES: readonly ProjectStage[] = [
-  'event_held',
-  'expenses_entered',
-  'documents_confirmed',
-  'data_confirmed',
-  'bonus_calculated',
-  'bonus_approved',
-  'closed',
-] as const
+export const PRE_PROJECT_STAGES = STAGE_ORDER
 
-export const STAGE_ORDER: readonly ProjectStage[] = [
-  ...PRE_PROJECT_STAGES,
-  ...CLOSING_STAGES,
-] as const
+export const CLOSING_STAGES = CLOSING_STAGE_ORDER
 
-export const STAGE_LABELS: Record<ProjectStage, string> = {
+export const STAGE_LABELS: Record<PreprojectStage, string> = {
   plum_request: 'Заявка из PLUM',
   first_contact: 'Первич. контакт выполнен',
   calc_ready: 'Расчёт подготовлен',
   signed: 'Договор подписан',
   ready: 'Готов к проведению',
-  event_held: 'Мероприятие проведено',
-  expenses_entered: 'Расходы внесены',
-  documents_confirmed: 'Документы подтверждены',
-  data_confirmed: 'Данные подтверждены',
-  bonus_calculated: 'Бонус рассчитан',
-  bonus_approved: 'Бонус утверждён',
-  closed: 'Проект закрыт',
+}
+
+export const ALL_STAGE_LABELS: Record<ProjectStage, string> = {
+  ...STAGE_LABELS,
+  ...CLOSING_STAGE_LABELS,
 }
 
 export const STAGE_FUNNEL: Record<ProjectStage, StageFunnel> = {
@@ -58,13 +47,23 @@ export const FUNNEL_LABELS: Record<StageFunnel, string> = {
   closing: 'Закрывающая воронка',
 }
 
-export type ProjectsByStage = Record<ProjectStage, Project[]>
+export function isPreprojectStage(stage: ProjectStage): stage is PreprojectStage {
+  return (STAGE_ORDER as readonly string[]).includes(stage)
+}
+
+export type ProjectsByStage = Record<PreprojectStage, Project[]>
 
 export function groupByStage(projects: Project[]): ProjectsByStage {
-  const acc = STAGE_ORDER.reduce(
-    (m, s) => ({ ...m, [s]: [] as Project[] }),
-    {} as ProjectsByStage,
-  )
-  for (const p of projects) acc[p.stage].push(p)
+  const acc: ProjectsByStage = {
+    plum_request: [],
+    first_contact: [],
+    calc_ready: [],
+    signed: [],
+    ready: [],
+  }
+  for (const p of projects) {
+    if (!isPreprojectStage(p.stage)) continue
+    acc[p.stage].push(p)
+  }
   return acc
 }

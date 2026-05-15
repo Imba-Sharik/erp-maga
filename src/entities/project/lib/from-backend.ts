@@ -15,25 +15,32 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   event_held: 'event_held',
   expenses_entered: 'expenses_entered',
   documents_confirmed: 'documents_confirmed',
+  /** В канбане колонки нет — отображаем вместе с «Данные подтверждены». */
+  feedback_received: 'data_confirmed',
   data_confirmed: 'data_confirmed',
   bonus_calculated: 'bonus_calculated',
   bonus_approved: 'bonus_approved',
   closed: 'closed',
 }
 
-const STATUS_BY_STAGE: Record<ProjectStage, ProjectStatus> = {
-  plum_request: 'confirmed',
-  first_contact: 'confirmed',
-  calc_ready: 'confirmed',
-  signed: 'signed',
-  ready: 'signed',
-  event_held: 'expenses',
-  expenses_entered: 'expenses',
-  documents_confirmed: 'expenses',
-  data_confirmed: 'expenses',
-  bonus_calculated: 'expenses',
-  bonus_approved: 'expenses',
-  closed: 'expenses',
+function statusForStage(stage: ProjectStage): ProjectStatus {
+  switch (stage) {
+    case 'plum_request':
+    case 'first_contact':
+    case 'calc_ready':
+      return 'confirmed'
+    case 'signed':
+    case 'ready':
+    case 'event_held':
+      return 'signed'
+    case 'expenses_entered':
+    case 'documents_confirmed':
+    case 'data_confirmed':
+    case 'bonus_calculated':
+    case 'bonus_approved':
+    case 'closed':
+      return 'expenses'
+  }
 }
 
 function formatLastUpdate(iso: string | undefined): string {
@@ -53,7 +60,7 @@ export function mapBackendProject(b: BackendProject): Project | null {
     id: String(b.id),
     title: b.event_name,
     date: b.event_date,
-    status: STATUS_BY_STAGE[stage],
+    status: statusForStage(stage),
     stage,
     city: b.city_label || b.city,
     loft: b.venue,

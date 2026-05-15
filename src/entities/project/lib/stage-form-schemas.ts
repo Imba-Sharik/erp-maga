@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { ProjectStage } from '../model/types'
+import type { PreprojectStage } from '../model/types'
 
 const required = (msg = 'Обязательное поле') => z.string().min(1, msg)
 
@@ -28,16 +28,9 @@ export const stageFormSchemas = {
     contractComment: z.string().optional(),
   }),
   ready: z.object({}),
-  event_held: z.object({}),
-  expenses_entered: z.object({}),
-  documents_confirmed: z.object({}),
-  data_confirmed: z.object({}),
-  bonus_calculated: z.object({}),
-  bonus_approved: z.object({}),
-  closed: z.object({}),
-} satisfies Record<ProjectStage, z.ZodTypeAny>
+} satisfies Record<PreprojectStage, z.ZodTypeAny>
 
-export type StageFormValues<S extends ProjectStage> = z.infer<(typeof stageFormSchemas)[S]>
+export type StageFormValues<S extends PreprojectStage> = z.infer<(typeof stageFormSchemas)[S]>
 
 export const contactChannelLabels: Record<'messenger' | 'phone' | 'email' | 'meeting', string> = {
   messenger: 'Мессенджер',

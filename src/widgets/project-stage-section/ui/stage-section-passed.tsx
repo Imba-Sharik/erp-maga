@@ -1,13 +1,9 @@
 import { ChevronDown } from 'lucide-react'
 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/shared/ui/collapsible'
-import {
+  ALL_STAGE_LABELS,
   STAGE_FUNNEL,
-  STAGE_LABELS,
   contactChannelLabels,
   contractTypeLabels,
   type ProjectStage,
@@ -37,8 +33,10 @@ function readField(entry: StageHistoryEntry, f: StageFieldConfig): string | unde
   if (f.type === 'date') return formatDate(raw)
   if (f.type === 'select') {
     if (f.options) return f.options.find((o) => o.value === raw)?.label ?? raw
-    if (f.name === 'contactChannel') return contactChannelLabels[raw as keyof typeof contactChannelLabels] ?? raw
-    if (f.name === 'contractType') return contractTypeLabels[raw as keyof typeof contractTypeLabels] ?? raw
+    if (f.name === 'contactChannel')
+      return contactChannelLabels[raw as keyof typeof contactChannelLabels] ?? raw
+    if (f.name === 'contractType')
+      return contractTypeLabels[raw as keyof typeof contractTypeLabels] ?? raw
   }
   return raw
 }
@@ -66,7 +64,7 @@ export function StageSectionPassed({ stage, entry }: StageSectionPassedProps) {
       <div className="flex flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
         <CollapsibleTrigger className="flex w-full items-center gap-1.5 text-sm">
           <span className="font-medium text-[#454545]">Этап пройден:</span>
-          <span className={`${funnelColor} font-semibold`}>{STAGE_LABELS[stage]}</span>
+          <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
           <ChevronDown className="text-muted-foreground size-3.5" />
         </CollapsibleTrigger>
         <CollapsibleContent className="flex flex-col gap-4">
