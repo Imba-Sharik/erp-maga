@@ -23,6 +23,8 @@ export type ClosingStage =
 
 export type ProjectStage = PreprojectStage | ClosingStage
 
+export type StageFunnel = 'pre_project' | 'closing'
+
 export interface Project {
   id: string
   title: string
@@ -45,6 +47,9 @@ export type ContractType = 'with_vat' | 'without_vat'
 export type ContactChannel = 'messenger' | 'phone' | 'email' | 'meeting'
 export type PlumStatus = 'pending' | 'confirmed'
 
+export type DocumentStatus = 'present' | 'absent' | 'not_required'
+export type EventReadiness = 'ready' | 'not_ready'
+
 export interface StageFormData {
   client?: string
   phone?: string
@@ -63,6 +68,54 @@ export interface StageFormData {
   contractDate?: string
   legalEntity?: string
   contractComment?: string
+
+  // event_held
+  postEventComment?: string
+  eventDate?: string
+  closingFunnelEnteredAt?: string
+  eventReadiness?: EventReadiness
+
+  // documents_confirmed
+  projectDocsStatus?: DocumentStatus
+  projectDocsConfirmedAt?: string
+  projectDocsConfirmedBy?: string
+  subleaseDocsStatus?: DocumentStatus
+  subleaseDocsConfirmedAt?: string
+  subleaseDocsConfirmedBy?: string
+  staffReceiptsStatus?: DocumentStatus
+  staffReceiptsConfirmedAt?: string
+  staffReceiptsConfirmedBy?: string
+
+  // data_confirmed
+  dataConfirmedStatus?: string
+  dataConfirmedAt?: string
+  dataConfirmedBy?: string
+
+  // bonus_approved
+  totalBonus?: string
+  bonusApprovedAt?: string
+  bonusApprovedBy?: string
+
+  // closed
+  closedAt?: string
+  leadManager?: string
+
+  // expenses_entered totals
+  expensesMainTotal?: string
+  expensesBacklineTotal?: string
+  expensesProjectTotal?: string
+
+  // bonus_calculated totals
+  netProfitTotal?: string
+  calculatedBonus?: string
+  bonusCalculatedAt?: string
+
+  // ready (sales) totals
+  salesMainTotal?: string
+  salesBacklineTotal?: string
+  salesProjectTotal?: string
+  taxRate?: string
+  taxAmount?: string
 }
 
 export interface StageHistoryEntry {

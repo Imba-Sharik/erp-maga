@@ -4,6 +4,7 @@ export type {
   ProjectStage,
   PreprojectStage,
   ClosingStage,
+  StageFunnel,
   ProjectBackOrigin,
   ProjectDetail,
   ProjectFinance,
@@ -11,6 +12,8 @@ export type {
   StageHistoryEntry,
   ContractType,
   ContactChannel,
+  DocumentStatus,
+  EventReadiness,
   PlumStatus,
 } from './model/types'
 export { mapBackendProject, mapBackendProjects, mapBackendProjectDetail } from './lib/from-backend'
@@ -24,7 +27,17 @@ export { groupByDay, toDayKey } from './lib/group-by-day'
 export type { ProjectsByDay } from './lib/group-by-day'
 export { getProjectsForDates, countProjectsInMonth } from './lib/schedule'
 export type { ScheduleDayRow } from './lib/schedule'
-export { STAGE_ORDER, STAGE_LABELS, groupByStage, isPreprojectStage } from './lib/stages'
+export {
+  STAGE_ORDER,
+  STAGE_LABELS,
+  ALL_STAGE_LABELS,
+  STAGE_FUNNEL,
+  FUNNEL_LABELS,
+  PRE_PROJECT_STAGES,
+  CLOSING_STAGES,
+  groupByStage,
+  isPreprojectStage,
+} from './lib/stages'
 export type { ProjectsByStage } from './lib/stages'
 export {
   CLOSING_STAGE_ORDER,
