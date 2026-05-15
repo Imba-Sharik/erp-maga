@@ -28,6 +28,13 @@ export const stageFormSchemas = {
     contractComment: z.string().optional(),
   }),
   ready: z.object({}),
+  event_held: z.object({}),
+  expenses_entered: z.object({}),
+  documents_confirmed: z.object({}),
+  data_confirmed: z.object({}),
+  bonus_calculated: z.object({}),
+  bonus_approved: z.object({}),
+  closed: z.object({}),
 } satisfies Record<ProjectStage, z.ZodTypeAny>
 
 export type StageFormValues<S extends ProjectStage> = z.infer<(typeof stageFormSchemas)[S]>

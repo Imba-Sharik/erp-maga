@@ -23,6 +23,7 @@ import {
 import { Textarea } from '@/shared/ui/textarea'
 import { cn } from '@/shared/lib/utils'
 import {
+  STAGE_FUNNEL,
   STAGE_LABELS,
   stageFormSchemas,
   type ProjectDetail,
@@ -31,6 +32,7 @@ import {
 } from '@/entities/project'
 
 import { STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import { StageFieldReadonly } from './stage-field-readonly'
 
 type SignedSchema = (typeof stageFormSchemas)['signed']
 type SignedFormValues = z.infer<SignedSchema>
@@ -64,6 +66,8 @@ export function StageSectionCurrent({
   const schema = stageFormSchemas[stage]
   const fields = STAGE_FIELDS[stage]
   const defaults = getDefaults(stage, {})
+  const funnelColor =
+    STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
 
   const form = useForm<SignedFormValues>({
     resolver: zodResolver(schema as SignedSchema),
@@ -74,7 +78,28 @@ export function StageSectionCurrent({
   const handleAdvance = form.handleSubmit((values) => onAdvance?.(values))
   const handleReady = form.handleSubmit((values) => onMarkReady?.(values))
 
-  const renderField = (f: StageFieldConfig) => (
+  const renderField = (f: StageFieldConfig) => {
+    if (f.source === 'system') {
+      const raw = f.mockValue
+      let display = raw
+      if (raw && f.type === 'select') {
+        display = f.options?.find((o) => o.value === raw)?.label ?? raw
+      } else if (raw && f.type === 'date') {
+        const d = new Date(raw)
+        if (!Number.isNaN(d.getTime())) display = d.toLocaleDateString('ru-RU')
+      }
+      return (
+        <StageFieldReadonly
+          key={f.name}
+          label={f.label}
+          value={display}
+          source="system"
+          isSelect={f.type === 'select'}
+          multiline={f.type === 'textarea'}
+        />
+      )
+    }
+    return (
     <FormField
       key={f.name}
       control={form.control}
@@ -122,13 +147,14 @@ export function StageSectionCurrent({
         </FormItem>
       )}
     />
-  )
+    )
+  }
 
   return (
     <div className="flex w-full flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
       <div className="flex items-center gap-1.5 text-sm">
         <span className="font-medium text-[#454545]">Текущий этап:</span>
-        <span className="text-funnel-preproject font-semibold">{STAGE_LABELS[stage]}</span>
+        <span className={`${funnelColor} font-semibold`}>{STAGE_LABELS[stage]}</span>
       </div>
       <div className="h-px w-full bg-[#F0F0F0]" />
       <Form {...form}>
