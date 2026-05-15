@@ -4,29 +4,16 @@ import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
 import { Button } from '@/shared/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Textarea } from '@/shared/ui/textarea'
 import { cn } from '@/shared/lib/utils'
 import {
   STAGE_LABELS,
   stageFormSchemas,
+  type PreprojectStage,
   type ProjectDetail,
-  type ProjectStage,
   type StageFormData,
 } from '@/entities/project'
 
@@ -35,7 +22,7 @@ import { STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
 type SignedSchema = (typeof stageFormSchemas)['signed']
 type SignedFormValues = z.infer<SignedSchema>
 
-function getDefaults(stage: ProjectStage, data: Partial<StageFormData>): SignedFormValues {
+function getDefaults(stage: PreprojectStage, data: Partial<StageFormData>): SignedFormValues {
   const fields = STAGE_FIELDS[stage]
   const result: Record<string, unknown> = {}
   for (const f of fields) {
@@ -51,16 +38,17 @@ function getDefaults(stage: ProjectStage, data: Partial<StageFormData>): SignedF
 
 interface StageSectionCurrentProps {
   project: ProjectDetail
+  stage: PreprojectStage
   onAdvance?: (values: SignedFormValues) => void
   onMarkReady?: (values: SignedFormValues) => void
 }
 
 export function StageSectionCurrent({
-  project,
+  project: _project,
+  stage,
   onAdvance,
   onMarkReady,
 }: StageSectionCurrentProps) {
-  const stage = project.stage
   const schema = stageFormSchemas[stage]
   const fields = STAGE_FIELDS[stage]
   const defaults = getDefaults(stage, {})
@@ -94,10 +82,7 @@ export function StageSectionCurrent({
                 className="min-h-[90px] rounded-[10px] border-[#B1B1B1] text-[13px]"
               />
             ) : f.type === 'select' ? (
-              <Select
-                value={(field.value as string) ?? ''}
-                onValueChange={field.onChange}
-              >
+              <Select value={(field.value as string) ?? ''} onValueChange={field.onChange}>
                 <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-[13px]">
                   <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
                 </SelectTrigger>
@@ -137,7 +122,7 @@ export function StageSectionCurrent({
             {fields.map(renderField)}
             <div
               className={cn(
-                '@[640px]:col-start-3 mt-auto flex flex-wrap items-end justify-end gap-2.5 self-end',
+                'mt-auto flex flex-wrap items-end justify-end gap-2.5 self-end @[640px]:col-start-3',
                 fields.length <= 5 && '@[640px]:row-start-2',
               )}
             >

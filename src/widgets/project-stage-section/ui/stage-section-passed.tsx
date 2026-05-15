@@ -1,15 +1,11 @@
 import { ChevronDown } from 'lucide-react'
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/shared/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import {
   STAGE_LABELS,
   contactChannelLabels,
   contractTypeLabels,
-  type ProjectStage,
+  type PreprojectStage,
   type StageHistoryEntry,
 } from '@/entities/project'
 
@@ -41,14 +37,16 @@ function readField(
   if (type === 'date') return formatDate(raw)
   if (type === 'select') {
     if (options) return options.find((o) => o.value === raw)?.label ?? raw
-    if (name === 'contactChannel') return contactChannelLabels[raw as keyof typeof contactChannelLabels] ?? raw
-    if (name === 'contractType') return contractTypeLabels[raw as keyof typeof contractTypeLabels] ?? raw
+    if (name === 'contactChannel')
+      return contactChannelLabels[raw as keyof typeof contactChannelLabels] ?? raw
+    if (name === 'contractType')
+      return contractTypeLabels[raw as keyof typeof contractTypeLabels] ?? raw
   }
   return raw
 }
 
 interface StageSectionPassedProps {
-  stage: ProjectStage
+  stage: PreprojectStage
   entry: StageHistoryEntry
 }
 
@@ -78,11 +76,7 @@ export function StageSectionPassed({ stage, entry }: StageSectionPassedProps) {
             ))}
             {extras.map((extra) =>
               extra.source === 'manager' ? (
-                <StageFieldReadonly
-                  key="manager"
-                  label={extra.label}
-                  value={entry.managerName}
-                />
+                <StageFieldReadonly key="manager" label={extra.label} value={entry.managerName} />
               ) : (
                 <StageFieldReadonly
                   key="enteredAt"

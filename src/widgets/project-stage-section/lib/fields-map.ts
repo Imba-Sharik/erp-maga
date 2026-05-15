@@ -1,4 +1,4 @@
-import type { ProjectStage, StageFormData } from '@/entities/project'
+import type { PreprojectStage, StageFormData } from '@/entities/project'
 
 export type StageFieldType = 'text' | 'textarea' | 'date' | 'select'
 
@@ -11,7 +11,7 @@ export interface StageFieldConfig {
   options?: { value: string; label: string }[]
 }
 
-export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
+export const STAGE_FIELDS: Record<PreprojectStage, StageFieldConfig[]> = {
   plum_request: [
     { name: 'client', label: 'Клиент', type: 'text' },
     { name: 'phone', label: 'Телефон', type: 'text' },
@@ -50,7 +50,13 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       ],
     },
     { name: 'contractNumber', label: 'Номер договора', type: 'text', required: true },
-    { name: 'contractDate', label: 'Дата договора', type: 'date', required: true, placeholder: 'дд-мм-гггг' },
+    {
+      name: 'contractDate',
+      label: 'Дата договора',
+      type: 'date',
+      required: true,
+      placeholder: 'дд-мм-гггг',
+    },
     { name: 'legalEntity', label: 'Юрлицо MAG', type: 'text', required: true },
     { name: 'contractComment', label: 'Комментарий по договору', type: 'text', placeholder: '—' },
   ],
@@ -62,11 +68,9 @@ export interface PassedExtra {
   source: 'manager' | 'enteredAt'
 }
 
-export const PASSED_EXTRAS: Record<ProjectStage, PassedExtra[]> = {
+export const PASSED_EXTRAS: Record<PreprojectStage, PassedExtra[]> = {
   plum_request: [],
-  first_contact: [
-    { label: 'Статус перевёл менеджер', source: 'manager' },
-  ],
+  first_contact: [{ label: 'Статус перевёл менеджер', source: 'manager' }],
   calc_ready: [
     { label: 'Статус перевёл менеджер', source: 'manager' },
     { label: 'Дата перехода в статус', source: 'enteredAt' },
