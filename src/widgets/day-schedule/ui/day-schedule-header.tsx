@@ -17,7 +17,7 @@ function buildSubtitle(projectsCount: number, daysSelectedCount: number): string
 export function DayScheduleHeader({ projectsCount, daysSelectedCount }: DayScheduleHeaderProps) {
   return (
     <div className="flex h-10 items-center justify-between">
-      <h2 className="text-[22px] leading-none font-bold text-[#1B1A17]">Расписание</h2>
+      <h2 className="font-heading leading-none font-bold text-[#1B1A17]">Расписание</h2>
       <span className="text-sm text-[#ACACAC]">
         {buildSubtitle(projectsCount, daysSelectedCount)}
       </span>
