@@ -17,7 +17,7 @@ export function PlumCommentCard({ project }: { project: ProjectDetail }) {
   return (
     <ProjectAsideCard title="Комментарий из PLUM">
       <p className="pt-2.5 pb-3 text-[13px] text-[#454545]">
-        {project.plumComment ?? '—'}
+        {project.plumComment?.trim() ? project.plumComment : '—'}
       </p>
       <KvRow label="Синхронизировано" value={formatDate(project.plumSyncedAt)} />
     </ProjectAsideCard>
