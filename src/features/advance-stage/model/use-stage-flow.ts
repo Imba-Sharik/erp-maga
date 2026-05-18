@@ -66,10 +66,9 @@ export function useStageFlow({
 
   const currentIndex = ALL_STAGE_ORDER.indexOf(currentStage)
 
-  const visibleStages = useMemo(
-    () => ALL_STAGE_ORDER.slice(0, currentIndex + 1),
-    [currentIndex],
-  )
+  // DEMO: показываем сразу все 12 этапов для показа продакту.
+  // Вернуть `ALL_STAGE_ORDER.slice(0, currentIndex + 1)` после демо.
+  const visibleStages = useMemo(() => [...ALL_STAGE_ORDER], [])
 
   const isCurrent = useCallback(
     (stage: ProjectStage) => stage === currentStage,
