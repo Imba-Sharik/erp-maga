@@ -1,4 +1,4 @@
-import type { ProjectDetail } from '../model/types'
+import type { ProjectDetail, ProjectStage } from '../model/types'
 import { PlumLink } from './plum-link'
 import { ProjectStageBadge } from './project-stage-badge'
 
@@ -16,7 +16,12 @@ function formatEnteredAt(iso: string) {
   return META_DATE_FORMAT.format(d)
 }
 
-export function ProjectHeader({ project }: { project: ProjectDetail }) {
+interface ProjectHeaderProps {
+  project: ProjectDetail
+  currentStage?: ProjectStage
+}
+
+export function ProjectHeader({ project, currentStage }: ProjectHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
@@ -26,7 +31,7 @@ export function ProjectHeader({ project }: { project: ProjectDetail }) {
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Текущий этап</span>
-          <ProjectStageBadge stage={project.stage} />
+          <ProjectStageBadge stage={currentStage ?? project.stage} />
         </div>
         <span className="text-[#454545]">Менеджер: {project.manager}</span>
         <span className="text-muted-foreground">

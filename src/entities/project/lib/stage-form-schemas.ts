@@ -6,22 +6,25 @@ const required = (msg = 'Обязательное поле') => z.string().min(1
 
 export const stageFormSchemas = {
   plum_request: z.object({
-    client: z.string().optional(),
-    phone: z.string().optional(),
-    email: z.string().optional(),
-    contactPerson: z.string().optional(),
+    clientCompany: required(),
+    phone: required(),
+    contactPerson: required(),
+    email: required().email('Невалидный email'),
     createdAt: z.string().optional(),
   }),
   first_contact: z.object({
     contactComment: required(),
-    contactChannel: z.enum(['messenger', 'phone', 'meeting']),
-    contactedAt: required(),
+    contactChannel: z.enum(['messenger', 'phone', 'meeting'], {
+      error: () => 'Выберите канал контакта',
+    }),
   }),
   calc_ready: z.object({
     calcComment: required(),
   }),
   signed: z.object({
-    contractType: z.enum(['with_vat', 'without_vat']),
+    contractType: z.enum(['with_vat', 'without_vat'], {
+      error: () => 'Выберите тип договора',
+    }),
     contractNumber: required(),
     contractDate: required(),
     legalEntity: required(),

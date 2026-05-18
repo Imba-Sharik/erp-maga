@@ -51,7 +51,7 @@ export type DocumentStatus = 'present' | 'absent' | 'not_required'
 export type EventReadiness = 'ready' | 'not_ready'
 
 export interface StageFormData {
-  client?: string
+  clientCompany?: string
   phone?: string
   email?: string
   contactPerson?: string
