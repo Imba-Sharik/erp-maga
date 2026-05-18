@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { useCurrentUser } from '@/entities/current-user'
 import {
   Dialog,
   DialogContent,
@@ -54,6 +55,7 @@ export interface CreateProjectDialogProps {
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
   const queryClient = useQueryClient()
+  const currentUser = useCurrentUser()
 
   const previewDateLabel = useMemo(() => {
     if (!open) return ''
@@ -74,6 +76,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         loft: values.loft,
         hall: values.hall,
         event_date,
+        mag_manager: currentUser.fullName,
       })
     },
     onSuccess: (project) => {
