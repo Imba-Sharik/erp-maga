@@ -17,10 +17,14 @@ import {
   type StageFormData,
 } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
+import type { StageRecord } from '@/features/advance-stage'
 
 import { STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import { partitionFields } from '../lib/partition-fields'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
+import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canEditStage } from '../lib/stage-permissions'
+import { StageDateField } from './stage-date-field'
 import { StageFieldReadonly } from './stage-field-readonly'
 
 type SignedSchema = (typeof stageFormSchemas)['signed']
@@ -43,18 +47,19 @@ function getDefaults(stage: PreprojectStage, data: Partial<StageFormData>): Sign
 interface StageSectionCurrentProps {
   project: ProjectDetail
   stage: PreprojectStage
-  onAdvance?: (values: SignedFormValues) => void
-  onMarkReady?: (values: SignedFormValues) => void
+  record?: StageRecord
+  onAdvance?: (values: Partial<StageFormData>) => void
 }
 
 export function StageSectionCurrent({
-  project: _project,
+  project,
   stage,
+  record,
   onAdvance,
-  onMarkReady,
 }: StageSectionCurrentProps) {
   const schema = stageFormSchemas[stage]
   const fields = STAGE_FIELDS[stage]
+  const { main: mainFields, meta: metaFields } = partitionFields(stage, fields)
   const defaults = getDefaults(stage, {})
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
@@ -67,12 +72,16 @@ export function StageSectionCurrent({
     mode: 'onSubmit',
   })
 
-  const handleAdvance = form.handleSubmit((values) => onAdvance?.(values))
-  const handleReady = form.handleSubmit((values) => onMarkReady?.(values))
+  const handleAdvance = form.handleSubmit((values) =>
+    onAdvance?.(values as Partial<StageFormData>),
+  )
 
   const renderField = (f: StageFieldConfig) => {
     if (f.source === 'system' || !canEdit) {
-      const raw = f.source === 'system' ? f.mockValue : undefined
+      const raw =
+        f.source === 'system'
+          ? resolveSystemValue(f.name, f.mockValue, { project, stage, record })
+          : undefined
       let display = raw
       if (raw && f.type === 'select') {
         display = f.options?.find((o) => o.value === raw)?.label ?? raw
@@ -123,6 +132,12 @@ export function StageSectionCurrent({
                   ))}
                 </SelectContent>
               </Select>
+            ) : f.type === 'date' ? (
+              <StageDateField
+                value={(field.value as string) ?? ''}
+                onChange={field.onChange}
+                placeholder={f.placeholder}
+              />
             ) : (
               <Input
                 {...field}
@@ -148,22 +163,12 @@ export function StageSectionCurrent({
         </div>
         {canEdit ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
-            {stage === 'signed' ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReady}
-                className="text-funnel-preproject hover:text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 h-[38px] rounded-[10px] bg-[#E9ECFF] px-4 text-sm"
-              >
-                Готов к проведению
-              </Button>
-            ) : null}
             <Button
               type="button"
               onClick={handleAdvance}
               className="h-[38px] rounded-[10px] px-4 text-sm"
             >
-              Следующий этап
+              {stage === 'signed' ? 'Готов к проведению' : 'Следующий этап'}
               <ArrowRight className="size-3.5" />
             </Button>
           </div>
@@ -172,9 +177,19 @@ export function StageSectionCurrent({
       <div className="h-px w-full bg-[#F0F0F0]" />
       <Form {...form}>
         <form className="flex flex-col gap-4" noValidate>
-          <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-            {renderNarrowPairs(fields, renderField)}
-          </div>
+          {mainFields.length > 0 && (
+            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+              {renderNarrowPairs(mainFields, renderField)}
+            </div>
+          )}
+          {metaFields.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <span className="text-sm font-medium text-[#454545]">Информация</span>
+              <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+                {metaFields.map(renderField)}
+              </div>
+            </div>
+          )}
         </form>
       </Form>
     </div>

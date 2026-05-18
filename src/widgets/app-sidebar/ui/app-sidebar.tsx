@@ -9,6 +9,7 @@ import {
   ListChecksIcon,
   SettingsIcon,
 } from '@/shared/assets'
+import { useCurrentUser } from '@/entities/current-user'
 import { USER_ROLES, USER_ROLE_LABELS, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
 import { MOCK_CURRENT_USER } from '@/shared/constants/mock-current-user'
 import { cn } from '@/shared/lib/utils'
@@ -53,6 +54,7 @@ export function AppSidebar() {
   const showCollapseInSidebar = !isMobile && state === 'expanded'
   const role = useUserRole()
   const setRole = useUserRoleStore((s) => s.setRole)
+  const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
 
   return (
@@ -130,7 +132,7 @@ export function AppSidebar() {
                     <AvatarFallback className="rounded-full">{MOCK_CURRENT_USER.initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{MOCK_CURRENT_USER.name}</span>
+                    <span className="truncate font-semibold">{user.displayName}</span>
                     <span className="text-muted-foreground truncate text-xs">{roleName}</span>
                   </div>
                 </SidebarMenuButton>

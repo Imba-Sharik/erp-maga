@@ -14,6 +14,12 @@ export const PRE_PROJECT_STAGES = STAGE_ORDER
 
 export const CLOSING_STAGES = CLOSING_STAGE_ORDER
 
+/** Полный порядок этапов воронки: предпроектная → закрывающая. */
+export const ALL_STAGE_ORDER: readonly ProjectStage[] = [
+  ...STAGE_ORDER,
+  ...CLOSING_STAGE_ORDER,
+] as const
+
 export const STAGE_LABELS: Record<PreprojectStage, string> = {
   plum_request: 'Заявка из PLUM',
   first_contact: 'Первич. контакт выполнен',

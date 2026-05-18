@@ -33,11 +33,11 @@ const readinessOptions = [
 
 export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   plum_request: [
-    { name: 'client', label: 'Клиент', type: 'text', source: 'manager', mockValue: 'Иванов Иван Иванович' },
-    { name: 'phone', label: 'Телефон', type: 'text', source: 'manager', mockValue: '+7 (999) 999-99-99' },
+    { name: 'clientCompany', label: 'Клиент', type: 'text', source: 'manager', required: true, mockValue: 'Иванов Иван Иванович' },
+    { name: 'phone', label: 'Телефон', type: 'text', source: 'manager', required: true, mockValue: '+7 (999) 999-99-99' },
     { name: 'createdAt', label: 'Дата создания проекта в системе', type: 'date', source: 'system', mockValue: '2026-05-06' },
-    { name: 'contactPerson', label: 'Контактное лицо', type: 'text', source: 'manager', mockValue: 'Ленин Сталин Марксович' },
-    { name: 'email', label: 'Email', type: 'text', source: 'manager', mockValue: 'client@gmail.com' },
+    { name: 'contactPerson', label: 'Контактное лицо', type: 'text', source: 'manager', required: true, mockValue: 'Ленин Сталин Марксович' },
+    { name: 'email', label: 'Email', type: 'text', source: 'manager', required: true, mockValue: 'client@gmail.com' },
   ],
   first_contact: [
     {
@@ -84,6 +84,20 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       required: true,
       source: 'manager',
       mockValue: 'Основной блок: оборудование + персонал — 1.8 млн, бэклайн 220 тыс.',
+    },
+    {
+      name: 'leadManager',
+      label: 'Статус перевёл менеджер',
+      type: 'text',
+      source: 'system',
+      mockValue: 'Иванов Иван Иванович',
+    },
+    {
+      name: 'closingFunnelEnteredAt',
+      label: 'Дата перехода в статус',
+      type: 'date',
+      source: 'system',
+      mockValue: '2026-05-09',
     },
   ],
   signed: [
@@ -373,10 +387,7 @@ export interface PassedExtra {
 export const PASSED_EXTRAS: Record<ProjectStage, PassedExtra[]> = {
   plum_request: [],
   first_contact: [],
-  calc_ready: [
-    { label: 'Статус перевёл менеджер', source: 'manager' },
-    { label: 'Дата перехода в статус', source: 'enteredAt' },
-  ],
+  calc_ready: [],
   signed: [],
   ready: [],
   event_held: [],
