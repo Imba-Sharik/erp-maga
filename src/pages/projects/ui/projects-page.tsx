@@ -1,12 +1,14 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 
 import { mapBackendProjects } from '@/entities/project'
+import { CreateProjectDialog } from '@/features/create-project'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
 import { ProjectsBoard, useProjectsBoardQuery } from '@/widgets/projects-board'
 
 export function ProjectsPage() {
+  const [createOpen, setCreateOpen] = useState(false)
   const eventDateAfter = useMemo(() => toIsoLocalDay(new Date()), [])
   const query = useProjectsBoardQuery({ event_date_after: eventDateAfter })
 
@@ -25,11 +27,17 @@ export function ProjectsPage() {
             Все проекты, проходящие через MAG. Проекты «Вне контура MAG» см. в отдельном разделе.
           </p>
         </div>
-        <Button className="h-10 rounded-[10px] bg-black px-4 text-white hover:bg-black/90">
+        <Button
+          type="button"
+          className="h-10 rounded-[10px] bg-black px-4 text-white hover:bg-black/90"
+          onClick={() => setCreateOpen(true)}
+        >
           <Plus className="size-4" />
           Добавить проект
         </Button>
       </header>
+
+      <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       {query.isError ? (
         <p className="text-sm text-red-600">Не удалось загрузить проекты.</p>

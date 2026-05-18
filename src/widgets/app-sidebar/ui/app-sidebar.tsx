@@ -11,6 +11,7 @@ import {
 } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
 import { USER_ROLES, USER_ROLE_LABELS, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
+import { MOCK_CURRENT_USER } from '@/shared/constants/mock-current-user'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -128,7 +129,7 @@ export function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="size-10 shrink-0 rounded-full transition-[width,height] duration-200 ease-linear group-data-[collapsible=icon]:size-8">
-                    <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
+                    <AvatarFallback className="rounded-full">{MOCK_CURRENT_USER.initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user.displayName}</span>
