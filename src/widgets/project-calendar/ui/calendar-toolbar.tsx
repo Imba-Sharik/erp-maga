@@ -1,5 +1,6 @@
 import { addMonths, getMonth, getYear, setMonth, setYear } from 'date-fns'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchBar } from '@/shared/ui/search-bar'
@@ -20,8 +21,6 @@ const MONTHS_RU = [
   'Декабрь',
 ]
 
-const LOFT_OPTIONS = ['LOFT#1', 'LOFT#2', 'LOFT#3']
-const HALL_OPTIONS = ['MAIN', 'BACKYARD', 'ROOFTOP']
 const YEAR_OPTIONS = [2024, 2025, 2026, 2027]
 
 const SELECT_TRIGGER_BASE =

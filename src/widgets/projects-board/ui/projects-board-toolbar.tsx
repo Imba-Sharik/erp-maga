@@ -1,10 +1,9 @@
 import { Search } from 'lucide-react'
+import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Input } from '@/shared/ui/input'
 
 const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
-const HALL_OPTIONS = ['MAIN', 'BACKYARD', 'ROOFTOP']
-const LOFT_OPTIONS = ['LOFT#1', 'LOFT#2', 'LOFT#3']
 
 const TRIGGER_CLASS =
   'h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none'
