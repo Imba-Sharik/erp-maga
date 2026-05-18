@@ -43,6 +43,12 @@ function statusForStage(stage: ProjectStage): ProjectStatus {
   }
 }
 
+function takeFirstManager(raw: string | undefined): string {
+  if (!raw) return ''
+  const first = raw.split(',')[0]?.trim()
+  return first ?? ''
+}
+
 function formatLastUpdate(iso: string | undefined): string {
   if (!iso) return ''
   try {
@@ -65,7 +71,9 @@ export function mapBackendProject(b: BackendProject): Project | null {
     city: b.city_label || b.city,
     loft: b.venue,
     hall: b.hall_loft,
-    manager: b.mag_manager ?? '',
+    // Бэк иногда отдаёт `mag_manager` как «Имя1, Имя2, Имя3» — берём первого
+    // как «ведущего менеджера» проекта, остальных пока игнорируем.
+    manager: takeFirstManager(b.mag_manager),
     type: b.event_type ?? '',
     company: b.client_company ?? '',
     phone: b.phone ?? '',
