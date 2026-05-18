@@ -13,7 +13,7 @@ export function ProjectDetailTabsRow({
         <Button
           type="button"
           variant="outline"
-          className="h-[38px] rounded-[10px] border-[#D25252] bg-[#FFF3F3] px-4 text-[13px] text-[#D25252] hover:bg-[#FFE5E5] hover:text-[#D25252]"
+          className="h-8 cursor-pointer rounded-full border-[#D25252] bg-[#FFF3F3] px-3 py-1 text-sm text-[#D25252] hover:bg-[#FFE5E5] hover:text-[#D25252]"
         >
           Вне контура MAG
         </Button>
