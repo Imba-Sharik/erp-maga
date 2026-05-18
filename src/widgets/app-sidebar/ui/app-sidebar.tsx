@@ -10,6 +10,7 @@ import {
   SettingsIcon,
 } from '@/shared/assets'
 import { USER_ROLES, USER_ROLE_LABELS, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
+import { MOCK_CURRENT_USER } from '@/shared/constants/mock-current-user'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -45,12 +46,6 @@ const navItems = [
   { title: 'Уведомления', url: '/notifications', icon: BellIcon },
   { title: 'Настройки', url: '/settings', icon: SettingsIcon },
 ]
-
-const user = {
-  name: 'Игорь Шарин',
-  email: 'sharinigor1@gmail.com',
-  initials: 'ИШ',
-}
 
 export function AppSidebar() {
   const { pathname } = useLocation()
@@ -132,10 +127,10 @@ export function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="size-10 shrink-0 rounded-full transition-[width,height] duration-200 ease-linear group-data-[collapsible=icon]:size-8">
-                    <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
+                    <AvatarFallback className="rounded-full">{MOCK_CURRENT_USER.initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate font-semibold">{MOCK_CURRENT_USER.name}</span>
                     <span className="text-muted-foreground truncate text-xs">{roleName}</span>
                   </div>
                 </SidebarMenuButton>
