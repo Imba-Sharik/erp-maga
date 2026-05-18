@@ -45,7 +45,7 @@ export function DayCell({
         )}
       >
         {isToday ? (
-          <span className="inline-flex h-7.5 min-w-7.5 items-center justify-center rounded-full bg-[#424242] px-1.5 text-xs leading-none text-white @max-[560px]/calendar:h-5 @max-[560px]/calendar:min-w-5 @max-[560px]/calendar:px-1 @max-[560px]/calendar:text-[10px]">
+          <span className="inline-flex h-7.5 min-w-7.5 items-center justify-center rounded-full bg-[#424242] px-1.5 text-xs leading-none text-white @max-[560px]/calendar:h-5 @max-[560px]/calendar:min-w-5 @max-[560px]/calendar:px-1 @max-[560px]/calendar:text-2xs">
             {dayNum}
           </span>
         ) : (

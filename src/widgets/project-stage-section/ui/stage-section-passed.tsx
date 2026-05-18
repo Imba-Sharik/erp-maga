@@ -81,7 +81,7 @@ export function StageSectionPassed({ stage, entry }: StageSectionPassedProps) {
         <CollapsibleContent className="flex flex-col gap-4">
           <div className="h-px w-full bg-[#F0F0F0]" />
           {fields.length === 0 && extras.length === 0 ? (
-            <p className="text-muted-foreground text-[13px] italic">
+            <p className="text-muted-foreground text-sm italic">
               Подробное содержимое раздела — в следующей итерации
             </p>
           ) : (

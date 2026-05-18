@@ -6,7 +6,7 @@ export function ClientDataCard({ project }: { project: ProjectDetail }) {
     <ProjectAsideCard
       title="Данные Клиента"
       badge={
-        <Badge variant="success" className="text-[10px]">
+        <Badge variant="success" className="text-2xs">
           {project.clientStatus === 'confirmed' ? 'Подтверждено' : 'Ожидание'}
         </Badge>
       }

@@ -101,7 +101,7 @@ export function CalendarPage() {
   return (
     <div ref={pageRef} className="flex flex-col gap-6">
       <header className="flex flex-col gap-1.5">
-        <h1 className="text-[22px] font-bold text-[#1B1A17]">Календарь проектов</h1>
+        <h1 className="font-heading font-bold text-[#1B1A17]">Календарь проектов</h1>
         <p className="text-sm text-[#ACACAC]">
           Проекты во «Вне контура MAG» в календаре не отображаются
         </p>

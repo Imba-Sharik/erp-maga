@@ -29,7 +29,7 @@ export function StageFieldReadonly({
     <StageFieldShell label={label} className={className}>
       <div
         className={cn(
-          'flex w-full rounded-[10px] border px-3 py-2 text-[13px]',
+          'flex w-full rounded-[10px] border px-3 py-2 text-sm',
           multiline ? 'min-h-[90px] items-start' : 'h-9 items-center',
           isSystem
             ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'

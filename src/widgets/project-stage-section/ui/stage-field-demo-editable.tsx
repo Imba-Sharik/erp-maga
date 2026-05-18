@@ -32,7 +32,7 @@ export function StageFieldDemoEditable({
     >
       {field.type === 'select' ? (
         <Select value={value} onValueChange={setValue}>
-          <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] bg-white text-[13px]">
+          <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] bg-white text-sm">
             <SelectValue placeholder={field.placeholder ?? 'Выберите…'} />
           </SelectTrigger>
           <SelectContent>
@@ -48,14 +48,14 @@ export function StageFieldDemoEditable({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={field.placeholder}
-          className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] bg-white text-[13px]"
+          className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] bg-white text-sm"
         />
       ) : (
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={field.placeholder}
-          className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-[13px]"
+          className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
         />
       )}
     </StageFieldShell>

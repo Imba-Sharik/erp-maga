@@ -36,7 +36,7 @@ export function ProjectTabs() {
           <TabsTrigger
             key={t.key}
             value={t.key}
-            className="h-8 cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full border border-[#B1B1B1] bg-white px-3 py-1.5 text-sm font-normal text-[#454545] data-[state=active]:border-transparent data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-[10px] border border-[#B1B1B1] bg-white px-4 py-1.5 text-sm font-normal text-[#454545] data-[state=active]:border-transparent data-[state=active]:font-medium data-[state=active]:shadow-none"
           >
             {t.label}
           </TabsTrigger>
