@@ -44,9 +44,11 @@ function statusForStage(stage: ProjectStage): ProjectStatus {
 }
 
 function takeFirstManager(raw: string | undefined): string {
-  if (!raw) return ''
-  const first = raw.split(',')[0]?.trim()
-  return first ?? ''
+  // DEMO: на проде брали первого менеджера из `mag_manager` (бэк отдавал
+  // несколько через запятую). Для демо подменяем на одного фиксированного,
+  // чтобы во всех проектах был узнаваемый «Иванов Иван Иванович».
+  void raw
+  return 'Иванов Иван Иванович'
 }
 
 function formatLastUpdate(iso: string | undefined): string {
