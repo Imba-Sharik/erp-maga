@@ -17,6 +17,7 @@ export type {
   PlumStatus,
 } from './model/types'
 export { mapBackendProject, mapBackendProjects, mapBackendProjectDetail } from './lib/from-backend'
+export { PREPROJECT_STAGE_TO_API, preprojectStageToApi } from './lib/preproject-stage-api'
 export {
   stageFormSchemas,
   contactChannelLabels,

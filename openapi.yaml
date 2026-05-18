@@ -91,6 +91,11 @@ paths:
         schema:
           type: string
           format: date
+      - in: query
+        name: stage
+        description: Фильтр по стадии проекта (для агрегатов и выборок).
+        schema:
+          $ref: '#/components/schemas/StageEnum'
       - name: limit
         required: false
         in: query
