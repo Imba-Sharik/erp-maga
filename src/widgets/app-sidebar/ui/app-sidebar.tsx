@@ -9,6 +9,7 @@ import {
   ListChecksIcon,
   SettingsIcon,
 } from '@/shared/assets'
+import { useCurrentUser } from '@/entities/current-user'
 import { USER_ROLES, USER_ROLE_LABELS, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
@@ -46,18 +47,13 @@ const navItems = [
   { title: 'Настройки', url: '/settings', icon: SettingsIcon },
 ]
 
-const user = {
-  name: 'Игорь Шарин',
-  email: 'sharinigor1@gmail.com',
-  initials: 'ИШ',
-}
-
 export function AppSidebar() {
   const { pathname } = useLocation()
   const { state, isMobile } = useSidebar()
   const showCollapseInSidebar = !isMobile && state === 'expanded'
   const role = useUserRole()
   const setRole = useUserRoleStore((s) => s.setRole)
+  const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
 
   return (
@@ -135,7 +131,7 @@ export function AppSidebar() {
                     <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate font-semibold">{user.displayName}</span>
                     <span className="text-muted-foreground truncate text-xs">{roleName}</span>
                   </div>
                 </SidebarMenuButton>

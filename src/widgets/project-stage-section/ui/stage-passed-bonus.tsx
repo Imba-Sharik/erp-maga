@@ -1,6 +1,7 @@
-import { ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
+import { ArrowRight, ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
 import type { ComponentType, SVGProps } from 'react'
 
+import { Button } from '@/shared/ui/button'
 import {
   Collapsible,
   CollapsibleContent,
@@ -8,6 +9,7 @@ import {
 } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
 import { useUserRole } from '@/entities/user-role'
+import type { StageFormData } from '@/entities/project'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { StageFieldShell } from './stage-field-shell'
@@ -106,19 +108,38 @@ function ArticleRow({ row, bonusSource }: { row: BonusRow; bonusSource: Source }
   )
 }
 
-export function StagePassedBonus() {
+interface StagePassedBonusProps {
+  isCurrent?: boolean
+  onAdvance?: (values?: Partial<StageFormData>) => void
+}
+
+export function StagePassedBonus({ isCurrent = false, onAdvance }: StagePassedBonusProps) {
   const role = useUserRole()
   const canEdit = canEditStage('bonus_calculated', role)
-  const bonusSource: Source = canEdit ? 'manager' : 'system'
+  const bonusSource: Source = canEdit && isCurrent ? 'manager' : 'system'
 
   return (
     <Collapsible defaultOpen className="w-full">
       <div className="flex flex-col gap-5 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
-        <CollapsibleTrigger className="flex w-full items-center gap-1.5 text-sm">
-          <span className="font-medium text-[#454545]">Этап пройден:</span>
-          <span className="text-funnel-closing font-semibold">Бонус рассчитан</span>
-          <ChevronDown className="text-muted-foreground size-3.5" />
-        </CollapsibleTrigger>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CollapsibleTrigger className="flex items-center gap-1.5 text-sm">
+            <span className="font-medium text-[#454545]">
+              {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
+            </span>
+            <span className="text-funnel-closing font-semibold">Бонус рассчитан</span>
+            <ChevronDown className="text-muted-foreground size-3.5" />
+          </CollapsibleTrigger>
+          {isCurrent && canEdit && (
+            <Button
+              type="button"
+              onClick={() => onAdvance?.()}
+              className="h-[38px] rounded-[10px] px-4 text-sm"
+            >
+              Следующий этап
+              <ArrowRight className="size-3.5" />
+            </Button>
+          )}
+        </div>
         <CollapsibleContent className="flex flex-col gap-5">
           <div className="h-px w-full bg-[#F0F0F0]" />
 

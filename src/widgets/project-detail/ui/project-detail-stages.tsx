@@ -1,10 +1,11 @@
 import {
-  CLOSING_STAGES,
   FUNNEL_LABELS,
-  PRE_PROJECT_STAGES,
+  STAGE_FUNNEL,
   type ProjectDetail,
+  type ProjectStage,
   type StageFunnel,
 } from '@/entities/project'
+import type { StageFlow } from '@/features/advance-stage'
 import { ProjectStageSection } from '@/widgets/project-stage-section'
 
 function FunnelHeader({ funnel }: { funnel: StageFunnel }) {
@@ -14,19 +15,50 @@ function FunnelHeader({ funnel }: { funnel: StageFunnel }) {
   )
 }
 
-export function ProjectDetailStages({ project }: { project: ProjectDetail }) {
-  const closingReversed = [...CLOSING_STAGES].reverse()
-  const preProjectReversed = [...PRE_PROJECT_STAGES].reverse()
+interface ProjectDetailStagesProps {
+  project: ProjectDetail
+  flow: StageFlow
+}
+
+export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps) {
+  const closing: ProjectStage[] = []
+  const preproject: ProjectStage[] = []
+  for (const stage of flow.visibleStages) {
+    if (STAGE_FUNNEL[stage] === 'closing') closing.push(stage)
+    else preproject.push(stage)
+  }
+
+  const sharedProps = {
+    project,
+    onAdvance: flow.advance,
+    articles: flow.articles,
+    taxRate: flow.taxRate,
+    onArticleChange: flow.updateArticle,
+    onTaxRateChange: flow.setTaxRate,
+    onToggleBackline: flow.toggleBackline,
+  }
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <FunnelHeader funnel="closing" />
-      {closingReversed.map((stage) => (
-        <ProjectStageSection key={stage} project={project} stage={stage} />
+      {closing.length > 0 && <FunnelHeader funnel="closing" />}
+      {[...closing].reverse().map((stage) => (
+        <ProjectStageSection
+          key={stage}
+          stage={stage}
+          isCurrent={flow.isCurrent(stage)}
+          record={flow.getRecord(stage)}
+          {...sharedProps}
+        />
       ))}
-      <FunnelHeader funnel="pre_project" />
-      {preProjectReversed.map((stage) => (
-        <ProjectStageSection key={stage} project={project} stage={stage} />
+      {preproject.length > 0 && <FunnelHeader funnel="pre_project" />}
+      {[...preproject].reverse().map((stage) => (
+        <ProjectStageSection
+          key={stage}
+          stage={stage}
+          isCurrent={flow.isCurrent(stage)}
+          record={flow.getRecord(stage)}
+          {...sharedProps}
+        />
       ))}
     </div>
   )

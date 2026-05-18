@@ -108,14 +108,14 @@ export interface StageHistoryEntry {
 
 export interface StageFormData {
   // plum_request
-  client?: string
+  clientCompany?: string
   phone?: string
   email?: string
   contactPerson?: string
   createdAt?: string
   // first_contact
   contactComment?: string
-  contactChannel?: 'messenger' | 'phone' | 'email' | 'meeting'
+  contactChannel?: 'messenger' | 'phone' | 'meeting'
   contactedAt?: string
   // calc_ready
   calcComment?: string
@@ -125,6 +125,8 @@ export interface StageFormData {
   contractDate?: string
   legalEntity?: string
   contractComment?: string
+  // event_held, expenses_entered, documents_confirmed, data_confirmed,
+  // bonus_calculated, bonus_approved, closed — см. fields-map.ts
 }
 
 export interface ProjectDetail extends Project {
@@ -175,52 +177,68 @@ const { data, isLoading, error } = useProjectsRetrieve(id!)  // kubb-хук
 
 Состояние таба — query-параметр `?tab=`. Это даёт shareable URL и сохранение между ререндерами.
 
-## Форма текущего этапа
+## Машина состояний воронки — `useStageFlow`
 
-`StageSectionCurrent` рендерит RHF-форму, схема которой зависит от `project.stage`. Конфиг полей — в `widgets/project-stage-section/lib/fields-map.ts`:
+Источник правды для «какой этап текущий», истории переходов и финансовых статей — хук [features/advance-stage/model/use-stage-flow.ts](../../src/features/advance-stage/model/use-stage-flow.ts).
 
 ```ts
-import { z } from 'zod'
-
-export const STAGE_FORM_SCHEMAS = {
-  plum_request:   z.object({...}),
-  first_contact:  z.object({ contactComment: z.string().min(1), contactChannel: z.enum([...]), contactedAt: z.string() }),
-  calc_ready:     z.object({ calcComment: z.string().min(1) }),
-  signed:         z.object({ contractType: z.enum(['with_vat','without_vat']), contractNumber: z.string().min(1), contractDate: z.string(), legalEntity: z.string().min(1), contractComment: z.string().optional() }),
-  ready:          z.object({}),
-} satisfies Record<ProjectStage, z.ZodSchema>
+const flow = useStageFlow({ initialStage: project.stage, projectEnteredAt: project.enteredSystemAt })
+// flow.currentStage, flow.visibleStages, flow.getRecord(stage), flow.advance(values?)
+// flow.articles, flow.taxRate, flow.updateArticle, flow.setTaxRate, flow.toggleBackline
 ```
 
-CTA-кнопки:
+Состояние **локальное** (`useState`), пока бэк не реализует `POST /projects/{id}/transitions/` ([docs/api/stages.md](../api/stages.md)). После kubb-генерации `advance` подменяется на мутацию — потребители (`ProjectDetailStages`, секции этапов) не трогаются.
 
-- **Следующий этап** — `POST /api/projects/{id}/advance-stage/` с телом формы. Перемещает проект на следующий этап в `STAGE_ORDER`.
-- **Готов к проведению** — `POST /api/projects/{id}/mark-ready/`. Доступна только на этапе `signed` и переводит в `ready` (терминальный для воронки продаж).
+Хранит:
+- `currentStage` — текущий этап. Стартует с `project.stage`, продвигается на `advance()`.
+- `records: Partial<Record<ProjectStage, StageRecord>>` — на каждый пройденный/текущий этап: `enteredAt`, `enteredBy`, `completedAt`, `completedBy`, `values` (значения формы). Для `plum_request` initial-запись: `enteredAt = project.enteredSystemAt`, `enteredBy = 'PLUM (синхронизация)'`. На `advance` — закрываем текущий этап (`completedAt = now`, `completedBy = useCurrentUser().fullName`), открываем следующий (`enteredAt = now`, `enteredBy = ...`).
+- `articles: ProjectArticles` (из [entities/project-articles](../../src/entities/project-articles)) — `{ main: Record<ArticleKind, { sales, expense, bonusPercent }>, backline: ... | null }`. Используется на финансовых этапах `ready_to_event`, `expenses_entered`, `bonus_calculated` (разные `aspect` редактируются на разных этапах). Дефолтные `bonusPercent` — в [defaults.ts](../../src/entities/project-articles/lib/defaults.ts), легко менять.
+- `taxRate` — единый процент налога (этап 5).
 
-Обе мутации — в `features/project-stage-transition/api/`, инвалидируют `projectsRetrieve(id)` и `projectsList()`.
+## Текущий пользователь — `useCurrentUser`
+
+Заглушка под JWT/`/users/me` — [entities/current-user](../../src/entities/current-user). Возвращает `{ id, fullName, displayName, initials, email, role }` на основе выбранной роли в дропдауне сайдбара. Имена-заглушки в `STUB_USERS` (manager → «Шарин Игорь Дмитриевич», accountant → «Петрова Анна Сергеевна», director → «Сидоров Сергей Сергеевич»). Используется в:
+- Сайдбаре (`AppSidebar`) — аватар/имя/инициалы реактивны к роли.
+- `useStageFlow.advance` — стамп `enteredBy` / `completedBy` при переходе.
+
+## Форма текущего этапа
+
+`StageSectionCurrent` рендерит RHF-форму на основе [stage-form-schemas.ts](../../src/entities/project/lib/stage-form-schemas.ts). Системные поля (`leadManager`, `contactedAt`, `closingFunnelEnteredAt`) в схему **не входят** — они выставляются автоматически бэком (а до подключения бэка — резолвятся из `flow.getRecord(stage)` через [resolve-system-value.ts](../../src/widgets/project-stage-section/lib/resolve-system-value.ts)).
+
+Текущие schemas:
+- `plum_request` — `clientCompany`, `phone`, `contactPerson`, `email` все `required()`; `createdAt` optional.
+- `first_contact` — `contactComment: required()`, `contactChannel: enum([messenger|phone|meeting])` с русским сообщением об ошибке.
+- `calc_ready` — `calcComment: required()`.
+- `signed` — `contractType: enum([with_vat|without_vat])` с русским сообщением, `contractNumber`, `contractDate`, `legalEntity: required()`, `contractComment: optional()`.
+- `ready` — пустая схема (форма не нужна, всё через `useStageFlow.articles`).
+
+CTA «Следующий этап» → `form.handleSubmit((values) => flow.advance(values))`. На `signed` кнопка получает лейбл «Готов к проведению» (то же действие). Реальный API будет описан в [docs/api/stages.md](../api/stages.md), сейчас всё локально.
+
+### Layout: «Информация» как футер
+
+`partitionFields(stage, fields)` ([partition-fields.ts](../../src/widgets/project-stage-section/lib/partition-fields.ts)) делит поля этапа на `main` (заполняет менеджер) и `meta` (системные `leadManager`/`contactedAt`/`closingFunnelEnteredAt`). `main` идёт в основную 3-колоночную сетку, `meta` — в отдельную секцию **«Информация»** с тем же сабхедером, что и на этапе 5. На `bonus_calculated`/`closed` секция «Информация» не отделяется — там `leadManager` означает «получатель/ведущий менеджер проекта», не транзишен.
+
+### Дата (`type: 'date'`)
+
+Manager-поля типа `date` (например, `contractDate` на `signed`) рендерятся через [StageDateField](../../src/widgets/project-stage-section/ui/stage-date-field.tsx) — Popover + shadcn Calendar (`react-day-picker`, `date-fns`). Хранит ISO `yyyy-MM-dd`, отображает `dd.MM.yyyy`.
 
 ## Пройденные этапы
 
-`StageSectionPassed` — collapsible (раскрыт по умолчанию). Поля рендерятся в зависимости от `source` поля:
+`StageSectionPassed` — collapsible (раскрыт по умолчанию). Все поля (и manager, и system) **рендерятся в системном стиле** (dashed `#C7C7C7`, bg `#F4F2EC`) — пройденный этап «заморожен» полностью. Значения тянутся из `flow.getRecord(stage).values`, системные — через `resolveSystemValue` с приоритетом `record` → `project` → `mockValue`. Layout — тот же `main` + «Информация», что и в текущем виде (см. выше).
 
-- `source: 'system'` — `StageFieldReadonly` с dashed border `#C7C7C7`, bg `#F4F2EC`, text `#6B6B6B`
-- `source: 'manager'` + текущая роль может редактировать → `StageFieldDemoEditable` (интерактивные Input/Select/Textarea с локальным state, без бэка)
-- `source: 'manager'` + не может → `StageFieldReadonly` в системном стиле
+`PASSED_EXTRAS` (в `fields-map.ts`) — устаревший механизм для «системных хвостов» (Статус перевёл менеджер / Дата перехода в статус). Поэтапно мигрируется: `calc_ready` и `signed` уже переведены на `STAGE_FIELDS` с `source: 'system'` (читается из `record`).
 
-Значения берутся из `project.history.find(h => h.stage === stage).data` (для конфигов без `mockValue`).
+### Кастомные секции — финансовые блоки
 
-`PASSED_EXTRAS` (в `fields-map.ts`) — устаревший механизм для «системных хвостов» (Статус перевёл менеджер / Дата перехода в статус). Новые этапы добавляют такие поля прямо в `STAGE_FIELDS[stage]` с `source: 'system'` — это даёт нативное позиционирование в сетке (`signed` уже мигрирован).
+`ready_to_event`, `expenses_entered`, `bonus_calculated` рендерятся не через generic-механизм, а через [FinanceBlockWithBackline](../../src/widgets/project-stage-section/ui/finance-block-with-backline.tsx) (data-driven компонент, тонкие обёртки `StagePassedReady`/`StagePassedExpenses` задают разный `aspect`):
 
-### Кастомные секции
+| Этап                | Компонент           | `aspect`         |
+| ------------------- | ------------------- | ---------------- |
+| `ready_to_event`    | `StagePassedReady`  | `'sales'`        |
+| `expenses_entered`  | `StagePassedExpenses` | `'expense'`    |
+| `bonus_calculated`  | `StagePassedBonus`  | — (свой UI)      |
 
-Некоторые этапы рендерятся не через generic-механизм, а через отдельные UI-компоненты — в [src/widgets/project-stage-section/ui/project-stage-section.tsx](../../src/widgets/project-stage-section/ui/project-stage-section.tsx) роутится по `stage`:
-
-| Этап                | Компонент                |
-| ------------------- | ------------------------ |
-| `ready`             | `StagePassedReady`       |
-| `expenses_entered`  | `StagePassedExpenses`    |
-| `bonus_calculated`  | `StagePassedBonus`       |
-
-Эти компоненты ведут свой локальный state (например, `backlineAdded` в `ready`/`expenses_entered` для тогла бэклайн-секции) и читают `useUserRole`, чтобы переключать `source` денежных полей между `'manager'` и `'system'` (плюс прятать кнопки `Добавить/Удалить бэклайн` под ролями без прав).
+Принимают `articles`, `taxRate`, `onArticleChange`, `onToggleBackline`, `onTaxRateChange`, `record`, `isCurrent` из `useStageFlow` (через `ProjectStageSection` → `ProjectDetailStages`). `MoneyInput`/`PercentInput` — живое форматирование (пробелы каждые 3 цифры + `₽`/`%`, фильтрация по `inputMode`). Проценты в колонке справа — `bonusPercent` из дефолтов (на этапе 5 read-only, на 11 будут редактируемы). Итоги, сумма налога — calculated. Кнопки «Добавить/Удалить бэклайн» видны только при `editable = canEdit && isCurrent`.
 
 ### Поля с `narrow: true`
 

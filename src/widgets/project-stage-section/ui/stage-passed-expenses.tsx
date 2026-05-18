@@ -1,4 +1,6 @@
+import type { ArticleBlock, ArticleKind, ArticleValues, ProjectArticles } from '@/entities/project-articles'
 import { useUserRole } from '@/entities/user-role'
+import type { StageRecord } from '@/features/advance-stage'
 
 import { canEditStage } from '../lib/stage-permissions'
 import {
@@ -6,7 +8,18 @@ import {
   FinanceBlockWithBackline,
 } from './finance-block-with-backline'
 
-export function StagePassedExpenses() {
+interface StagePassedExpensesProps {
+  isCurrent?: boolean
+  record?: StageRecord
+  articles: ProjectArticles
+  taxRate: number
+  onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
+  onTaxRateChange: (rate: number) => void
+  onToggleBackline: () => void
+  onAdvance?: () => void
+}
+
+export function StagePassedExpenses({ isCurrent, ...rest }: StagePassedExpensesProps) {
   const role = useUserRole()
   const canEdit = canEditStage('expenses_entered', role)
 
@@ -15,8 +28,11 @@ export function StagePassedExpenses() {
       stage="expenses_entered"
       headerTitle="Расходы внесены"
       headerColorClass="text-funnel-closing"
+      aspect="expense"
       subsectionTitlePrefix="Расходы: "
-      infoExtras={<ExpensesCommentField canEdit={canEdit} />}
+      isCurrent={isCurrent}
+      infoExtras={<ExpensesCommentField canEdit={canEdit && Boolean(isCurrent)} />}
+      {...rest}
     />
   )
 }

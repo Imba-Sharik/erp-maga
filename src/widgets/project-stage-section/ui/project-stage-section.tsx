@@ -1,5 +1,12 @@
-import type { ProjectDetail, ProjectStage, StageHistoryEntry } from '@/entities/project'
+import type { ProjectDetail, ProjectStage, StageFormData } from '@/entities/project'
 import { isPreprojectStage } from '@/entities/project'
+import type {
+  ArticleBlock,
+  ArticleKind,
+  ArticleValues,
+  ProjectArticles,
+} from '@/entities/project-articles'
+import type { StageRecord } from '@/features/advance-stage'
 
 import { StagePassedBonus } from './stage-passed-bonus'
 import { StagePassedExpenses } from './stage-passed-expenses'
@@ -10,30 +17,68 @@ import { StageSectionPassed } from './stage-section-passed'
 interface ProjectStageSectionProps {
   project: ProjectDetail
   stage: ProjectStage
+  isCurrent: boolean
+  record: StageRecord | undefined
+  onAdvance: (values?: Partial<StageFormData>) => void
+  articles: ProjectArticles
+  taxRate: number
+  onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
+  onTaxRateChange: (rate: number) => void
+  onToggleBackline: () => void
 }
 
-export function ProjectStageSection({ project, stage }: ProjectStageSectionProps) {
-  if (project.stage === stage && isPreprojectStage(stage)) {
-    return <StageSectionCurrent project={project} stage={stage} />
+export function ProjectStageSection({
+  project,
+  stage,
+  isCurrent,
+  record,
+  onAdvance,
+  articles,
+  taxRate,
+  onArticleChange,
+  onTaxRateChange,
+  onToggleBackline,
+}: ProjectStageSectionProps) {
+  const financeProps = {
+    articles,
+    taxRate,
+    onArticleChange,
+    onTaxRateChange,
+    onToggleBackline,
+    onAdvance: () => onAdvance(),
   }
 
+  // Этапы с финансовыми блоками — собственная вёрстка
   if (stage === 'ready') {
-    return <StagePassedReady />
+    return <StagePassedReady isCurrent={isCurrent} record={record} {...financeProps} />
   }
-
   if (stage === 'expenses_entered') {
-    return <StagePassedExpenses />
+    return <StagePassedExpenses isCurrent={isCurrent} record={record} {...financeProps} />
   }
-
   if (stage === 'bonus_calculated') {
-    return <StagePassedBonus />
+    return <StagePassedBonus isCurrent={isCurrent} onAdvance={onAdvance} />
   }
 
-  const entry: StageHistoryEntry = project.history.find((h) => h.stage === stage) ?? {
-    stage,
-    enteredAt: '',
-    managerName: '',
-    data: {},
+  // Текущий этап предпроектной воронки — форма с валидацией
+  if (isCurrent && isPreprojectStage(stage)) {
+    return (
+      <StageSectionCurrent
+        project={project}
+        stage={stage}
+        record={record}
+        onAdvance={onAdvance}
+      />
+    )
   }
-  return <StageSectionPassed stage={stage} entry={entry} />
+
+  // Все остальные (пройденные и закрывающие без отдельного дизайна)
+  return (
+    <StageSectionPassed
+      project={project}
+      stage={stage}
+      isCurrent={isCurrent}
+      record={record}
+      onAdvance={onAdvance}
+    />
+  )
 }
