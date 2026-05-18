@@ -118,7 +118,9 @@ export function StageSectionPassed({
         label={f.label}
         value={readField(ctx, values, f)}
         multiline={f.type === 'textarea'}
-        source={isCurrent && canEdit ? f.source : 'system'}
+        // DEMO: показываем source как есть (manager solid / system dashed),
+        // чтобы было видно, какие поля заполняет менеджер, а какие — система.
+        source={canEdit ? f.source : 'system'}
         isSelect={f.type === 'select'}
         className={spanClass(f.span, f.type === 'textarea')}
       />
