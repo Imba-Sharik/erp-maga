@@ -1,10 +1,18 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
-import { groupByStage, PRE_PROJECT_STAGES, STAGE_LABELS, type Project } from '@/entities/project'
+import {
+  groupByStage,
+  PRE_PROJECT_STAGES,
+  STAGE_LABELS,
+  type PreprojectStage,
+  type Project,
+} from '@/entities/project'
 import { Card } from '@/shared/ui/card'
 import { ProjectsKanbanColumn } from './projects-kanban-column'
 
 interface ProjectsKanbanProps {
   projects: Project[]
+  totalsByStage?: Partial<Record<PreprojectStage, number>>
+  filtersActive?: boolean
   onLoadMore?: () => void
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
@@ -12,6 +20,8 @@ interface ProjectsKanbanProps {
 
 export function ProjectsKanban({
   projects,
+  totalsByStage,
+  filtersActive = false,
   onLoadMore,
   hasNextPage,
   isFetchingNextPage,
@@ -40,6 +50,8 @@ export function ProjectsKanban({
                 key={stage}
                 title={STAGE_LABELS[stage]}
                 projects={byStage[stage]}
+                backendTotalCount={totalsByStage?.[stage]}
+                filtersActive={filtersActive}
                 onLoadMore={isFirst ? onLoadMore : undefined}
                 hasNextPage={isFirst ? hasNextPage : false}
                 isFetchingNextPage={isFirst ? isFetchingNextPage : false}

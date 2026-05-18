@@ -29,8 +29,9 @@ export function DayCell({
       type="button"
       onClick={onSelect}
       className={cn(
-        'min-h-16 cursor-pointer bg-white md:min-h-24',
-        '@max-[1100px]/calendar:flex @max-[1100px]/calendar:flex-col @max-[1100px]/calendar:aspect-square @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:overflow-hidden',
+        'flex w-full flex-col cursor-pointer bg-white',
+        '@min-[1101px]/calendar:min-h-16 @min-[1101px]/calendar:md:min-h-24',
+        '@max-[1100px]/calendar:aspect-square @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:overflow-hidden',
         outOfMonth && 'bg-[#F3F3F3]',
         colIdx < 6 && 'border-r border-[#D3D3D3]',
         !isLastRow && 'border-b border-[#D3D3D3]',
@@ -38,11 +39,10 @@ export function DayCell({
     >
       <div
         className={cn(
-          'flex min-h-0 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
-          'h-full @max-[1100px]/calendar:flex-1',
+          'flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
           '@max-[560px]/calendar:gap-0.5 @max-[560px]/calendar:p-1',
           isSelected &&
-            'rounded-[10px] border border-[#ADADAD] bg-linear-to-br from-white to-[#D9D9D9]',
+            'border border-[#ADADAD] bg-linear-to-br from-white to-[#D9D9D9]',
         )}
       >
         <span className="relative shrink-0 inline-flex items-center justify-center">
@@ -61,9 +61,12 @@ export function DayCell({
             {dayNum}
           </span>
         </span>
-        <div className="@max-[1100px]/calendar:flex @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:flex-1 @max-[1100px]/calendar:flex-col @max-[1100px]/calendar:items-center @max-[1100px]/calendar:justify-center">
+        <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col items-start">
           {isLoading && !outOfMonth ? (
-            <span className="h-4 w-12 animate-pulse rounded bg-[#E9E6DD] @max-[560px]/calendar:h-3 @max-[560px]/calendar:w-8" />
+            <span
+              className="pointer-events-none inline-block h-5 w-10 animate-pulse rounded-full bg-[#EBEBEB]"
+              aria-hidden
+            />
           ) : (
             <ProjectCountBadge count={count} />
           )}

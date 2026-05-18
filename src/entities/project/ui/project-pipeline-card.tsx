@@ -1,6 +1,12 @@
 import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/shared/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu'
 import type { Project, ProjectBackOrigin } from '../model/types'
 
 interface ProjectPipelineCardProps {
@@ -28,14 +34,22 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
     >
       <div className="flex items-center justify-between gap-2">
         <h3 className="truncate text-sm font-semibold text-[#454545]">{project.title}</h3>
-        <button
-          type="button"
-          aria-label="Меню проекта"
-          onClick={stop}
-          className="text-[#454545] hover:opacity-70"
-        >
-          <MoreVertical className="size-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Меню проекта"
+              onClick={stop}
+              onPointerDown={stop}
+              className="-m-1 shrink-0 rounded p-1 text-[#454545] hover:opacity-70"
+            >
+              <MoreVertical className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-44">
+            <DropdownMenuItem variant="destructive">Вне контура MAG</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <p className="text-xs text-[#ACACAC]">

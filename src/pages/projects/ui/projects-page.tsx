@@ -46,6 +46,7 @@ export function ProjectsPage() {
       ) : (
         <ProjectsBoard
           projects={projects}
+          listDateParams={{ event_date_after: eventDateAfter }}
           onLoadMore={() => query.fetchNextPage()}
           hasNextPage={query.hasNextPage}
           isFetchingNextPage={query.isFetchingNextPage}
