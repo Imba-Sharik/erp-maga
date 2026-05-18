@@ -30,7 +30,7 @@ export function DayCell({
       onClick={onSelect}
       className={cn(
         'min-h-16 cursor-pointer bg-white md:min-h-24',
-        '@max-[1100px]/calendar:aspect-square @max-[1100px]/calendar:min-h-0',
+        '@max-[1100px]/calendar:flex @max-[1100px]/calendar:flex-col @max-[1100px]/calendar:aspect-square @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:overflow-hidden',
         outOfMonth && 'bg-[#F3F3F3]',
         colIdx < 6 && 'border-r border-[#D3D3D3]',
         !isLastRow && 'border-b border-[#D3D3D3]',
@@ -38,26 +38,36 @@ export function DayCell({
     >
       <div
         className={cn(
-          'flex h-full flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
+          'flex min-h-0 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
+          'h-full @max-[1100px]/calendar:flex-1',
           '@max-[560px]/calendar:gap-0.5 @max-[560px]/calendar:p-1',
           isSelected &&
             'rounded-[10px] border border-[#ADADAD] bg-linear-to-br from-white to-[#D9D9D9]',
         )}
       >
-        {isToday ? (
-          <span className="inline-flex h-7.5 min-w-7.5 items-center justify-center rounded-full bg-[#424242] px-1.5 text-xs leading-none text-white @max-[560px]/calendar:h-5 @max-[560px]/calendar:min-w-5 @max-[560px]/calendar:px-1 @max-[560px]/calendar:text-2xs">
+        <span className="relative shrink-0 inline-flex items-center justify-center">
+          {isToday && (
+            <span
+              className="pointer-events-none absolute top-1/2 left-1/2 h-5.5 w-5.5 min-w-5.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#424242] @max-[560px]/calendar:h-4 @max-[560px]/calendar:w-4 @max-[560px]/calendar:min-w-4 @max-[400px]/calendar:h-3.5 @max-[400px]/calendar:w-3.5 @max-[400px]/calendar:min-w-3.5"
+              aria-hidden
+            />
+          )}
+          <span
+            className={cn(
+              'relative z-10 text-sm leading-none @max-[560px]/calendar:text-3xs',
+              isToday ? 'text-white' : 'text-[#1B1A17]',
+            )}
+          >
             {dayNum}
           </span>
-        ) : (
-          <span className="text-sm leading-none text-[#1B1A17] @max-[560px]/calendar:text-xs">
-            {dayNum}
-          </span>
-        )}
-        {isLoading && !outOfMonth ? (
-          <span className="h-4 w-12 animate-pulse rounded bg-[#E9E6DD] @max-[560px]/calendar:h-3 @max-[560px]/calendar:w-8" />
-        ) : (
-          <ProjectCountBadge count={count} />
-        )}
+        </span>
+        <div className="@max-[1100px]/calendar:flex @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:flex-1 @max-[1100px]/calendar:flex-col @max-[1100px]/calendar:items-center @max-[1100px]/calendar:justify-center">
+          {isLoading && !outOfMonth ? (
+            <span className="h-4 w-12 animate-pulse rounded bg-[#E9E6DD] @max-[560px]/calendar:h-3 @max-[560px]/calendar:w-8" />
+          ) : (
+            <ProjectCountBadge count={count} />
+          )}
+        </div>
       </div>
     </button>
   )
