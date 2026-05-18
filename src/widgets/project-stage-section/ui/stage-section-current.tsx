@@ -108,11 +108,11 @@ export function StageSectionCurrent({
                 {...field}
                 value={(field.value as string) ?? ''}
                 placeholder={f.placeholder}
-                className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-[13px]"
+                className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
               />
             ) : f.type === 'select' ? (
               <Select value={(field.value as string) ?? ''} onValueChange={field.onChange}>
-                <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-[13px]">
+                <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
                   <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -128,7 +128,7 @@ export function StageSectionCurrent({
                 {...field}
                 value={(field.value as string) ?? ''}
                 placeholder={f.placeholder}
-                className="h-9 rounded-[10px] border-[#B1B1B1] text-[13px]"
+                className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
               />
             )}
           </FormControl>
@@ -153,7 +153,7 @@ export function StageSectionCurrent({
                 type="button"
                 variant="outline"
                 onClick={handleReady}
-                className="text-funnel-preproject hover:text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 h-[38px] rounded-[10px] bg-[#E9ECFF] px-4 text-[13px]"
+                className="text-funnel-preproject hover:text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 h-[38px] rounded-[10px] bg-[#E9ECFF] px-4 text-sm"
               >
                 Готов к проведению
               </Button>
@@ -161,7 +161,7 @@ export function StageSectionCurrent({
             <Button
               type="button"
               onClick={handleAdvance}
-              className="h-[38px] rounded-[10px] px-4 text-[13px]"
+              className="h-[38px] rounded-[10px] px-4 text-sm"
             >
               Следующий этап
               <ArrowRight className="size-3.5" />

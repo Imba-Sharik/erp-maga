@@ -146,7 +146,7 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="text-muted-foreground text-[11px] tracking-wide uppercase">
+                <DropdownMenuLabel className="text-muted-foreground text-2xs tracking-wide uppercase">
                   Войти как (dev)
                 </DropdownMenuLabel>
                 <DropdownMenuRadioGroup

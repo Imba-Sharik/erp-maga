@@ -17,7 +17,7 @@ export function AppBreadcrumb() {
 
   return (
     <Breadcrumb>
-      <BreadcrumbList className="gap-1.5 text-[13px] sm:gap-1.5">
+      <BreadcrumbList className="gap-1.5 text-sm sm:gap-1.5">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1
           const isFirst = index === 0

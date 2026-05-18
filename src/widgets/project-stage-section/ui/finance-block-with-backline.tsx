@@ -31,7 +31,7 @@ function ReadonlyBox({
     <div
       title={isSystem ? 'Заполнено системой' : undefined}
       className={cn(
-        'flex h-9 items-center rounded-[10px] border px-3 text-[13px]',
+        'flex h-9 items-center rounded-[10px] border px-3 text-sm',
         align === 'center' ? 'justify-center' : 'justify-start',
         isSystem
           ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
@@ -171,7 +171,7 @@ export function FinanceBlockWithBackline({
                       <button
                         type="button"
                         disabled
-                        className="text-funnel-closing border-funnel-closing/40 bg-funnel-closing/10 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border px-3 text-[13px] font-medium"
+                        className="text-funnel-closing border-funnel-closing/40 bg-funnel-closing/10 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
                       >
                         <Check className="size-3.5" />
                         Бэклайн добавлен
@@ -180,7 +180,7 @@ export function FinanceBlockWithBackline({
                       <button
                         type="button"
                         onClick={() => setBacklineAdded(true)}
-                        className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-[13px] font-medium"
+                        className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-sm font-medium"
                       >
                         <Plus className="size-3.5" />
                         Добавить бэклайн
@@ -208,7 +208,7 @@ export function FinanceBlockWithBackline({
                       <button
                         type="button"
                         onClick={() => setBacklineAdded(false)}
-                        className="inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-[13px] font-medium text-red-600 transition-colors hover:bg-red-50"
+                        className="inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
                       >
                         <Trash2 className="size-3.5" />
                         Удалить бэклайн
@@ -246,7 +246,7 @@ export function ExpensesCommentField({ canEdit }: { canEdit: boolean }) {
     <StageFieldShell label="Комментарий к расходам">
       <div
         className={cn(
-          'flex min-h-[90px] w-full items-start rounded-[10px] border px-3 py-2 text-[13px]',
+          'flex min-h-[90px] w-full items-start rounded-[10px] border px-3 py-2 text-sm',
           canEdit
             ? 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]'
             : 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]',

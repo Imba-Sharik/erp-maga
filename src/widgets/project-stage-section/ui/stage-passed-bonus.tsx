@@ -53,7 +53,7 @@ function ReadonlyBox({
     <div
       title={isSystem ? 'Заполнено системой' : undefined}
       className={cn(
-        'flex h-9 items-center gap-2 rounded-[10px] border px-3 text-[13px]',
+        'flex h-9 items-center gap-2 rounded-[10px] border px-3 text-sm',
         align === 'center' ? 'justify-center' : 'justify-start',
         isSystem
           ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
@@ -68,7 +68,7 @@ function ReadonlyBox({
 }
 
 function Operator({ children }: { children: string }) {
-  return <span className="text-[#6B6B6B] text-[13px] font-medium px-1">{children}</span>
+  return <span className="text-[#6B6B6B] text-sm font-medium px-1">{children}</span>
 }
 
 function ArticleRow({ row, bonusSource }: { row: BonusRow; bonusSource: Source }) {
