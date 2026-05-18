@@ -72,7 +72,7 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
           </span>
           Карточка в PLUM
         </a>
-        <span className="text-[10px] text-[#ACACAC]">{project.lastUpdate}</span>
+        <span className="text-2xs text-[#ACACAC]">{project.lastUpdate}</span>
       </div>
     </Card>
   )

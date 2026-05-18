@@ -20,7 +20,7 @@ export function KvRow({ label, value, valueClassName }: KvRowProps) {
   const display = isEmptyValue(value) ? EMPTY : value
 
   return (
-    <div className="flex items-center justify-between gap-3 py-3 text-[13px]">
+    <div className="flex items-center justify-between gap-3 py-3 text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span className={cn('text-right font-medium text-[#1B1A17]', valueClassName)}>{display}</span>
     </div>

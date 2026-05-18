@@ -23,7 +23,7 @@ export function ProjectHeader({ project }: { project: ProjectDetail }) {
         <h1 className="text-2xl font-bold text-[#1B1A17]">{project.title}</h1>
         <PlumLink href={project.plumCardUrl} />
       </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Текущий этап</span>
           <ProjectStageBadge stage={project.stage} />
