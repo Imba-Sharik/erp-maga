@@ -34,7 +34,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     { name: 'contactPerson', label: 'Контактное лицо', type: 'text', source: 'manager', required: true, mockValue: 'Ленин Сталин Марксович' },
     { name: 'email', label: 'Email', type: 'text', source: 'manager', required: true, mockValue: 'client@gmail.com' },
   ],
-  first_contact: [
+  primary_contact_done: [
     {
       name: 'contactComment',
       label: 'Комментарий по контакту',
@@ -71,7 +71,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       mockValue: 'messenger',
     },
   ],
-  calc_ready: [
+  calculation_prepared: [
     {
       name: 'calcComment',
       label: 'Комментарий к расчёту',
@@ -95,7 +95,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       mockValue: '2026-05-09',
     },
   ],
-  signed: [
+  contract_signed: [
     {
       name: 'contractType',
       label: 'Тип договора',
@@ -157,7 +157,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       mockValue: '2026-05-09',
     },
   ],
-  ready: [
+  ready_to_event: [
     { name: 'salesMainTotal', label: 'Итого продажи (основной блок)', type: 'text', source: 'system', mockValue: '1 718 000 ₽' },
     { name: 'salesBacklineTotal', label: 'Итого продажи бэклайна', type: 'text', source: 'system', mockValue: '220 000 ₽' },
     { name: 'salesProjectTotal', label: 'Итого продажи проекта', type: 'text', source: 'system', mockValue: '1 938 000 ₽' },
@@ -366,10 +366,10 @@ export interface PassedExtra {
 
 export const PASSED_EXTRAS: Record<ProjectStage, PassedExtra[]> = {
   plum_request: [],
-  first_contact: [],
-  calc_ready: [],
-  signed: [],
-  ready: [],
+  primary_contact_done: [],
+  calculation_prepared: [],
+  contract_signed: [],
+  ready_to_event: [],
   event_held: [],
   expenses_entered: [],
   documents_confirmed: [],

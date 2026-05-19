@@ -53,7 +53,7 @@ export function ProjectStageSection({
   }
 
   // Этапы с финансовыми блоками — собственная вёрстка
-  if (stage === 'ready') {
+  if (stage === 'ready_to_event') {
     return <StagePassedReady isCurrent={isCurrent} record={record} {...financeProps} />
   }
   if (stage === 'expenses_entered') {
