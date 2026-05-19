@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import type { Project, ProjectBackOrigin } from '../model/types'
+import { ProjectTelegramLink } from './project-telegram-link'
 
 interface ProjectPipelineCardProps {
   project: Project
@@ -62,16 +63,7 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
       <p className="text-xs text-[#ACACAC]">
         Телефон: <span className="text-funnel-preproject">{project.phone}</span>
       </p>
-      <p className="text-xs text-[#ACACAC]">
-        Email:{' '}
-        <a
-          href={`mailto:${project.email}`}
-          onClick={stop}
-          className="text-funnel-preproject underline-offset-2 hover:underline"
-        >
-          {project.email}
-        </a>
-      </p>
+      <ProjectTelegramLink phone={project.phone} onClick={stop} />
 
       <div className="mt-1 flex items-center justify-between gap-2">
         <a
