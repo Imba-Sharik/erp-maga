@@ -1,3 +1,4 @@
+import { ACCESS_TOKEN_KEY } from '@/entities/session'
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 export const axiosInstance = axios.create({
@@ -6,8 +7,10 @@ export const axiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY)
+  if (!token) return config
+
+  config.headers.set('Authorization', `Bearer ${token}`)
   return config
 })
 
