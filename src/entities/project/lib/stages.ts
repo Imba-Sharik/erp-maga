@@ -4,10 +4,10 @@ import { CLOSING_STAGE_LABELS, CLOSING_STAGE_ORDER } from './closing-stages'
 
 export const STAGE_ORDER: readonly PreprojectStage[] = [
   'plum_request',
-  'first_contact',
-  'calc_ready',
-  'signed',
-  'ready',
+  'primary_contact_done',
+  'calculation_prepared',
+  'contract_signed',
+  'ready_to_event',
 ] as const
 
 export const PRE_PROJECT_STAGES = STAGE_ORDER
@@ -22,10 +22,10 @@ export const ALL_STAGE_ORDER: readonly ProjectStage[] = [
 
 export const STAGE_LABELS: Record<PreprojectStage, string> = {
   plum_request: 'Заявка из PLUM',
-  first_contact: 'Первич. контакт выполнен',
-  calc_ready: 'Расчёт подготовлен',
-  signed: 'Договор подписан',
-  ready: 'Готов к проведению',
+  primary_contact_done: 'Первич. контакт выполнен',
+  calculation_prepared: 'Расчёт подготовлен',
+  contract_signed: 'Договор подписан',
+  ready_to_event: 'Готов к проведению',
 }
 
 export const ALL_STAGE_LABELS: Record<ProjectStage, string> = {
@@ -35,10 +35,10 @@ export const ALL_STAGE_LABELS: Record<ProjectStage, string> = {
 
 export const STAGE_FUNNEL: Record<ProjectStage, StageFunnel> = {
   plum_request: 'pre_project',
-  first_contact: 'pre_project',
-  calc_ready: 'pre_project',
-  signed: 'pre_project',
-  ready: 'pre_project',
+  primary_contact_done: 'pre_project',
+  calculation_prepared: 'pre_project',
+  contract_signed: 'pre_project',
+  ready_to_event: 'pre_project',
   event_held: 'closing',
   expenses_entered: 'closing',
   documents_confirmed: 'closing',
@@ -62,10 +62,10 @@ export type ProjectsByStage = Record<PreprojectStage, Project[]>
 export function groupByStage(projects: Project[]): ProjectsByStage {
   const acc: ProjectsByStage = {
     plum_request: [],
-    first_contact: [],
-    calc_ready: [],
-    signed: [],
-    ready: [],
+    primary_contact_done: [],
+    calculation_prepared: [],
+    contract_signed: [],
+    ready_to_event: [],
   }
   for (const p of projects) {
     if (!isPreprojectStage(p.stage)) continue

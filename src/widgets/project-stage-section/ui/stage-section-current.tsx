@@ -28,7 +28,7 @@ import { canEditStage } from '../lib/stage-permissions'
 import { StageDateField } from './stage-date-field'
 import { StageFieldReadonly } from './stage-field-readonly'
 
-type SignedSchema = (typeof stageFormSchemas)['signed']
+type SignedSchema = (typeof stageFormSchemas)['contract_signed']
 type SignedFormValues = z.infer<SignedSchema>
 
 function getDefaults(stage: ProjectStage, data: Partial<StageFormData>): SignedFormValues {
@@ -203,7 +203,7 @@ export function StageSectionCurrent({
               onClick={handleAdvance}
               className="h-[38px] rounded-[10px] px-4 text-sm"
             >
-              {stage === 'signed' ? 'Готов к проведению' : 'Следующий этап'}
+              {stage === 'contract_signed' ? 'Готов к проведению' : 'Следующий этап'}
               <ArrowRight className="size-3.5" />
             </Button>
           </div>

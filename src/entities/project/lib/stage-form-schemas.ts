@@ -12,16 +12,16 @@ export const stageFormSchemas = {
     email: required().email('Невалидный email'),
     createdAt: z.string().optional(),
   }),
-  first_contact: z.object({
+  primary_contact_done: z.object({
     contactComment: required(),
     contactChannel: z.enum(['messenger', 'phone', 'meeting'], {
       error: () => 'Выберите канал контакта',
     }),
   }),
-  calc_ready: z.object({
+  calculation_prepared: z.object({
     calcComment: required(),
   }),
-  signed: z.object({
+  contract_signed: z.object({
     contractType: z.enum(['with_vat', 'without_vat'], {
       error: () => 'Выберите тип договора',
     }),
@@ -30,7 +30,7 @@ export const stageFormSchemas = {
     legalEntity: required(),
     contractComment: z.string().optional(),
   }),
-  ready: z.object({}),
+  ready_to_event: z.object({}),
   event_held: z.object({
     postEventComment: z.string().optional(),
   }),
