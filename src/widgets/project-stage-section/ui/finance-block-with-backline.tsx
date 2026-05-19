@@ -137,9 +137,7 @@ function ArticleRow({ kind, values, percent, aspect, editable, onChange }: Artic
             onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
           />
         ) : (
-          // DEMO: показываем как «заполняется менеджером» (solid bg), а не system,
-          // чтобы продакт видел разницу с системными полями (процент, итого, налог).
-          <ReadonlyBox value={formatMoney(values[aspect])} source="manager" />
+          <ReadonlyBox value={formatMoney(values[aspect])} source="system" />
         )}
         <ReadonlyBox value={formatPercent(percent)} source="system" align="center" />
       </div>
