@@ -4,9 +4,12 @@ import {
   endOfWeek,
   format,
   isSameDay,
+  parse,
   startOfMonth,
   startOfWeek,
 } from 'date-fns'
+import { mergeDates, removeDates } from '@/widgets/project-calendar/lib/date-range'
+import type { PaintMode } from '@/widgets/project-calendar/lib/use-calendar-paint-select'
 import {
   countProjectsInMonth,
   getProjectsForDates,
@@ -50,10 +53,7 @@ export function CalendarPage() {
     event_date_before,
     limit: 100,
   })
-  const projects = useMemo(
-    () => (data ? mapBackendProjects(data.results) : []),
-    [data],
-  )
+  const projects = useMemo(() => (data ? mapBackendProjects(data.results) : []), [data])
 
   const projectsByDay = useMemo(
     () =>
@@ -78,6 +78,13 @@ export function CalendarPage() {
 
   const removeSelectedDate = useCallback((date: Date) => {
     setSelectedDates((prev) => prev.filter((d) => !isSameDay(d, date)))
+  }, [])
+
+  const applyPaintedDates = useCallback((keys: string[], mode: PaintMode) => {
+    const dates = keys.map((key) => parse(key, 'yyyy-MM-dd', new Date()))
+    setSelectedDates((prev) =>
+      mode === 'add' ? mergeDates(prev, dates) : removeDates(prev, dates),
+    )
   }, [])
 
   const scheduleDays = useMemo(
@@ -120,6 +127,7 @@ export function CalendarPage() {
             hall={hall}
             onChangeMonth={setVisibleMonth}
             onToggleDate={toggleSelectedDate}
+            onPaintDates={applyPaintedDates}
             onChangeLoft={setLoft}
             onChangeHall={setHall}
             totalThisMonth={totalThisMonth}

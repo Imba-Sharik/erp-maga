@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { pluralProjects, toDayKey, type ProjectsByDay } from '@/entities/project'
+import type { PaintMode } from '../lib/use-calendar-paint-select'
 import { CalendarGrid } from './calendar-grid'
 import { CalendarToolbar } from './calendar-toolbar'
 
@@ -14,6 +15,7 @@ interface ProjectCalendarProps {
   hall: string | null
   onChangeMonth: (date: Date) => void
   onToggleDate: (date: Date) => void
+  onPaintDates: (keys: string[], mode: PaintMode) => void
   onChangeLoft: (loft: string | null) => void
   onChangeHall: (hall: string | null) => void
   totalThisMonth: number
@@ -32,6 +34,7 @@ export function ProjectCalendar({
   hall,
   onChangeMonth,
   onToggleDate,
+  onPaintDates,
   onChangeLoft,
   onChangeHall,
   totalThisMonth,
@@ -62,6 +65,7 @@ export function ProjectCalendar({
         today={today}
         projectsByDay={projectsByDay}
         onToggleDate={onToggleDate}
+        onPaintDates={onPaintDates}
         isLoading={isLoading}
       />
       <p className="text-right text-sm text-[#ACACAC]">

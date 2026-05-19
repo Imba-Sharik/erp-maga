@@ -46,12 +46,11 @@ export function DaySchedule({ scheduleDays, maxHeightPx, onRemoveSelectedDay }: 
             </p>
           ) : (
             <div className="flex flex-col gap-5">
-              {scheduleDays.map((row, idx) => (
+              {scheduleDays.map((row) => (
                 <ScheduleDaySection
                   key={row.key}
                   date={row.date}
                   projects={row.projects}
-                  withDivider={idx < daysSelectedCount - 1}
                   onRemoveSelectedDay={onRemoveSelectedDay}
                 />
               ))}

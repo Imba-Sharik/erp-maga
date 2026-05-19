@@ -1,7 +1,9 @@
 import { isSameDay } from 'date-fns'
 import { Card } from '@/shared/ui/card'
 import type { ProjectsByDay } from '@/entities/project'
+import { cn } from '@/shared/lib/utils'
 import { buildMonthMatrix, WEEKDAYS_RU } from '../lib/build-month-matrix'
+import { useCalendarPaintSelect, type PaintMode } from '../lib/use-calendar-paint-select'
 import { DayCell } from './day-cell'
 
 interface CalendarGridProps {
@@ -10,6 +12,7 @@ interface CalendarGridProps {
   today: Date
   projectsByDay: ProjectsByDay
   onToggleDate: (date: Date) => void
+  onPaintDates: (keys: string[], mode: PaintMode) => void
   isLoading?: boolean
 }
 
@@ -19,9 +22,21 @@ export function CalendarGrid({
   today,
   projectsByDay,
   onToggleDate,
+  onPaintDates,
   isLoading = false,
 }: CalendarGridProps) {
   const days = buildMonthMatrix(visibleMonth)
+
+  const {
+    effectiveSelectedKeys,
+    isDragging,
+    handleDayPointerDown,
+    handleDayPointerEnter,
+    shouldSuppressClick,
+  } = useCalendarPaintSelect({
+    selectedKeys,
+    onPaintCommit: onPaintDates,
+  })
 
   return (
     <Card className="gap-0 overflow-hidden border-[#B1B1B1] py-0 shadow-none">
@@ -33,7 +48,7 @@ export function CalendarGrid({
         ))}
       </div>
 
-      <div className="grid grid-cols-7">
+      <div className={cn('grid grid-cols-7', isDragging && 'select-none')}>
         {days.map((day, i) => {
           const count = projectsByDay.get(day.key)?.length ?? 0
           const colIdx = i % 7
@@ -41,12 +56,18 @@ export function CalendarGrid({
           return (
             <DayCell
               key={day.key}
+              dayKey={day.key}
               dayNum={day.dayNum}
               outOfMonth={day.outOfMonth}
               isToday={isSameDay(day.date, today)}
-              isSelected={selectedKeys.has(day.key)}
+              isSelected={effectiveSelectedKeys.has(day.key)}
               count={count}
-              onSelect={() => onToggleDate(day.date)}
+              onSelect={() => {
+                if (shouldSuppressClick()) return
+                onToggleDate(day.date)
+              }}
+              onPointerDown={(event) => handleDayPointerDown(day.key, event)}
+              onPointerEnter={(event) => handleDayPointerEnter(day.key, event)}
               colIdx={colIdx}
               isLastRow={isLastRow}
               isLoading={isLoading}
