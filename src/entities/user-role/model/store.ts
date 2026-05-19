@@ -1,6 +1,8 @@
+import { applyDevSessionForRole } from '@/entities/session'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { USER_ROLE_STORAGE_KEY } from './constants'
 import type { UserRole } from './types'
 
 interface UserRoleState {
@@ -12,9 +14,17 @@ export const useUserRoleStore = create<UserRoleState>()(
   persist(
     (set) => ({
       role: 'manager',
-      setRole: (role) => set({ role }),
+      setRole: (role) => {
+        set({ role })
+        applyDevSessionForRole(role)
+      },
     }),
-    { name: 'erp-maga:user-role' },
+    {
+      name: USER_ROLE_STORAGE_KEY,
+      onRehydrateStorage: () => (state) => {
+        if (state) applyDevSessionForRole(state.role)
+      },
+    },
   ),
 )
 
