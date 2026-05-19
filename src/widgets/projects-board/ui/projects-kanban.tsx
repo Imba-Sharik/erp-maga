@@ -1,34 +1,24 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+
 import {
-  groupByStage,
   PRE_PROJECT_STAGES,
   STAGE_LABELS,
+  preprojectStageToApi,
   type PreprojectStage,
-  type Project,
 } from '@/entities/project'
 import { Card } from '@/shared/ui/card'
-import { ProjectsKanbanColumn } from './projects-kanban-column'
+
+import type { ProjectsFilter } from '../lib/filter-projects'
+import type { BoardListParams } from '../lib/kanban-board-query'
+import { KanbanColumnWithQuery } from './kanban-column-with-query'
 
 interface ProjectsKanbanProps {
-  projects: Project[]
-  totalsByStage?: Partial<Record<PreprojectStage, number>>
-  filtersActive?: boolean
-  onLoadMore?: () => void
-  hasNextPage?: boolean
-  isFetchingNextPage?: boolean
+  listParams: BoardListParams
+  filter: ProjectsFilter
+  filtersActive: boolean
 }
 
-export function ProjectsKanban({
-  projects,
-  totalsByStage,
-  filtersActive = false,
-  onLoadMore,
-  hasNextPage,
-  isFetchingNextPage,
-}: ProjectsKanbanProps) {
-  const byStage = groupByStage(projects)
-  const firstStage = PRE_PROJECT_STAGES[0]
-
+export function ProjectsKanban({ listParams, filter, filtersActive }: ProjectsKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
       <OverlayScrollbarsComponent
@@ -43,23 +33,41 @@ export function ProjectsKanban({
         className="projects-kanban-scroll-area h-full min-h-0 w-full min-w-0 flex-1"
       >
         <div className="flex h-full min-w-fit divide-x divide-[#D3D3D3]">
-          {PRE_PROJECT_STAGES.map((stage) => {
-            const isFirst = stage === firstStage
-            return (
-              <ProjectsKanbanColumn
-                key={stage}
-                title={STAGE_LABELS[stage]}
-                projects={byStage[stage]}
-                backendTotalCount={totalsByStage?.[stage]}
-                filtersActive={filtersActive}
-                onLoadMore={isFirst ? onLoadMore : undefined}
-                hasNextPage={isFirst ? hasNextPage : false}
-                isFetchingNextPage={isFirst ? isFetchingNextPage : false}
-              />
-            )
-          })}
+          {PRE_PROJECT_STAGES.map((stage) => (
+            <ProjectsKanbanColumnItem
+              key={stage}
+              stage={stage}
+              listParams={listParams}
+              filter={filter}
+              filtersActive={filtersActive}
+            />
+          ))}
         </div>
       </OverlayScrollbarsComponent>
     </Card>
+  )
+}
+
+function ProjectsKanbanColumnItem({
+  stage,
+  listParams,
+  filter,
+  filtersActive,
+}: {
+  stage: PreprojectStage
+  listParams: BoardListParams
+  filter: ProjectsFilter
+  filtersActive: boolean
+}) {
+  return (
+    <KanbanColumnWithQuery
+      variant="preproject"
+      scope="board-preproject"
+      apiStage={preprojectStageToApi(stage)}
+      title={STAGE_LABELS[stage]}
+      listParams={listParams}
+      filter={filter}
+      filtersActive={filtersActive}
+    />
   )
 }

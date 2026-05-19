@@ -1,42 +1,22 @@
 import { useMemo, useState } from 'react'
-import { type Project } from '@/entities/project'
-import { filterProjects } from '../lib/filter-projects'
-import { useProjectsBoardStageCounts } from '../lib/use-projects-board-stage-counts'
+
+import type { BoardListParams } from '../lib/kanban-board-query'
 import { ProjectsBoardToolbar } from './projects-board-toolbar'
 import { ProjectsKanban } from './projects-kanban'
 
 interface ProjectsBoardProps {
-  projects: Project[]
-  listDateParams: { event_date_after?: string; event_date_before?: string }
-  onLoadMore?: () => void
-  hasNextPage?: boolean
-  isFetchingNextPage?: boolean
+  listDateParams: BoardListParams
 }
 
-export function ProjectsBoard({
-  projects,
-  listDateParams,
-  onLoadMore,
-  hasNextPage,
-  isFetchingNextPage,
-}: ProjectsBoardProps) {
+export function ProjectsBoard({ listDateParams }: ProjectsBoardProps) {
   const [search, setSearch] = useState('')
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
 
-  const filtersActive =
-    search.trim() !== '' || city !== null || hall !== null || loft !== null
+  const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
 
-  const { totalsByStage } = useProjectsBoardStageCounts({
-    ...listDateParams,
-    enabled: true,
-  })
-
-  const filtered = useMemo(
-    () => filterProjects(projects, { search, city, hall, loft }),
-    [projects, search, city, hall, loft],
-  )
+  const filter = useMemo(() => ({ search, city, hall, loft }), [search, city, hall, loft])
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
@@ -51,14 +31,7 @@ export function ProjectsBoard({
         onChangeLoft={setLoft}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ProjectsKanban
-          projects={filtered}
-          totalsByStage={totalsByStage}
-          filtersActive={filtersActive}
-          onLoadMore={onLoadMore}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-        />
+        <ProjectsKanban listParams={listDateParams} filter={filter} filtersActive={filtersActive} />
       </div>
     </div>
   )

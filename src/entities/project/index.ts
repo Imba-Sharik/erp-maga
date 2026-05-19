@@ -18,6 +18,8 @@ export type {
 } from './model/types'
 export { mapBackendProject, mapBackendProjects, mapBackendProjectDetail } from './lib/from-backend'
 export { PREPROJECT_STAGE_TO_API, preprojectStageToApi } from './lib/preproject-stage-api'
+export { CLOSING_STAGE_TO_API, closingStageToApi } from './lib/closing-stage-api'
+export { projectStageToApi } from './lib/project-stage-api'
 export {
   stageFormSchemas,
   contactChannelLabels,

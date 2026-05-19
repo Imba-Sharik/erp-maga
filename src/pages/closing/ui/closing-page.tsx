@@ -1,18 +1,10 @@
 import { useMemo } from 'react'
 
-import { mapBackendProjects } from '@/entities/project'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { ClosingBoard } from '@/widgets/closing-board'
-import { useProjectsBoardQuery } from '@/widgets/projects-board'
 
 export function ClosingPage() {
-  const eventDateAfter = useMemo(() => toIsoLocalDay(new Date()), [])
-  const query = useProjectsBoardQuery({ event_date_after: eventDateAfter })
-
-  const projects = useMemo(() => {
-    const raw = query.data?.pages.flatMap((p) => p.results) ?? []
-    return mapBackendProjects(raw).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
-  }, [query.data])
+  const listDateParams = useMemo(() => ({ event_date_after: toIsoLocalDay(new Date()) }), [])
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
@@ -25,18 +17,7 @@ export function ClosingPage() {
         </div>
       </header>
 
-      {query.isError ? (
-        <p className="text-sm text-red-600">Не удалось загрузить проекты.</p>
-      ) : query.isLoading ? (
-        <p className="text-sm text-[#ACACAC]">Загружаем проекты…</p>
-      ) : (
-        <ClosingBoard
-          projects={projects}
-          onLoadMore={() => query.fetchNextPage()}
-          hasNextPage={query.hasNextPage}
-          isFetchingNextPage={query.isFetchingNextPage}
-        />
-      )}
+      <ClosingBoard listDateParams={listDateParams} />
     </div>
   )
 }
