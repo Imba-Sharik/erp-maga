@@ -41,7 +41,7 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
               aria-label="Меню проекта"
               onClick={stop}
               onPointerDown={stop}
-              className="-m-1 shrink-0 rounded p-1 text-[#454545] hover:opacity-70"
+              className="-m-1 shrink-0 cursor-pointer rounded p-1 text-[#454545] transition-colors hover:bg-[#E9E6DD]"
             >
               <MoreVertical className="size-4" />
             </button>

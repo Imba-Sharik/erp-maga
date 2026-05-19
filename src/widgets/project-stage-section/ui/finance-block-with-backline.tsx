@@ -92,7 +92,7 @@ function PercentInput({
       inputMode="decimal"
       value={display}
       placeholder="0%"
-      onChange={(e) => onCommit(parsePercent(e.target.value))}
+      onChange={(e) => onCommit(Math.min(100, parsePercent(e.target.value)))}
       className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
     />
   )
