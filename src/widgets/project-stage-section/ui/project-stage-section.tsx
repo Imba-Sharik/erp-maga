@@ -1,5 +1,4 @@
 import type { ProjectDetail, ProjectStage, StageFormData } from '@/entities/project'
-import { isPreprojectStage } from '@/entities/project'
 import type {
   ArticleBlock,
   ArticleKind,
@@ -20,11 +19,14 @@ interface ProjectStageSectionProps {
   isCurrent: boolean
   record: StageRecord | undefined
   onAdvance: (values?: Partial<StageFormData>) => void
+  onPatchValues: (patch: Partial<StageFormData>) => void
   articles: ProjectArticles
   taxRate: number
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onTaxRateChange: (rate: number) => void
   onToggleBackline: () => void
+  /** Получить запись произвольного этапа (например, `data_confirmed` для отображения «Кто подтвердил» на этапе бонуса). */
+  getRecord: (stage: ProjectStage) => StageRecord | undefined
 }
 
 export function ProjectStageSection({
@@ -33,11 +35,13 @@ export function ProjectStageSection({
   isCurrent,
   record,
   onAdvance,
+  onPatchValues,
   articles,
   taxRate,
   onArticleChange,
   onTaxRateChange,
   onToggleBackline,
+  getRecord,
 }: ProjectStageSectionProps) {
   const financeProps = {
     articles,
@@ -56,17 +60,27 @@ export function ProjectStageSection({
     return <StagePassedExpenses isCurrent={isCurrent} record={record} {...financeProps} />
   }
   if (stage === 'bonus_calculated') {
-    return <StagePassedBonus isCurrent={isCurrent} onAdvance={onAdvance} />
+    return (
+      <StagePassedBonus
+        isCurrent={isCurrent}
+        articles={articles}
+        dataConfirmedRecord={getRecord('data_confirmed')}
+        onArticleChange={onArticleChange}
+        onAdvance={onAdvance}
+      />
+    )
   }
 
-  // Текущий этап предпроектной воронки — форма с валидацией
-  if (isCurrent && isPreprojectStage(stage)) {
+  // Текущий этап с RHF-формой (все, кроме финансовых блоков)
+  if (isCurrent) {
     return (
       <StageSectionCurrent
         project={project}
         stage={stage}
         record={record}
+        articles={articles}
         onAdvance={onAdvance}
+        onPatchValues={onPatchValues}
       />
     )
   }
@@ -78,6 +92,7 @@ export function ProjectStageSection({
       stage={stage}
       isCurrent={isCurrent}
       record={record}
+      articles={articles}
       onAdvance={onAdvance}
     />
   )

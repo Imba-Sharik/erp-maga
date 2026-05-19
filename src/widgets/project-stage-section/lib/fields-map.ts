@@ -26,11 +26,6 @@ const docStatusOptions = [
   { value: 'not_required', label: 'Не требуется' },
 ]
 
-const readinessOptions = [
-  { value: 'ready', label: 'Был готов' },
-  { value: 'not_ready', label: 'Не был готов к проведению' },
-]
-
 export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   plum_request: [
     { name: 'clientCompany', label: 'Клиент', type: 'text', source: 'manager', required: true, mockValue: 'Иванов Иван Иванович' },
@@ -197,10 +192,9 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     {
       name: 'eventReadiness',
       label: 'Статус готовности к проведению',
-      type: 'select',
+      type: 'text',
       source: 'system',
-      options: readinessOptions,
-      mockValue: 'ready',
+      mockValue: 'Был готов',
     },
   ],
   expenses_entered: [
@@ -239,21 +233,18 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       required: true,
       source: 'manager',
       options: docStatusOptions,
-      mockValue: 'absent',
     },
     {
       name: 'projectDocsConfirmedAt',
       label: 'Дата подтверждения документа',
       type: 'date',
       source: 'system',
-      mockValue: '2026-05-09',
     },
     {
       name: 'projectDocsConfirmedBy',
       label: 'Кто подтвердил',
       type: 'text',
       source: 'system',
-      mockValue: 'Иванова Анна Алексеевна',
     },
     {
       name: 'subleaseDocsStatus',
@@ -262,21 +253,18 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       required: true,
       source: 'manager',
       options: docStatusOptions,
-      mockValue: 'absent',
     },
     {
       name: 'subleaseDocsConfirmedAt',
       label: 'Дата подтверждения документа',
       type: 'date',
       source: 'system',
-      mockValue: '2026-05-09',
     },
     {
       name: 'subleaseDocsConfirmedBy',
       label: 'Кто подтвердил',
       type: 'text',
       source: 'system',
-      mockValue: 'Иванова Анна Алексеевна',
     },
     {
       name: 'staffReceiptsStatus',
@@ -285,21 +273,18 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       required: true,
       source: 'manager',
       options: docStatusOptions,
-      mockValue: 'absent',
     },
     {
       name: 'staffReceiptsConfirmedAt',
       label: 'Дата подтверждения документа',
       type: 'date',
       source: 'system',
-      mockValue: '2026-05-09',
     },
     {
       name: 'staffReceiptsConfirmedBy',
       label: 'Кто подтвердил',
       type: 'text',
       source: 'system',
-      mockValue: 'Иванова Анна Алексеевна',
     },
   ],
   data_confirmed: [
@@ -320,14 +305,12 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       label: 'Дата подтверждения данных',
       type: 'date',
       source: 'system',
-      mockValue: '2026-05-09',
     },
     {
       name: 'dataConfirmedBy',
       label: 'Кто подтвердил',
       type: 'text',
       source: 'system',
-      mockValue: 'Петров Пётр Петрович',
     },
   ],
   bonus_calculated: [
@@ -344,7 +327,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       label: 'Итоговый бонус',
       type: 'text',
       source: 'system',
-      mockValue: '443 330 ₽',
     },
     {
       name: 'bonusApprovedAt',
@@ -367,14 +349,12 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       label: 'Дата закрытия',
       type: 'date',
       source: 'system',
-      mockValue: '2026-05-09',
     },
     {
       name: 'leadManager',
       label: 'Ведущий менеджер',
       type: 'text',
       source: 'system',
-      mockValue: 'Петров Пётр Петрович',
     },
   ],
 }

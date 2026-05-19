@@ -2,6 +2,7 @@ import type {
   ArticleBlock,
   ArticleKind,
   ArticlesBlockMap,
+  ArticleValues,
   ProjectArticles,
 } from '../model/types'
 
@@ -39,4 +40,24 @@ export function articlePercent(
 export function taxAmount(totalSales: number, taxRate: number): number {
   if (totalSales <= 0 || taxRate <= 0) return 0
   return (totalSales * taxRate) / 100
+}
+
+/**
+ * Бонус по одной статье: при override руководителя — возвращает override,
+ * иначе формула `(sales − expense) × bonusPercent / 100`.
+ */
+export function articleBonusAmount(values: ArticleValues): number {
+  const netProfit = values.sales - values.expense
+  const formula = (netProfit * values.bonusPercent) / 100
+  return values.bonusAmount ?? formula
+}
+
+/** Итоговый бонус по проекту: сумма `articleBonusAmount` по всем статьям (main + backline, если есть). */
+export function bonusTotal(articles: ProjectArticles): number {
+  let total = 0
+  for (const v of Object.values(articles.main)) total += articleBonusAmount(v)
+  if (articles.backline) {
+    for (const v of Object.values(articles.backline)) total += articleBonusAmount(v)
+  }
+  return total
 }

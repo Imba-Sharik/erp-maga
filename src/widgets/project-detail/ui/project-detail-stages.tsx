@@ -31,11 +31,13 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
   const sharedProps = {
     project,
     onAdvance: flow.advance,
+    onPatchValues: flow.patchCurrentStageValues,
     articles: flow.articles,
     taxRate: flow.taxRate,
     onArticleChange: flow.updateArticle,
     onTaxRateChange: flow.setTaxRate,
     onToggleBackline: flow.toggleBackline,
+    getRecord: flow.getRecord,
   }
 
   return (

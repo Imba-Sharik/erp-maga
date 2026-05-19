@@ -1,10 +1,16 @@
 import type { ProjectDetail, ProjectStage, StageFormData } from '@/entities/project'
+import {
+  bonusTotal,
+  formatMoney,
+  type ProjectArticles,
+} from '@/entities/project-articles'
 import type { StageRecord } from '@/features/advance-stage'
 
 interface ResolveContext {
   project: ProjectDetail
   stage: ProjectStage
   record?: StageRecord
+  articles?: ProjectArticles
 }
 
 /**
@@ -22,36 +28,49 @@ interface ResolveContext {
 export function resolveSystemValue(
   fieldName: keyof StageFormData,
   fallback: string | undefined,
-  { project, stage, record }: ResolveContext,
+  { project, stage, record, articles }: ResolveContext,
 ): string | undefined {
   switch (fieldName) {
     case 'createdAt':
       return project.enteredSystemAt || fallback
 
+    case 'totalBonus':
+      // «Итоговый бонус» — сумма bonus_amount по всем статьям (с overrides директора).
+      if (articles) return formatMoney(bonusTotal(articles))
+      return fallback
+
     case 'eventDate':
       return project.date || fallback
 
     case 'leadManager':
+      // По ТЗ: на `bonus_calculated` («получатель бонуса») и `closed` («ведущий менеджер»)
+      // это всегда главный менеджер проекта, не автор транзишена.
       if (stage === 'bonus_calculated' || stage === 'closed') {
         return project.manager || fallback
       }
+      // На остальных этапах — «Статус перевёл менеджер» = автор входа в этап.
       return record?.enteredBy || project.manager || fallback
 
-    case 'contactedAt':
-    case 'closingFunnelEnteredAt':
     case 'projectDocsConfirmedAt':
     case 'subleaseDocsConfirmedAt':
     case 'staffReceiptsConfirmedAt':
     case 'dataConfirmedAt':
-    case 'bonusCalculatedAt':
-    case 'bonusApprovedAt':
-    case 'closedAt':
-      return record?.enteredAt || fallback
+      // Per-row штамп от select-onChange; если строка ещё не подтверждена — пусто.
+      return record?.values?.[fieldName] || fallback
 
     case 'projectDocsConfirmedBy':
     case 'subleaseDocsConfirmedBy':
     case 'staffReceiptsConfirmedBy':
     case 'dataConfirmedBy':
+      return record?.values?.[fieldName] || fallback
+
+    case 'contactedAt':
+    case 'closingFunnelEnteredAt':
+    case 'bonusCalculatedAt':
+    case 'bonusApprovedAt':
+    case 'closedAt':
+      return record?.enteredAt || fallback
+
     case 'bonusApprovedBy':
       return record?.enteredBy || fallback
 

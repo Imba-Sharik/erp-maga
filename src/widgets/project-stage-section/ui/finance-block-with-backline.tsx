@@ -6,7 +6,6 @@ import {
   blockTotal,
   formatMoney,
   formatPercent,
-  parseMoney,
   parsePercent,
   projectTotal,
   taxAmount,
@@ -28,6 +27,7 @@ import {
 import { Input } from '@/shared/ui/input'
 
 import { canEditStage } from '../lib/stage-permissions'
+import { MoneyInput } from './money-input'
 import { StageFieldShell } from './stage-field-shell'
 
 type Source = 'manager' | 'system'
@@ -78,26 +78,6 @@ function ReadonlyBox({
   )
 }
 
-/** Money-input для manager-полей. Цифры пропускаются, остальное игнорируется, форматирование живое. */
-function MoneyInput({
-  value,
-  onCommit,
-}: {
-  value: number
-  onCommit: (next: number) => void
-}) {
-  const display = value > 0 ? formatMoney(value) : ''
-  return (
-    <Input
-      inputMode="numeric"
-      value={display}
-      placeholder="0 ₽"
-      onChange={(e) => onCommit(parseMoney(e.target.value))}
-      className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
-    />
-  )
-}
-
 function PercentInput({
   value,
   onCommit,
@@ -105,7 +85,8 @@ function PercentInput({
   value: number
   onCommit: (next: number) => void
 }) {
-  const display = value > 0 ? formatPercent(value) : ''
+  // Незаполненное значение — это явный «0%» в поле, чтобы было видно, что налог будет 0.
+  const display = formatPercent(value)
   return (
     <Input
       inputMode="decimal"
@@ -137,9 +118,7 @@ function ArticleRow({ kind, values, percent, aspect, editable, onChange }: Artic
             onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
           />
         ) : (
-          // DEMO: показываем как «заполняется менеджером» (solid bg), а не system,
-          // чтобы продакт видел разницу с системными полями (процент, итого, налог).
-          <ReadonlyBox value={formatMoney(values[aspect])} source="manager" />
+          <ReadonlyBox value={formatMoney(values[aspect])} source="system" />
         )}
         <ReadonlyBox value={formatPercent(percent)} source="system" align="center" />
       </div>
