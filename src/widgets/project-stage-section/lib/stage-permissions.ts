@@ -7,10 +7,10 @@ const ALL_ROLES: readonly UserRole[] = ['manager', 'accountant', 'director']
 // добавлять новый этап сюда явно — иначе TS подсветит ошибку.
 const STAGE_EDIT_ROLES: Record<ProjectStage, readonly UserRole[]> = {
   plum_request: ALL_ROLES,
-  first_contact: ['manager', 'director'],
-  calc_ready: ['manager', 'director'],
-  signed: ['manager', 'director'],
-  ready: ['manager', 'director'],
+  primary_contact_done: ['manager', 'director'],
+  calculation_prepared: ['manager', 'director'],
+  contract_signed: ['manager', 'director'],
+  ready_to_event: ['manager', 'director'],
   event_held: ['manager', 'director'],
   expenses_entered: ['manager', 'director'],
   documents_confirmed: ['accountant'],

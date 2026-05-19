@@ -6,7 +6,12 @@ export type ProjectBackOrigin = {
 }
 
 /** Воронка до мероприятия (формы и канбан «Проекты»). */
-export type PreprojectStage = 'plum_request' | 'first_contact' | 'calc_ready' | 'signed' | 'ready'
+export type PreprojectStage =
+  | 'plum_request'
+  | 'primary_contact_done'
+  | 'calculation_prepared'
+  | 'contract_signed'
+  | 'ready_to_event'
 
 /**
  * Этапы закрытия после проведения (канбан «Закрытие»).
