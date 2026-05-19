@@ -48,8 +48,7 @@ export function useKanbanColumnQuery({
 
   const projects = useMemo(() => {
     const raw = query.data?.pages.flatMap((p) => p.results) ?? []
-    const mapped = mapBackendProjects(raw)
-    return mapped.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
+    return mapBackendProjects(raw)
   }, [query.data])
 
   const totalCount = query.data?.pages[0]?.count

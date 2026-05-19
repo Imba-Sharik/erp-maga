@@ -1,8 +1,8 @@
 import type { Project } from '@/shared/api/generated/types/Project'
 
-let mockIdSeq = -1
+let optimisticIdSeq = -1
 
-export function buildMockApiProject(params: {
+export function buildOptimisticProject(params: {
   event_name: string
   event_type: number
   event_type_label: string
@@ -12,13 +12,13 @@ export function buildMockApiProject(params: {
   mag_manager: string
 }): Project {
   const nowIso = new Date().toISOString()
-  const id = mockIdSeq--
+  const id = optimisticIdSeq--
   const clientId = `${id}_${Date.now()}`
 
   return {
     id,
-    plum_event_id: `mock-${clientId}`,
-    plum_card_url: 'https://example.com/mock-plum-card',
+    plum_event_id: `optimistic-${clientId}`,
+    plum_card_url: '',
     plum_last_synced_at: nowIso,
     plum_event_payload_hash: '',
     event_name: params.event_name.trim(),
@@ -31,8 +31,8 @@ export function buildMockApiProject(params: {
     hall_loft: params.hall,
     city: 'Москва',
     city_label: 'Москва',
-    plum_event_status: 'mock',
-    plum_event_status_label: 'Мок',
+    plum_event_status: '',
+    plum_event_status_label: '',
     plum_comment: '',
     plum_client_company: '',
     plum_contact_person: '',

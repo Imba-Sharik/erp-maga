@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useMemo } from 'react'
@@ -15,38 +14,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
-import { EVENT_TYPE_OPTIONS, getEventTypeLabelById } from '@/shared/constants/event-type-options'
+import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
 import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
-import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Input } from '@/shared/ui/input'
-import { buildMockApiProject } from '../lib/build-mock-api-project'
-import { prependMockProjectToProjectsQueries } from '../lib/prepends-mock-to-projects-queries-cache'
+
+import type { CreateProjectFormValues } from '../lib/create-project-form-values'
+import { useCreateProject } from '../model/use-create-project'
 
 const TRIGGER_CLASS =
   'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
 const formSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(1, 'Введите название проекта')
-    .max(500, 'Не длиннее 500 символов'),
+  title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
   eventType: z.string().min(1, 'Выберите тип мероприятия'),
   loft: z.string().min(1, 'Выберите лофт'),
   hall: z.string().min(1, 'Выберите зал'),
-})
-
-type FormValues = z.infer<typeof formSchema>
+}) satisfies z.ZodType<CreateProjectFormValues>
 
 export interface CreateProjectDialogProps {
   open: boolean
@@ -54,43 +40,31 @@ export interface CreateProjectDialogProps {
 }
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
-  const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
 
-  const previewDateLabel = useMemo(() => {
-    if (!open) return ''
-    return format(new Date(), 'd MMMM yyyy', { locale: ru })
-  }, [open])
-
-  const form = useForm<FormValues>({
+  const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { title: '', eventType: '', loft: '', hall: '' },
   })
 
-  const mutation = useMutation({
-    mutationFn: async (values: FormValues) => {
-      const event_date = toIsoLocalDay(new Date())
-      const eventTypeId = Number(values.eventType)
-      return buildMockApiProject({
-        event_name: values.title,
-        event_type: eventTypeId,
-        event_type_label: getEventTypeLabelById(values.eventType) ?? '',
-        loft: values.loft,
-        hall: values.hall,
-        event_date,
-        mag_manager: currentUser.fullName,
-      })
-    },
-    onSuccess: (project) => {
-      prependMockProjectToProjectsQueries(queryClient, project)
+  const {
+    create,
+    isPending,
+    isError,
+    errorMessage,
+    reset: resetMutation,
+  } = useCreateProject({
+    magManager: currentUser.fullName,
+    onCreated: () => {
       onOpenChange(false)
       form.reset()
     },
   })
 
-  function onSubmit(values: FormValues) {
-    mutation.mutate(values)
-  }
+  const previewDateLabel = useMemo(() => {
+    if (!open) return ''
+    return format(new Date(), 'd MMMM yyyy', { locale: ru })
+  }, [open])
 
   return (
     <Dialog
@@ -99,7 +73,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         onOpenChange(next)
         if (!next) {
           form.reset()
-          mutation.reset()
+          resetMutation()
         }
       }}
     >
@@ -107,14 +81,12 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         <DialogHeader>
           <DialogTitle className="font-heading text-[#1B1A17]">Новый проект</DialogTitle>
           <DialogDescription>
-            {previewDateLabel
-              ? `Дата мероприятия будет назначена: ${previewDateLabel}.`
-              : null}
+            {previewDateLabel ? `Дата мероприятия будет назначена: ${previewDateLabel}.` : null}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form onSubmit={form.handleSubmit(create)} className="flex flex-col gap-4">
             <FormField
               control={form.control}
               name="title"
@@ -193,22 +165,27 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
+            {isError && errorMessage ? (
+              <p className="text-destructive text-sm" role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
             <DialogFooter className="gap-2 sm:gap-2">
               <Button
                 type="button"
                 variant="outline"
                 className="rounded-[10px]"
                 onClick={() => onOpenChange(false)}
-                disabled={mutation.isPending}
+                disabled={isPending}
               >
                 Отмена
               </Button>
               <Button
                 type="submit"
                 className="rounded-[10px] bg-black text-white hover:bg-black/90"
-                disabled={mutation.isPending}
+                disabled={isPending}
               >
-                {mutation.isPending ? 'Создание…' : 'Создать'}
+                {isPending ? 'Создание…' : 'Создать'}
               </Button>
             </DialogFooter>
           </form>

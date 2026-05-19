@@ -168,30 +168,48 @@ export interface PrependProjectToCachesOptions {
   includeNonBoard?: boolean
 }
 
+function matchingProjectsListPredicate(
+  queryKey: readonly unknown[],
+  project: ApiProject,
+  options: PrependProjectToCachesOptions,
+): boolean {
+  const { boardApiStage, includeNonBoard = true } = options
+  const eventDate = project.event_date
+  const params = listParamsFromQueryKey(queryKey)
+  if (!eventDateMatchesListParams(eventDate, params)) return false
+
+  const first = queryKey[0]
+  if (isKanbanBoardQueryKey(first)) {
+    if (boardApiStage === undefined) return false
+    return first.apiStage === boardApiStage
+  }
+
+  return includeNonBoard
+}
+
 /** Добавить проект в подходящие кэши списков `/api/v1/projects/`. */
 export function prependProjectToMatchingCaches(
   queryClient: QueryClient,
   project: ApiProject,
   options: PrependProjectToCachesOptions = {},
 ): void {
-  const { boardApiStage, includeNonBoard = true } = options
-  const eventDate = project.event_date
-
   forEachMatchingProjectsListQuery(
     queryClient,
-    (queryKey) => {
-      const params = listParamsFromQueryKey(queryKey)
-      if (!eventDateMatchesListParams(eventDate, params)) return false
-
-      const first = queryKey[0]
-      if (isKanbanBoardQueryKey(first)) {
-        if (boardApiStage === undefined) return false
-        return first.apiStage === boardApiStage
-      }
-
-      return includeNonBoard
-    },
+    (queryKey) => matchingProjectsListPredicate(queryKey, project, options),
     (_queryKey, raw) => patchListCache(raw, project, 'prepend'),
+  )
+}
+
+/** Убрать проект из подходящих кэшей списков `/api/v1/projects/`. */
+export function removeProjectFromMatchingCaches(
+  queryClient: QueryClient,
+  project: ApiProject,
+  options: PrependProjectToCachesOptions = {},
+): void {
+  forEachMatchingProjectsListQuery(
+    queryClient,
+    (queryKey) => matchingProjectsListPredicate(queryKey, project, options),
+    (_queryKey, raw) => patchListCache(raw, project, 'remove'),
   )
 }
 
