@@ -80,7 +80,19 @@ paths:
   /api/v1/projects/:
     get:
       operationId: projects_list
+      description: 'Список проектов. Query: event_date_after, event_date_before, stage,
+        limit, offset.'
       parameters:
+      - in: query
+        name: event_date_after
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: event_date_before
+        schema:
+          type: string
+          format: date
       - name: limit
         required: false
         in: query
@@ -99,6 +111,42 @@ paths:
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - in: query
+        name: stage
+        schema:
+          type: string
+          enum:
+          - archived
+          - bonus_approved
+          - bonus_calculated
+          - calculation_prepared
+          - closed
+          - contract_signed
+          - data_confirmed
+          - documents_confirmed
+          - event_held
+          - expenses_entered
+          - feedback_received
+          - out_of_mag_scope
+          - plum_request
+          - primary_contact_done
+          - ready_to_event
+        description: |-
+          * `plum_request` - Заявка из Plum
+          * `primary_contact_done` - Первичный контакт выполнен
+          * `calculation_prepared` - Расчёт подготовлен
+          * `contract_signed` - Договор подписан
+          * `ready_to_event` - Готов к проведению
+          * `event_held` - Мероприятие проведено
+          * `expenses_entered` - Расходы внесены
+          * `documents_confirmed` - Документы подтверждены
+          * `feedback_received` - Обратная связь по проекту получена
+          * `data_confirmed` - Данные подтверждены
+          * `bonus_calculated` - Бонус рассчитан
+          * `bonus_approved` - Бонус утверждён
+          * `closed` - Проект закрыт
+          * `archived` - Архив
+          * `out_of_mag_scope` - Вне контура MAG
       tags:
       - projects
       security:
@@ -128,7 +176,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectDetail'
           description: ''
     put:
       operationId: projects_update
@@ -303,6 +351,23 @@ paths:
   /api/v1/projects/{id}/transition/:
     post:
       operationId: projects_transition_create
+      description: POST /transition/ — alias; предпочтительно /transitions/.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/{id}/transitions/:
+    post:
+      operationId: projects_transitions_create
       parameters:
       - in: path
         name: id
@@ -433,10 +498,6 @@ components:
           format: email
           title: Email (редактируемый)
           maxLength: 254
-        mag_manager:
-          type: integer
-          nullable: true
-          title: Менеджер MAG
     Project:
       type: object
       properties:
@@ -555,9 +616,8 @@ components:
           title: Email (редактируемый)
           maxLength: 254
         mag_manager:
-          type: integer
-          nullable: true
-          title: Менеджер MAG
+          type: string
+          readOnly: true
         mag_manager_email:
           type: string
           format: email
@@ -602,6 +662,7 @@ components:
       - hall_loft
       - id
       - last_active_stage
+      - mag_manager
       - mag_manager_email
       - plum_card_url
       - plum_client_company
@@ -621,6 +682,446 @@ components:
       - sync_error
       - updated_at
       - venue
+    ProjectDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plum_event_id:
+          type: string
+          readOnly: true
+          title: ID мероприятия Plum
+        plum_card_url:
+          type: string
+          format: uri
+          readOnly: true
+          title: Ссылка на карточку Plum
+        plum_last_synced_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата последней синхронизации
+        plum_event_payload_hash:
+          type: string
+          readOnly: true
+          title: SHA-256 нормализованного JSON мероприятия Plum
+        event_name:
+          type: string
+          readOnly: true
+          title: Название мероприятия
+        event_date:
+          type: string
+          format: date
+          readOnly: true
+          title: Дата мероприятия
+        venue:
+          type: string
+          readOnly: true
+          title: Площадка
+        hall_loft:
+          type: string
+          readOnly: true
+          title: Зал / лофт
+        city:
+          type: string
+          readOnly: true
+          title: Город
+        city_label:
+          type: string
+          readOnly: true
+        event_type:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Тип мероприятия Plum (код)
+        event_type_label:
+          type: string
+          readOnly: true
+        event_format:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Формат мероприятия Plum (код)
+        event_format_label:
+          type: string
+          readOnly: true
+        plum_event_status:
+          type: string
+          readOnly: true
+          title: Статус мероприятия в Plum
+        plum_event_status_label:
+          type: string
+          readOnly: true
+        plum_comment:
+          type: string
+          readOnly: true
+          title: Комментарий из Plum
+        plum_client_company:
+          type: string
+          readOnly: true
+          title: Клиент / название компании
+        plum_contact_person:
+          type: string
+          readOnly: true
+          title: Контактное лицо
+        plum_phone:
+          type: string
+          readOnly: true
+          title: Телефон
+        plum_email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email
+        plum_lofthall_manager:
+          type: string
+          readOnly: true
+          title: Менеджер LOFT HALL
+        plum_mag_manager:
+          type: string
+          readOnly: true
+          title: Менеджер MAG (Plum)
+        client_company:
+          type: string
+          readOnly: true
+          title: Клиент / название компании (редактируемое)
+        contact_person:
+          type: string
+          readOnly: true
+          title: Контактное лицо (редактируемое)
+        phone:
+          type: string
+          readOnly: true
+          title: Телефон (редактируемый)
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email (редактируемый)
+        mag_manager:
+          type: string
+          readOnly: true
+        mag_manager_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        stage:
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          readOnly: true
+          title: Стадия проекта
+        last_active_stage:
+          allOf:
+          - $ref: '#/components/schemas/LastActiveStageEnum'
+          readOnly: true
+          title: Последняя активная стадия
+        source_payload:
+          readOnly: true
+          title: Последний payload Plum
+        sync_error:
+          type: string
+          readOnly: true
+          title: Ошибка последней синхронизации
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата создания проекта в ERP
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        contact_comment:
+          type: string
+          readOnly: true
+        contact_channel:
+          type: string
+          nullable: true
+          readOnly: true
+        contacted_at:
+          type: string
+          readOnly: true
+        primary_contact_set_by:
+          type: string
+          readOnly: true
+        calculation_comment:
+          type: string
+          readOnly: true
+        calculation_prepared_at:
+          type: string
+          readOnly: true
+        calculation_prepared_set_by:
+          type: string
+          readOnly: true
+        contract_type:
+          type: string
+          readOnly: true
+        contract_number:
+          type: string
+          readOnly: true
+        contract_date:
+          type: string
+          readOnly: true
+        legal_entity:
+          type: string
+          readOnly: true
+        contract_comment:
+          type: string
+          readOnly: true
+        contract_signed_at:
+          type: string
+          readOnly: true
+        contract_signed_set_by:
+          type: string
+          readOnly: true
+        ready_to_event_at:
+          type: string
+          readOnly: true
+        ready_to_event_set_by:
+          type: string
+          readOnly: true
+        event_held_at:
+          type: string
+          readOnly: true
+        event_held_set_by:
+          type: string
+          readOnly: true
+        event_readiness:
+          type: boolean
+          readOnly: true
+        post_event_comment:
+          type: string
+          readOnly: true
+        expenses_entered_at:
+          type: string
+          readOnly: true
+        expenses_entered_set_by:
+          type: string
+          readOnly: true
+        expenses_comment:
+          type: string
+          readOnly: true
+        documents_confirmed_at:
+          type: string
+          readOnly: true
+        documents_confirmed_set_by:
+          type: string
+          readOnly: true
+        project_docs_status:
+          type: string
+          readOnly: true
+        project_docs_confirmed_at:
+          type: string
+          readOnly: true
+        project_docs_confirmed_by:
+          type: string
+          readOnly: true
+        sublease_docs_status:
+          type: string
+          readOnly: true
+        sublease_docs_confirmed_at:
+          type: string
+          readOnly: true
+        sublease_docs_confirmed_by:
+          type: string
+          readOnly: true
+        staff_receipts_status:
+          type: string
+          readOnly: true
+        staff_receipts_confirmed_at:
+          type: string
+          readOnly: true
+        staff_receipts_confirmed_by:
+          type: string
+          readOnly: true
+        data_confirmed_status:
+          type: string
+          nullable: true
+          readOnly: true
+        data_confirmation_at:
+          type: string
+          readOnly: true
+        data_confirmation_by:
+          type: string
+          readOnly: true
+        data_confirmed_at:
+          type: string
+          readOnly: true
+        data_confirmed_set_by:
+          type: string
+          readOnly: true
+        data_rejected:
+          type: boolean
+          readOnly: true
+        was_not_ready_for_event:
+          type: boolean
+          readOnly: true
+        bonus_calculated_at:
+          type: string
+          readOnly: true
+        bonus_calculated_set_by:
+          type: string
+          readOnly: true
+        net_profit_total:
+          type: number
+          format: double
+          readOnly: true
+        bonus_calculated_total:
+          type: number
+          format: double
+          readOnly: true
+        bonus_approved_total:
+          type: number
+          format: double
+          readOnly: true
+        bonus_approved_at:
+          type: string
+          readOnly: true
+        bonus_approved_by:
+          type: string
+          readOnly: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        closing_funnel_entered_at:
+          type: string
+          format: date-time
+          readOnly: true
+        sales_main_total:
+          type: number
+          format: double
+          readOnly: true
+        sales_backline_total:
+          type: number
+          format: double
+          readOnly: true
+        sales_project_total:
+          type: number
+          format: double
+          readOnly: true
+        tax_rate:
+          type: number
+          format: double
+          readOnly: true
+        tax_amount:
+          type: number
+          format: double
+          readOnly: true
+        expenses_main_total:
+          type: number
+          format: double
+          readOnly: true
+        expenses_backline_total:
+          type: number
+          format: double
+          readOnly: true
+        expenses_project_total:
+          type: number
+          format: double
+          readOnly: true
+        articles:
+          type: array
+          items: {}
+          readOnly: true
+      required:
+      - articles
+      - bonus_approved_at
+      - bonus_approved_by
+      - bonus_approved_total
+      - bonus_calculated_at
+      - bonus_calculated_set_by
+      - bonus_calculated_total
+      - calculation_comment
+      - calculation_prepared_at
+      - calculation_prepared_set_by
+      - city
+      - city_label
+      - client_company
+      - closed_at
+      - closing_funnel_entered_at
+      - contact_channel
+      - contact_comment
+      - contact_person
+      - contacted_at
+      - contract_comment
+      - contract_date
+      - contract_number
+      - contract_signed_at
+      - contract_signed_set_by
+      - contract_type
+      - created_at
+      - data_confirmation_at
+      - data_confirmation_by
+      - data_confirmed_at
+      - data_confirmed_set_by
+      - data_confirmed_status
+      - data_rejected
+      - documents_confirmed_at
+      - documents_confirmed_set_by
+      - email
+      - event_date
+      - event_format
+      - event_format_label
+      - event_held_at
+      - event_held_set_by
+      - event_name
+      - event_readiness
+      - event_type
+      - event_type_label
+      - expenses_backline_total
+      - expenses_comment
+      - expenses_entered_at
+      - expenses_entered_set_by
+      - expenses_main_total
+      - expenses_project_total
+      - hall_loft
+      - id
+      - last_active_stage
+      - legal_entity
+      - mag_manager
+      - mag_manager_email
+      - net_profit_total
+      - phone
+      - plum_card_url
+      - plum_client_company
+      - plum_comment
+      - plum_contact_person
+      - plum_email
+      - plum_event_id
+      - plum_event_payload_hash
+      - plum_event_status
+      - plum_event_status_label
+      - plum_last_synced_at
+      - plum_lofthall_manager
+      - plum_mag_manager
+      - plum_phone
+      - post_event_comment
+      - primary_contact_set_by
+      - project_docs_confirmed_at
+      - project_docs_confirmed_by
+      - project_docs_status
+      - ready_to_event_at
+      - ready_to_event_set_by
+      - sales_backline_total
+      - sales_main_total
+      - sales_project_total
+      - source_payload
+      - staff_receipts_confirmed_at
+      - staff_receipts_confirmed_by
+      - staff_receipts_status
+      - stage
+      - sublease_docs_confirmed_at
+      - sublease_docs_confirmed_by
+      - sublease_docs_status
+      - sync_error
+      - tax_amount
+      - tax_rate
+      - updated_at
+      - venue
+      - was_not_ready_for_event
     ProjectRequest:
       type: object
       properties:
@@ -641,10 +1142,6 @@ components:
           format: email
           title: Email (редактируемый)
           maxLength: 254
-        mag_manager:
-          type: integer
-          nullable: true
-          title: Менеджер MAG
     StageEnum:
       enum:
       - plum_request
@@ -731,6 +1228,9 @@ components:
           type: string
           readOnly: true
           title: Фамилия
+        role:
+          type: string
+          readOnly: true
         is_staff:
           type: boolean
           readOnly: true
@@ -758,6 +1258,7 @@ components:
       - id
       - is_staff
       - last_name
+      - role
       - updated_at
       - username
   securitySchemes:
