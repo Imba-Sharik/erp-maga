@@ -3,10 +3,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 const RESET_VALUE = '__clearable_select_reset__'
 const EMPTY_KEY = '__clearable_select_empty__'
 
+export type SelectOption = {
+  value: string
+  label: string
+}
+
+type ClearableSelectOptions = readonly string[] | readonly SelectOption[]
+
+function normalizeOptions(options: ClearableSelectOptions): SelectOption[] {
+  if (options.length === 0) return []
+  if (typeof options[0] === 'string') {
+    return (options as readonly string[]).map((value) => ({ value, label: value }))
+  }
+  return [...(options as readonly SelectOption[])]
+}
+
 interface ClearableSelectProps {
   value: string | null
   onChange: (value: string | null) => void
-  options: readonly string[]
+  options: ClearableSelectOptions
   placeholder: string
   clearLabel?: string
   triggerClassName?: string
@@ -38,9 +53,9 @@ export function ClearableSelect({
         <SelectItem value={RESET_VALUE} className="text-muted-foreground">
           {clearLabel}
         </SelectItem>
-        {options.map((opt) => (
-          <SelectItem key={opt} value={opt}>
-            {opt}
+        {normalizeOptions(options).map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
           </SelectItem>
         ))}
       </SelectContent>

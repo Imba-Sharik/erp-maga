@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
-import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
+import { EVENT_TYPE_OPTIONS, getEventTypeLabelById } from '@/shared/constants/event-type-options'
 import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
@@ -70,9 +70,11 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
       const event_date = toIsoLocalDay(new Date())
+      const eventTypeId = Number(values.eventType)
       return buildMockApiProject({
         event_name: values.title,
-        event_type: values.eventType,
+        event_type: eventTypeId,
+        event_type_label: getEventTypeLabelById(values.eventType) ?? '',
         loft: values.loft,
         hall: values.hall,
         event_date,
@@ -141,7 +143,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <ClearableSelect
                       placeholder="Выберите тип"
                       value={field.value || null}
-                      options={EVENT_TYPE_OPTIONS}
+                      options={EVENT_TYPE_OPTIONS.map((o) => ({
+                        value: String(o.id),
+                        label: o.label,
+                      }))}
                       onChange={(v) => field.onChange(v ?? '')}
                       triggerClassName={TRIGGER_CLASS}
                     />

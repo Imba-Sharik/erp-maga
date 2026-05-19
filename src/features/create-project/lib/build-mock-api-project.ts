@@ -4,7 +4,8 @@ let mockIdSeq = -1
 
 export function buildMockApiProject(params: {
   event_name: string
-  event_type: string
+  event_type: number
+  event_type_label: string
   loft: string
   hall: string
   event_date: string
@@ -21,8 +22,8 @@ export function buildMockApiProject(params: {
     plum_last_synced_at: nowIso,
     plum_event_payload_hash: '',
     event_name: params.event_name.trim(),
-    event_type: null,
-    event_type_label: params.event_type,
+    event_type: params.event_type,
+    event_type_label: params.event_type_label,
     event_format: null,
     event_format_label: '',
     event_date: params.event_date,
