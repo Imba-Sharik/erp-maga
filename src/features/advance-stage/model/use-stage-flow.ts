@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 
 import { useCurrentUser } from '@/entities/current-user'
@@ -14,6 +15,11 @@ import {
   type ArticleValues,
   type ProjectArticles,
 } from '@/entities/project-articles'
+import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
+import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
+
+import { buildTransitionBody } from '../lib/to-transition-body'
 
 export interface StageRecord {
   enteredAt?: string
@@ -32,6 +38,7 @@ export interface StageFlow {
   isCurrent: (stage: ProjectStage) => boolean
   getRecord: (stage: ProjectStage) => StageRecord | undefined
   advance: (values?: Partial<StageFormData>) => void
+  isAdvancing: boolean
   /** Инкрементальная правка полей текущего этапа (для per-row аудита, документов и т.п.). */
   patchCurrentStageValues: (patch: Partial<StageFormData>) => void
 
@@ -44,6 +51,8 @@ export interface StageFlow {
 }
 
 export interface UseStageFlowOptions {
+  /** ID проекта из бэка (`Project.id`). Без него `advance()` работает только локально. */
+  projectId?: number
   initialStage: ProjectStage
   /** Когда проект попал в воронку (создан в нашей системе после синка PLUM). */
   projectEnteredAt?: string
@@ -52,10 +61,13 @@ export interface UseStageFlowOptions {
 const PLUM_SYSTEM_LABEL = 'PLUM (синхронизация)'
 
 export function useStageFlow({
+  projectId,
   initialStage,
   projectEnteredAt,
 }: UseStageFlowOptions): StageFlow {
   const currentUser = useCurrentUser()
+  const queryClient = useQueryClient()
+  const transitionMutation = useProjectsTransitionsCreate()
   const [currentStage, setCurrentStage] = useState<ProjectStage>(initialStage)
   const [records, setRecords] = useState<StageRecords>(() => ({
     [initialStage]: {
@@ -83,12 +95,8 @@ export function useStageFlow({
     [records],
   )
 
-  const advance = useCallback(
-    (values?: Partial<StageFormData>) => {
-      const nextIndex = currentIndex + 1
-      const next = ALL_STAGE_ORDER[nextIndex]
-      if (!next) return
-
+  const applyAdvanceLocally = useCallback(
+    (next: ProjectStage, values?: Partial<StageFormData>) => {
       const now = new Date().toISOString()
       setRecords((prev) => ({
         ...prev,
@@ -108,7 +116,53 @@ export function useStageFlow({
       }))
       setCurrentStage(next)
     },
-    [currentStage, currentIndex, currentUser.fullName],
+    [currentStage, currentUser.fullName],
+  )
+
+  const advance = useCallback(
+    (values?: Partial<StageFormData>) => {
+      const nextIndex = currentIndex + 1
+      const next = ALL_STAGE_ORDER[nextIndex]
+      if (!next) return
+
+      if (projectId === undefined) {
+        applyAdvanceLocally(next, values)
+        return
+      }
+
+      const body = buildTransitionBody({
+        currentStage,
+        nextStage: next,
+        values,
+        articles,
+        taxRate,
+      })
+
+      transitionMutation.mutate(
+        { id: projectId, data: body },
+        {
+          onSuccess: () => {
+            applyAdvanceLocally(next, values)
+            queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
+            // List-ключ — префикс с любыми query-параметрами; передаём только url-часть,
+            // чтобы матчнулись все варианты (канбан, календарь по разным месяцам).
+            queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+          },
+          // Ошибку наверх пробрасываем через mutation.error — UI пока её не показывает,
+          // но `isAdvancing` снимет блокировку кнопки, и пользователь сможет ретрайнуть.
+        },
+      )
+    },
+    [
+      applyAdvanceLocally,
+      articles,
+      currentIndex,
+      currentStage,
+      projectId,
+      queryClient,
+      taxRate,
+      transitionMutation,
+    ],
   )
 
   const patchCurrentStageValues = useCallback(
@@ -159,6 +213,7 @@ export function useStageFlow({
     isCurrent,
     getRecord,
     advance,
+    isAdvancing: transitionMutation.isPending,
     patchCurrentStageValues,
     articles,
     taxRate,

@@ -17,7 +17,7 @@ interface StagePassedReadyProps {
 export function StagePassedReady(props: StagePassedReadyProps) {
   return (
     <FinanceBlockWithBackline
-      stage="ready"
+      stage="ready_to_event"
       headerTitle="Готов к проведению"
       headerColorClass="text-funnel-preproject"
       aspect="sales"

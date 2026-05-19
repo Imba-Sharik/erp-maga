@@ -8,10 +8,10 @@ import type { Project, ProjectDetail, ProjectStage, ProjectStatus } from '../mod
 
 const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   plum_request: 'plum_request',
-  primary_contact_done: 'first_contact',
-  calculation_prepared: 'calc_ready',
-  contract_signed: 'signed',
-  ready_to_event: 'ready',
+  primary_contact_done: 'primary_contact_done',
+  calculation_prepared: 'calculation_prepared',
+  contract_signed: 'contract_signed',
+  ready_to_event: 'ready_to_event',
   event_held: 'event_held',
   expenses_entered: 'expenses_entered',
   documents_confirmed: 'documents_confirmed',
@@ -26,11 +26,11 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
 function statusForStage(stage: ProjectStage): ProjectStatus {
   switch (stage) {
     case 'plum_request':
-    case 'first_contact':
-    case 'calc_ready':
+    case 'primary_contact_done':
+    case 'calculation_prepared':
       return 'confirmed'
-    case 'signed':
-    case 'ready':
+    case 'contract_signed':
+    case 'ready_to_event':
     case 'event_held':
       return 'signed'
     case 'expenses_entered':
