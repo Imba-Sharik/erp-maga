@@ -74,7 +74,7 @@ export function mapBackendProject(b: BackendProject): Project | null {
     // Бэк иногда отдаёт `mag_manager` как «Имя1, Имя2, Имя3» — берём первого
     // как «ведущего менеджера» проекта, остальных пока игнорируем.
     manager: takeFirstManager(b.mag_manager),
-    type: b.event_type ?? '',
+    type: b.event_type_label ?? '',
     company: b.client_company ?? '',
     phone: b.phone ?? '',
     email: b.email ?? '',
