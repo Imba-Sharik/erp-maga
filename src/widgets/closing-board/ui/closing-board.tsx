@@ -1,31 +1,22 @@
 import { useMemo, useState } from 'react'
-import { type Project } from '@/entities/project'
-import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
+
+import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import { ProjectsBoardToolbar } from '@/widgets/projects-board/ui/projects-board-toolbar'
 import { ClosingKanban } from './closing-kanban'
 
 interface ClosingBoardProps {
-  projects: Project[]
-  onLoadMore?: () => void
-  hasNextPage?: boolean
-  isFetchingNextPage?: boolean
+  listDateParams: BoardListParams
 }
 
-export function ClosingBoard({
-  projects,
-  onLoadMore,
-  hasNextPage,
-  isFetchingNextPage,
-}: ClosingBoardProps) {
+export function ClosingBoard({ listDateParams }: ClosingBoardProps) {
   const [search, setSearch] = useState('')
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
 
-  const filtered = useMemo(
-    () => filterProjects(projects, { search, city, hall, loft }),
-    [projects, search, city, hall, loft],
-  )
+  const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
+
+  const filter = useMemo(() => ({ search, city, hall, loft }), [search, city, hall, loft])
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
@@ -40,12 +31,7 @@ export function ClosingBoard({
         onChangeLoft={setLoft}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ClosingKanban
-          projects={filtered}
-          onLoadMore={onLoadMore}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-        />
+        <ClosingKanban listParams={listDateParams} filter={filter} filtersActive={filtersActive} />
       </div>
     </div>
   )
