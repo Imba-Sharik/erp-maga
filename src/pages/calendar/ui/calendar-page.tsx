@@ -17,6 +17,7 @@ import {
   mapBackendProjects,
 } from '@/entities/project'
 import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
 import { useElementSize } from '@/shared/hooks/use-element-size'
 import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import { DaySchedule } from '@/widgets/day-schedule'
@@ -51,6 +52,7 @@ export function CalendarPage() {
   const { data, isLoading, isFetching } = useProjectsList({
     event_date_after,
     event_date_before,
+    ordering: PROJECTS_LIST_DEFAULT_ORDERING,
     limit: 100,
   })
   const projects = useMemo(() => (data ? mapBackendProjects(data.results) : []), [data])

@@ -1,10 +1,17 @@
 import { useMemo } from 'react'
 
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { ClosingBoard } from '@/widgets/closing-board'
 
 export function ClosingPage() {
-  const listDateParams = useMemo(() => ({ event_date_after: toIsoLocalDay(new Date()) }), [])
+  const listDateParams = useMemo(
+    () => ({
+      event_date_after: toIsoLocalDay(new Date()),
+      ordering: PROJECTS_LIST_DEFAULT_ORDERING,
+    }),
+    [],
+  )
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
