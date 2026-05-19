@@ -81,21 +81,6 @@ paths:
     get:
       operationId: projects_list
       parameters:
-      - in: query
-        name: event_date_after
-        schema:
-          type: string
-          format: date
-      - in: query
-        name: event_date_before
-        schema:
-          type: string
-          format: date
-      - in: query
-        name: stage
-        description: Фильтр по стадии проекта (для агрегатов и выборок).
-        schema:
-          $ref: '#/components/schemas/StageEnum'
       - name: limit
         required: false
         in: query
@@ -108,11 +93,16 @@ paths:
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
       tags:
       - projects
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -133,7 +123,6 @@ paths:
       - projects
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -141,6 +130,202 @@ paths:
               schema:
                 $ref: '#/components/schemas/Project'
           description: ''
+    put:
+      operationId: projects_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    patch:
+      operationId: projects_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/v1/projects/{id}/backline/:
+    post:
+      operationId: projects_backline_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: projects_backline_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/projects/{id}/documents/:
+    patch:
+      operationId: projects_documents_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/{id}/expenses/:
+    patch:
+      operationId: projects_expenses_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/{id}/pipeline/:
+    get:
+      operationId: projects_pipeline_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/{id}/sales/:
+    get:
+      operationId: projects_sales_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: projects_sales_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/{id}/transition/:
+    post:
+      operationId: projects_transition_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/projects/legal-entities/:
+    get:
+      operationId: projects_legal_entities_retrieve
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/users/me/:
     get:
       operationId: users_me_retrieve
@@ -228,6 +413,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
+    PatchedProjectRequest:
+      type: object
+      properties:
+        client_company:
+          type: string
+          title: Клиент / название компании (редактируемое)
+          maxLength: 500
+        contact_person:
+          type: string
+          title: Контактное лицо (редактируемое)
+          maxLength: 500
+        phone:
+          type: string
+          title: Телефон (редактируемый)
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          title: Email (редактируемый)
+          maxLength: 254
+        mag_manager:
+          type: integer
+          nullable: true
+          title: Менеджер MAG
     Project:
       type: object
       properties:
@@ -236,96 +445,140 @@ components:
           readOnly: true
         plum_event_id:
           type: string
+          readOnly: true
           title: ID мероприятия Plum
-          maxLength: 64
         plum_card_url:
           type: string
           format: uri
+          readOnly: true
           title: Ссылка на карточку Plum
-          maxLength: 500
         plum_last_synced_at:
           type: string
           format: date-time
+          readOnly: true
           title: Дата последней синхронизации
         plum_event_payload_hash:
           type: string
+          readOnly: true
           title: SHA-256 нормализованного JSON мероприятия Plum
-          maxLength: 64
         event_name:
           type: string
+          readOnly: true
           title: Название мероприятия
-          maxLength: 500
         event_date:
           type: string
           format: date
+          readOnly: true
           title: Дата мероприятия
         venue:
           type: string
+          readOnly: true
           title: Площадка
-          maxLength: 255
         hall_loft:
           type: string
+          readOnly: true
           title: Зал / лофт
-          maxLength: 255
         city:
           type: string
+          readOnly: true
           title: Город
-          maxLength: 255
-        event_type:
+        city_label:
           type: string
-          title: Тип мероприятия
-          maxLength: 255
+          readOnly: true
+        event_type:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Тип мероприятия Plum (код)
+        event_type_label:
+          type: string
+          readOnly: true
+        event_format:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Формат мероприятия Plum (код)
+        event_format_label:
+          type: string
+          readOnly: true
         plum_event_status:
           type: string
+          readOnly: true
           title: Статус мероприятия в Plum
-          maxLength: 255
+        plum_event_status_label:
+          type: string
+          readOnly: true
         plum_comment:
           type: string
+          readOnly: true
           title: Комментарий из Plum
+        plum_client_company:
+          type: string
+          readOnly: true
+          title: Клиент / название компании
+        plum_contact_person:
+          type: string
+          readOnly: true
+          title: Контактное лицо
+        plum_phone:
+          type: string
+          readOnly: true
+          title: Телефон
+        plum_email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email
+        plum_lofthall_manager:
+          type: string
+          readOnly: true
+          title: Менеджер LOFT HALL
+        plum_mag_manager:
+          type: string
+          readOnly: true
+          title: Менеджер MAG (Plum)
         client_company:
           type: string
-          title: Клиент / название компании
+          title: Клиент / название компании (редактируемое)
           maxLength: 500
         contact_person:
           type: string
-          title: Контактное лицо
-          maxLength: 255
+          title: Контактное лицо (редактируемое)
+          maxLength: 500
         phone:
           type: string
-          title: Телефон
+          title: Телефон (редактируемый)
           maxLength: 64
         email:
           type: string
           format: email
+          title: Email (редактируемый)
           maxLength: 254
-        lofthall_manager:
-          type: string
-          title: Менеджер LOFT HALL
-          maxLength: 255
         mag_manager:
-          type: string
+          type: integer
+          nullable: true
           title: Менеджер MAG
-          maxLength: 255
+        mag_manager_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
         stage:
           allOf:
           - $ref: '#/components/schemas/StageEnum'
+          readOnly: true
           title: Стадия проекта
         last_active_stage:
           allOf:
           - $ref: '#/components/schemas/LastActiveStageEnum'
+          readOnly: true
           title: Последняя активная стадия
-        client_company_is_manual:
-          type: boolean
-        contact_person_is_manual:
-          type: boolean
-        phone_is_manual:
-          type: boolean
-        email_is_manual:
-          type: boolean
         source_payload:
+          readOnly: true
           title: Последний payload Plum
         sync_error:
           type: string
+          readOnly: true
           title: Ошибка последней синхронизации
         created_at:
           type: string
@@ -336,26 +589,62 @@ components:
           type: string
           format: date-time
           readOnly: true
-        city_label:
-          type: string
-          readOnly: true
-        plum_event_status_label:
-          type: string
-          readOnly: true
       required:
       - city
       - city_label
       - created_at
       - event_date
+      - event_format
+      - event_format_label
       - event_name
+      - event_type
+      - event_type_label
       - hall_loft
       - id
+      - last_active_stage
+      - mag_manager_email
       - plum_card_url
+      - plum_client_company
+      - plum_comment
+      - plum_contact_person
+      - plum_email
       - plum_event_id
+      - plum_event_payload_hash
       - plum_event_status
       - plum_event_status_label
+      - plum_last_synced_at
+      - plum_lofthall_manager
+      - plum_mag_manager
+      - plum_phone
+      - source_payload
+      - stage
+      - sync_error
       - updated_at
       - venue
+    ProjectRequest:
+      type: object
+      properties:
+        client_company:
+          type: string
+          title: Клиент / название компании (редактируемое)
+          maxLength: 500
+        contact_person:
+          type: string
+          title: Контактное лицо (редактируемое)
+          maxLength: 500
+        phone:
+          type: string
+          title: Телефон (редактируемый)
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          title: Email (редактируемый)
+          maxLength: 254
+        mag_manager:
+          type: integer
+          nullable: true
+          title: Менеджер MAG
     StageEnum:
       enum:
       - plum_request
