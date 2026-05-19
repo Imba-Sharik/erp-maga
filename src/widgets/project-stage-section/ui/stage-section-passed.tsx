@@ -11,12 +11,12 @@ import {
   type ProjectStage,
   type StageFormData,
 } from '@/entities/project'
+import type { ProjectArticles } from '@/entities/project-articles'
 
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
 import { PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
-import { partitionFields } from '../lib/partition-fields'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canEditStage } from '../lib/stage-permissions'
@@ -40,6 +40,7 @@ interface ResolveCtx {
   project: ProjectDetail
   stage: ProjectStage
   record?: StageRecord
+  articles?: ProjectArticles
 }
 
 function fallbackValue(
@@ -50,7 +51,8 @@ function fallbackValue(
   const fromValues = (values as Record<string, string | undefined> | undefined)?.[f.name]
   if (fromValues) return fromValues
   if (f.source === 'system') return resolveSystemValue(f.name, f.mockValue, ctx)
-  return f.mockValue
+  // Manager-поле не заполнено менеджером — показываем пусто, без подсказочного mockValue.
+  return undefined
 }
 
 function readField(
@@ -84,6 +86,7 @@ interface StageSectionPassedProps {
   stage: ProjectStage
   isCurrent?: boolean
   record?: StageRecord
+  articles?: ProjectArticles
   onAdvance?: (values?: Partial<StageFormData>) => void
 }
 
@@ -92,12 +95,12 @@ export function StageSectionPassed({
   stage,
   isCurrent = false,
   record,
+  articles,
   onAdvance,
 }: StageSectionPassedProps) {
-  const ctx: ResolveCtx = { project, stage, record }
+  const ctx: ResolveCtx = { project, stage, record, articles }
   const values = record?.values
   const fields = STAGE_FIELDS[stage]
-  const { main: mainFields, meta: metaFields } = partitionFields(stage, fields)
   const extras = PASSED_EXTRAS[stage]
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
@@ -153,45 +156,26 @@ export function StageSectionPassed({
               Подробное содержимое раздела — в следующей итерации
             </p>
           ) : (
-            <>
-              {mainFields.length > 0 && (
-                <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                  {renderNarrowPairs(mainFields, renderField)}
-                </div>
+            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+              {renderNarrowPairs(fields, renderField)}
+              {extras.map((extra) =>
+                extra.source === 'manager' ? (
+                  <StageFieldReadonly
+                    key="manager"
+                    label={extra.label}
+                    value={record?.enteredBy ?? 'Иванов Иван Иванович'}
+                    source="system"
+                  />
+                ) : (
+                  <StageFieldReadonly
+                    key="enteredAt"
+                    label={extra.label}
+                    value={formatDate(record?.enteredAt) ?? '09-05-2026'}
+                    source="system"
+                  />
+                ),
               )}
-              {metaFields.length > 0 && (
-                <div className="flex flex-col gap-4">
-                  <span className="text-sm font-medium text-[#454545]">Информация</span>
-                  <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                    {metaFields.map(renderField)}
-                  </div>
-                </div>
-              )}
-              {extras.length > 0 && (
-                <div className="flex flex-col gap-4">
-                  <span className="text-sm font-medium text-[#454545]">Информация</span>
-                  <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                    {extras.map((extra) =>
-                      extra.source === 'manager' ? (
-                        <StageFieldReadonly
-                          key="manager"
-                          label={extra.label}
-                          value={record?.enteredBy ?? 'Иванов Иван Иванович'}
-                          source="system"
-                        />
-                      ) : (
-                        <StageFieldReadonly
-                          key="enteredAt"
-                          label={extra.label}
-                          value={formatDate(record?.enteredAt) ?? '09-05-2026'}
-                          source="system"
-                        />
-                      ),
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
+            </div>
           )}
         </CollapsibleContent>
       </div>

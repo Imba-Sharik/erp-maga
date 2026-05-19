@@ -9,18 +9,19 @@ import { Input } from '@/shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Textarea } from '@/shared/ui/textarea'
 import {
+  ALL_STAGE_LABELS,
   STAGE_FUNNEL,
-  STAGE_LABELS,
   stageFormSchemas,
-  type PreprojectStage,
   type ProjectDetail,
+  type ProjectStage,
   type StageFormData,
 } from '@/entities/project'
+import { useCurrentUser } from '@/entities/current-user'
+import type { ProjectArticles } from '@/entities/project-articles'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
 import { STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
-import { partitionFields } from '../lib/partition-fields'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canEditStage } from '../lib/stage-permissions'
@@ -30,7 +31,7 @@ import { StageFieldReadonly } from './stage-field-readonly'
 type SignedSchema = (typeof stageFormSchemas)['signed']
 type SignedFormValues = z.infer<SignedSchema>
 
-function getDefaults(stage: PreprojectStage, data: Partial<StageFormData>): SignedFormValues {
+function getDefaults(stage: ProjectStage, data: Partial<StageFormData>): SignedFormValues {
   const fields = STAGE_FIELDS[stage]
   const result: Record<string, unknown> = {}
   for (const f of fields) {
@@ -46,25 +47,44 @@ function getDefaults(stage: PreprojectStage, data: Partial<StageFormData>): Sign
 
 interface StageSectionCurrentProps {
   project: ProjectDetail
-  stage: PreprojectStage
+  stage: ProjectStage
   record?: StageRecord
+  articles?: ProjectArticles
   onAdvance?: (values: Partial<StageFormData>) => void
+  onPatchValues?: (patch: Partial<StageFormData>) => void
+}
+
+/**
+ * Селекты, при выборе значения которых надо сразу штамповать `*ConfirmedAt`/`*ConfirmedBy`
+ * текущим юзером — для per-row аудита. Маппинг явный, потому что имена `*At`/`*By`
+ * не всегда выводятся из имени статуса (ср. `projectDocsStatus → projectDocsConfirmedAt`
+ * vs `dataConfirmedStatus → dataConfirmedAt`).
+ */
+const CONFIRM_META_BY_STATUS: Partial<
+  Record<keyof StageFormData, { atField: keyof StageFormData; byField: keyof StageFormData }>
+> = {
+  projectDocsStatus: { atField: 'projectDocsConfirmedAt', byField: 'projectDocsConfirmedBy' },
+  subleaseDocsStatus: { atField: 'subleaseDocsConfirmedAt', byField: 'subleaseDocsConfirmedBy' },
+  staffReceiptsStatus: { atField: 'staffReceiptsConfirmedAt', byField: 'staffReceiptsConfirmedBy' },
+  dataConfirmedStatus: { atField: 'dataConfirmedAt', byField: 'dataConfirmedBy' },
 }
 
 export function StageSectionCurrent({
   project,
   stage,
   record,
+  articles,
   onAdvance,
+  onPatchValues,
 }: StageSectionCurrentProps) {
   const schema = stageFormSchemas[stage]
   const fields = STAGE_FIELDS[stage]
-  const { main: mainFields, meta: metaFields } = partitionFields(stage, fields)
-  const defaults = getDefaults(stage, {})
+  const defaults = getDefaults(stage, record?.values ?? {})
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const role = useUserRole()
   const canEdit = canEditStage(stage, role)
+  const currentUser = useCurrentUser()
 
   const form = useForm<SignedFormValues>({
     resolver: zodResolver(schema as SignedSchema),
@@ -80,7 +100,7 @@ export function StageSectionCurrent({
     if (f.source === 'system' || !canEdit) {
       const raw =
         f.source === 'system'
-          ? resolveSystemValue(f.name, f.mockValue, { project, stage, record })
+          ? resolveSystemValue(f.name, f.mockValue, { project, stage, record, articles })
           : undefined
       let display = raw
       if (raw && f.type === 'select') {
@@ -106,7 +126,7 @@ export function StageSectionCurrent({
       control={form.control}
       name={f.name as keyof SignedFormValues}
       render={({ field }) => (
-        <FormItem className={f.type === 'textarea' ? 'flex h-full min-w-0 flex-col' : 'min-w-0'}>
+        <FormItem className={f.type === 'textarea' ? 'flex h-full min-w-0 flex-col @[640px]:row-span-2' : 'min-w-0'}>
           <FormLabel className="text-xs font-medium text-[#454545]">
             {f.label}
             {f.required ? <span className="text-[#D25252]">*</span> : null}
@@ -120,7 +140,22 @@ export function StageSectionCurrent({
                 className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
               />
             ) : f.type === 'select' ? (
-              <Select value={(field.value as string) ?? ''} onValueChange={field.onChange}>
+              <Select
+                value={(field.value as string) ?? ''}
+                onValueChange={(value) => {
+                  field.onChange(value)
+                  // Если у статуса есть пара `*ConfirmedAt`/`*ConfirmedBy` — штампим их
+                  // прямо в момент выбора, для per-row аудита.
+                  const meta = CONFIRM_META_BY_STATUS[f.name as keyof StageFormData]
+                  if (meta) {
+                    onPatchValues?.({
+                      [f.name]: value,
+                      [meta.atField]: new Date().toISOString(),
+                      [meta.byField]: currentUser.fullName,
+                    })
+                  }
+                }}
+              >
                 <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
                   <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
                 </SelectTrigger>
@@ -155,13 +190,13 @@ export function StageSectionCurrent({
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 rounded-[15px] border border-[#B1B1B1] bg-white px-5 py-2">
+    <div className="flex w-full flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 text-sm">
           <span className="font-medium text-[#454545]">Текущий этап:</span>
-          <span className={`${funnelColor} font-semibold`}>{STAGE_LABELS[stage]}</span>
+          <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
         </div>
-        {canEdit ? (
+        {canEdit && stage !== 'closed' ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             <Button
               type="button"
@@ -177,19 +212,9 @@ export function StageSectionCurrent({
       <div className="h-px w-full bg-[#F0F0F0]" />
       <Form {...form}>
         <form className="flex flex-col gap-4" noValidate>
-          {mainFields.length > 0 && (
-            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {renderNarrowPairs(mainFields, renderField)}
-            </div>
-          )}
-          {metaFields.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <span className="text-sm font-medium text-[#454545]">Информация</span>
-              <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                {metaFields.map(renderField)}
-              </div>
-            </div>
-          )}
+          <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+            {renderNarrowPairs(fields, renderField)}
+          </div>
         </form>
       </Form>
     </div>

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { PreprojectStage } from '../model/types'
+import type { ProjectStage } from '../model/types'
 
 const required = (msg = 'Обязательное поле') => z.string().min(1, msg)
 
@@ -31,9 +31,32 @@ export const stageFormSchemas = {
     contractComment: z.string().optional(),
   }),
   ready: z.object({}),
-} satisfies Record<PreprojectStage, z.ZodTypeAny>
+  event_held: z.object({
+    postEventComment: z.string().optional(),
+  }),
+  expenses_entered: z.object({}),
+  documents_confirmed: z.object({
+    projectDocsStatus: z.enum(['present', 'absent', 'not_required'], {
+      error: () => 'Выберите статус по закрывающим проекта',
+    }),
+    subleaseDocsStatus: z.enum(['present', 'absent', 'not_required'], {
+      error: () => 'Выберите статус по субаренде',
+    }),
+    staffReceiptsStatus: z.enum(['present', 'absent', 'not_required'], {
+      error: () => 'Выберите статус по распискам персонала',
+    }),
+  }),
+  data_confirmed: z.object({
+    dataConfirmedStatus: z.enum(['confirmed', 'rejected'], {
+      error: () => 'Выберите статус подтверждения данных',
+    }),
+  }),
+  bonus_calculated: z.object({}),
+  bonus_approved: z.object({}),
+  closed: z.object({}),
+} satisfies Record<ProjectStage, z.ZodTypeAny>
 
-export type StageFormValues<S extends PreprojectStage> = z.infer<(typeof stageFormSchemas)[S]>
+export type StageFormValues<S extends ProjectStage> = z.infer<(typeof stageFormSchemas)[S]>
 
 export const contactChannelLabels: Record<'messenger' | 'phone' | 'meeting', string> = {
   messenger: 'Мессенджер',

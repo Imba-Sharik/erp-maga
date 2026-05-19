@@ -1,6 +1,20 @@
 import { ArrowRight, ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
 import type { ComponentType, SVGProps } from 'react'
 
+import { useUserRole } from '@/entities/user-role'
+import type { StageFormData } from '@/entities/project'
+import {
+  ARTICLE_LABELS,
+  BACKLINE_ARTICLE_KINDS,
+  MAIN_ARTICLE_KINDS,
+  formatMoney,
+  formatPercent,
+  type ArticleBlock,
+  type ArticleKind,
+  type ArticleValues,
+  type ProjectArticles,
+} from '@/entities/project-articles'
+import type { StageRecord } from '@/features/advance-stage'
 import { Button } from '@/shared/ui/button'
 import {
   Collapsible,
@@ -8,34 +22,40 @@ import {
   CollapsibleTrigger,
 } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
-import { useUserRole } from '@/entities/user-role'
-import type { StageFormData } from '@/entities/project'
 
 import { canEditStage } from '../lib/stage-permissions'
+import { MoneyInput } from './money-input'
 import { StageFieldShell } from './stage-field-shell'
 
 type Source = 'manager' | 'system'
 type Icon = ComponentType<SVGProps<SVGSVGElement>>
 
 interface BonusRow {
-  label: string
-  sales: string
-  expense: string
-  netProfit: string
-  bonusPercent: string
-  bonusAmount: string
+  block: ArticleBlock
+  kind: ArticleKind
+  values: ArticleValues
 }
 
-const BONUS_ROWS: BonusRow[] = [
-  { label: 'Оборудование', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'Субаренда', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'Транспорт', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'Интернет', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'Расходники', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'Экран', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'Оборудование', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-  { label: 'ТМ', sales: '170 000 ₽', expense: '90 000 ₽', netProfit: '80 000 ₽', bonusPercent: '53,5%', bonusAmount: '43 540 ₽' },
-]
+function buildBonusRows(articles: ProjectArticles): BonusRow[] {
+  const rows: BonusRow[] = []
+  for (const kind of MAIN_ARTICLE_KINDS) {
+    rows.push({ block: 'main', kind, values: articles.main[kind] })
+  }
+  if (articles.backline) {
+    for (const kind of BACKLINE_ARTICLE_KINDS) {
+      rows.push({ block: 'backline', kind, values: articles.backline[kind] })
+    }
+  }
+  return rows
+}
+
+function calcRow(values: ArticleValues) {
+  const netProfit = values.sales - values.expense
+  const formulaBonus = (netProfit * values.bonusPercent) / 100
+  // Если руководитель скорректировал — берём override, иначе формулу.
+  const bonusAmount = values.bonusAmount ?? formulaBonus
+  return { netProfit, bonusAmount }
+}
 
 function ReadonlyBox({
   value,
@@ -73,36 +93,50 @@ function Operator({ children }: { children: string }) {
   return <span className="text-[#6B6B6B] text-sm font-medium px-1">{children}</span>
 }
 
-function ArticleRow({ row, bonusSource }: { row: BonusRow; bonusSource: Source }) {
+interface ArticleRowProps {
+  row: BonusRow
+  editable: boolean
+  onBonusChange: (block: ArticleBlock, kind: ArticleKind, amount: number) => void
+}
+
+function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
+  const { netProfit, bonusAmount } = calcRow(row.values)
   return (
     <div className="grid grid-cols-1 items-end gap-4 @[900px]:grid-cols-[minmax(0,1fr)_88px_120px]">
       <div className="flex flex-col gap-1.5 min-w-0">
-        <span className="text-xs font-medium text-[#454545]">{row.label}</span>
+        <span className="text-xs font-medium text-[#454545]">{ARTICLE_LABELS[row.kind]}</span>
         <div className="flex items-center gap-1.5 min-w-0">
           <ReadonlyBox
-            value={row.sales}
+            value={formatMoney(row.values.sales)}
             source="system"
             icon={CircleDollarSign}
             className="min-w-0 flex-1"
           />
           <Operator>−</Operator>
           <ReadonlyBox
-            value={row.expense}
+            value={formatMoney(row.values.expense)}
             source="system"
             icon={TrendingDown}
             className="min-w-0 flex-1"
           />
           <Operator>=</Operator>
-          <ReadonlyBox value={row.netProfit} source="system" className="min-w-0 flex-1" />
+          <ReadonlyBox value={formatMoney(netProfit)} source="system" className="min-w-0 flex-1" />
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">% Бонуса</span>
-        <ReadonlyBox value={row.bonusPercent} source="system" align="center" />
+        <ReadonlyBox value={formatPercent(row.values.bonusPercent)} source="system" align="center" />
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">Бонус по статье</span>
-        <ReadonlyBox value={row.bonusAmount} source={bonusSource} />
+        {editable ? (
+          <MoneyInput
+            value={bonusAmount}
+            onCommit={(next) => onBonusChange(row.block, row.kind, next)}
+          />
+        ) : (
+          <ReadonlyBox value={formatMoney(bonusAmount)} source="system" />
+        )}
       </div>
     </div>
   )
@@ -110,13 +144,32 @@ function ArticleRow({ row, bonusSource }: { row: BonusRow; bonusSource: Source }
 
 interface StagePassedBonusProps {
   isCurrent?: boolean
+  articles: ProjectArticles
+  /** Запись этапа 9 (`data_confirmed`) — оттуда берём «Кто подтвердил». */
+  dataConfirmedRecord?: StageRecord
+  onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onAdvance?: (values?: Partial<StageFormData>) => void
 }
 
-export function StagePassedBonus({ isCurrent = false, onAdvance }: StagePassedBonusProps) {
+export function StagePassedBonus({
+  isCurrent = false,
+  articles,
+  dataConfirmedRecord,
+  onArticleChange,
+  onAdvance,
+}: StagePassedBonusProps) {
   const role = useUserRole()
   const canEdit = canEditStage('bonus_calculated', role)
-  const bonusSource: Source = canEdit && isCurrent ? 'manager' : 'system'
+  const editable = canEdit && isCurrent
+
+  const rows = buildBonusRows(articles)
+  const totalBonus = rows.reduce((acc, row) => acc + calcRow(row.values).bonusAmount, 0)
+  const dataConfirmedBy =
+    (dataConfirmedRecord?.values?.dataConfirmedBy as string | undefined) ?? '—'
+
+  const handleBonusChange = (block: ArticleBlock, kind: ArticleKind, amount: number) => {
+    onArticleChange(block, kind, { bonusAmount: amount })
+  }
 
   return (
     <Collapsible defaultOpen className="w-full">
@@ -151,16 +204,21 @@ export function StagePassedBonus({ isCurrent = false, onAdvance }: StagePassedBo
             <CollapsibleContent>
               <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="flex flex-col gap-4 min-w-0">
-                  {BONUS_ROWS.map((row, idx) => (
-                    <ArticleRow key={`${row.label}-${idx}`} row={row} bonusSource={bonusSource} />
+                  {rows.map((row) => (
+                    <ArticleRow
+                      key={`${row.block}-${row.kind}`}
+                      row={row}
+                      editable={editable}
+                      onBonusChange={handleBonusChange}
+                    />
                   ))}
                 </div>
                 <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
                   <StageFieldShell label="Данные подтверждены руководителем">
-                    <ReadonlyBox value="Иванов Иван Иванович" source="system" />
+                    <ReadonlyBox value={dataConfirmedBy} source="system" />
                   </StageFieldShell>
                   <StageFieldShell label="Итоговый бонус">
-                    <ReadonlyBox value="443 330 ₽" source="system" />
+                    <ReadonlyBox value={formatMoney(totalBonus)} source="system" />
                   </StageFieldShell>
                 </div>
               </div>

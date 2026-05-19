@@ -45,6 +45,11 @@ export interface ArticleValues {
   sales: number
   expense: number
   bonusPercent: number
+  /**
+   * Override итогового «Бонус по статье». Если не задан — считается формулой
+   * `net_profit × bonusPercent / 100`. Заполняется руководителем на этапе 10/11.
+   */
+  bonusAmount?: number
 }
 
 export type ArticlesBlockMap = Record<ArticleKind, ArticleValues>

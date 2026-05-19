@@ -17,5 +17,7 @@ export {
   projectTotal,
   articlePercent,
   taxAmount,
+  articleBonusAmount,
+  bonusTotal,
 } from './lib/calc'
 export { formatMoney, formatPercent, parseMoney, parsePercent } from './lib/format'

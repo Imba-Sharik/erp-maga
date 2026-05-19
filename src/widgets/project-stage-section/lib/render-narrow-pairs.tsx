@@ -10,7 +10,7 @@ import type { StageFieldConfig } from './fields-map'
 export function renderNarrowPairs(
   fields: StageFieldConfig[],
   renderOne: (f: StageFieldConfig) => ReactNode,
-  pairWrapperClassName = 'grid min-w-0 grid-cols-2 gap-x-3',
+  pairWrapperClassName = 'grid min-w-0 grid-cols-2 items-start gap-x-3',
 ): ReactNode[] {
   const items: ReactNode[] = []
   for (let i = 0; i < fields.length; i++) {

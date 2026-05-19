@@ -32,6 +32,8 @@ export interface StageFlow {
   isCurrent: (stage: ProjectStage) => boolean
   getRecord: (stage: ProjectStage) => StageRecord | undefined
   advance: (values?: Partial<StageFormData>) => void
+  /** Инкрементальная правка полей текущего этапа (для per-row аудита, документов и т.п.). */
+  patchCurrentStageValues: (patch: Partial<StageFormData>) => void
 
   // Финансовые статьи (используются на этапах ready/expenses/bonus_calculated).
   articles: ProjectArticles
@@ -92,7 +94,9 @@ export function useStageFlow({
         ...prev,
         [currentStage]: {
           ...prev[currentStage],
-          values: values ?? prev[currentStage]?.values ?? {},
+          // Мержим, а не заменяем: per-row штампы (`patchCurrentStageValues`) и
+          // form-values на submit должны соблюдаться оба, не затирая друг друга.
+          values: { ...prev[currentStage]?.values, ...values },
           completedAt: now,
           completedBy: currentUser.fullName,
         },
@@ -105,6 +109,19 @@ export function useStageFlow({
       setCurrentStage(next)
     },
     [currentStage, currentIndex, currentUser.fullName],
+  )
+
+  const patchCurrentStageValues = useCallback(
+    (patch: Partial<StageFormData>) => {
+      setRecords((prev) => ({
+        ...prev,
+        [currentStage]: {
+          ...prev[currentStage],
+          values: { ...prev[currentStage]?.values, ...patch },
+        },
+      }))
+    },
+    [currentStage],
   )
 
   const updateArticle = useCallback(
@@ -142,6 +159,7 @@ export function useStageFlow({
     isCurrent,
     getRecord,
     advance,
+    patchCurrentStageValues,
     articles,
     taxRate,
     updateArticle,
