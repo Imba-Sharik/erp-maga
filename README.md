@@ -37,6 +37,11 @@ src/
 ```bash
 pnpm install
 cp .env.example .env
+```
+
+В `.env` (или `.env.local`) укажите dev JWT для переключателя ролей в сайдбаре — переменные `VITE_DEV_ACCESS_TOKEN_*` и при необходимости `VITE_DEV_REFRESH_TOKEN_*` (см. `.env.example`). Токены не коммитятся.
+
+```bash
 pnpm dev
 ```
 
