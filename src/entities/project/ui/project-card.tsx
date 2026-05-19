@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Card } from '@/shared/ui/card'
 import type { Project, ProjectBackOrigin } from '../model/types'
 import { ProjectStatusBadge } from './project-status-badge'
+import { ProjectTelegramLink } from './project-telegram-link'
 
 interface ProjectCardProps {
   project: Project
@@ -11,6 +12,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
   const navigate = useNavigate()
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
+  const stop = (e: React.MouseEvent) => e.stopPropagation()
 
   return (
     <Card
@@ -37,6 +39,7 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
       <p className="text-xs text-[#ACACAC]">
         Телефон: <span className="text-funnel-preproject">{project.phone}</span>
       </p>
+      <ProjectTelegramLink phone={project.phone} onClick={stop} />
     </Card>
   )
 }

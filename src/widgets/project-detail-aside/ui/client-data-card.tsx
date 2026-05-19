@@ -1,7 +1,14 @@
 import { Badge } from '@/shared/ui/badge'
-import { KvRow, ProjectAsideCard, type ProjectDetail } from '@/entities/project'
+import {
+  buildTelegramPhoneUrl,
+  KvRow,
+  ProjectAsideCard,
+  type ProjectDetail,
+} from '@/entities/project'
 
 export function ClientDataCard({ project }: { project: ProjectDetail }) {
+  const telegramUrl = buildTelegramPhoneUrl(project.phone)
+
   return (
     <ProjectAsideCard
       title="Данные Клиента"
@@ -14,7 +21,21 @@ export function ClientDataCard({ project }: { project: ProjectDetail }) {
       <KvRow label="Компания" value={project.clientCompany} />
       <KvRow label="Контактное лицо" value={project.manager} />
       <KvRow label="Телефон" value={project.phone} />
-      <KvRow label="Email" value={project.email} />
+      {telegramUrl && (
+        <KvRow
+          label="Ссылка на телеграм"
+          value={
+            <a
+              href={telegramUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-funnel-preproject underline-offset-2 hover:underline"
+            >
+              Перейти
+            </a>
+          }
+        />
+      )}
     </ProjectAsideCard>
   )
 }
