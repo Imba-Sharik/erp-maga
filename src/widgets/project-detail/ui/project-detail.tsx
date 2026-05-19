@@ -8,6 +8,7 @@ import { ProjectDetailTabsRow } from './project-detail-tabs-row'
 
 export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   const flow = useStageFlow({
+    projectId: Number(project.id),
     initialStage: project.stage,
     projectEnteredAt: project.enteredSystemAt,
   })
