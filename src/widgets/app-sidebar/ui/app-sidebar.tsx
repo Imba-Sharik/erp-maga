@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, User } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -10,7 +11,13 @@ import {
   SettingsIcon,
 } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
-import { USER_ROLES, USER_ROLE_LABELS, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
+import {
+  USER_ROLES,
+  USER_ROLE_LABELS,
+  useUserRole,
+  useUserRoleStore,
+  type UserRole,
+} from '@/entities/user-role'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -51,6 +58,7 @@ export function AppSidebar() {
   const { pathname } = useLocation()
   const { state, isMobile } = useSidebar()
   const showCollapseInSidebar = !isMobile && state === 'expanded'
+  const queryClient = useQueryClient()
   const role = useUserRole()
   const setRole = useUserRoleStore((s) => s.setRole)
   const user = useCurrentUser()
@@ -147,7 +155,10 @@ export function AppSidebar() {
                 </DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={role}
-                  onValueChange={(v) => setRole(v as UserRole)}
+                  onValueChange={(v) => {
+                    setRole(v as UserRole)
+                    void queryClient.invalidateQueries()
+                  }}
                 >
                   {USER_ROLES.map((r) => (
                     <DropdownMenuRadioItem key={r} value={r}>
