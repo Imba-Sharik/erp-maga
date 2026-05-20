@@ -176,3 +176,33 @@
     bottom: -14px;
   }
 }
+
+/* Модификатор: вертикальный и горизонтальный скроллбары вынесены наружу (таблица проектов).
+ *
+ * Использование:
+ *   <OverlayScrollbarsComponent className="projects-table-scroll-area">
+ *     ...
+ *   </OverlayScrollbarsComponent>
+ */
+.projects-table-scroll-area {
+  &[data-overlayscrollbars~='host'] {
+    min-height: 0;
+    overflow: visible !important;
+  }
+
+  [data-overlayscrollbars-viewport] {
+    min-height: 0;
+  }
+
+  [data-overlayscrollbars-contents] {
+    @apply rounded-xl;
+  }
+
+  .os-scrollbar-vertical {
+    margin-inline: -14px;
+  }
+
+  .os-scrollbar-horizontal {
+    bottom: -14px;
+  }
+}
