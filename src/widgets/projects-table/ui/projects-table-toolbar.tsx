@@ -11,7 +11,7 @@ const COLUMN_VIEW_OPTIONS: { value: ProjectsTableColumnView; label: string }[] =
   { value: 'economics', label: 'Данные экономики' },
 ]
 
-const COLUMN_VIEW_TRIGGER = 'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white sm:w-55'
+const COLUMN_VIEW_TRIGGER = 'h-10! w-full rounded-[10px] border-[#B1B1B1] bg-white sm:w-55'
 
 interface ProjectsTableToolbarProps {
   search: string

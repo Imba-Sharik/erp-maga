@@ -27,7 +27,7 @@ const STAGE_OPTIONS: SelectOption[] = ALL_STAGE_ORDER.map((stage) => ({
 }))
 
 const HEADER_FILTER_TRIGGER =
-  'h-7 w-full min-w-0 gap-1 rounded-md border-0 bg-[#F6F6F6] px-2.5 text-xs text-[#454545] shadow-none data-placeholder:text-[#454545]'
+  'h-8! w-full min-w-0 gap-1 rounded-sm border-0 bg-[#F6F6F6] px-2 text-sm text-[#454545] shadow-none data-placeholder:text-[#454545]'
 
 interface ProjectsTableViewProps {
   projects: Project[]
