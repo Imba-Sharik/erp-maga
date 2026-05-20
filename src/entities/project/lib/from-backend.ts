@@ -51,6 +51,7 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   bonus_calculated: 'bonus_calculated',
   bonus_approved: 'bonus_approved',
   closed: 'closed',
+  out_of_mag_scope: 'out_of_mag_scope',
 }
 
 function takeFirstManager(raw: string | undefined): string {
@@ -75,11 +76,14 @@ export function mapBackendProject(b: BackendProject): Project | null {
   const raw = b as BackendProject & BackendProjectListExtras
   const economics = mapEconomics(raw)
 
+  const lastActiveStage = b.last_active_stage ? STAGE_MAP[b.last_active_stage] : undefined
+
   return {
     id: String(b.id),
     title: b.event_name,
     date: b.event_date,
     stage,
+    ...(lastActiveStage ? { lastActiveStage } : {}),
     city: b.city_label || b.city,
     loft: b.venue,
     hall: b.hall_loft,

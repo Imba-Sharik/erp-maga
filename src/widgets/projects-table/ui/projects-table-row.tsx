@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react'
-import { format, parseISO } from 'date-fns'
-import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { ProjectStageBadge, type Project, type ProjectBackOrigin } from '@/entities/project'
+import type { Project, ProjectBackOrigin } from '@/entities/project'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import {
@@ -13,30 +11,54 @@ import {
   resolveTotalBonus,
 } from '../lib/economics-columns'
 import { getTableGridTemplate } from '../lib/table-columns'
-
-function formatDate(iso: string): string {
-  if (!iso) return '—'
-  try {
-    return format(parseISO(iso), 'dd.MM.yyyy')
-  } catch {
-    return iso
-  }
-}
+import {
+  Cell,
+  EmptyTableCell,
+  formatTableDate,
+  ProjectHallCell,
+  ProjectLoftCell,
+  ProjectManagerCell,
+  ProjectStageTableCell,
+  ProjectTitleCell,
+} from './table-row-cells'
 
 interface ProjectsTableRowProps {
   project: Project
   columnView: ProjectsTableColumnView
   backOrigin: ProjectBackOrigin
+  renderRowAction?: (project: Project) => ReactNode
 }
 
-export function ProjectsTableRow({ project, columnView, backOrigin }: ProjectsTableRowProps) {
+export function ProjectsTableRow({
+  project,
+  columnView,
+  backOrigin,
+  renderRowAction,
+}: ProjectsTableRowProps) {
   const navigate = useNavigate()
   const gridTemplate = getTableGridTemplate(columnView)
+  const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
+
+  if (columnView === 'outside-mag') {
+    return (
+      <div
+        className="grid w-full items-center text-left transition-colors hover:bg-[#FAF9F6]"
+        style={{ gridTemplateColumns: gridTemplate }}
+      >
+        <button type="button" onClick={goToDetail} className="contents text-left">
+          <OutsideMagTableCells project={project} />
+        </button>
+        <div className="flex min-h-[44px] items-center justify-center px-2 py-2">
+          {renderRowAction?.(project)}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <button
       type="button"
-      onClick={() => navigate(`/projects/${project.id}`, { state: backOrigin })}
+      onClick={goToDetail}
       className="grid w-full items-center text-left transition-colors hover:bg-[#FAF9F6]"
       style={{ gridTemplateColumns: gridTemplate }}
     >
@@ -49,27 +71,34 @@ export function ProjectsTableRow({ project, columnView, backOrigin }: ProjectsTa
   )
 }
 
+function OutsideMagTableCells({ project }: { project: Project }) {
+  return (
+    <>
+      <ProjectTitleCell project={project} />
+      <ProjectLoftCell project={project} />
+      <ProjectHallCell project={project} />
+      <ProjectManagerCell project={project} />
+      <ProjectStageTableCell stage={project.lastActiveStage} />
+      <EmptyTableCell />
+      <EmptyTableCell />
+      <EmptyTableCell />
+      <EmptyTableCell />
+    </>
+  )
+}
+
 function GeneralTableCells({ project }: { project: Project }) {
   return (
     <>
-      <Cell>
-        <span className="w-full truncate font-medium text-[#454545]">{project.title || '—'}</span>
-      </Cell>
-      <Cell muted>{project.loft || '—'}</Cell>
-      <Cell muted>{project.hall || '—'}</Cell>
-      <Cell>
-        <span className="flex w-full min-w-0 items-center gap-1.5">
-          <Pencil className="size-3 shrink-0 text-[#BCBCBC]" />
-          <span className="min-w-0 truncate text-[#ACACAC]">{project.manager || '—'}</span>
-        </span>
-      </Cell>
-      <Cell>
-        <ProjectStageBadge stage={project.stage} />
-      </Cell>
-      <Cell muted>{formatDate(project.date)}</Cell>
+      <ProjectTitleCell project={project} />
+      <ProjectLoftCell project={project} />
+      <ProjectHallCell project={project} />
+      <ProjectManagerCell project={project} />
+      <ProjectStageTableCell stage={project.stage} />
+      <Cell muted>{formatTableDate(project.date)}</Cell>
       <Cell muted>{project.company || '—'}</Cell>
       <Cell muted>{project.phone || '—'}</Cell>
-      <Cell muted>{formatDate(project.createdAt)}</Cell>
+      <Cell muted>{formatTableDate(project.createdAt)}</Cell>
     </>
   )
 }
@@ -77,38 +106,13 @@ function GeneralTableCells({ project }: { project: Project }) {
 function EconomicsTableCells({ project }: { project: Project }) {
   return (
     <>
-      <Cell>
-        <span className="w-full truncate font-medium text-[#454545]">{project.title || '—'}</span>
-      </Cell>
-      <Cell>
-        <span className="flex w-full min-w-0 items-center gap-1.5">
-          <Pencil className="size-3 shrink-0 text-[#BCBCBC]" />
-          <span className="min-w-0 truncate text-[#ACACAC]">{project.manager || '—'}</span>
-        </span>
-      </Cell>
+      <ProjectTitleCell project={project} />
+      <ProjectManagerCell project={project} />
       <Cell muted>{project.company || '—'}</Cell>
-      <Cell>
-        <ProjectStageBadge stage={project.stage} />
-      </Cell>
+      <ProjectStageTableCell stage={project.stage} />
       <Cell muted>{formatTableMoney(resolveSalesTotal(project))}</Cell>
       <Cell muted>{formatTableMoney(resolveNetProfitTotal(project))}</Cell>
       <Cell muted>{formatTableMoney(resolveTotalBonus(project))}</Cell>
     </>
-  )
-}
-
-function Cell({ children, muted }: { children: ReactNode; muted?: boolean }) {
-  return (
-    <div
-      className={`flex min-h-[44px] min-w-0 items-center px-3 py-2 text-sm ${
-        muted ? 'text-[#ACACAC]' : 'text-[#454545]'
-      }`}
-    >
-      {typeof children === 'string' ? (
-        <span className="w-full truncate">{children}</span>
-      ) : (
-        children
-      )}
-    </div>
   )
 }

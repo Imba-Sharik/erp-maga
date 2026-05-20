@@ -1,7 +1,7 @@
 import { ALL_STAGE_ORDER, type Project, type ProjectStage } from '@/entities/project'
 import { formatMoney } from '@/entities/project-articles'
 
-export type ProjectsTableColumnView = 'general' | 'economics'
+export type ProjectsTableColumnView = 'general' | 'economics' | 'outside-mag'
 
 const STAGE_INDEX = new Map<ProjectStage, number>(
   ALL_STAGE_ORDER.map((stage, index) => [stage, index]),

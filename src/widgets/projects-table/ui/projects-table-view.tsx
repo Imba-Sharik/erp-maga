@@ -8,7 +8,6 @@ import {
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
-import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
 import { Card } from '@/shared/ui/card'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -16,18 +15,21 @@ import { Skeleton } from '@/shared/ui/skeleton'
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
 import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
+import {
+  HEADER_FILTER_TRIGGER,
+  TableHeaderHallFilter,
+  TableHeaderLoftFilter,
+  TableHeaderManagerFilter,
+} from './table-header-filters'
 import { ProjectsTableRow } from './projects-table-row'
 
-const BACK_ORIGIN: ProjectBackOrigin = { to: '/projects', label: 'Все проекты' }
+const DEFAULT_BACK_ORIGIN: ProjectBackOrigin = { to: '/projects', label: 'Все проекты' }
 
 /** Все 12 этапов воронки — фиксированный список для фильтра «Этап проекта». */
 const STAGE_OPTIONS: SelectOption[] = ALL_STAGE_ORDER.map((stage) => ({
   value: stage,
   label: ALL_STAGE_LABELS[stage],
 }))
-
-const HEADER_FILTER_TRIGGER =
-  'h-8! w-full min-w-0 gap-1 rounded-sm border-0 bg-[#F6F6F6] px-2 text-sm text-[#454545] shadow-none data-placeholder:text-[#454545]'
 
 interface ProjectsTableViewProps {
   projects: Project[]
@@ -40,6 +42,8 @@ interface ProjectsTableViewProps {
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onLoadMore: () => void
+  backOrigin?: ProjectBackOrigin
+  renderRowAction?: (project: Project) => ReactNode
 }
 
 export function ProjectsTableView({
@@ -53,6 +57,8 @@ export function ProjectsTableView({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
+  backOrigin = DEFAULT_BACK_ORIGIN,
+  renderRowAction,
 }: ProjectsTableViewProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const gridTemplate = getTableGridTemplate(columnView)
@@ -92,8 +98,14 @@ export function ProjectsTableView({
                 managerOptions={managerOptions}
                 onColumnFilterChange={onColumnFilterChange}
               />
-            ) : (
+            ) : columnView === 'economics' ? (
               <EconomicsTableHeader
+                columnFilters={columnFilters}
+                managerOptions={managerOptions}
+                onColumnFilterChange={onColumnFilterChange}
+              />
+            ) : (
+              <OutsideMagTableHeader
                 columnFilters={columnFilters}
                 managerOptions={managerOptions}
                 onColumnFilterChange={onColumnFilterChange}
@@ -118,7 +130,8 @@ export function ProjectsTableView({
                   key={project.id}
                   project={project}
                   columnView={columnView}
-                  backOrigin={BACK_ORIGIN}
+                  backOrigin={backOrigin}
+                  renderRowAction={renderRowAction}
                 />
               ))}
               {hasNextPage && (
@@ -150,30 +163,22 @@ function GeneralTableHeader({
     <>
       <HeaderLabel>Название проекта</HeaderLabel>
       <HeaderCell>
-        <ClearableSelect
-          placeholder="LOFT"
-          value={columnFilters.loft}
-          options={LOFT_OPTIONS}
-          onChange={(v) => onColumnFilterChange('loft', v)}
-          triggerClassName={HEADER_FILTER_TRIGGER}
+        <TableHeaderLoftFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
         />
       </HeaderCell>
       <HeaderCell>
-        <ClearableSelect
-          placeholder="Зал"
-          value={columnFilters.hall}
-          options={HALL_OPTIONS}
-          onChange={(v) => onColumnFilterChange('hall', v)}
-          triggerClassName={HEADER_FILTER_TRIGGER}
+        <TableHeaderHallFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
         />
       </HeaderCell>
       <HeaderCell>
-        <ClearableSelect
-          placeholder="Отв. менеджер"
-          value={columnFilters.manager}
-          options={managerOptions}
-          onChange={(v) => onColumnFilterChange('manager', v)}
-          triggerClassName={HEADER_FILTER_TRIGGER}
+        <TableHeaderManagerFilter
+          columnFilters={columnFilters}
+          managerOptions={managerOptions}
+          onColumnFilterChange={onColumnFilterChange}
         />
       </HeaderCell>
       <HeaderCell>
@@ -193,6 +198,47 @@ function GeneralTableHeader({
   )
 }
 
+function OutsideMagTableHeader({
+  columnFilters,
+  managerOptions,
+  onColumnFilterChange,
+}: {
+  columnFilters: ColumnFilters
+  managerOptions: string[]
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}) {
+  return (
+    <>
+      <HeaderLabel>Название проекта</HeaderLabel>
+      <HeaderCell>
+        <TableHeaderLoftFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <TableHeaderHallFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <TableHeaderManagerFilter
+          columnFilters={columnFilters}
+          managerOptions={managerOptions}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderLabel>Крайний этап</HeaderLabel>
+      <HeaderLabel>Дата перевода</HeaderLabel>
+      <HeaderLabel>Кто перевёл</HeaderLabel>
+      <HeaderLabel>Причина перевода</HeaderLabel>
+      <HeaderLabel>Комментарий</HeaderLabel>
+      <HeaderCell aria-hidden />
+    </>
+  )
+}
+
 function EconomicsTableHeader({
   columnFilters,
   managerOptions,
@@ -206,12 +252,10 @@ function EconomicsTableHeader({
     <>
       <HeaderLabel>Название проекта</HeaderLabel>
       <HeaderCell>
-        <ClearableSelect
-          placeholder="Отв. менеджер"
-          value={columnFilters.manager}
-          options={managerOptions}
-          onChange={(v) => onColumnFilterChange('manager', v)}
-          triggerClassName={HEADER_FILTER_TRIGGER}
+        <TableHeaderManagerFilter
+          columnFilters={columnFilters}
+          managerOptions={managerOptions}
+          onColumnFilterChange={onColumnFilterChange}
         />
       </HeaderCell>
       <HeaderLabel>Компания</HeaderLabel>
@@ -235,8 +279,18 @@ function HeaderLabel({ children }: { children: ReactNode }) {
   return <div className="min-w-0 truncate px-3 py-3 text-sm text-[#454545]">{children}</div>
 }
 
-function HeaderCell({ children }: { children: ReactNode }) {
-  return <div className="min-w-0 px-3 py-2">{children}</div>
+function HeaderCell({
+  children,
+  'aria-hidden': ariaHidden,
+}: {
+  children?: ReactNode
+  'aria-hidden'?: boolean
+}) {
+  return (
+    <div className="min-w-0 px-3 py-2" aria-hidden={ariaHidden}>
+      {children}
+    </div>
+  )
 }
 
 function TableSkeleton({

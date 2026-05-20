@@ -7,6 +7,7 @@ import { PREPROJECT_STAGE_TO_API } from './preproject-stage-api'
 const PROJECT_STAGE_TO_API: Record<ProjectStage, StageEnum> = {
   ...PREPROJECT_STAGE_TO_API,
   ...CLOSING_STAGE_TO_API,
+  out_of_mag_scope: 'out_of_mag_scope',
 }
 
 /** UI-стадия проекта → значение `stage` в API (для канбана и transitions). */
