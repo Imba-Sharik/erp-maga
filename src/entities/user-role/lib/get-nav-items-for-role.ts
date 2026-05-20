@@ -1,5 +1,5 @@
-import type { UserRole } from '@/entities/user-role'
-import { APP_NAV_ITEMS, type AppNavIcon, type AppNavItemId } from '@/shared/config/app-navigation'
+import { APP_NAV_ITEMS, type AppNavIcon, type AppNavItemId } from '../model/app-navigation'
+import type { UserRole } from '../model/types'
 
 export type AppNavItem = {
   id: AppNavItemId

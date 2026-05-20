@@ -2,11 +2,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, User } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { MagLogo, SettingsIcon } from '@/shared/assets'
-import { useAppNavItems } from '@/shared/lib/app-navigation/use-app-nav-items'
 import { useCurrentUser } from '@/entities/current-user'
 import {
   USER_ROLES,
   USER_ROLE_LABELS,
+  useAppNavItems,
   useUserRole,
   useUserRoleStore,
   type UserRole,

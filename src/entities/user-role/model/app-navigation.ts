@@ -1,6 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
 
-import type { UserRole } from '@/entities/user-role'
 import {
   BellIcon,
   CalendarIcon,
@@ -9,6 +8,8 @@ import {
   ListChecksIcon,
   SettingsIcon,
 } from '@/shared/assets'
+
+import type { UserRole } from './types'
 
 export type AppNavItemId =
   | 'dashboard'
