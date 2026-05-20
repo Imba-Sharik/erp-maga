@@ -17,8 +17,7 @@ export function OutsideMagPage() {
         <div className="flex flex-col gap-1.5">
           <h1 className="font-heading font-bold text-[#1B1A17]">Вне контура MAG</h1>
           <p className="max-w-[640px] text-sm text-[#ACACAC]">
-            Проекты, выведенные из контура MAG. Их можно вернуть в основную воронку из карточки
-            проекта.
+            Проекты, перемещённые в воронку “Вне контура”
           </p>
         </div>
       </header>
