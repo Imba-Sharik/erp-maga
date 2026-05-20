@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useCurrentUser } from '@/entities/current-user'
@@ -27,6 +28,8 @@ import { useCreateProject } from '../model/use-create-project'
 const TRIGGER_CLASS =
   'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
+const PROJECTS_BACK = { to: '/projects', label: 'Все проекты' } as const
+
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
   eventType: z.string().min(1, 'Выберите тип мероприятия'),
@@ -40,6 +43,7 @@ export interface CreateProjectDialogProps {
 }
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
+  const navigate = useNavigate()
   const currentUser = useCurrentUser()
 
   const form = useForm<CreateProjectFormValues>({
@@ -55,9 +59,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     reset: resetMutation,
   } = useCreateProject({
     magManager: currentUser.fullName,
-    onCreated: () => {
+    onCreated: (project) => {
       onOpenChange(false)
       form.reset()
+      navigate(`/projects/${project.id}`, { state: PROJECTS_BACK })
     },
   })
 
