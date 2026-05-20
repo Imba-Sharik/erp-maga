@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useCurrentUser } from '@/entities/current-user'
+import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 import {
   Dialog,
   DialogContent,
@@ -27,8 +28,6 @@ import { useCreateProject } from '../model/use-create-project'
 
 const TRIGGER_CLASS =
   'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
-
-const PROJECTS_BACK = { to: '/projects', label: 'Все проекты' } as const
 
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
@@ -62,7 +61,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     onCreated: (project) => {
       onOpenChange(false)
       form.reset()
-      navigate(`/projects/${project.id}`, { state: PROJECTS_BACK })
+      navigate(`/projects/${project.id}`, { state: DEFAULT_PROJECTS_BACK_ORIGIN })
     },
   })
 
