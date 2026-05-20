@@ -10,11 +10,11 @@ export const TABLE_GRID_TEMPLATE_ECONOMICS =
 
 /** Шаблон колонок «Вне контура MAG». */
 export const TABLE_GRID_TEMPLATE_OUTSIDE_MAG =
-  'minmax(170px,1.5fr) minmax(96px,0.8fr) minmax(96px,0.8fr) minmax(170px,1.45fr) minmax(130px,1.05fr) minmax(120px,1fr) minmax(120px,1fr) minmax(140px,1.1fr) minmax(140px,1.1fr) minmax(56px,72px)'
+  'minmax(170px,1.5fr) minmax(96px,0.8fr) minmax(96px,0.8fr) minmax(170px,1.45fr) minmax(165px,1.35fr) minmax(120px,1fr) minmax(120px,1fr) minmax(140px,1.1fr) minmax(140px,1.1fr) minmax(56px,72px)'
 
 export const TABLE_MIN_WIDTH_GENERAL = '1180px'
 export const TABLE_MIN_WIDTH_ECONOMICS = '900px'
-export const TABLE_MIN_WIDTH_OUTSIDE_MAG = '1280px'
+export const TABLE_MIN_WIDTH_OUTSIDE_MAG = '1315px'
 
 export const TABLE_COLUMN_COUNT: Record<ProjectsTableColumnView, number> = {
   general: 9,
