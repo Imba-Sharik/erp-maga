@@ -99,8 +99,8 @@ src/
 // entities/project/model/types.ts
 export interface StageHistoryEntry {
   stage: ProjectStage
-  enteredAt: string          // ISO дата перехода в этап
-  managerName: string        // кто перевёл
+  enteredAt: string // ISO дата перехода в этап
+  managerName: string // кто перевёл
   comment?: string
   // поля специфичные для этапа — берутся из StageFormData
   data: Partial<StageFormData>
@@ -130,10 +130,10 @@ export interface StageFormData {
 }
 
 export interface ProjectDetail extends Project {
-  enteredSystemAt: string    // «Заведено в систему: 11 мая 2026, 10:08»
+  enteredSystemAt: string // «Заведено в систему: 11 мая 2026, 10:08»
   history: StageHistoryEntry[]
   // PLUM
-  plumId: string             // 'PL-89432'
+  plumId: string // 'PL-89432'
   plumStatus: 'pending' | 'confirmed'
   plumComment?: string
   plumSyncedAt?: string
@@ -157,7 +157,7 @@ export interface ProjectDetail extends Project {
 ```tsx
 // pages/project-detail/ui/project-detail-page.tsx
 const { id } = useParams<{ id: string }>()
-const { data, isLoading, error } = useProjectsRetrieve(id!)  // kubb-хук
+const { data, isLoading, error } = useProjectsRetrieve(id!) // kubb-хук
 ```
 
 **Не хранить ответ в Zustand** — TanStack Query уже кэширует. Локальный UI-стейт (открыт ли passed-этап, активный таб) — в URL (`?tab=data&stage=signed`) или в локальном `useState`.
@@ -166,12 +166,12 @@ const { data, isLoading, error } = useProjectsRetrieve(id!)  // kubb-хук
 
 Четыре таба, активный — `Данные о проекте`:
 
-| Tab key      | Содержимое                                  | MVP? |
-| ------------ | ------------------------------------------- | ---- |
-| `data`       | LeftStack со StageSection-ами               | ✅    |
-| `economics`  | Расчёт по позициям, P&L                     | ❌    |
-| `documents`  | Файлы: договор, смета, акты                 | ❌    |
-| `actions`    | Аудит-лог (кто, что, когда)                 | ❌    |
+| Tab key     | Содержимое                    | MVP? |
+| ----------- | ----------------------------- | ---- |
+| `data`      | LeftStack со StageSection-ами | ✅   |
+| `economics` | Расчёт по позициям, P&L       | ❌   |
+| `documents` | Файлы: договор, смета, акты   | ❌   |
+| `actions`   | Аудит-лог (кто, что, когда)   | ❌   |
 
 В MVP — заглушки для трёх вкладок (`Coming soon`).
 
@@ -182,7 +182,10 @@ const { data, isLoading, error } = useProjectsRetrieve(id!)  // kubb-хук
 Источник правды для «какой этап текущий», истории переходов и финансовых статей — хук [features/advance-stage/model/use-stage-flow.ts](../../src/features/advance-stage/model/use-stage-flow.ts).
 
 ```ts
-const flow = useStageFlow({ initialStage: project.stage, projectEnteredAt: project.enteredSystemAt })
+const flow = useStageFlow({
+  initialStage: project.stage,
+  projectEnteredAt: project.enteredSystemAt,
+})
 // flow.currentStage, flow.visibleStages, flow.getRecord(stage), flow.advance(values?)
 // flow.articles, flow.taxRate, flow.updateArticle, flow.setTaxRate, flow.toggleBackline
 ```
@@ -190,6 +193,7 @@ const flow = useStageFlow({ initialStage: project.stage, projectEnteredAt: proje
 Состояние **локальное** (`useState`), пока бэк не реализует `POST /projects/{id}/transitions/` ([docs/api/stages.md](../api/stages.md)). После kubb-генерации `advance` подменяется на мутацию — потребители (`ProjectDetailStages`, секции этапов) не трогаются.
 
 Хранит:
+
 - `currentStage` — текущий этап. Стартует с `project.stage`, продвигается на `advance()`.
 - `records: Partial<Record<ProjectStage, StageRecord>>` — на каждый пройденный/текущий этап: `enteredAt`, `enteredBy`, `completedAt`, `completedBy`, `values` (значения формы). Для `plum_request` initial-запись: `enteredAt = project.enteredSystemAt`, `enteredBy = 'PLUM (синхронизация)'`. На `advance` — закрываем текущий этап (`completedAt = now`, `completedBy = useCurrentUser().fullName`), открываем следующий (`enteredAt = now`, `enteredBy = ...`).
 - `articles: ProjectArticles` (из [entities/project-articles](../../src/entities/project-articles)) — `{ main: Record<ArticleKind, { sales, expense, bonusPercent }>, backline: ... | null }`. Используется на финансовых этапах `ready_to_event`, `expenses_entered`, `bonus_calculated` (разные `aspect` редактируются на разных этапах). Дефолтные `bonusPercent` — в [defaults.ts](../../src/entities/project-articles/lib/defaults.ts), легко менять.
@@ -198,6 +202,7 @@ const flow = useStageFlow({ initialStage: project.stage, projectEnteredAt: proje
 ## Текущий пользователь — `useCurrentUser`
 
 Заглушка под JWT/`/users/me` — [entities/current-user](../../src/entities/current-user). Возвращает `{ id, fullName, displayName, initials, email, role }` на основе выбранной роли в дропдауне сайдбара. Имена-заглушки в `STUB_USERS` (manager → «Шарин Игорь Дмитриевич», accountant → «Петрова Анна Сергеевна», director → «Сидоров Сергей Сергеевич»). Используется в:
+
 - Сайдбаре (`AppSidebar`) — аватар/имя/инициалы реактивны к роли.
 - `useStageFlow.advance` — стамп `enteredBy` / `completedBy` при переходе.
 
@@ -206,6 +211,7 @@ const flow = useStageFlow({ initialStage: project.stage, projectEnteredAt: proje
 `StageSectionCurrent` рендерит RHF-форму на основе [stage-form-schemas.ts](../../src/entities/project/lib/stage-form-schemas.ts). Системные поля (`leadManager`, `contactedAt`, `closingFunnelEnteredAt`) в схему **не входят** — они выставляются автоматически бэком (а до подключения бэка — резолвятся из `flow.getRecord(stage)` через [resolve-system-value.ts](../../src/widgets/project-stage-section/lib/resolve-system-value.ts)).
 
 Текущие schemas:
+
 - `plum_request` — `clientCompany`, `phone`, `contactPerson`, `email` все `required()`; `createdAt` optional.
 - `first_contact` — `contactComment: required()`, `contactChannel: enum([messenger|phone|meeting])` с русским сообщением об ошибке.
 - `calc_ready` — `calcComment: required()`.
@@ -232,11 +238,11 @@ Manager-поля типа `date` (например, `contractDate` на `signed`
 
 `ready_to_event`, `expenses_entered`, `bonus_calculated` рендерятся не через generic-механизм, а через [FinanceBlockWithBackline](../../src/widgets/project-stage-section/ui/finance-block-with-backline.tsx) (data-driven компонент, тонкие обёртки `StagePassedReady`/`StagePassedExpenses` задают разный `aspect`):
 
-| Этап                | Компонент           | `aspect`         |
-| ------------------- | ------------------- | ---------------- |
-| `ready_to_event`    | `StagePassedReady`  | `'sales'`        |
-| `expenses_entered`  | `StagePassedExpenses` | `'expense'`    |
-| `bonus_calculated`  | `StagePassedBonus`  | — (свой UI)      |
+| Этап               | Компонент             | `aspect`    |
+| ------------------ | --------------------- | ----------- |
+| `ready_to_event`   | `StagePassedReady`    | `'sales'`   |
+| `expenses_entered` | `StagePassedExpenses` | `'expense'` |
+| `bonus_calculated` | `StagePassedBonus`    | — (свой UI) |
 
 Принимают `articles`, `taxRate`, `onArticleChange`, `onToggleBackline`, `onTaxRateChange`, `record`, `isCurrent` из `useStageFlow` (через `ProjectStageSection` → `ProjectDetailStages`). `MoneyInput`/`PercentInput` — живое форматирование (пробелы каждые 3 цифры + `₽`/`%`, фильтрация по `inputMode`). Проценты в колонке справа — `bonusPercent` из дефолтов (на этапе 5 read-only, на 11 будут редактируемы). Итоги, сумма налога — calculated. Кнопки «Добавить/Удалить бэклайн» видны только при `editable = canEdit && isCurrent`.
 
@@ -249,6 +255,7 @@ Manager-поля типа `date` (например, `contractDate` на `signed`
 Источник — [src/widgets/project-stage-section/lib/stage-permissions.ts](../../src/widgets/project-stage-section/lib/stage-permissions.ts). Подробнее в [CLAUDE.md](../../CLAUDE.md), раздел «Права по этапам».
 
 Реализация:
+
 1. `useUserRole()` из `@/entities/user-role` отдаёт текущую роль (выбирается в дропдауне профиля сайдбара).
 2. `canEditStage(stage, role)` возвращает `boolean`.
 3. В каждой stage-секции (current, passed, custom-passed) при `!canEdit`:
@@ -261,12 +268,12 @@ Manager-поля типа `date` (например, `contractDate` на `signed`
 
 Все 4 карточки — read-only снимки. Источник:
 
-| Карточка             | Поля проекта                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| **Данные из PLUM**   | `plumId`, `plumStatus`, `type`, `date`, `loft`, `hall`, `city`                              |
-| **Данные Клиента**   | `clientCompany`, `manager` (контактное лицо), `phone`, `email`, бейдж `clientStatus`        |
-| **Комментарий из PLUM** | `plumComment`, `plumSyncedAt`                                                            |
-| **Финансы (сводка)** | `finance.sales`, `finance.expenses`, `finance.bonuses`, `finance.netProfit`                 |
+| Карточка                | Поля проекта                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| **Данные из PLUM**      | `plumId`, `plumStatus`, `type`, `date`, `loft`, `hall`, `city`                       |
+| **Данные Клиента**      | `clientCompany`, `manager` (контактное лицо), `phone`, `email`, бейдж `clientStatus` |
+| **Комментарий из PLUM** | `plumComment`, `plumSyncedAt`                                                        |
+| **Финансы (сводка)**    | `finance.sales`, `finance.expenses`, `finance.bonuses`, `finance.netProfit`          |
 
 Общий компонент-обёртка — `entities/project/ui/project-aside-card.tsx` с пропсами `title`, `badge?`, `subline?`, `children`. Внутри — список `KvRow` (label / value через `justify-between`).
 
@@ -284,34 +291,34 @@ Container queries для `DetailLayout`:
 В [src/app/layouts/app-layout.tsx](../../src/app/layouts/app-layout.tsx) Topbar — общий для всех страниц. Чтобы добавить Breadcrumb слева, нужен слот:
 
 ```tsx
-<AppLayout breadcrumb={<Breadcrumb backTo="/projects" current="P-2026-0142" />}>
-  ...
-</AppLayout>
+<AppLayout breadcrumb={<Breadcrumb backTo="/projects" current="P-2026-0142" />}>...</AppLayout>
 ```
 
 Либо — через `Outlet context` / отдельный `useTopbarSlot()` хук. Решение — в момент имплементации, конвенция фиксируется в [src/app/layouts/app-layout.tsx](../../src/app/layouts/app-layout.tsx).
 
 ## Состояния
 
-| Состояние   | UI                                                                                           |
-| ----------- | -------------------------------------------------------------------------------------------- |
-| `loading`   | Skeleton всех блоков (Breadcrumb, MainCard, Stages, Aside). Использовать `shadcn/skeleton`.  |
+| Состояние   | UI                                                                                            |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| `loading`   | Skeleton всех блоков (Breadcrumb, MainCard, Stages, Aside). Использовать `shadcn/skeleton`.   |
 | `error`     | Inline error card в LeftStack + кнопка «Повторить». Сайдбар и Topbar остаются интерактивными. |
 | `not_found` | Редирект на `/projects` + toast.                                                              |
-| `forbidden` | Карточка «Нет доступа» (для будущих ролей).                                                  |
+| `forbidden` | Карточка «Нет доступа» (для будущих ролей).                                                   |
 
 ## Звёздочки `*` для обязательных полей
 
-`StageFieldShell` принимает `required?: boolean` и рендерит звёздочку красным `#D25252` (см. также `FormLabel` в `StageSectionCurrent`). Для passed-секций флаг прокидывается через `StageFieldDemoEditable` (читает `field.required`). В кастомных компонентах (`ready`/`expenses_entered`/`bonus_calculated`) `ArticleField` по дефолту `required: true`, `SimpleField` — нет.
+Текст подписи и красная звёздочка (`#D25252`) — [field-label-text.tsx](../../src/widgets/project-stage-section/ui/field-label-text.tsx) (`FieldLabelText`). Единая подпись — [stage-field-label.tsx](../../src/widgets/project-stage-section/ui/stage-field-label.tsx) (`StageFieldLabel`: `form` для RHF в `StageSectionCurrent`, иначе `<span>`). Layout «подпись + control» — [stage-field.tsx](../../src/widgets/project-stage-section/ui/stage-field.tsx) (`StageField`, `gap-1.5`). RHF-поля: `FormItem` + `StageFieldLabel form` + `FormControl` + `FormMessage` (`FormItem` сохраняет `gap-2`). Passed — `StageFieldDemoEditable`; финансы — `StageField` в `FinanceBlockWithBackline`.
 
 ## Что есть и чего не хватает
 
 **Готово:**
+
 - ✅ Figma-фрейм `ProjectDetail` со всеми блоками
 - ✅ Базовые типы `Project`, `ProjectStage`, `STAGE_ORDER`, `STAGE_LABELS` в `entities/project`
 - ✅ Компоненты-кирпичи: `ProjectStatusBadge`, `ProjectCard`
 
 **Нужно для MVP детальной страницы:**
+
 - ⏳ Расширить `Project` → `ProjectDetail` с `history`, `plumId`, `finance`
 - ⏳ Добавить `STAGE_FORM_SCHEMAS` (zod)
 - ⏳ Slot в `AppLayout` для Breadcrumb
@@ -326,4 +333,4 @@ Container queries для `DetailLayout`:
 - Figma: [Источник — /projects/[id]](https://www.figma.com/design/HAj8LlmGcKz3fN9NOVqUSX/ERP-MAG2?node-id=2534-2)
 - Старый PM-пример: [node 2480:2](https://www.figma.com/design/HAj8LlmGcKz3fN9NOVqUSX/ERP-MAG2?node-id=2480-2)
 - Соседний Code sync для kanban: [node 2474:2](https://www.figma.com/design/HAj8LlmGcKz3fN9NOVqUSX/ERP-MAG2?node-id=2474-2)
-- Конвенции именования слоёв: [docs/pm/figma-handoff.md](./figma-handoff.md) *(если/когда появится)*
+- Конвенции именования слоёв: [docs/pm/figma-handoff.md](./figma-handoff.md) _(если/когда появится)_
