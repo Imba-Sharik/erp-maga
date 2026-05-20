@@ -28,6 +28,14 @@ export type ProjectStage = PreprojectStage | ClosingStage
 
 export type StageFunnel = 'pre_project' | 'closing'
 
+/** Финансовые итоги проекта (могут отсутствовать в списке до нужного этапа). */
+export interface ProjectEconomics {
+  salesProjectTotal: number | null
+  netProfitTotal: number | null
+  bonusCalculatedTotal: number | null
+  bonusApprovedTotal: number | null
+}
+
 export interface Project {
   id: string
   title: string
@@ -45,6 +53,7 @@ export interface Project {
   lastUpdate: string
   /** ISO-datetime создания проекта в системе («появление в системе»). */
   createdAt: string
+  economics?: ProjectEconomics
 }
 
 export type ContractType = 'with_vat' | 'without_vat'

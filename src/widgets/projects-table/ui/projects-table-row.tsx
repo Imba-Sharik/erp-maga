@@ -5,7 +5,14 @@ import { useNavigate } from 'react-router-dom'
 
 import { ProjectStageBadge, type Project, type ProjectBackOrigin } from '@/entities/project'
 
-import { TABLE_GRID_TEMPLATE } from '../lib/table-columns'
+import type { ProjectsTableColumnView } from '../lib/economics-columns'
+import {
+  formatTableMoney,
+  resolveNetProfitTotal,
+  resolveSalesTotal,
+  resolveTotalBonus,
+} from '../lib/economics-columns'
+import { getTableGridTemplate } from '../lib/table-columns'
 
 function formatDate(iso: string): string {
   if (!iso) return '—'
@@ -18,23 +25,35 @@ function formatDate(iso: string): string {
 
 interface ProjectsTableRowProps {
   project: Project
+  columnView: ProjectsTableColumnView
   backOrigin: ProjectBackOrigin
 }
 
-export function ProjectsTableRow({ project, backOrigin }: ProjectsTableRowProps) {
+export function ProjectsTableRow({ project, columnView, backOrigin }: ProjectsTableRowProps) {
   const navigate = useNavigate()
+  const gridTemplate = getTableGridTemplate(columnView)
 
   return (
     <button
       type="button"
       onClick={() => navigate(`/projects/${project.id}`, { state: backOrigin })}
       className="grid w-full items-center border-b border-[#EDEDED] text-left transition-colors last:border-b-0 hover:bg-[#FAF9F6]"
-      style={{ gridTemplateColumns: TABLE_GRID_TEMPLATE }}
+      style={{ gridTemplateColumns: gridTemplate }}
     >
+      {columnView === 'general' ? (
+        <GeneralTableCells project={project} />
+      ) : (
+        <EconomicsTableCells project={project} />
+      )}
+    </button>
+  )
+}
+
+function GeneralTableCells({ project }: { project: Project }) {
+  return (
+    <>
       <Cell>
-        <span className="w-full truncate font-medium text-[#454545]">
-          {project.title || '—'}
-        </span>
+        <span className="w-full truncate font-medium text-[#454545]">{project.title || '—'}</span>
       </Cell>
       <Cell muted>{project.loft || '—'}</Cell>
       <Cell muted>{project.hall || '—'}</Cell>
@@ -51,7 +70,30 @@ export function ProjectsTableRow({ project, backOrigin }: ProjectsTableRowProps)
       <Cell muted>{project.company || '—'}</Cell>
       <Cell muted>{project.phone || '—'}</Cell>
       <Cell muted>{formatDate(project.createdAt)}</Cell>
-    </button>
+    </>
+  )
+}
+
+function EconomicsTableCells({ project }: { project: Project }) {
+  return (
+    <>
+      <Cell>
+        <span className="w-full truncate font-medium text-[#454545]">{project.title || '—'}</span>
+      </Cell>
+      <Cell>
+        <span className="flex w-full min-w-0 items-center gap-1.5">
+          <Pencil className="size-3 shrink-0 text-[#BCBCBC]" />
+          <span className="min-w-0 truncate text-[#ACACAC]">{project.manager || '—'}</span>
+        </span>
+      </Cell>
+      <Cell muted>{project.company || '—'}</Cell>
+      <Cell>
+        <ProjectStageBadge stage={project.stage} />
+      </Cell>
+      <Cell muted>{formatTableMoney(resolveSalesTotal(project))}</Cell>
+      <Cell muted>{formatTableMoney(resolveNetProfitTotal(project))}</Cell>
+      <Cell muted>{formatTableMoney(resolveTotalBonus(project))}</Cell>
+    </>
   )
 }
 
@@ -62,7 +104,11 @@ function Cell({ children, muted }: { children: ReactNode; muted?: boolean }) {
         muted ? 'text-[#ACACAC]' : 'text-[#454545]'
       }`}
     >
-      {typeof children === 'string' ? <span className="w-full truncate">{children}</span> : children}
+      {typeof children === 'string' ? (
+        <span className="w-full truncate">{children}</span>
+      ) : (
+        children
+      )}
     </div>
   )
 }
