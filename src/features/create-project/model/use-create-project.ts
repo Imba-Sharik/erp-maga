@@ -23,7 +23,7 @@ type CreateProjectMutationContext = {
 
 export interface UseCreateProjectOptions {
   magManager: string
-  onCreated?: () => void
+  onCreated?: (project: Project) => void
 }
 
 function buildOptimisticFromRequest(data: ProjectCreateRequest, magManager: string): Project {
@@ -57,7 +57,7 @@ export function useCreateProject({ magManager, onCreated }: UseCreateProjectOpti
           removeCreatedProjectFromQueries(queryClient, context.optimistic)
         }
         prependCreatedProjectToQueries(queryClient, created)
-        onCreated?.()
+        onCreated?.(created)
       },
       onError: (_error, _variables, context) => {
         if (context?.optimistic) {

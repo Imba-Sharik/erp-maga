@@ -1,6 +1,6 @@
-import { PipelineKanbanColumn, type PipelineKanbanColumnProps } from './pipeline-kanban-column'
+import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 
-const PROJECTS_BACK = { to: '/projects', label: 'Все проекты' } as const
+import { PipelineKanbanColumn, type PipelineKanbanColumnProps } from './pipeline-kanban-column'
 
 type ProjectsKanbanColumnProps = Omit<
   PipelineKanbanColumnProps,
@@ -12,7 +12,7 @@ export function ProjectsKanbanColumn(props: ProjectsKanbanColumnProps) {
     <PipelineKanbanColumn
       {...props}
       headerAccentClassName="bg-funnel-preproject"
-      backOrigin={PROJECTS_BACK}
+      backOrigin={DEFAULT_PROJECTS_BACK_ORIGIN}
     />
   )
 }

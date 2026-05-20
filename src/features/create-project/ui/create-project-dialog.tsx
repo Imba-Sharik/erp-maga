@@ -3,9 +3,11 @@ import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useCurrentUser } from '@/entities/current-user'
+import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 import {
   Dialog,
   DialogContent,
@@ -40,6 +42,7 @@ export interface CreateProjectDialogProps {
 }
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
+  const navigate = useNavigate()
   const currentUser = useCurrentUser()
 
   const form = useForm<CreateProjectFormValues>({
@@ -55,9 +58,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     reset: resetMutation,
   } = useCreateProject({
     magManager: currentUser.fullName,
-    onCreated: () => {
+    onCreated: (project) => {
       onOpenChange(false)
       form.reset()
+      navigate(`/projects/${project.id}`, { state: DEFAULT_PROJECTS_BACK_ORIGIN })
     },
   })
 
