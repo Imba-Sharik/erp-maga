@@ -3,7 +3,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
 import type { ProjectsListQueryParams } from '@/shared/api/generated/types/projectsController/ProjectsList'
 
-export type KanbanBoardScope = 'board-preproject' | 'board-closing'
+export type KanbanBoardScope = 'board-preproject' | 'board-closing' | 'board-outside-mag'
 
 export type BoardListParams = Pick<
   ProjectsListQueryParams,
@@ -30,7 +30,8 @@ export function isKanbanBoardQueryKey(first: unknown): first is {
     (first as { url: string }).url === '/api/v1/projects/' &&
     'scope' in first &&
     ((first as { scope: string }).scope === 'board-preproject' ||
-      (first as { scope: string }).scope === 'board-closing') &&
+      (first as { scope: string }).scope === 'board-closing' ||
+      (first as { scope: string }).scope === 'board-outside-mag') &&
     'apiStage' in first
   )
 }

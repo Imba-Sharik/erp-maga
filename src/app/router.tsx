@@ -1,10 +1,12 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { RequireRole } from './guards/require-role'
 import { AppLayout } from './layouts/app-layout'
 import { CalendarPage } from '@/pages/calendar'
 import { ClosingPage } from '@/pages/closing'
 import { DashboardPage } from '@/pages/dashboard'
 import { NotFoundPage } from '@/pages/not-found'
 import { NotificationsPage } from '@/pages/notifications'
+import { OutsideMagPage } from '@/pages/outside-mag'
 import { ProfilePage } from '@/pages/profile'
 import { ProjectDetailPage } from '@/pages/project-detail'
 import { ProjectsPage } from '@/pages/projects'
@@ -22,6 +24,14 @@ const router = createBrowserRouter([
       { path: 'projects', element: <ProjectsPage /> },
       { path: 'projects/:id', element: <ProjectDetailPage /> },
       { path: 'closing', element: <ClosingPage /> },
+      {
+        path: 'outside-mag',
+        element: (
+          <RequireRole roles={['director']}>
+            <OutsideMagPage />
+          </RequireRole>
+        ),
+      },
       { path: 'notifications', element: <NotificationsPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'settings', element: <SettingsPage /> },

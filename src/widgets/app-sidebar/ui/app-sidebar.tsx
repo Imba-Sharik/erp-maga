@@ -1,19 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, User } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import {
-  MagLogo,
-  BellIcon,
-  CalendarIcon,
-  DashboardIcon,
-  FolderIcon,
-  ListChecksIcon,
-  SettingsIcon,
-} from '@/shared/assets'
+import { MagLogo, SettingsIcon } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
 import {
   USER_ROLES,
   USER_ROLE_LABELS,
+  useRoleNavItems,
   useUserRole,
   useUserRoleStore,
   type UserRole,
@@ -45,15 +38,6 @@ import {
   useSidebar,
 } from '@/shared/ui/sidebar'
 
-const navItems = [
-  { title: 'Дашборд', url: '/dashboard', icon: DashboardIcon },
-  { title: 'Календарь', url: '/calendar', icon: CalendarIcon },
-  { title: 'Проекты', url: '/projects', icon: FolderIcon },
-  { title: 'Закрытие', url: '/closing', icon: ListChecksIcon },
-  { title: 'Уведомления', url: '/notifications', icon: BellIcon },
-  { title: 'Настройки', url: '/settings', icon: SettingsIcon },
-]
-
 export function AppSidebar() {
   const { pathname } = useLocation()
   const { state, isMobile } = useSidebar()
@@ -63,6 +47,7 @@ export function AppSidebar() {
   const setRole = useUserRoleStore((s) => s.setRole)
   const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
+  const navItems = useRoleNavItems()
 
   return (
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">
@@ -92,7 +77,7 @@ export function AppSidebar() {
               {navItems.map((item) => {
                 const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
