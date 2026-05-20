@@ -6,7 +6,7 @@ import { Input } from '@/shared/ui/input'
 const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
 
 const TRIGGER_CLASS =
-  'h-10 min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none'
+  'h-10! min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none'
 
 interface ProjectsBoardToolbarProps {
   search: string
@@ -17,6 +17,8 @@ interface ProjectsBoardToolbarProps {
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
+  /** Селекты рядом с поиском (слева), без растягивания вправо */
+  filtersAlign?: 'start' | 'spread'
 }
 
 export function ProjectsBoardToolbar({
@@ -28,9 +30,18 @@ export function ProjectsBoardToolbar({
   onChangeCity,
   onChangeHall,
   onChangeLoft,
+  filtersAlign = 'spread',
 }: ProjectsBoardToolbarProps) {
+  const filtersAtStart = filtersAlign === 'start'
+
   return (
-    <div className="flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+    <div
+      className={
+        filtersAtStart
+          ? 'flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-start md:gap-4'
+          : 'flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4'
+      }
+    >
       <div className="relative w-full md:w-75">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
         <Input
@@ -42,7 +53,13 @@ export function ProjectsBoardToolbar({
         />
       </div>
 
-      <div className="flex flex-1 flex-wrap items-center gap-2.5 md:flex-none">
+      <div
+        className={
+          filtersAtStart
+            ? 'flex flex-wrap items-center gap-2.5'
+            : 'flex flex-1 flex-wrap items-center gap-2.5 md:flex-none'
+        }
+      >
         <ClearableSelect
           placeholder="Выберите город"
           value={city}

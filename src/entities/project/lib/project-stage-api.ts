@@ -8,6 +8,7 @@ const PROJECT_STAGE_TO_API: Record<ProjectStage, StageEnum> = {
   ...PREPROJECT_STAGE_TO_API,
   ...CLOSING_STAGE_TO_API,
   out_of_mag_scope: 'out_of_mag_scope',
+  archived: 'archived',
 }
 
 /** UI-стадия проекта → значение `stage` в API (для канбана и transitions). */

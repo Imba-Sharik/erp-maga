@@ -16,6 +16,7 @@ import {
   Cell,
   EmptyTableCell,
   formatTableDate,
+  ProjectArchivedAtCell,
   ProjectHallCell,
   ProjectLoftCell,
   ProjectStageTableCell,
@@ -133,6 +134,56 @@ export function ProjectsTableRow({
           <Cell muted>{project.company || '—'}</Cell>
           <Cell muted>{project.phone || '—'}</Cell>
           <Cell muted>{formatTableDate(project.createdAt)}</Cell>
+        </div>
+      </div>
+    )
+  }
+
+  if (columnView === 'closing-general') {
+    return (
+      <div
+        className={ROW_NAV_CLASS}
+        style={{ gridTemplateColumns: gridTemplate }}
+        role="button"
+        tabIndex={0}
+        onClick={goToDetail}
+        onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
+      >
+        <div className="contents">
+          <ProjectTitleCell project={project} />
+          <ProjectLoftCell project={project} />
+          <ProjectHallCell project={project} />
+        </div>
+        <ProjectManagerCell {...managerCellProps} />
+        <div className="contents">
+          <Cell muted>{formatTableDate(project.date)}</Cell>
+          <Cell muted>{project.company || '—'}</Cell>
+          <Cell muted>{project.phone || '—'}</Cell>
+          <ProjectArchivedAtCell project={project} />
+        </div>
+      </div>
+    )
+  }
+
+  if (columnView === 'closing-economics') {
+    return (
+      <div
+        className={ROW_NAV_CLASS}
+        style={{ gridTemplateColumns: gridTemplate }}
+        role="button"
+        tabIndex={0}
+        onClick={goToDetail}
+        onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
+      >
+        <div className="contents">
+          <ProjectTitleCell project={project} />
+        </div>
+        <ProjectManagerCell {...managerCellProps} />
+        <div className="contents">
+          <Cell muted>{project.company || '—'}</Cell>
+          <Cell muted>{formatTableMoney(resolveSalesTotal(project))}</Cell>
+          <Cell muted>{formatTableMoney(resolveNetProfitTotal(project))}</Cell>
+          <Cell muted>{formatTableMoney(resolveTotalBonus(project))}</Cell>
         </div>
       </div>
     )

@@ -480,6 +480,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     },
   ],
   out_of_mag_scope: [],
+  archived: [],
 }
 
 export interface PassedExtra {
@@ -501,4 +502,5 @@ export const PASSED_EXTRAS: Record<ProjectStage, PassedExtra[]> = {
   bonus_approved: [],
   closed: [],
   out_of_mag_scope: [],
+  archived: [],
 }
