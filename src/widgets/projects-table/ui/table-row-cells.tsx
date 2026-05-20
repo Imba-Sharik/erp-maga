@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { format, parseISO } from 'date-fns'
-import { Pencil } from 'lucide-react'
 
 import { ProjectStageBadge, type Project, type ProjectStage } from '@/entities/project'
 
@@ -47,17 +46,6 @@ export function ProjectLoftCell({ project }: { project: Project }) {
 
 export function ProjectHallCell({ project }: { project: Project }) {
   return <Cell muted>{project.hall || TABLE_EMPTY}</Cell>
-}
-
-export function ProjectManagerCell({ project }: { project: Project }) {
-  return (
-    <Cell>
-      <span className="flex w-full min-w-0 items-center gap-1.5">
-        <Pencil className="size-3 shrink-0 text-[#BCBCBC]" />
-        <span className="min-w-0 truncate text-[#ACACAC]">{project.manager || TABLE_EMPTY}</span>
-      </span>
-    </Cell>
-  )
 }
 
 export function EmptyTableCell() {
