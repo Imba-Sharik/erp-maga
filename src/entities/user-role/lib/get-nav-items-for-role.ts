@@ -1,15 +1,15 @@
-import { APP_NAV_ITEMS, type AppNavIcon, type AppNavItemId } from '../model/app-navigation'
+import { ROLE_NAV_ITEMS, type RoleNavIcon, type RoleNavItemId } from '../model/role-navigation'
 import type { UserRole } from '../model/types'
 
-export type AppNavItem = {
-  id: AppNavItemId
+export type RoleNavItem = {
+  id: RoleNavItemId
   url: string
-  icon: AppNavIcon
+  icon: RoleNavIcon
   title: string
 }
 
-export function getNavItemsForRole(role: UserRole): AppNavItem[] {
-  return APP_NAV_ITEMS.filter((item) => item.roles === undefined || item.roles.includes(role)).map(
+export function getNavItemsForRole(role: UserRole): RoleNavItem[] {
+  return ROLE_NAV_ITEMS.filter((item) => item.roles === undefined || item.roles.includes(role)).map(
     (item) => ({
       id: item.id,
       url: item.url,

@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/entities/current-user'
 import {
   USER_ROLES,
   USER_ROLE_LABELS,
-  useAppNavItems,
+  useRoleNavItems,
   useUserRole,
   useUserRoleStore,
   type UserRole,
@@ -47,7 +47,7 @@ export function AppSidebar() {
   const setRole = useUserRoleStore((s) => s.setRole)
   const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
-  const navItems = useAppNavItems()
+  const navItems = useRoleNavItems()
 
   return (
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">

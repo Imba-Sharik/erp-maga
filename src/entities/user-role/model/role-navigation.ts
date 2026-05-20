@@ -11,7 +11,7 @@ import {
 
 import type { UserRole } from './types'
 
-export type AppNavItemId =
+export type RoleNavItemId =
   | 'dashboard'
   | 'calendar'
   | 'projects'
@@ -20,12 +20,12 @@ export type AppNavItemId =
   | 'notifications'
   | 'settings'
 
-export type AppNavIcon = ComponentType<SVGProps<SVGSVGElement>>
+export type RoleNavIcon = ComponentType<SVGProps<SVGSVGElement>>
 
-export type AppNavItemDef = {
-  id: AppNavItemId
+export type RoleNavItemDef = {
+  id: RoleNavItemId
   url: string
-  icon: AppNavIcon
+  icon: RoleNavIcon
   title: string
   /** Если не задано — пункт виден всем ролям */
   roles?: readonly UserRole[]
@@ -33,7 +33,7 @@ export type AppNavItemDef = {
   titleByRole?: Partial<Record<UserRole, string>>
 }
 
-export const APP_NAV_ITEMS: readonly AppNavItemDef[] = [
+export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
   { id: 'dashboard', title: 'Дашборд', url: '/dashboard', icon: DashboardIcon },
   { id: 'calendar', title: 'Календарь', url: '/calendar', icon: CalendarIcon },
   {
