@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/shared/ui/textarea'
 
 import type { StageFieldConfig } from '../lib/fields-map'
-import { StageFieldShell } from './stage-field-shell'
+import { StageField } from './stage-field'
 
 interface StageFieldDemoEditableProps {
   field: StageFieldConfig
@@ -25,7 +25,7 @@ export function StageFieldDemoEditable({
   const isTextarea = field.type === 'textarea'
 
   return (
-    <StageFieldShell
+    <StageField
       label={field.label}
       required={field.required}
       className={isTextarea ? `h-full ${className ?? ''}` : className}
@@ -58,6 +58,6 @@ export function StageFieldDemoEditable({
           className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
         />
       )}
-    </StageFieldShell>
+    </StageField>
   )
 }

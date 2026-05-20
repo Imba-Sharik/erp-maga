@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
 import type { StageFieldSource } from '../lib/fields-map'
-import { StageFieldShell } from './stage-field-shell'
+import { StageField } from './stage-field'
 
 interface StageFieldReadonlyProps {
   label: string
@@ -26,7 +26,7 @@ export function StageFieldReadonly({
   const isSystem = source === 'system'
 
   return (
-    <StageFieldShell label={label} className={className}>
+    <StageField label={label} className={className}>
       <div
         className={cn(
           'flex w-full rounded-[10px] border px-3 py-2 text-sm',
@@ -38,10 +38,8 @@ export function StageFieldReadonly({
         title={isSystem ? 'Заполнено системой' : undefined}
       >
         <span className={cn('min-w-0 flex-1', !value && 'text-muted-foreground')}>{display}</span>
-        {isSelect ? (
-          <ChevronDown className="text-muted-foreground ml-2 size-3.5 shrink-0" />
-        ) : null}
+        {isSelect ? <ChevronDown className="text-muted-foreground ml-2 size-3.5 shrink-0" /> : null}
       </div>
-    </StageFieldShell>
+    </StageField>
   )
 }

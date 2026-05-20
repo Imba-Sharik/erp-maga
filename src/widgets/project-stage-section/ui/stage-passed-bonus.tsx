@@ -16,16 +16,12 @@ import {
 } from '@/entities/project-articles'
 import type { StageRecord } from '@/features/advance-stage'
 import { Button } from '@/shared/ui/button'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/shared/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
-import { StageFieldShell } from './stage-field-shell'
+import { StageField } from './stage-field'
 
 type Source = 'manager' | 'system'
 type Icon = ComponentType<SVGProps<SVGSVGElement>>
@@ -90,7 +86,7 @@ function ReadonlyBox({
 }
 
 function Operator({ children }: { children: string }) {
-  return <span className="text-[#6B6B6B] text-sm font-medium px-1">{children}</span>
+  return <span className="px-1 text-sm font-medium text-[#6B6B6B]">{children}</span>
 }
 
 interface ArticleRowProps {
@@ -103,9 +99,9 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
   const { netProfit, bonusAmount } = calcRow(row.values)
   return (
     <div className="grid grid-cols-1 items-end gap-4 @[900px]:grid-cols-[minmax(0,1fr)_88px_120px]">
-      <div className="flex flex-col gap-1.5 min-w-0">
+      <div className="flex min-w-0 flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">{ARTICLE_LABELS[row.kind]}</span>
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex min-w-0 items-center gap-1.5">
           <ReadonlyBox
             value={formatMoney(row.values.sales)}
             source="system"
@@ -125,7 +121,11 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">% Бонуса</span>
-        <ReadonlyBox value={formatPercent(row.values.bonusPercent)} source="system" align="center" />
+        <ReadonlyBox
+          value={formatPercent(row.values.bonusPercent)}
+          source="system"
+          align="center"
+        />
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">Бонус по статье</span>
@@ -198,12 +198,14 @@ export function StagePassedBonus({
 
           <Collapsible defaultOpen className="flex flex-col gap-4">
             <CollapsibleTrigger className="flex items-center gap-1.5 text-sm">
-              <span className="font-medium text-[#454545]">Бонус: Продажная часть (основной блок)</span>
+              <span className="font-medium text-[#454545]">
+                Бонус: Продажная часть (основной блок)
+              </span>
               <ChevronDown className="text-muted-foreground size-3.5" />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
-                <div className="flex flex-col gap-4 min-w-0">
+                <div className="flex min-w-0 flex-col gap-4">
                   {rows.map((row) => (
                     <ArticleRow
                       key={`${row.block}-${row.kind}`}
@@ -214,12 +216,12 @@ export function StagePassedBonus({
                   ))}
                 </div>
                 <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
-                  <StageFieldShell label="Данные подтверждены руководителем">
+                  <StageField label="Данные подтверждены руководителем">
                     <ReadonlyBox value={dataConfirmedBy} source="system" />
-                  </StageFieldShell>
-                  <StageFieldShell label="Итоговый бонус">
+                  </StageField>
+                  <StageField label="Итоговый бонус">
                     <ReadonlyBox value={formatMoney(totalBonus)} source="system" />
-                  </StageFieldShell>
+                  </StageField>
                 </div>
               </div>
             </CollapsibleContent>
