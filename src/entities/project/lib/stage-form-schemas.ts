@@ -59,6 +59,7 @@ export const stageFormSchemas = {
   bonus_approved: z.object({}),
   closed: z.object({}),
   out_of_mag_scope: z.object({}),
+  archived: z.object({}),
 } satisfies Record<ProjectStage, z.ZodTypeAny>
 
 export type StageFormValues<S extends ProjectStage> = z.infer<(typeof stageFormSchemas)[S]>

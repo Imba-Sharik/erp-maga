@@ -51,6 +51,7 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   bonus_calculated: 'bonus_calculated',
   bonus_approved: 'bonus_approved',
   closed: 'closed',
+  archived: 'archived',
   out_of_mag_scope: 'out_of_mag_scope',
 }
 

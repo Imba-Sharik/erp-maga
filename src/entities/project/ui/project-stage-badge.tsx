@@ -2,17 +2,17 @@ import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
 
 import { CLOSING_STAGE_LABELS, isClosingStage } from '../lib/closing-stages'
-import { ALL_STAGE_LABELS, isOutsideMagStage, STAGE_LABELS } from '../lib/stages'
+import { ALL_STAGE_LABELS, isArchivedStage, isOutsideMagStage, STAGE_LABELS } from '../lib/stages'
 import type { ProjectStage } from '../model/types'
 
 function stageBadgeVariant(stage: ProjectStage) {
-  if (isOutsideMagStage(stage)) return 'outline' as const
+  if (isOutsideMagStage(stage) || isArchivedStage(stage)) return 'outline' as const
   if (isClosingStage(stage)) return 'funnelClosing' as const
   return 'funnelPreproject' as const
 }
 
 function stageBadgeLabel(stage: ProjectStage) {
-  if (isOutsideMagStage(stage)) return ALL_STAGE_LABELS[stage]
+  if (isOutsideMagStage(stage) || isArchivedStage(stage)) return ALL_STAGE_LABELS[stage]
   if (isClosingStage(stage)) return CLOSING_STAGE_LABELS[stage]
   return STAGE_LABELS[stage]
 }

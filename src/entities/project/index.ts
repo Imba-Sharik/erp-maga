@@ -5,6 +5,8 @@ export type {
   ProjectStage,
   PreprojectStage,
   ClosingStage,
+  OutsideMagStage,
+  ArchivedStage,
   StageFunnel,
   ProjectBackOrigin,
   ProjectDetail,
@@ -40,8 +42,11 @@ export {
   FUNNEL_LABELS,
   PRE_PROJECT_STAGES,
   CLOSING_STAGES,
+  ARCHIVED_STAGE_LABEL,
   groupByStage,
   isPreprojectStage,
+  isOutsideMagStage,
+  isArchivedStage,
 } from './lib/stages'
 export type { ProjectsByStage } from './lib/stages'
 export {

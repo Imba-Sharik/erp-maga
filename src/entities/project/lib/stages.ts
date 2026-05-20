@@ -1,4 +1,5 @@
 import type {
+  ArchivedStage,
   OutsideMagStage,
   PreprojectStage,
   Project,
@@ -20,10 +21,11 @@ export const PRE_PROJECT_STAGES = STAGE_ORDER
 
 export const CLOSING_STAGES = CLOSING_STAGE_ORDER
 
-/** Полный порядок этапов воронки: предпроектная → закрывающая. */
+/** Полный порядок этапов воронки: предпроектная → закрывающая → архив. */
 export const ALL_STAGE_ORDER: readonly ProjectStage[] = [
   ...STAGE_ORDER,
   ...CLOSING_STAGE_ORDER,
+  'archived',
 ] as const
 
 export const STAGE_LABELS: Record<PreprojectStage, string> = {
@@ -35,11 +37,13 @@ export const STAGE_LABELS: Record<PreprojectStage, string> = {
 }
 
 export const OUTSIDE_MAG_STAGE_LABEL = 'Вне контура MAG'
+export const ARCHIVED_STAGE_LABEL = 'Архивный проект'
 
 export const ALL_STAGE_LABELS: Record<ProjectStage, string> = {
   ...STAGE_LABELS,
   ...CLOSING_STAGE_LABELS,
   out_of_mag_scope: OUTSIDE_MAG_STAGE_LABEL,
+  archived: ARCHIVED_STAGE_LABEL,
 }
 
 export const STAGE_FUNNEL: Record<ProjectStage, StageFunnel> = {
@@ -56,10 +60,15 @@ export const STAGE_FUNNEL: Record<ProjectStage, StageFunnel> = {
   bonus_approved: 'closing',
   closed: 'closing',
   out_of_mag_scope: 'closing',
+  archived: 'closing',
 }
 
 export function isOutsideMagStage(stage: ProjectStage): stage is OutsideMagStage {
   return stage === 'out_of_mag_scope'
+}
+
+export function isArchivedStage(stage: ProjectStage): stage is ArchivedStage {
+  return stage === 'archived'
 }
 
 export const FUNNEL_LABELS: Record<StageFunnel, string> = {

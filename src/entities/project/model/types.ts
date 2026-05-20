@@ -27,7 +27,10 @@ export type ClosingStage =
 /** Проект перемещён в «Вне контура MAG». */
 export type OutsideMagStage = 'out_of_mag_scope'
 
-export type ProjectStage = PreprojectStage | ClosingStage | OutsideMagStage
+/** Проект перемещён в архив. */
+export type ArchivedStage = 'archived'
+
+export type ProjectStage = PreprojectStage | ClosingStage | OutsideMagStage | ArchivedStage
 
 export type StageFunnel = 'pre_project' | 'closing'
 
@@ -59,6 +62,8 @@ export interface Project {
   /** Последняя активная стадия до перевода в «Вне контура» (если есть в API). */
   lastActiveStage?: ProjectStage
   economics?: ProjectEconomics
+  /** ISO-datetime архивации проекта. */
+  archivedAt?: string
 }
 
 export type ContractType = 'with_vat' | 'without_vat'
