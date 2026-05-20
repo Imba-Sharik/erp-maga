@@ -1,5 +1,3 @@
-export type ProjectStatus = 'confirmed' | 'signed' | 'expenses'
-
 export type ProjectBackOrigin = {
   to: string
   label: string
@@ -34,7 +32,6 @@ export interface Project {
   id: string
   title: string
   date: string
-  status: ProjectStatus
   stage: ProjectStage
   city: string
   loft: string

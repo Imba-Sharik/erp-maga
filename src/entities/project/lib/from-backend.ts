@@ -4,7 +4,7 @@ import { ru } from 'date-fns/locale'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
 
-import type { Project, ProjectDetail, ProjectStage, ProjectStatus } from '../model/types'
+import type { Project, ProjectDetail, ProjectStage } from '../model/types'
 
 const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   plum_request: 'plum_request',
@@ -21,26 +21,6 @@ const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   bonus_calculated: 'bonus_calculated',
   bonus_approved: 'bonus_approved',
   closed: 'closed',
-}
-
-function statusForStage(stage: ProjectStage): ProjectStatus {
-  switch (stage) {
-    case 'plum_request':
-    case 'primary_contact_done':
-    case 'calculation_prepared':
-      return 'confirmed'
-    case 'contract_signed':
-    case 'ready_to_event':
-    case 'event_held':
-      return 'signed'
-    case 'expenses_entered':
-    case 'documents_confirmed':
-    case 'data_confirmed':
-    case 'bonus_calculated':
-    case 'bonus_approved':
-    case 'closed':
-      return 'expenses'
-  }
 }
 
 function takeFirstManager(raw: string | undefined): string {
@@ -66,7 +46,6 @@ export function mapBackendProject(b: BackendProject): Project | null {
     id: String(b.id),
     title: b.event_name,
     date: b.event_date,
-    status: statusForStage(stage),
     stage,
     city: b.city_label || b.city,
     loft: b.venue,

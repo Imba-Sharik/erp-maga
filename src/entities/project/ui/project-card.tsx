@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/shared/ui/card'
 import type { Project, ProjectBackOrigin } from '../model/types'
-import { ProjectStatusBadge } from './project-status-badge'
+import { ProjectStageBadge } from './project-stage-badge'
 import { ProjectTelegramLink } from './project-telegram-link'
 
 interface ProjectCardProps {
@@ -29,7 +29,7 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-sm font-semibold text-[#1B1A17]">{project.title}</h3>
-        <ProjectStatusBadge status={project.status} />
+        <ProjectStageBadge stage={project.stage} />
       </div>
       <p className="text-xs text-[#ACACAC]">
         {project.loft} · {project.hall} · {project.manager}
