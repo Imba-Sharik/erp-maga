@@ -24,7 +24,10 @@ export type ClosingStage =
   | 'bonus_approved'
   | 'closed'
 
-export type ProjectStage = PreprojectStage | ClosingStage
+/** Проект перемещён в «Вне контура MAG». */
+export type OutsideMagStage = 'out_of_mag_scope'
+
+export type ProjectStage = PreprojectStage | ClosingStage | OutsideMagStage
 
 export type StageFunnel = 'pre_project' | 'closing'
 
@@ -53,6 +56,8 @@ export interface Project {
   lastUpdate: string
   /** ISO-datetime создания проекта в системе («появление в системе»). */
   createdAt: string
+  /** Последняя активная стадия до перевода в «Вне контура» (если есть в API). */
+  lastActiveStage?: ProjectStage
   economics?: ProjectEconomics
 }
 

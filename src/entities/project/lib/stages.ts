@@ -1,4 +1,10 @@
-import type { PreprojectStage, Project, ProjectStage, StageFunnel } from '../model/types'
+import type {
+  OutsideMagStage,
+  PreprojectStage,
+  Project,
+  ProjectStage,
+  StageFunnel,
+} from '../model/types'
 
 import { CLOSING_STAGE_LABELS, CLOSING_STAGE_ORDER } from './closing-stages'
 
@@ -28,9 +34,12 @@ export const STAGE_LABELS: Record<PreprojectStage, string> = {
   ready_to_event: 'Готов к проведению',
 }
 
+export const OUTSIDE_MAG_STAGE_LABEL = 'Вне контура MAG'
+
 export const ALL_STAGE_LABELS: Record<ProjectStage, string> = {
   ...STAGE_LABELS,
   ...CLOSING_STAGE_LABELS,
+  out_of_mag_scope: OUTSIDE_MAG_STAGE_LABEL,
 }
 
 export const STAGE_FUNNEL: Record<ProjectStage, StageFunnel> = {
@@ -46,6 +55,11 @@ export const STAGE_FUNNEL: Record<ProjectStage, StageFunnel> = {
   bonus_calculated: 'closing',
   bonus_approved: 'closing',
   closed: 'closing',
+  out_of_mag_scope: 'closing',
+}
+
+export function isOutsideMagStage(stage: ProjectStage): stage is OutsideMagStage {
+  return stage === 'out_of_mag_scope'
 }
 
 export const FUNNEL_LABELS: Record<StageFunnel, string> = {

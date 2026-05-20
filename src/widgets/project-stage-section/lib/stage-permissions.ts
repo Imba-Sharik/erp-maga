@@ -18,6 +18,7 @@ const STAGE_EDIT_ROLES: Record<ProjectStage, readonly UserRole[]> = {
   bonus_calculated: ['director'],
   bonus_approved: ['director'],
   closed: ALL_ROLES,
+  out_of_mag_scope: [],
 }
 
 export function canEditStage(stage: ProjectStage, role: UserRole): boolean {

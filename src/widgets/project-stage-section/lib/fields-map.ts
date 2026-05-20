@@ -28,11 +28,45 @@ const docStatusOptions = [
 
 export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   plum_request: [
-    { name: 'clientCompany', label: 'Клиент', type: 'text', source: 'manager', required: true, mockValue: 'Иванов Иван Иванович' },
-    { name: 'phone', label: 'Телефон', type: 'phone', source: 'manager', required: true, mockValue: '+7 (999) 999-99-99' },
-    { name: 'createdAt', label: 'Дата создания проекта в системе', type: 'date', source: 'system', mockValue: '2026-05-06' },
-    { name: 'contactPerson', label: 'Контактное лицо', type: 'text', source: 'manager', required: true, mockValue: 'Ленин Сталин Марксович' },
-    { name: 'email', label: 'Email', type: 'text', source: 'manager', required: true, mockValue: 'client@gmail.com' },
+    {
+      name: 'clientCompany',
+      label: 'Клиент',
+      type: 'text',
+      source: 'manager',
+      required: true,
+      mockValue: 'Иванов Иван Иванович',
+    },
+    {
+      name: 'phone',
+      label: 'Телефон',
+      type: 'phone',
+      source: 'manager',
+      required: true,
+      mockValue: '+7 (999) 999-99-99',
+    },
+    {
+      name: 'createdAt',
+      label: 'Дата создания проекта в системе',
+      type: 'date',
+      source: 'system',
+      mockValue: '2026-05-06',
+    },
+    {
+      name: 'contactPerson',
+      label: 'Контактное лицо',
+      type: 'text',
+      source: 'manager',
+      required: true,
+      mockValue: 'Ленин Сталин Марксович',
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'text',
+      source: 'manager',
+      required: true,
+      mockValue: 'client@gmail.com',
+    },
   ],
   primary_contact_done: [
     {
@@ -158,12 +192,48 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     },
   ],
   ready_to_event: [
-    { name: 'salesMainTotal', label: 'Итого продажи (основной блок)', type: 'text', source: 'system', mockValue: '1 718 000 ₽' },
-    { name: 'salesBacklineTotal', label: 'Итого продажи бэклайна', type: 'text', source: 'system', mockValue: '220 000 ₽' },
-    { name: 'salesProjectTotal', label: 'Итого продажи проекта', type: 'text', source: 'system', mockValue: '1 938 000 ₽' },
-    { name: 'taxRate', label: 'Единый % налога', type: 'text', source: 'manager', mockValue: '15%' },
-    { name: 'taxAmount', label: 'Сумма налога', type: 'text', source: 'system', mockValue: '290 700 ₽' },
-    { name: 'leadManager', label: 'Статус перевёл менеджер', type: 'text', source: 'system', mockValue: 'Иванов Иван Иванович' },
+    {
+      name: 'salesMainTotal',
+      label: 'Итого продажи (основной блок)',
+      type: 'text',
+      source: 'system',
+      mockValue: '1 718 000 ₽',
+    },
+    {
+      name: 'salesBacklineTotal',
+      label: 'Итого продажи бэклайна',
+      type: 'text',
+      source: 'system',
+      mockValue: '220 000 ₽',
+    },
+    {
+      name: 'salesProjectTotal',
+      label: 'Итого продажи проекта',
+      type: 'text',
+      source: 'system',
+      mockValue: '1 938 000 ₽',
+    },
+    {
+      name: 'taxRate',
+      label: 'Единый % налога',
+      type: 'text',
+      source: 'manager',
+      mockValue: '15%',
+    },
+    {
+      name: 'taxAmount',
+      label: 'Сумма налога',
+      type: 'text',
+      source: 'system',
+      mockValue: '290 700 ₽',
+    },
+    {
+      name: 'leadManager',
+      label: 'Статус перевёл менеджер',
+      type: 'text',
+      source: 'system',
+      mockValue: 'Иванов Иван Иванович',
+    },
   ],
   event_held: [
     {
@@ -171,8 +241,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       label: 'Комментарий после мероприятия',
       type: 'textarea',
       source: 'manager',
-      mockValue:
-        'Всё прошло успешно, клиент остался крайне доволен предоставленным оборудованием.',
+      mockValue: 'Всё прошло успешно, клиент остался крайне доволен предоставленным оборудованием.',
       span: 1,
     },
     {
@@ -198,16 +267,33 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     },
   ],
   expenses_entered: [
-    { name: 'expensesMainTotal', label: 'Итого расходы (основной блок)', type: 'text', source: 'system', mockValue: '1 020 000 ₽' },
-    { name: 'expensesBacklineTotal', label: 'Итого расходы бэклайна', type: 'text', source: 'system', mockValue: '170 000 ₽' },
-    { name: 'expensesProjectTotal', label: 'Итого расходы проекта', type: 'text', source: 'system', mockValue: '1 190 000 ₽' },
+    {
+      name: 'expensesMainTotal',
+      label: 'Итого расходы (основной блок)',
+      type: 'text',
+      source: 'system',
+      mockValue: '1 020 000 ₽',
+    },
+    {
+      name: 'expensesBacklineTotal',
+      label: 'Итого расходы бэклайна',
+      type: 'text',
+      source: 'system',
+      mockValue: '170 000 ₽',
+    },
+    {
+      name: 'expensesProjectTotal',
+      label: 'Итого расходы проекта',
+      type: 'text',
+      source: 'system',
+      mockValue: '1 190 000 ₽',
+    },
     {
       name: 'postEventComment',
       label: 'Комментарий к расходам',
       type: 'textarea',
       source: 'manager',
-      mockValue:
-        'Всё прошло успешно, клиент остался крайне доволен предоставленным оборудованием.',
+      mockValue: 'Всё прошло успешно, клиент остался крайне доволен предоставленным оборудованием.',
       span: 1,
     },
     {
@@ -314,12 +400,48 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
     },
   ],
   bonus_calculated: [
-    { name: 'salesProjectTotal', label: 'Итого продажи проекта', type: 'text', source: 'system', mockValue: '1 938 000 ₽' },
-    { name: 'expensesProjectTotal', label: 'Итого расходы проекта', type: 'text', source: 'system', mockValue: '1 190 000 ₽' },
-    { name: 'netProfitTotal', label: 'Итоговая чистая прибыль', type: 'text', source: 'system', mockValue: '748 000 ₽' },
-    { name: 'calculatedBonus', label: 'Итоговый бонус (рассчитанный)', type: 'text', source: 'system', mockValue: '443 330 ₽' },
-    { name: 'leadManager', label: 'Получатель бонуса', type: 'text', source: 'system', mockValue: 'Иванов Иван Иванович' },
-    { name: 'bonusCalculatedAt', label: 'Дата расчёта бонуса', type: 'date', source: 'system', mockValue: '2026-05-09' },
+    {
+      name: 'salesProjectTotal',
+      label: 'Итого продажи проекта',
+      type: 'text',
+      source: 'system',
+      mockValue: '1 938 000 ₽',
+    },
+    {
+      name: 'expensesProjectTotal',
+      label: 'Итого расходы проекта',
+      type: 'text',
+      source: 'system',
+      mockValue: '1 190 000 ₽',
+    },
+    {
+      name: 'netProfitTotal',
+      label: 'Итоговая чистая прибыль',
+      type: 'text',
+      source: 'system',
+      mockValue: '748 000 ₽',
+    },
+    {
+      name: 'calculatedBonus',
+      label: 'Итоговый бонус (рассчитанный)',
+      type: 'text',
+      source: 'system',
+      mockValue: '443 330 ₽',
+    },
+    {
+      name: 'leadManager',
+      label: 'Получатель бонуса',
+      type: 'text',
+      source: 'system',
+      mockValue: 'Иванов Иван Иванович',
+    },
+    {
+      name: 'bonusCalculatedAt',
+      label: 'Дата расчёта бонуса',
+      type: 'date',
+      source: 'system',
+      mockValue: '2026-05-09',
+    },
   ],
   bonus_approved: [
     {
@@ -357,6 +479,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'system',
     },
   ],
+  out_of_mag_scope: [],
 }
 
 export interface PassedExtra {
@@ -377,4 +500,5 @@ export const PASSED_EXTRAS: Record<ProjectStage, PassedExtra[]> = {
   bonus_calculated: [],
   bonus_approved: [],
   closed: [],
+  out_of_mag_scope: [],
 }

@@ -6,8 +6,7 @@ import type { ProjectStage } from '../model/types'
 
 const required = (msg = 'Обязательное поле') => z.string().min(1, msg)
 
-const ruPhone = (msg = 'Невалидный номер телефона') =>
-  required().refine(isValidRuPhone, msg)
+const ruPhone = (msg = 'Невалидный номер телефона') => required().refine(isValidRuPhone, msg)
 
 export const stageFormSchemas = {
   plum_request: z.object({
@@ -59,6 +58,7 @@ export const stageFormSchemas = {
   bonus_calculated: z.object({}),
   bonus_approved: z.object({}),
   closed: z.object({}),
+  out_of_mag_scope: z.object({}),
 } satisfies Record<ProjectStage, z.ZodTypeAny>
 
 export type StageFormValues<S extends ProjectStage> = z.infer<(typeof stageFormSchemas)[S]>
