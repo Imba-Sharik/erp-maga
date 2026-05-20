@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
@@ -14,6 +14,7 @@ import { Skeleton } from '@/shared/ui/skeleton'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
+import { assignProjectManagerMock } from '../lib/mock-assign-project-manager'
 import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
 import {
   HEADER_FILTER_TRIGGER,
@@ -63,6 +64,27 @@ export function ProjectsTableView({
   const sentinelRef = useRef<HTMLDivElement>(null)
   const gridTemplate = getTableGridTemplate(columnView)
   const minWidth = getTableMinWidth(columnView)
+  const [managerOverrides, setManagerOverrides] = useState<Record<string, string>>({})
+  const [editingManagerProjectId, setEditingManagerProjectId] = useState<string | null>(null)
+
+  const getDisplayManager = useCallback(
+    (project: Project) => managerOverrides[project.id] ?? project.manager,
+    [managerOverrides],
+  )
+
+  const handleStartEditManager = useCallback((projectId: string) => {
+    setEditingManagerProjectId(projectId)
+  }, [])
+
+  const handleCancelEditManager = useCallback(() => {
+    setEditingManagerProjectId(null)
+  }, [])
+
+  const handleAssignManager = useCallback((projectId: string, manager: string) => {
+    setManagerOverrides((prev) => ({ ...prev, [projectId]: manager }))
+    assignProjectManagerMock(projectId, manager)
+    setEditingManagerProjectId(null)
+  }, [])
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -132,6 +154,12 @@ export function ProjectsTableView({
                   columnView={columnView}
                   backOrigin={backOrigin}
                   renderRowAction={renderRowAction}
+                  displayManager={getDisplayManager(project)}
+                  managerOptions={managerOptions}
+                  isEditingManager={editingManagerProjectId === project.id}
+                  onStartEditManager={() => handleStartEditManager(project.id)}
+                  onAssignManager={(manager) => handleAssignManager(project.id, manager)}
+                  onCancelEditManager={handleCancelEditManager}
                 />
               ))}
               {hasNextPage && (
