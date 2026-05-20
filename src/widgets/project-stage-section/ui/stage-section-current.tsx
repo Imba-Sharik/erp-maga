@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
 import { Button } from '@/shared/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
 import { PhoneInput } from '@/shared/ui/phone-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
@@ -27,6 +27,7 @@ import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canEditStage } from '../lib/stage-permissions'
 import { StageDateField } from './stage-date-field'
+import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 
 type SignedSchema = (typeof stageFormSchemas)['contract_signed']
@@ -93,9 +94,7 @@ export function StageSectionCurrent({
     mode: 'onSubmit',
   })
 
-  const handleAdvance = form.handleSubmit((values) =>
-    onAdvance?.(values as Partial<StageFormData>),
-  )
+  const handleAdvance = form.handleSubmit((values) => onAdvance?.(values as Partial<StageFormData>))
 
   const renderField = (f: StageFieldConfig) => {
     if (f.source === 'system' || !canEdit) {
@@ -122,82 +121,81 @@ export function StageSectionCurrent({
       )
     }
     return (
-    <FormField
-      key={f.name}
-      control={form.control}
-      name={f.name as keyof SignedFormValues}
-      render={({ field }) => (
-        <FormItem className={f.type === 'textarea' ? 'flex h-full min-w-0 flex-col @[640px]:row-span-2' : 'min-w-0'}>
-          <FormLabel className="text-xs font-medium text-[#454545]">
-            <span>
-              {f.label}
-              {f.required ? <span className="text-[#D25252]">*</span> : null}
-            </span>
-          </FormLabel>
-          <FormControl>
-            {f.type === 'textarea' ? (
-              <Textarea
-                {...field}
-                value={(field.value as string) ?? ''}
-                placeholder={f.placeholder}
-                className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
-              />
-            ) : f.type === 'select' ? (
-              <Select
-                value={(field.value as string) ?? ''}
-                onValueChange={(value) => {
-                  field.onChange(value)
-                  // Если у статуса есть пара `*ConfirmedAt`/`*ConfirmedBy` — штампим их
-                  // прямо в момент выбора, для per-row аудита.
-                  const meta = CONFIRM_META_BY_STATUS[f.name as keyof StageFormData]
-                  if (meta) {
-                    onPatchValues?.({
-                      [f.name]: value,
-                      [meta.atField]: new Date().toISOString(),
-                      [meta.byField]: currentUser.fullName,
-                    })
-                  }
-                }}
-              >
-                <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
-                  <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {f.options?.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : f.type === 'date' ? (
-              <StageDateField
-                value={(field.value as string) ?? ''}
-                onChange={field.onChange}
-                placeholder={f.placeholder}
-              />
-            ) : f.type === 'phone' ? (
-              <PhoneInput
-                name={field.name}
-                ref={field.ref}
-                value={(field.value as string) ?? ''}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
-              />
-            ) : (
-              <Input
-                {...field}
-                value={(field.value as string) ?? ''}
-                placeholder={f.placeholder}
-                className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
-              />
-            )}
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+      <FormField
+        key={f.name}
+        control={form.control}
+        name={f.name as keyof SignedFormValues}
+        render={({ field }) => (
+          <FormItem
+            className={
+              f.type === 'textarea' ? 'flex h-full min-w-0 flex-col @[640px]:row-span-2' : 'min-w-0'
+            }
+          >
+            <StageFieldLabel form label={f.label} required={f.required} />
+            <FormControl>
+              {f.type === 'textarea' ? (
+                <Textarea
+                  {...field}
+                  value={(field.value as string) ?? ''}
+                  placeholder={f.placeholder}
+                  className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
+                />
+              ) : f.type === 'select' ? (
+                <Select
+                  value={(field.value as string) ?? ''}
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                    // Если у статуса есть пара `*ConfirmedAt`/`*ConfirmedBy` — штампим их
+                    // прямо в момент выбора, для per-row аудита.
+                    const meta = CONFIRM_META_BY_STATUS[f.name as keyof StageFormData]
+                    if (meta) {
+                      onPatchValues?.({
+                        [f.name]: value,
+                        [meta.atField]: new Date().toISOString(),
+                        [meta.byField]: currentUser.fullName,
+                      })
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
+                    <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {f.options?.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : f.type === 'date' ? (
+                <StageDateField
+                  value={(field.value as string) ?? ''}
+                  onChange={field.onChange}
+                  placeholder={f.placeholder}
+                />
+              ) : f.type === 'phone' ? (
+                <PhoneInput
+                  name={field.name}
+                  ref={field.ref}
+                  value={(field.value as string) ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
+                />
+              ) : (
+                <Input
+                  {...field}
+                  value={(field.value as string) ?? ''}
+                  placeholder={f.placeholder}
+                  className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     )
   }
 
