@@ -19,16 +19,12 @@ import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/shared/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { Input } from '@/shared/ui/input'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
-import { StageFieldShell } from './stage-field-shell'
+import { StageField } from './stage-field'
 
 type Source = 'manager' | 'system'
 type Aspect = 'sales' | 'expense'
@@ -78,13 +74,7 @@ function ReadonlyBox({
   )
 }
 
-function PercentInput({
-  value,
-  onCommit,
-}: {
-  value: number
-  onCommit: (next: number) => void
-}) {
+function PercentInput({ value, onCommit }: { value: number; onCommit: (next: number) => void }) {
   // Незаполненное значение — это явный «0%» в поле, чтобы было видно, что налог будет 0.
   const display = formatPercent(value)
   return (
@@ -110,7 +100,7 @@ interface ArticleRowProps {
 function ArticleRow({ kind, values, percent, aspect, editable, onChange }: ArticleRowProps) {
   const required = true
   return (
-    <StageFieldShell label={ARTICLE_LABELS[kind]} required={required}>
+    <StageField label={ARTICLE_LABELS[kind]} required={required}>
       <div className="grid grid-cols-[1fr_56px] gap-1.5">
         {editable ? (
           <MoneyInput
@@ -122,7 +112,7 @@ function ArticleRow({ kind, values, percent, aspect, editable, onChange }: Artic
         )}
         <ReadonlyBox value={formatPercent(percent)} source="system" align="center" />
       </div>
-    </StageFieldShell>
+    </StageField>
   )
 }
 
@@ -140,9 +130,9 @@ function SimpleField({
   children?: ReactNode
 }) {
   return (
-    <StageFieldShell label={label} required={required}>
+    <StageField label={label} required={required}>
       {children ?? <ReadonlyBox value={value ?? ''} source={source} />}
-    </StageFieldShell>
+    </StageField>
   )
 }
 
@@ -162,7 +152,7 @@ function DualField({
 }
 
 function ActionField({ children }: { children: ReactNode }) {
-  return <StageFieldShell label="Действие">{children}</StageFieldShell>
+  return <StageField label="Действие">{children}</StageField>
 }
 
 function SubsectionHeader({ title }: { title: string }) {
@@ -267,7 +257,7 @@ export function FinanceBlockWithBackline({
                   const right = MAIN_RIGHT[rowIdx]
                   const slot =
                     rowIdx === 0 ? (
-                      <StageFieldShell key="tax-rate" label="Единый % налога" required>
+                      <StageField key="tax-rate" label="Единый % налога" required>
                         {editable ? (
                           <PercentInput value={taxRate} onCommit={onTaxRateChange} />
                         ) : (
@@ -276,7 +266,7 @@ export function FinanceBlockWithBackline({
                             source="manager"
                           />
                         )}
-                      </StageFieldShell>
+                      </StageField>
                     ) : rowIdx === 1 ? (
                       <SimpleField
                         key="tax-amount"
@@ -316,11 +306,7 @@ export function FinanceBlockWithBackline({
                         )}
                       </ActionField>
                     ) : null
-                  return [
-                    renderArticleRow('main', left),
-                    renderArticleRow('main', right),
-                    slot,
-                  ]
+                  return [renderArticleRow('main', left), renderArticleRow('main', right), slot]
                 })}
               </div>
             </CollapsibleContent>
@@ -390,7 +376,7 @@ export function FinanceBlockWithBackline({
 export function ExpensesCommentField({ canEdit }: { canEdit: boolean }) {
   const [comment, setComment] = useState('')
   return (
-    <StageFieldShell label="Комментарий к расходам">
+    <StageField label="Комментарий к расходам">
       {canEdit ? (
         <Input
           value={comment}
@@ -401,6 +387,6 @@ export function ExpensesCommentField({ canEdit }: { canEdit: boolean }) {
       ) : (
         <ReadonlyBox value={comment || '—'} source="system" />
       )}
-    </StageFieldShell>
+    </StageField>
   )
 }
