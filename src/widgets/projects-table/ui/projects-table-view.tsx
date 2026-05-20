@@ -12,8 +12,9 @@ import { Card } from '@/shared/ui/card'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 import { Skeleton } from '@/shared/ui/skeleton'
 
+import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
-import { TABLE_GRID_TEMPLATE, TABLE_MIN_WIDTH } from '../lib/table-columns'
+import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
 import { ProjectsTableRow } from './projects-table-row'
 
 const BACK_ORIGIN: ProjectBackOrigin = { to: '/projects', label: 'Все проекты' }
@@ -29,6 +30,7 @@ const HEADER_FILTER_TRIGGER =
 
 interface ProjectsTableViewProps {
   projects: Project[]
+  columnView: ProjectsTableColumnView
   columnFilters: ColumnFilters
   managerOptions: string[]
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
@@ -41,6 +43,7 @@ interface ProjectsTableViewProps {
 
 export function ProjectsTableView({
   projects,
+  columnView,
   columnFilters,
   managerOptions,
   onColumnFilterChange,
@@ -51,6 +54,8 @@ export function ProjectsTableView({
   onLoadMore,
 }: ProjectsTableViewProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const gridTemplate = getTableGridTemplate(columnView)
+  const minWidth = getTableMinWidth(columnView)
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -65,56 +70,28 @@ export function ProjectsTableView({
   return (
     <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-hidden border-[#B1B1B1] py-0 shadow-none">
       <div className="min-h-0 flex-1 overflow-auto">
-        <div style={{ minWidth: TABLE_MIN_WIDTH }}>
+        <div style={{ minWidth }}>
           <div
             className="sticky top-0 z-10 grid items-center border-b border-[#D3D3D3] bg-white"
-            style={{ gridTemplateColumns: TABLE_GRID_TEMPLATE }}
+            style={{ gridTemplateColumns: gridTemplate }}
           >
-            <HeaderLabel>Название проекта</HeaderLabel>
-            <HeaderCell>
-              <ClearableSelect
-                placeholder="LOFT"
-                value={columnFilters.loft}
-                options={LOFT_OPTIONS}
-                onChange={(v) => onColumnFilterChange('loft', v)}
-                triggerClassName={HEADER_FILTER_TRIGGER}
+            {columnView === 'general' ? (
+              <GeneralTableHeader
+                columnFilters={columnFilters}
+                managerOptions={managerOptions}
+                onColumnFilterChange={onColumnFilterChange}
               />
-            </HeaderCell>
-            <HeaderCell>
-              <ClearableSelect
-                placeholder="Зал"
-                value={columnFilters.hall}
-                options={HALL_OPTIONS}
-                onChange={(v) => onColumnFilterChange('hall', v)}
-                triggerClassName={HEADER_FILTER_TRIGGER}
+            ) : (
+              <EconomicsTableHeader
+                columnFilters={columnFilters}
+                managerOptions={managerOptions}
+                onColumnFilterChange={onColumnFilterChange}
               />
-            </HeaderCell>
-            <HeaderCell>
-              <ClearableSelect
-                placeholder="Отв. менеджер"
-                value={columnFilters.manager}
-                options={managerOptions}
-                onChange={(v) => onColumnFilterChange('manager', v)}
-                triggerClassName={HEADER_FILTER_TRIGGER}
-              />
-            </HeaderCell>
-            <HeaderCell>
-              <ClearableSelect
-                placeholder="Этап проекта"
-                value={columnFilters.stage}
-                options={STAGE_OPTIONS}
-                onChange={(v) => onColumnFilterChange('stage', v)}
-                triggerClassName={HEADER_FILTER_TRIGGER}
-              />
-            </HeaderCell>
-            <HeaderLabel>Дата мероприятия</HeaderLabel>
-            <HeaderLabel>Компания</HeaderLabel>
-            <HeaderLabel>Телефон</HeaderLabel>
-            <HeaderLabel>Появление в системе</HeaderLabel>
+            )}
           </div>
 
           {isLoading ? (
-            <TableSkeleton />
+            <TableSkeleton columnView={columnView} gridTemplate={gridTemplate} />
           ) : isError ? (
             <div className="flex h-40 items-center justify-center px-4 text-sm text-red-600">
               Не удалось загрузить проекты.
@@ -126,7 +103,12 @@ export function ProjectsTableView({
           ) : (
             <>
               {projects.map((project) => (
-                <ProjectsTableRow key={project.id} project={project} backOrigin={BACK_ORIGIN} />
+                <ProjectsTableRow
+                  key={project.id}
+                  project={project}
+                  columnView={columnView}
+                  backOrigin={BACK_ORIGIN}
+                />
               ))}
               {hasNextPage && (
                 <div
@@ -144,6 +126,100 @@ export function ProjectsTableView({
   )
 }
 
+function GeneralTableHeader({
+  columnFilters,
+  managerOptions,
+  onColumnFilterChange,
+}: {
+  columnFilters: ColumnFilters
+  managerOptions: string[]
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}) {
+  return (
+    <>
+      <HeaderLabel>Название проекта</HeaderLabel>
+      <HeaderCell>
+        <ClearableSelect
+          placeholder="LOFT"
+          value={columnFilters.loft}
+          options={LOFT_OPTIONS}
+          onChange={(v) => onColumnFilterChange('loft', v)}
+          triggerClassName={HEADER_FILTER_TRIGGER}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <ClearableSelect
+          placeholder="Зал"
+          value={columnFilters.hall}
+          options={HALL_OPTIONS}
+          onChange={(v) => onColumnFilterChange('hall', v)}
+          triggerClassName={HEADER_FILTER_TRIGGER}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <ClearableSelect
+          placeholder="Отв. менеджер"
+          value={columnFilters.manager}
+          options={managerOptions}
+          onChange={(v) => onColumnFilterChange('manager', v)}
+          triggerClassName={HEADER_FILTER_TRIGGER}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <ClearableSelect
+          placeholder="Этап проекта"
+          value={columnFilters.stage}
+          options={STAGE_OPTIONS}
+          onChange={(v) => onColumnFilterChange('stage', v)}
+          triggerClassName={HEADER_FILTER_TRIGGER}
+        />
+      </HeaderCell>
+      <HeaderLabel>Дата мероприятия</HeaderLabel>
+      <HeaderLabel>Компания</HeaderLabel>
+      <HeaderLabel>Телефон</HeaderLabel>
+      <HeaderLabel>Появление в системе</HeaderLabel>
+    </>
+  )
+}
+
+function EconomicsTableHeader({
+  columnFilters,
+  managerOptions,
+  onColumnFilterChange,
+}: {
+  columnFilters: ColumnFilters
+  managerOptions: string[]
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}) {
+  return (
+    <>
+      <HeaderLabel>Название проекта</HeaderLabel>
+      <HeaderCell>
+        <ClearableSelect
+          placeholder="Отв. менеджер"
+          value={columnFilters.manager}
+          options={managerOptions}
+          onChange={(v) => onColumnFilterChange('manager', v)}
+          triggerClassName={HEADER_FILTER_TRIGGER}
+        />
+      </HeaderCell>
+      <HeaderLabel>Компания</HeaderLabel>
+      <HeaderCell>
+        <ClearableSelect
+          placeholder="Этап проекта"
+          value={columnFilters.stage}
+          options={STAGE_OPTIONS}
+          onChange={(v) => onColumnFilterChange('stage', v)}
+          triggerClassName={HEADER_FILTER_TRIGGER}
+        />
+      </HeaderCell>
+      <HeaderLabel>Сумма продаж</HeaderLabel>
+      <HeaderLabel>Чистая прибыль</HeaderLabel>
+      <HeaderLabel>Итоговый бонус</HeaderLabel>
+    </>
+  )
+}
+
 function HeaderLabel({ children }: { children: ReactNode }) {
   return <div className="min-w-0 truncate px-3 py-3 text-sm text-[#454545]">{children}</div>
 }
@@ -152,16 +228,24 @@ function HeaderCell({ children }: { children: ReactNode }) {
   return <div className="min-w-0 px-3 py-2">{children}</div>
 }
 
-function TableSkeleton() {
+function TableSkeleton({
+  columnView,
+  gridTemplate,
+}: {
+  columnView: ProjectsTableColumnView
+  gridTemplate: string
+}) {
+  const colCount = TABLE_COLUMN_COUNT[columnView]
+
   return (
     <>
       {Array.from({ length: 10 }).map((_, row) => (
         <div
           key={row}
           className="grid items-center border-b border-[#EDEDED]"
-          style={{ gridTemplateColumns: TABLE_GRID_TEMPLATE }}
+          style={{ gridTemplateColumns: gridTemplate }}
         >
-          {Array.from({ length: 9 }).map((__, col) => (
+          {Array.from({ length: colCount }).map((__, col) => (
             <div key={col} className="px-3 py-3.5">
               <Skeleton className="h-3.5 w-full max-w-30" />
             </div>
