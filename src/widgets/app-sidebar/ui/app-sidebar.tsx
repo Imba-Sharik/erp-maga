@@ -106,7 +106,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <div className="mx-3 group-data-[collapsible=icon]:hidden">
-          <p className="text-muted-foreground pb-1 text-start text-xs whitespace-nowrap">V 0.0.1</p>
+          <p className="text-muted-foreground pb-1 text-start text-xs whitespace-nowrap">V 0.5.5</p>
           <div
             aria-hidden
             className="border-sidebar-border shrink-0 border-t group-data-[collapsible=icon]:mx-0"
