@@ -1,8 +1,8 @@
 import { Search } from 'lucide-react'
 
-import { cn } from '@/shared/lib/utils'
 import { Input } from '@/shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
+import { ToggleSwitch } from '@/shared/ui/toggle-switch'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 
@@ -61,28 +61,7 @@ export function ProjectsTableToolbar({
         </Select>
       </div>
 
-      <button
-        type="button"
-        role="switch"
-        aria-checked={pendingOnly}
-        onClick={() => onTogglePending(!pendingOnly)}
-        className="flex shrink-0 cursor-pointer items-center gap-2.5 text-sm text-[#454545]"
-      >
-        <span>Ожидают обработки</span>
-        <span
-          className={cn(
-            'relative h-5 w-9 shrink-0 rounded-full transition-colors',
-            pendingOnly ? 'bg-black' : 'bg-[#D3D3D3]',
-          )}
-        >
-          <span
-            className={cn(
-              'absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-all',
-              pendingOnly ? 'left-[18px]' : 'left-0.5',
-            )}
-          />
-        </span>
-      </button>
+      <ToggleSwitch label="Ожидают обработки" checked={pendingOnly} onChange={onTogglePending} />
     </div>
   )
 }
