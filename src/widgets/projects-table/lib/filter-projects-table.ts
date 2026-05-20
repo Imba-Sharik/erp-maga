@@ -38,7 +38,7 @@ export function filterProjectsTable(projects: Project[], filter: ProjectsTableFi
   const { columns, columnView = 'general' } = filter
 
   return projects.filter((p) => {
-    if (columnView === 'general') {
+    if (columnView === 'general' || columnView === 'outside-mag') {
       if (columns.loft && p.loft !== columns.loft) return false
       if (columns.hall && p.hall !== columns.hall) return false
     }
