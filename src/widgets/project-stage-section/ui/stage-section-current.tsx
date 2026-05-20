@@ -6,6 +6,7 @@ import type { z } from 'zod'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
+import { PhoneInput } from '@/shared/ui/phone-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Textarea } from '@/shared/ui/textarea'
 import {
@@ -128,8 +129,10 @@ export function StageSectionCurrent({
       render={({ field }) => (
         <FormItem className={f.type === 'textarea' ? 'flex h-full min-w-0 flex-col @[640px]:row-span-2' : 'min-w-0'}>
           <FormLabel className="text-xs font-medium text-[#454545]">
-            {f.label}
-            {f.required ? <span className="text-[#D25252]">*</span> : null}
+            <span>
+              {f.label}
+              {f.required ? <span className="text-[#D25252]">*</span> : null}
+            </span>
           </FormLabel>
           <FormControl>
             {f.type === 'textarea' ? (
@@ -172,6 +175,16 @@ export function StageSectionCurrent({
                 value={(field.value as string) ?? ''}
                 onChange={field.onChange}
                 placeholder={f.placeholder}
+              />
+            ) : f.type === 'phone' ? (
+              <PhoneInput
+                name={field.name}
+                ref={field.ref}
+                value={(field.value as string) ?? ''}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder={f.placeholder}
+                className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
               />
             ) : (
               <Input

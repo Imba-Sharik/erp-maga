@@ -1,13 +1,18 @@
 import { z } from 'zod'
 
+import { isValidRuPhone } from '@/shared/lib/phone/is-valid-ru-phone'
+
 import type { ProjectStage } from '../model/types'
 
 const required = (msg = 'Обязательное поле') => z.string().min(1, msg)
 
+const ruPhone = (msg = 'Невалидный номер телефона') =>
+  required().refine(isValidRuPhone, msg)
+
 export const stageFormSchemas = {
   plum_request: z.object({
     clientCompany: required(),
-    phone: required(),
+    phone: ruPhone(),
     contactPerson: required(),
     email: required().email('Невалидный email'),
     createdAt: z.string().optional(),

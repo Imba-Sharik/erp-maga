@@ -1,6 +1,6 @@
 import type { ProjectStage, StageFormData } from '@/entities/project'
 
-export type StageFieldType = 'text' | 'textarea' | 'date' | 'select'
+export type StageFieldType = 'text' | 'textarea' | 'date' | 'select' | 'phone'
 export type StageFieldSource = 'manager' | 'system'
 
 export interface StageFieldConfig {
@@ -29,7 +29,7 @@ const docStatusOptions = [
 export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   plum_request: [
     { name: 'clientCompany', label: 'Клиент', type: 'text', source: 'manager', required: true, mockValue: 'Иванов Иван Иванович' },
-    { name: 'phone', label: 'Телефон', type: 'text', source: 'manager', required: true, mockValue: '+7 (999) 999-99-99' },
+    { name: 'phone', label: 'Телефон', type: 'phone', source: 'manager', required: true, mockValue: '+7 (999) 999-99-99' },
     { name: 'createdAt', label: 'Дата создания проекта в системе', type: 'date', source: 'system', mockValue: '2026-05-06' },
     { name: 'contactPerson', label: 'Контактное лицо', type: 'text', source: 'manager', required: true, mockValue: 'Ленин Сталин Марксович' },
     { name: 'email', label: 'Email', type: 'text', source: 'manager', required: true, mockValue: 'client@gmail.com' },
