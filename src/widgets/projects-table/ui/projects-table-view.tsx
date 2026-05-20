@@ -126,6 +126,18 @@ export function ProjectsTableView({
                 managerOptions={managerOptions}
                 onColumnFilterChange={onColumnFilterChange}
               />
+            ) : columnView === 'closing-general' ? (
+              <ClosingGeneralTableHeader
+                columnFilters={columnFilters}
+                managerOptions={managerOptions}
+                onColumnFilterChange={onColumnFilterChange}
+              />
+            ) : columnView === 'closing-economics' ? (
+              <ClosingEconomicsTableHeader
+                columnFilters={columnFilters}
+                managerOptions={managerOptions}
+                onColumnFilterChange={onColumnFilterChange}
+              />
             ) : (
               <OutsideMagTableHeader
                 columnFilters={columnFilters}
@@ -318,6 +330,72 @@ function HeaderCell({
     <div className="min-w-0 px-3 py-2" aria-hidden={ariaHidden}>
       {children}
     </div>
+  )
+}
+
+function ClosingGeneralTableHeader({
+  columnFilters,
+  managerOptions,
+  onColumnFilterChange,
+}: {
+  columnFilters: ColumnFilters
+  managerOptions: string[]
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}) {
+  return (
+    <>
+      <HeaderLabel>Название проекта</HeaderLabel>
+      <HeaderCell>
+        <TableHeaderLoftFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <TableHeaderHallFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderCell>
+        <TableHeaderManagerFilter
+          columnFilters={columnFilters}
+          managerOptions={managerOptions}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderLabel>Дата мероприятия</HeaderLabel>
+      <HeaderLabel>Компания</HeaderLabel>
+      <HeaderLabel>Телефон</HeaderLabel>
+      <HeaderLabel>Дата архивации</HeaderLabel>
+    </>
+  )
+}
+
+function ClosingEconomicsTableHeader({
+  columnFilters,
+  managerOptions,
+  onColumnFilterChange,
+}: {
+  columnFilters: ColumnFilters
+  managerOptions: string[]
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}) {
+  return (
+    <>
+      <HeaderLabel>Название проекта</HeaderLabel>
+      <HeaderCell>
+        <TableHeaderManagerFilter
+          columnFilters={columnFilters}
+          managerOptions={managerOptions}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </HeaderCell>
+      <HeaderLabel>Компания</HeaderLabel>
+      <HeaderLabel>Сумма продаж</HeaderLabel>
+      <HeaderLabel>Чистая прибыль</HeaderLabel>
+      <HeaderLabel>Итоговый бонус</HeaderLabel>
+    </>
   )
 }
 

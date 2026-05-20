@@ -52,6 +52,10 @@ export function EmptyTableCell() {
   return <Cell muted>{TABLE_EMPTY}</Cell>
 }
 
+export function ProjectArchivedAtCell({ project }: { project: Project }) {
+  return <Cell muted>{formatTableDate(project.archivedAt ?? '')}</Cell>
+}
+
 /** Этап в ячейке таблицы: не вылезает за колонку, полный текст в `title`. */
 export function ProjectStageTableCell({ stage }: { stage?: ProjectStage }) {
   if (!stage) return <EmptyTableCell />
