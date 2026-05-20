@@ -1,9 +1,11 @@
 import * as React from 'react'
 
-import { formatRuPhone } from '@/shared/lib/phone/format-ru-phone'
+import { extractLocalDigits } from '@/shared/lib/phone/extract-local-digits'
+import { formatLocalDigits, formatRuPhone } from '@/shared/lib/phone/format-ru-phone'
 import { Input } from '@/shared/ui/input'
 
-const PHONE_MASK_PLACEHOLDER = '+7 (999) 999-99-99'
+/** Базовый префикс: поле никогда не пустеет, чтобы код страны был виден сразу. */
+const PHONE_PREFIX = '+7 '
 
 type PhoneInputProps = Omit<
   React.ComponentProps<typeof Input>,
@@ -15,11 +17,14 @@ type PhoneInputProps = Omit<
 
 /**
  * Поле ввода телефона с фиксированной маской `+7 (XXX) XXX-XX-XX`.
- * Хранит и отдаёт уже отформатированную строку. Каретка всегда уходит в конец,
- * поэтому правки в середине номера не поддерживаются — осознанный компромисс
- * простой реализации без зависимостей.
+ * Префикс `+7` всегда виден — пользователь вводит только 10 цифр номера,
+ * поэтому первый введённый символ не теряется (раньше ведущие `7`/`8`
+ * трактовались как код страны и «проглатывались»).
+ * Хранит и отдаёт отформатированную строку (пустую, если цифр нет).
+ * Каретка всегда уходит в конец, поэтому правки в середине не поддерживаются —
+ * осознанный компромисс простой реализации без зависимостей.
  */
-export function PhoneInput({ value, onChange, placeholder, ref, ...rest }: PhoneInputProps) {
+export function PhoneInput({ value, onChange, ref, ...rest }: PhoneInputProps) {
   const innerRef = React.useRef<HTMLInputElement | null>(null)
 
   const setRef = React.useCallback(
@@ -32,7 +37,17 @@ export function PhoneInput({ value, onChange, placeholder, ref, ...rest }: Phone
   )
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const next = formatRuPhone(event.target.value)
+    const inputType = (event.nativeEvent as InputEvent).inputType ?? ''
+    let local = extractLocalDigits(event.target.value)
+
+    // Backspace, стерший только символ маски (скобку): количество цифр не
+    // изменилось — значит пользователь хотел удалить цифру, убираем последнюю.
+    // Иначе каретка «застревает» на `)`, которую маска возвращает обратно.
+    if (inputType.startsWith('delete') && local.length === extractLocalDigits(value).length) {
+      local = local.slice(0, -1)
+    }
+
+    const next = formatLocalDigits(local)
     onChange(next)
     // Маска перезаписывает строку целиком: возвращаем каретку в конец и
     // синхронизируем DOM на случай, когда значение не изменилось (например,
@@ -40,8 +55,9 @@ export function PhoneInput({ value, onChange, placeholder, ref, ...rest }: Phone
     requestAnimationFrame(() => {
       const el = innerRef.current
       if (!el) return
-      el.value = next
-      el.setSelectionRange(next.length, next.length)
+      const shown = next || PHONE_PREFIX
+      el.value = shown
+      el.setSelectionRange(shown.length, shown.length)
     })
   }
 
@@ -51,9 +67,8 @@ export function PhoneInput({ value, onChange, placeholder, ref, ...rest }: Phone
       ref={setRef}
       type="tel"
       inputMode="tel"
-      value={formatRuPhone(value)}
+      value={formatRuPhone(value) || PHONE_PREFIX}
       onChange={handleChange}
-      placeholder={placeholder ?? PHONE_MASK_PLACEHOLDER}
     />
   )
 }

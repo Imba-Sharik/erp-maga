@@ -183,7 +183,6 @@ export function StageSectionCurrent({
                 value={(field.value as string) ?? ''}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
-                placeholder={f.placeholder}
                 className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
               />
             ) : (
