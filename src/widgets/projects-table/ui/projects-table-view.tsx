@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
 import {
   ALL_STAGE_LABELS,
@@ -26,7 +27,7 @@ const STAGE_OPTIONS: SelectOption[] = ALL_STAGE_ORDER.map((stage) => ({
 }))
 
 const HEADER_FILTER_TRIGGER =
-  'h-7 w-full min-w-0 gap-1 rounded-md border-0 bg-[#F6F6F6] px-2.5 text-xs text-[#454545] shadow-none data-placeholder:text-[#454545]'
+  'h-8! w-full min-w-0 gap-1 rounded-sm border-0 bg-[#F6F6F6] px-2 text-sm text-[#454545] shadow-none data-placeholder:text-[#454545]'
 
 interface ProjectsTableViewProps {
   projects: Project[]
@@ -68,8 +69,18 @@ export function ProjectsTableView({
   }, [hasNextPage, onLoadMore])
 
   return (
-    <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-hidden border-[#B1B1B1] py-0 shadow-none">
-      <div className="min-h-0 flex-1 overflow-auto">
+    <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-visible border-[#B1B1B1] py-0 shadow-none">
+      <OverlayScrollbarsComponent
+        options={{
+          overflow: { x: 'scroll', y: 'scroll' },
+          scrollbars: {
+            visibility: 'auto',
+            autoHide: 'never',
+            autoHideDelay: 800,
+          },
+        }}
+        className="projects-table-scroll-area min-h-0 flex-1"
+      >
         <div style={{ minWidth }}>
           <div
             className="sticky top-0 z-10 grid items-center border-b border-[#D3D3D3] bg-white"
@@ -121,7 +132,7 @@ export function ProjectsTableView({
             </>
           )}
         </div>
-      </div>
+      </OverlayScrollbarsComponent>
     </Card>
   )
 }
@@ -240,11 +251,7 @@ function TableSkeleton({
   return (
     <>
       {Array.from({ length: 10 }).map((_, row) => (
-        <div
-          key={row}
-          className="grid items-center border-b border-[#EDEDED]"
-          style={{ gridTemplateColumns: gridTemplate }}
-        >
+        <div key={row} className="grid items-center" style={{ gridTemplateColumns: gridTemplate }}>
           {Array.from({ length: colCount }).map((__, col) => (
             <div key={col} className="px-3 py-3.5">
               <Skeleton className="h-3.5 w-full max-w-30" />

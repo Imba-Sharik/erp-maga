@@ -37,7 +37,7 @@ export function ProjectsTableRow({ project, columnView, backOrigin }: ProjectsTa
     <button
       type="button"
       onClick={() => navigate(`/projects/${project.id}`, { state: backOrigin })}
-      className="grid w-full items-center border-b border-[#EDEDED] text-left transition-colors last:border-b-0 hover:bg-[#FAF9F6]"
+      className="grid w-full items-center text-left transition-colors hover:bg-[#FAF9F6]"
       style={{ gridTemplateColumns: gridTemplate }}
     >
       {columnView === 'general' ? (
