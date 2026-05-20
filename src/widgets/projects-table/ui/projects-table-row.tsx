@@ -14,6 +14,7 @@ import { getTableGridTemplate } from '../lib/table-columns'
 import {
   Cell,
   EmptyTableCell,
+  TABLE_EMPTY,
   formatTableDate,
   ProjectHallCell,
   ProjectLoftCell,
@@ -77,7 +78,13 @@ function OutsideMagTableCells({ project }: { project: Project }) {
       <ProjectLoftCell project={project} />
       <ProjectHallCell project={project} />
       <ProjectManagerCell project={project} />
-      <EmptyTableCell />
+      <Cell>
+        {project.lastActiveStage ? (
+          <ProjectStageBadge stage={project.lastActiveStage} />
+        ) : (
+          <span className="text-[#ACACAC]">{TABLE_EMPTY}</span>
+        )}
+      </Cell>
       <EmptyTableCell />
       <EmptyTableCell />
       <EmptyTableCell />

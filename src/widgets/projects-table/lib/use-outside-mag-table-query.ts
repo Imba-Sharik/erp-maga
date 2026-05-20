@@ -13,7 +13,14 @@ export type OutsideMagTableListParams = Pick<
   'event_date_after' | 'event_date_before' | 'ordering'
 >
 
-export function useOutsideMagTableQuery(listParams: OutsideMagTableListParams) {
+interface UseOutsideMagTableQueryOptions {
+  enabled?: boolean
+}
+
+export function useOutsideMagTableQuery(
+  listParams: OutsideMagTableListParams,
+  { enabled = true }: UseOutsideMagTableQueryOptions = {},
+) {
   const query = useInfiniteQuery({
     queryKey: [
       'outside-mag-table',
@@ -24,6 +31,7 @@ export function useOutsideMagTableQuery(listParams: OutsideMagTableListParams) {
       },
     ] as const,
     initialPageParam: 0,
+    enabled,
     queryFn: ({ pageParam, signal }) =>
       projectsList(
         {

@@ -16,7 +16,7 @@ import { OUTSIDE_MAG_MOCK_PROJECTS } from '../model/outside-mag-mock-projects'
 import { OutsideMagSearchToolbar } from './outside-mag-search-toolbar'
 import { ReturnFromOutsideMagButton } from './return-from-outside-mag-button'
 
-const useOutsideMagMocks = import.meta.env.DEV || env.USE_MOCKS
+const isOutsideMagMocksEnabled = import.meta.env.DEV || env.USE_MOCKS
 
 const OUTSIDE_MAG_BACK: ProjectBackOrigin = {
   to: '/outside-mag',
@@ -31,13 +31,15 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const [search, setSearch] = useState('')
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
 
-  const query = useOutsideMagTableQuery(listDateParams)
+  const query = useOutsideMagTableQuery(listDateParams, {
+    enabled: !isOutsideMagMocksEnabled,
+  })
 
-  const projects = useOutsideMagMocks ? OUTSIDE_MAG_MOCK_PROJECTS : query.projects
-  const hasNextPage = useOutsideMagMocks ? false : query.hasNextPage
-  const isLoading = useOutsideMagMocks ? false : query.isLoading
-  const isError = useOutsideMagMocks ? false : query.isError
-  const isFetchingNextPage = useOutsideMagMocks ? false : query.isFetchingNextPage
+  const projects = isOutsideMagMocksEnabled ? OUTSIDE_MAG_MOCK_PROJECTS : query.projects
+  const hasNextPage = isOutsideMagMocksEnabled ? false : query.hasNextPage
+  const isLoading = isOutsideMagMocksEnabled ? false : query.isLoading
+  const isError = isOutsideMagMocksEnabled ? false : query.isError
+  const isFetchingNextPage = isOutsideMagMocksEnabled ? false : query.isFetchingNextPage
   const fetchNextPage = query.fetchNextPage
 
   const managerOptions = useMemo(() => {
