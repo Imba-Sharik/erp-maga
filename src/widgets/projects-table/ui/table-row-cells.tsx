@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { format, parseISO } from 'date-fns'
 import { Pencil } from 'lucide-react'
 
-import type { Project } from '@/entities/project'
+import { ProjectStageBadge, type Project, type ProjectStage } from '@/entities/project'
 
 export const TABLE_EMPTY = '—'
 
@@ -62,4 +62,17 @@ export function ProjectManagerCell({ project }: { project: Project }) {
 
 export function EmptyTableCell() {
   return <Cell muted>{TABLE_EMPTY}</Cell>
+}
+
+/** Этап в ячейке таблицы: не вылезает за колонку, полный текст в `title`. */
+export function ProjectStageTableCell({ stage }: { stage?: ProjectStage }) {
+  if (!stage) return <EmptyTableCell />
+
+  return (
+    <Cell>
+      <div className="w-full min-w-0">
+        <ProjectStageBadge stage={stage} truncate />
+      </div>
+    </Cell>
+  )
 }

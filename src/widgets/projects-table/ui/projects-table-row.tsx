@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ProjectStageBadge, type Project, type ProjectBackOrigin } from '@/entities/project'
+import type { Project, ProjectBackOrigin } from '@/entities/project'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import {
@@ -14,11 +14,11 @@ import { getTableGridTemplate } from '../lib/table-columns'
 import {
   Cell,
   EmptyTableCell,
-  TABLE_EMPTY,
   formatTableDate,
   ProjectHallCell,
   ProjectLoftCell,
   ProjectManagerCell,
+  ProjectStageTableCell,
   ProjectTitleCell,
 } from './table-row-cells'
 
@@ -78,13 +78,7 @@ function OutsideMagTableCells({ project }: { project: Project }) {
       <ProjectLoftCell project={project} />
       <ProjectHallCell project={project} />
       <ProjectManagerCell project={project} />
-      <Cell>
-        {project.lastActiveStage ? (
-          <ProjectStageBadge stage={project.lastActiveStage} />
-        ) : (
-          <span className="text-[#ACACAC]">{TABLE_EMPTY}</span>
-        )}
-      </Cell>
+      <ProjectStageTableCell stage={project.lastActiveStage} />
       <EmptyTableCell />
       <EmptyTableCell />
       <EmptyTableCell />
@@ -100,9 +94,7 @@ function GeneralTableCells({ project }: { project: Project }) {
       <ProjectLoftCell project={project} />
       <ProjectHallCell project={project} />
       <ProjectManagerCell project={project} />
-      <Cell>
-        <ProjectStageBadge stage={project.stage} />
-      </Cell>
+      <ProjectStageTableCell stage={project.stage} />
       <Cell muted>{formatTableDate(project.date)}</Cell>
       <Cell muted>{project.company || '—'}</Cell>
       <Cell muted>{project.phone || '—'}</Cell>
@@ -117,9 +109,7 @@ function EconomicsTableCells({ project }: { project: Project }) {
       <ProjectTitleCell project={project} />
       <ProjectManagerCell project={project} />
       <Cell muted>{project.company || '—'}</Cell>
-      <Cell>
-        <ProjectStageBadge stage={project.stage} />
-      </Cell>
+      <ProjectStageTableCell stage={project.stage} />
       <Cell muted>{formatTableMoney(resolveSalesTotal(project))}</Cell>
       <Cell muted>{formatTableMoney(resolveNetProfitTotal(project))}</Cell>
       <Cell muted>{formatTableMoney(resolveTotalBonus(project))}</Cell>
