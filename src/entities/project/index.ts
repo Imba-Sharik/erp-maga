@@ -1,7 +1,6 @@
 export { DEFAULT_PROJECTS_BACK_ORIGIN } from './model/project-back-origins'
 export type {
   Project,
-  ProjectStatus,
   ProjectStage,
   PreprojectStage,
   ClosingStage,
@@ -57,7 +56,6 @@ export { ProjectCard } from './ui/project-card'
 export { ProjectCountBadge } from './ui/project-count-badge'
 export { ProjectPipelineCard } from './ui/project-pipeline-card'
 export { ProjectTelegramLink } from './ui/project-telegram-link'
-export { ProjectStatusBadge } from './ui/project-status-badge'
 export { ProjectStageBadge } from './ui/project-stage-badge'
 export { ProjectHeader } from './ui/project-header'
 export { PlumLink } from './ui/plum-link'
