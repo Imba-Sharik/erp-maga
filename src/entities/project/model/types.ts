@@ -46,6 +46,8 @@ export interface Project {
   email: string
   plumCardUrl: string
   lastUpdate: string
+  /** ISO-datetime создания проекта в системе («появление в системе»). */
+  createdAt: string
 }
 
 export type ContractType = 'with_vat' | 'without_vat'

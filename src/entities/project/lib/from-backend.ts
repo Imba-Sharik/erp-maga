@@ -80,6 +80,7 @@ export function mapBackendProject(b: BackendProject): Project | null {
     email: b.email ?? '',
     plumCardUrl: b.plum_card_url,
     lastUpdate: formatLastUpdate(b.updated_at),
+    createdAt: b.created_at,
   }
 }
 
