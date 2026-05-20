@@ -4,6 +4,7 @@ import { AppLayout } from './layouts/app-layout'
 import { CalendarPage } from '@/pages/calendar'
 import { ClosingPage } from '@/pages/closing'
 import { DashboardPage } from '@/pages/dashboard'
+import { LoginPage } from '@/pages/login'
 import { NotFoundPage } from '@/pages/not-found'
 import { NotificationsPage } from '@/pages/notifications'
 import { OutsideMagPage } from '@/pages/outside-mag'
@@ -13,6 +14,10 @@ import { ProjectsPage } from '@/pages/projects'
 import { SettingsPage } from '@/pages/settings'
 
 const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
   {
     path: '/',
     element: <AppLayout />,
