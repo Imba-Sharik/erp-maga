@@ -4,7 +4,37 @@ import { ru } from 'date-fns/locale'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
 
-import type { Project, ProjectDetail, ProjectStage } from '../model/types'
+import type { Project, ProjectDetail, ProjectEconomics, ProjectStage } from '../model/types'
+
+/** Поля итогов, которые бэк может отдавать в списке, но их нет в сгенерированном Project. */
+type BackendProjectListExtras = {
+  sales_project_total?: number
+  net_profit_total?: number
+  bonus_calculated_total?: number
+  bonus_approved_total?: number
+}
+
+function parseOptionalNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function mapEconomics(b: BackendProject & BackendProjectListExtras): ProjectEconomics {
+  return {
+    salesProjectTotal: parseOptionalNumber(b.sales_project_total),
+    netProfitTotal: parseOptionalNumber(b.net_profit_total),
+    bonusCalculatedTotal: parseOptionalNumber(b.bonus_calculated_total),
+    bonusApprovedTotal: parseOptionalNumber(b.bonus_approved_total),
+  }
+}
+
+function hasAnyEconomics(e: ProjectEconomics): boolean {
+  return (
+    e.salesProjectTotal !== null ||
+    e.netProfitTotal !== null ||
+    e.bonusCalculatedTotal !== null ||
+    e.bonusApprovedTotal !== null
+  )
+}
 
 const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
   plum_request: 'plum_request',
@@ -42,6 +72,9 @@ export function mapBackendProject(b: BackendProject): Project | null {
   const stage = b.stage ? STAGE_MAP[b.stage] : undefined
   if (!stage) return null
 
+  const raw = b as BackendProject & BackendProjectListExtras
+  const economics = mapEconomics(raw)
+
   return {
     id: String(b.id),
     title: b.event_name,
@@ -60,6 +93,7 @@ export function mapBackendProject(b: BackendProject): Project | null {
     plumCardUrl: b.plum_card_url,
     lastUpdate: formatLastUpdate(b.updated_at),
     createdAt: b.created_at,
+    ...(hasAnyEconomics(economics) ? { economics } : {}),
   }
 }
 

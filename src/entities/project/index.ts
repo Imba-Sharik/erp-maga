@@ -1,6 +1,7 @@
 export { DEFAULT_PROJECTS_BACK_ORIGIN } from './model/project-back-origins'
 export type {
   Project,
+  ProjectEconomics,
   ProjectStage,
   PreprojectStage,
   ClosingStage,
