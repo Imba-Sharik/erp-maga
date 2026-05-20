@@ -7,6 +7,7 @@ import {
   FolderIcon,
   ListChecksIcon,
   SettingsIcon,
+  OutOfScopeIcon,
 } from '@/shared/assets'
 
 import type { UserRole } from './types'
@@ -48,7 +49,7 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
     id: 'outside-mag',
     title: 'Вне контура MAG',
     url: '/outside-mag',
-    icon: FolderIcon,
+    icon: OutOfScopeIcon,
     roles: ['director'],
   },
   { id: 'notifications', title: 'Уведомления', url: '/notifications', icon: BellIcon },
