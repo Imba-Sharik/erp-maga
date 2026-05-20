@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
 import {
   ALL_STAGE_LABELS,
@@ -68,8 +69,18 @@ export function ProjectsTableView({
   }, [hasNextPage, onLoadMore])
 
   return (
-    <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-hidden border-[#B1B1B1] py-0 shadow-none">
-      <div className="min-h-0 flex-1 overflow-auto">
+    <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-visible border-[#B1B1B1] py-0 shadow-none">
+      <OverlayScrollbarsComponent
+        options={{
+          overflow: { x: 'scroll', y: 'scroll' },
+          scrollbars: {
+            visibility: 'auto',
+            autoHide: 'never',
+            autoHideDelay: 800,
+          },
+        }}
+        className="projects-table-scroll-area min-h-0 flex-1"
+      >
         <div style={{ minWidth }}>
           <div
             className="sticky top-0 z-10 grid items-center border-b border-[#D3D3D3] bg-white"
@@ -121,7 +132,7 @@ export function ProjectsTableView({
             </>
           )}
         </div>
-      </div>
+      </OverlayScrollbarsComponent>
     </Card>
   )
 }
