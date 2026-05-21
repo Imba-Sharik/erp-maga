@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 import type { ProjectsListQueryParams } from '@/shared/api/generated/types/projectsController/ProjectsList'
 
 export type KanbanBoardScope = 'board-preproject' | 'board-closing' | 'board-outside-mag'
@@ -12,7 +12,7 @@ export type BoardListParams = Pick<
 
 export function kanbanColumnQueryKey(
   scope: KanbanBoardScope,
-  apiStage: StageEnum,
+  apiStage: ProjectStageEnumKey,
   listParams: BoardListParams,
 ) {
   return [{ url: '/api/v1/projects/' as const, scope, apiStage }, listParams] as const
@@ -21,7 +21,7 @@ export function kanbanColumnQueryKey(
 export function isKanbanBoardQueryKey(first: unknown): first is {
   url: string
   scope: KanbanBoardScope
-  apiStage: StageEnum
+  apiStage: ProjectStageEnumKey
 } {
   return (
     typeof first === 'object' &&
@@ -44,7 +44,7 @@ export function invalidateKanbanBoardQueries(queryClient: QueryClient): void {
 
 export function kanbanColumnMatchesProjectStage(
   queryKey: readonly unknown[],
-  projectStage: StageEnum | undefined,
+  projectStage: ProjectStageEnumKey | undefined,
 ): boolean {
   if (!projectStage) return false
   const first = queryKey[0]

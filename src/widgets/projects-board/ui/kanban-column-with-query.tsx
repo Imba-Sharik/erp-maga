@@ -2,7 +2,7 @@ import { useMemo, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { filterProjects, type ProjectsFilter } from '../lib/filter-projects'
 import type { BoardListParams, KanbanBoardScope } from '../lib/kanban-board-query'
@@ -12,7 +12,7 @@ import { ProjectsKanbanColumn } from './projects-kanban-column'
 
 interface KanbanColumnWithQueryBaseProps {
   scope: KanbanBoardScope
-  apiStage: StageEnum
+  apiStage: ProjectStageEnumKey
   title: string
   listParams: BoardListParams
   filter: ProjectsFilter

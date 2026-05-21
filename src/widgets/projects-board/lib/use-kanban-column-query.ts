@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { mapBackendProjects } from '@/entities/project'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import {
   kanbanColumnQueryKey,
@@ -15,7 +15,7 @@ const PAGE_SIZE = 50
 
 export interface UseKanbanColumnQueryParams {
   scope: KanbanBoardScope
-  apiStage: StageEnum
+  apiStage: ProjectStageEnumKey
   listParams: BoardListParams
   enabled?: boolean
 }

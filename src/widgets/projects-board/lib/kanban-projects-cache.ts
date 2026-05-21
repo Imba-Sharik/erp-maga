@@ -3,7 +3,7 @@ import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import type { Project as ApiProject } from '@/shared/api/generated/types/Project'
 import type { PaginatedProjectList } from '@/shared/api/generated/types/PaginatedProjectList'
 import type { ProjectsListQueryParams } from '@/shared/api/generated/types/projectsController/ProjectsList'
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { isKanbanBoardQueryKey } from './kanban-board-query'
 
@@ -41,7 +41,10 @@ function projectMatchesRow(project: ApiProject, row: ApiProject): boolean {
   return row.id === project.id || row.plum_event_id === project.plum_event_id
 }
 
-export function matchesBoardColumn(queryKey: readonly unknown[], apiStage: StageEnum): boolean {
+export function matchesBoardColumn(
+  queryKey: readonly unknown[],
+  apiStage: ProjectStageEnumKey,
+): boolean {
   const first = queryKey[0]
   if (!isKanbanBoardQueryKey(first)) return false
   return first.apiStage === apiStage
@@ -163,7 +166,7 @@ function patchListCache(raw: unknown, project: ApiProject, mode: 'remove' | 'pre
 
 export interface PrependProjectToCachesOptions {
   /** Если задан — prepend только в board-колонку с этим API stage. */
-  boardApiStage?: StageEnum
+  boardApiStage?: ProjectStageEnumKey
   /** Если false — не трогать календарь и прочие списки без board scope. По умолчанию true. */
   includeNonBoard?: boolean
 }
@@ -216,7 +219,7 @@ export function removeProjectFromMatchingCaches(
 function patchBoardColumn(
   queryClient: QueryClient,
   project: ApiProject,
-  apiStage: StageEnum,
+  apiStage: ProjectStageEnumKey,
   mode: 'remove' | 'prepend',
 ): void {
   const eventDate = project.event_date
@@ -234,8 +237,8 @@ function patchBoardColumn(
 
 export interface MoveProjectInKanbanCacheInput {
   project: ApiProject
-  fromApiStage: StageEnum
-  toApiStage: StageEnum
+  fromApiStage: ProjectStageEnumKey
+  toApiStage: ProjectStageEnumKey
 }
 
 export function moveProjectInKanbanCache(
