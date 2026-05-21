@@ -18,6 +18,7 @@ interface KanbanColumnWithQueryBaseProps {
   filter: ProjectsFilter
   filtersActive: boolean
   onMoveOutsideMag?: (project: Project) => void
+  onChangeManager?: (project: Project) => void
 }
 
 interface PreprojectKanbanColumnProps extends KanbanColumnWithQueryBaseProps {
@@ -49,6 +50,7 @@ export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
     onMoveOutsideMag: props.onMoveOutsideMag,
+    onChangeManager: props.onChangeManager,
   }
 
   const accentClassName =

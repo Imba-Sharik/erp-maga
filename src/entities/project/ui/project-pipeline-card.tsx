@@ -17,6 +17,7 @@ interface ProjectPipelineCardProps {
   /** Есть незавершённый черновик этапа — подсветить карточку жёлтой обводкой. */
   hasDraft?: boolean
   onMoveOutsideMag?: (project: Project) => void
+  onChangeManager?: (project: Project) => void
 }
 
 /**
@@ -33,10 +34,12 @@ export function ProjectPipelineCard({
   backOrigin,
   hasDraft,
   onMoveOutsideMag,
+  onChangeManager,
 }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
+  const hasMenu = Boolean(onMoveOutsideMag ?? onChangeManager)
 
   const handleBodyKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -62,26 +65,38 @@ export function ProjectPipelineCard({
         >
           {project.title}
         </button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label="Меню проекта"
-              className="-m-1 shrink-0 cursor-pointer rounded p-1 text-[#454545] transition-colors hover:bg-[#E9E6DD]"
+        {hasMenu ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Меню проекта"
+                className="-m-1 shrink-0 cursor-pointer rounded p-1 text-[#454545] transition-colors hover:bg-[#E9E6DD]"
+              >
+                <MoreVertical className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-44"
+              onPointerDown={preventPortalClickThrough}
             >
-              <MoreVertical className="size-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="min-w-44"
-            onPointerDown={preventPortalClickThrough}
-          >
-            <DropdownMenuItem variant="destructive" onSelect={() => onMoveOutsideMag?.(project)}>
-              Вне контура MAG
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {onChangeManager ? (
+                <DropdownMenuItem onSelect={() => onChangeManager(project)}>
+                  Сменить менеджера
+                </DropdownMenuItem>
+              ) : null}
+              {onMoveOutsideMag ? (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => onMoveOutsideMag(project)}
+                >
+                  Вне контура MAG
+                </DropdownMenuItem>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
       </div>
 
       <div

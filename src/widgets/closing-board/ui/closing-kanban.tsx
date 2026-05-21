@@ -5,6 +5,7 @@ import {
   CLOSING_STAGE_ORDER,
   closingStageToApi,
   type ClosingStage,
+  type Project,
 } from '@/entities/project'
 import { Card } from '@/shared/ui/card'
 import type { ProjectsFilter } from '@/widgets/projects-board/lib/filter-projects'
@@ -17,9 +18,15 @@ interface ClosingKanbanProps {
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  onChangeManager?: (project: Project) => void
 }
 
-export function ClosingKanban({ listParams, filter, filtersActive }: ClosingKanbanProps) {
+export function ClosingKanban({
+  listParams,
+  filter,
+  filtersActive,
+  onChangeManager,
+}: ClosingKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
       <OverlayScrollbarsComponent
@@ -41,6 +48,7 @@ export function ClosingKanban({ listParams, filter, filtersActive }: ClosingKanb
               listParams={listParams}
               filter={filter}
               filtersActive={filtersActive}
+              onChangeManager={onChangeManager}
             />
           ))}
         </div>
@@ -54,11 +62,13 @@ function ClosingKanbanColumnItem({
   listParams,
   filter,
   filtersActive,
+  onChangeManager,
 }: {
   stage: ClosingStage
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  onChangeManager?: (project: Project) => void
 }) {
   return (
     <KanbanColumnWithQuery
@@ -70,6 +80,7 @@ function ClosingKanbanColumnItem({
       filter={filter}
       filtersActive={filtersActive}
       backOrigin={CLOSING_BACK}
+      onChangeManager={onChangeManager}
     />
   )
 }

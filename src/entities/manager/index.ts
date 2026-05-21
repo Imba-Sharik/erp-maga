@@ -1,3 +1,6 @@
 export type { Manager } from './model/types'
 export { MOCK_MANAGERS } from './model/managers-mock'
 export { deleteManagerMock } from './lib/mock-delete-manager'
+export { assignProjectManagerMock } from './lib/mock-assign-project-manager'
+export { MOCK_EXTRA_MANAGERS, buildManagerSelectOptions } from './lib/manager-select-options'
+export { getMockManagersForSelect } from './lib/get-mock-managers-for-select'

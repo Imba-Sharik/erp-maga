@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 
-import type { ProjectBackOrigin } from '@/entities/project'
+import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { useUserRole } from '@/entities/user-role'
+import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -25,7 +27,9 @@ interface ClosingBoardProps {
 }
 
 export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoardProps) {
+  const role = useUserRole()
   const [archiveMode, setArchiveMode] = useState(false)
+  const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
 
   // Kanban filters
   const [search, setSearch] = useState('')
@@ -120,9 +124,20 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
             listParams={listDateParams}
             filter={filter}
             filtersActive={filtersActive}
+            onChangeManager={role === 'director' ? setChangeManagerTarget : undefined}
           />
         </div>
       )}
+
+      <ChangeProjectManagerDialog
+        open={changeManagerTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setChangeManagerTarget(null)
+        }}
+        projectId={changeManagerTarget?.id ?? ''}
+        projectTitle={changeManagerTarget?.title}
+        currentManager={changeManagerTarget?.manager ?? ''}
+      />
     </div>
   )
 }
