@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight } from 'lucide-react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
@@ -19,6 +20,7 @@ import {
 } from '@/entities/project'
 import { useCurrentUser } from '@/entities/current-user'
 import type { ProjectArticles } from '@/entities/project-articles'
+import { stageDraftActions } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
@@ -93,6 +95,28 @@ export function StageSectionCurrent({
     defaultValues: defaults,
     mode: 'onSubmit',
   })
+
+  // Черновик: при каждом изменении формы пишем введённое в стор.
+  // Так черновик переживает и переход по SPA, и перезагрузку страницы (F5):
+  // unmount-эффекты при перезагрузке не вызываются, а живое сохранение — да.
+  useEffect(() => {
+    const sub = form.watch((values) => {
+      if (!canEdit) return
+      const draftValues = values as Record<string, unknown>
+      const hasContent = fields.some((f) => Boolean(draftValues[f.name]))
+      if (hasContent) {
+        stageDraftActions.save(project.id, {
+          stage,
+          authorId: currentUser.id,
+          values: draftValues as Partial<StageFormData>,
+          savedAt: new Date().toISOString(),
+        })
+      } else {
+        stageDraftActions.clear(project.id, currentUser.id)
+      }
+    })
+    return () => sub.unsubscribe()
+  }, [form, fields, canEdit, project.id, stage, currentUser.id])
 
   const handleAdvance = form.handleSubmit((values) => onAdvance?.(values as Partial<StageFormData>))
 

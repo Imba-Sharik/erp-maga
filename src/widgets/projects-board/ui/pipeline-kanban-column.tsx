@@ -8,6 +8,8 @@ import {
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
+import { useCurrentUser } from '@/entities/current-user'
+import { draftKey, useStageDrafts } from '@/entities/stage-draft'
 
 const INITIAL_VISIBLE = 25
 const STEP = 25
@@ -48,6 +50,8 @@ export function PipelineKanbanColumn({
   onMoveOutsideMag,
 }: PipelineKanbanColumnProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
+  const drafts = useStageDrafts()
+  const currentUser = useCurrentUser()
 
   const visible = projects.slice(0, visibleCount)
   const cachedRemaining = projects.length - visible.length
@@ -96,6 +100,7 @@ export function PipelineKanbanColumn({
                   key={p.id}
                   project={p}
                   backOrigin={backOrigin}
+                  hasDraft={Boolean(drafts[draftKey(p.id, currentUser.id)])}
                   onMoveOutsideMag={onMoveOutsideMag}
                 />
               ))}

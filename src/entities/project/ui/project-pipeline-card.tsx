@@ -1,5 +1,6 @@
 import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { cn } from '@/shared/lib/utils'
 import { Card } from '@/shared/ui/card'
 import {
   DropdownMenu,
@@ -13,6 +14,8 @@ import { ProjectTelegramLink } from './project-telegram-link'
 interface ProjectPipelineCardProps {
   project: Project
   backOrigin?: ProjectBackOrigin
+  /** Есть незавершённый черновик этапа — подсветить карточку жёлтой обводкой. */
+  hasDraft?: boolean
   onMoveOutsideMag?: (project: Project) => void
 }
 
@@ -28,6 +31,7 @@ function preventPortalClickThrough(e: React.PointerEvent) {
 export function ProjectPipelineCard({
   project,
   backOrigin,
+  hasDraft,
   onMoveOutsideMag,
 }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
@@ -42,7 +46,14 @@ export function ProjectPipelineCard({
   }
 
   return (
-    <Card className="gap-1 border-[#D3D3D3] bg-[#F9F9F9] p-2.5 shadow-none transition-colors hover:border-[#B1B1B1]">
+    <Card
+      className={cn(
+        'gap-1 bg-[#F9F9F9] p-2.5 shadow-none transition-colors',
+        hasDraft
+          ? 'border-[#E0A53E] ring-1 ring-[#E0A53E]'
+          : 'border-[#D3D3D3] hover:border-[#B1B1B1]',
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
