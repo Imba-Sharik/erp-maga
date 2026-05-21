@@ -11,7 +11,7 @@ import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shar
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
-import { assignProjectManagerMock } from '../lib/mock-assign-project-manager'
+import { assignProjectManagerMock } from '@/entities/manager'
 import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
 import {
   HEADER_FILTER_TRIGGER,

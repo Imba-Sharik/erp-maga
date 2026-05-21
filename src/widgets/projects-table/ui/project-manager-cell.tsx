@@ -13,7 +13,7 @@ import {
 
 import { GridTableCell } from '@/shared/ui/grid-table'
 
-import { buildManagerSelectOptions } from '../lib/manager-select-options'
+import { buildManagerSelectOptions } from '@/entities/manager'
 import { TABLE_EMPTY } from './table-row-cells'
 
 export interface ProjectManagerCellProps {
