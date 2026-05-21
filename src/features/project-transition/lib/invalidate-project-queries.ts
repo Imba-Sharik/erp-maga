@@ -1,0 +1,35 @@
+import type { QueryClient } from '@tanstack/react-query'
+
+import { invalidateKanbanBoardQueries } from '@/widgets/projects-board/lib/kanban-board-query'
+import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
+import { projectsOutOfMagListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsOutOfMagList'
+import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
+
+export function invalidateProjectsListQueries(queryClient: QueryClient): void {
+  queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+}
+
+export function invalidateOutsideMagQueries(queryClient: QueryClient): void {
+  queryClient.invalidateQueries({ queryKey: projectsOutOfMagListQueryKey() })
+}
+
+export function invalidateProjectAfterTransition(
+  queryClient: QueryClient,
+  projectId: number,
+): void {
+  queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
+  invalidateProjectsListQueries(queryClient)
+  invalidateOutsideMagQueries(queryClient)
+  invalidateKanbanBoardQueries(queryClient)
+}
+
+export function removeProjectFromOutsideMagCaches(
+  queryClient: QueryClient,
+  projectId: number,
+): void {
+  queryClient.setQueriesData<OutOfMagProject[]>(
+    { queryKey: projectsOutOfMagListQueryKey() },
+    (prev) => (prev ? prev.filter((row) => row.id !== projectId) : prev),
+  )
+}

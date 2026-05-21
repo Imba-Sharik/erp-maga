@@ -1,6 +1,7 @@
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
+import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
@@ -103,6 +104,43 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     createdAt: b.created_at,
     ...(hasAnyEconomics(economics) ? { economics } : {}),
   }
+}
+
+export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
+  const lastActiveStage = b.stage_from ? STAGE_MAP[b.stage_from as ProjectStageEnumKey] : undefined
+
+  return {
+    id: String(b.id),
+    title: b.event_name,
+    date: b.event_date,
+    stage: 'out_of_mag_scope',
+    ...(lastActiveStage ? { lastActiveStage } : {}),
+    city: '',
+    loft: b.venue,
+    hall: b.hall_loft,
+    manager: takeFirstManager(b.mag_manager),
+    type: '',
+    company: '',
+    phone: '',
+    email: '',
+    plumCardUrl: '',
+    lastUpdate: formatLastUpdate(b.out_of_mag_transferred_at ?? undefined),
+    createdAt: b.out_of_mag_transferred_at ?? '',
+    outsideMag: {
+      reason: b.out_of_mag_reason,
+      transferredAt: b.out_of_mag_transferred_at,
+      transferredBy: b.out_of_mag_transferred_by,
+    },
+  }
+}
+
+export function mapBackendOutOfMagProjects(list: readonly OutOfMagProject[]): Project[] {
+  const result: Project[] = []
+  for (const item of list) {
+    const mapped = mapBackendOutOfMagProject(item)
+    if (mapped) result.push(mapped)
+  }
+  return result
 }
 
 export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
