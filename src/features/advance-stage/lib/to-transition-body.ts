@@ -1,16 +1,12 @@
-import type {
-  ArticleBlock,
-  ArticlesBlockMap,
-  ProjectArticles,
-} from '@/entities/project-articles'
+import type { ArticleBlock, ArticlesBlockMap, ProjectArticles } from '@/entities/project-articles'
 import type { ProjectStage, StageFormData } from '@/entities/project'
 import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
-import type { ToStageEnum } from '@/shared/api/generated/types/ToStageEnum'
+import type { ProjectTransitionRequestToStageEnumKey } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import type { TransitionArticleRequest } from '@/shared/api/generated/types/TransitionArticleRequest'
 
-/** Стейджи воронки = подмножество ToStageEnum, имена совпадают 1:1. */
-function toStage(stage: ProjectStage): ToStageEnum {
-  return stage as ToStageEnum
+/** Стейджи воронки = подмножество to_stage, имена совпадают 1:1. */
+function toStage(stage: ProjectStage): ProjectTransitionRequestToStageEnumKey {
+  return stage as ProjectTransitionRequestToStageEnumKey
 }
 
 function toDecimalString(value: number | undefined): string | undefined {
@@ -97,7 +93,8 @@ export function buildTransitionBody({
   if (v.subleaseDocsStatus) body.sublease_docs_status = v.subleaseDocsStatus
   if (v.staffReceiptsStatus) body.staff_receipts_status = v.staffReceiptsStatus
   if (v.dataConfirmedStatus) {
-    body.data_confirmed_status = v.dataConfirmedStatus as ProjectTransitionRequest['data_confirmed_status']
+    body.data_confirmed_status =
+      v.dataConfirmedStatus as ProjectTransitionRequest['data_confirmed_status']
   }
 
   // tax_rate обязателен для перехода ready_to_event → event_held.
