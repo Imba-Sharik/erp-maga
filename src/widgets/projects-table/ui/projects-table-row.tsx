@@ -1,7 +1,7 @@
 import type { KeyboardEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { getOutsideMagReasonLabel, type Project, type ProjectBackOrigin } from '@/entities/project'
 import { GridTableCell, GridTableRow, GridTableRowActionCell } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
@@ -14,7 +14,6 @@ import {
 import { getTableGridTemplate } from '../lib/table-columns'
 import { ProjectManagerCell, type ProjectManagerCellProps } from './project-manager-cell'
 import {
-  EmptyTableCell,
   formatTableDate,
   ProjectArchivedAtCell,
   ProjectHallCell,
@@ -103,10 +102,14 @@ export function ProjectsTableRow({
         <ProjectManagerCell {...managerCellProps} />
         <div className="contents">
           <ProjectStageTableCell stage={project.lastActiveStage} />
-          <EmptyTableCell />
-          <EmptyTableCell />
-          <EmptyTableCell />
-          <EmptyTableCell />
+          <GridTableCell muted>
+            {formatTableDate(project.outsideMag?.transferredAt ?? '')}
+          </GridTableCell>
+          <GridTableCell muted>{project.outsideMag?.transferredBy || '—'}</GridTableCell>
+          <GridTableCell muted>
+            {getOutsideMagReasonLabel(project.outsideMag?.reason)}
+          </GridTableCell>
+          <GridTableCell muted>—</GridTableCell>
         </div>
         <GridTableRowActionCell>{renderRowAction?.(project)}</GridTableRowActionCell>
       </ProjectTableNavRow>
