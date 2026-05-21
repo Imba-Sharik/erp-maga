@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { ManagersTable } from '@/widgets/managers-table'
+
 import { ManagersToolbar } from './managers-toolbar'
 
 export function ManagersPage() {
@@ -26,6 +28,10 @@ export function ManagersPage() {
         onChangeHall={setHall}
         onChangeLoft={setLoft}
       />
+
+      <div className="flex h-full min-h-0 flex-1 flex-col">
+        <ManagersTable search={search} hall={hall} loft={loft} />
+      </div>
     </div>
   )
 }
