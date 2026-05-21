@@ -56,6 +56,8 @@ export {
   isClosingStage,
 } from './lib/closing-stages'
 export type { ProjectsByClosingStage } from './lib/closing-stages'
+export type { OutsideMagReason } from './lib/outside-mag-reason'
+export { OUTSIDE_MAG_REASON_OPTIONS } from './lib/outside-mag-reason'
 export { pluralProjects } from './lib/plural'
 export { buildTelegramPhoneUrl } from './lib/build-telegram-phone-url'
 export { ProjectCard } from './ui/project-card'
