@@ -7,6 +7,7 @@ import { DashboardPage } from '@/pages/dashboard'
 import { LoginPage } from '@/pages/login'
 import { NotFoundPage } from '@/pages/not-found'
 import { NotificationsPage } from '@/pages/notifications'
+import { ManagersPage } from '@/pages/managers'
 import { OutsideMagPage } from '@/pages/outside-mag'
 import { ProfilePage } from '@/pages/profile'
 import { ProjectDetailPage } from '@/pages/project-detail'
@@ -34,6 +35,14 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={['director']}>
             <OutsideMagPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'managers',
+        element: (
+          <RequireRole roles={['director']}>
+            <ManagersPage />
           </RequireRole>
         ),
       },
