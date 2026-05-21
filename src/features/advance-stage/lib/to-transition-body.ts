@@ -100,7 +100,9 @@ export function buildTransitionBody({
     body.data_confirmed_status = v.dataConfirmedStatus as ProjectTransitionRequest['data_confirmed_status']
   }
 
-  if (currentStage === 'ready_to_event' && taxRate > 0) {
+  // tax_rate обязателен для перехода ready_to_event → event_held.
+  // Бэк не принимает отсутствие поля — если менеджер не заполнил процент, шлём 0.
+  if (currentStage === 'ready_to_event') {
     body.tax_rate = taxRate.toFixed(2)
   }
 

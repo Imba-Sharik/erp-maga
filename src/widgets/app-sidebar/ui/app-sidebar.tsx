@@ -3,6 +3,7 @@ import { LogOut, User } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { MagLogo, SettingsIcon } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
+import { useUnreadNotificationCount } from '@/entities/notification'
 import {
   USER_ROLES,
   USER_ROLE_LABELS,
@@ -48,6 +49,7 @@ export function AppSidebar() {
   const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
   const navItems = useRoleNavItems()
+  const unreadCount = useUnreadNotificationCount()
 
   return (
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">
@@ -76,6 +78,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {navItems.map((item) => {
                 const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
+                const showDot = item.id === 'notifications' && unreadCount > 0
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
@@ -91,7 +94,12 @@ export function AppSidebar() {
                             isActive && (isMobile || state === 'expanded') && 'translate-x-[2px]',
                           )}
                         >
-                          <item.icon className="size-4 shrink-0" />
+                          <span className="relative flex shrink-0">
+                            <item.icon className="size-4 shrink-0" />
+                            {showDot && (
+                              <span className="ring-sidebar absolute -top-0.5 -right-0.5 size-2 rounded-full bg-[#D25252] ring-2" />
+                            )}
+                          </span>
                           <span className="truncate">{item.title}</span>
                         </div>
                       </Link>

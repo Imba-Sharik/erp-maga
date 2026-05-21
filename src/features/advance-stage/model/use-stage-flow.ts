@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 
 import { useCurrentUser } from '@/entities/current-user'
+import { getStageNotification, useNotificationStore } from '@/entities/notification'
 import {
   ALL_STAGE_ORDER,
   type ProjectStage,
@@ -56,6 +57,8 @@ export interface UseStageFlowOptions {
   initialStage: ProjectStage
   /** Когда проект попал в воронку (создан в нашей системе после синка PLUM). */
   projectEnteredAt?: string
+  /** Название проекта — подставляется в текст уведомлений руководителю. */
+  projectTitle?: string
 }
 
 const PLUM_SYSTEM_LABEL = 'PLUM (синхронизация)'
@@ -64,6 +67,7 @@ export function useStageFlow({
   projectId,
   initialStage,
   projectEnteredAt,
+  projectTitle,
 }: UseStageFlowOptions): StageFlow {
   const currentUser = useCurrentUser()
   const queryClient = useQueryClient()
@@ -115,8 +119,20 @@ export function useStageFlow({
         },
       }))
       setCurrentStage(next)
+
+      // Мок: переход на этап, требующий действия роли → уведомление этой роли.
+      const stageNotification = getStageNotification(next)
+      if (stageNotification) {
+        useNotificationStore.getState().push({
+          stage: next,
+          recipient: stageNotification.recipient,
+          channels: stageNotification.channels,
+          projectId: projectId ?? 0,
+          projectTitle: projectTitle ?? `Проект #${projectId ?? '—'}`,
+        })
+      }
     },
-    [currentStage, currentUser.fullName],
+    [currentStage, currentUser.fullName, projectId, projectTitle],
   )
 
   const advance = useCallback(
