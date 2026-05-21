@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 
-import type { ProjectBackOrigin } from '@/entities/project'
+import type { Project, ProjectBackOrigin } from '@/entities/project'
 import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
 
 import { filterProjects, type ProjectsFilter } from '../lib/filter-projects'
@@ -17,6 +17,7 @@ interface KanbanColumnWithQueryBaseProps {
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  onMoveOutsideMag?: (project: Project) => void
 }
 
 interface PreprojectKanbanColumnProps extends KanbanColumnWithQueryBaseProps {
@@ -47,6 +48,7 @@ export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
     onLoadMore: () => query.fetchNextPage(),
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
+    onMoveOutsideMag: props.onMoveOutsideMag,
   }
 
   const accentClassName =

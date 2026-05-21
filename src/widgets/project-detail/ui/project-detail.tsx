@@ -1,5 +1,8 @@
-import type { ProjectDetail as ProjectDetailEntity } from '@/entities/project'
+import { useState } from 'react'
+
+import { isOutsideMagStage, type ProjectDetail as ProjectDetailEntity } from '@/entities/project'
 import { useStageFlow } from '@/features/advance-stage'
+import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import { ProjectDetailAside } from '@/widgets/project-detail-aside'
 
 import { ProjectDetailMainCard } from './project-detail-main-card'
@@ -7,10 +10,14 @@ import { ProjectDetailStages } from './project-detail-stages'
 import { ProjectDetailTabsRow } from './project-detail-tabs-row'
 
 export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
+  const [outsideMagOpen, setOutsideMagOpen] = useState(false)
+  const showOutsideMagButton = !isOutsideMagStage(project.stage)
+
   const flow = useStageFlow({
     projectId: Number(project.id),
     initialStage: project.stage,
     projectEnteredAt: project.enteredSystemAt,
+    projectTitle: project.title,
   })
 
   return (
@@ -18,11 +25,21 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
       <div className="grid grid-cols-1 items-start gap-5 @[1200px]:grid-cols-[minmax(0,1fr)_405px]">
         <div className="flex w-full min-w-0 flex-col gap-4">
           <ProjectDetailMainCard project={project} currentStage={flow.currentStage} />
-          <ProjectDetailTabsRow showOutsideMagButton />
+          <ProjectDetailTabsRow
+            showOutsideMagButton={showOutsideMagButton}
+            onOutsideMagClick={() => setOutsideMagOpen(true)}
+          />
           <ProjectDetailStages project={project} flow={flow} />
         </div>
         <ProjectDetailAside project={project} />
       </div>
+
+      <MoveProjectOutsideMagDialog
+        open={outsideMagOpen}
+        onOpenChange={setOutsideMagOpen}
+        projectId={project.id}
+        projectTitle={project.title}
+      />
     </div>
   )
 }

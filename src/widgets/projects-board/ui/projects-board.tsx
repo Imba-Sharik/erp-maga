@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react'
 
+import type { Project } from '@/entities/project'
+import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
+
 import type { BoardListParams } from '../lib/kanban-board-query'
 import { ProjectsBoardToolbar } from './projects-board-toolbar'
 import { ProjectsKanban } from './projects-kanban'
@@ -13,6 +16,7 @@ export function ProjectsBoard({ listDateParams }: ProjectsBoardProps) {
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
+  const [outsideMagTarget, setOutsideMagTarget] = useState<Project | null>(null)
 
   const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
 
@@ -31,8 +35,22 @@ export function ProjectsBoard({ listDateParams }: ProjectsBoardProps) {
         onChangeLoft={setLoft}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ProjectsKanban listParams={listDateParams} filter={filter} filtersActive={filtersActive} />
+        <ProjectsKanban
+          listParams={listDateParams}
+          filter={filter}
+          filtersActive={filtersActive}
+          onMoveOutsideMag={setOutsideMagTarget}
+        />
       </div>
+
+      <MoveProjectOutsideMagDialog
+        open={outsideMagTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setOutsideMagTarget(null)
+        }}
+        projectId={outsideMagTarget?.id ?? ''}
+        projectTitle={outsideMagTarget?.title}
+      />
     </div>
   )
 }

@@ -14,7 +14,11 @@ import { draftKey, useStageDrafts } from '@/entities/stage-draft'
 const INITIAL_VISIBLE = 25
 const STEP = 25
 
-function columnCountLabel(visible: number, backendTotal: number | undefined, filtersActive: boolean): string {
+function columnCountLabel(
+  visible: number,
+  backendTotal: number | undefined,
+  filtersActive: boolean,
+): string {
   if (backendTotal === undefined) return String(visible)
   if (filtersActive || visible !== backendTotal) return `${visible} / ${backendTotal}`
   return String(backendTotal)
@@ -30,6 +34,7 @@ export interface PipelineKanbanColumnProps {
   onLoadMore?: () => void
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
+  onMoveOutsideMag?: (project: Project) => void
 }
 
 export function PipelineKanbanColumn({
@@ -42,6 +47,7 @@ export function PipelineKanbanColumn({
   onLoadMore,
   hasNextPage,
   isFetchingNextPage,
+  onMoveOutsideMag,
 }: PipelineKanbanColumnProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
   const drafts = useStageDrafts()
@@ -95,6 +101,7 @@ export function PipelineKanbanColumn({
                   project={p}
                   backOrigin={backOrigin}
                   hasDraft={Boolean(drafts[draftKey(p.id, currentUser.id)])}
+                  onMoveOutsideMag={onMoveOutsideMag}
                 />
               ))}
               {showMoreButton && (

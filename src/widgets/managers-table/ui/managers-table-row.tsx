@@ -12,10 +12,10 @@ import { DeleteManagerButton } from './delete-manager-button'
 
 interface ManagersTableRowProps {
   manager: Manager
-  onDelete: (id: string) => void
+  onRequestDelete: (manager: Manager) => void
 }
 
-export function ManagersTableRow({ manager, onDelete }: ManagersTableRowProps) {
+export function ManagersTableRow({ manager, onRequestDelete }: ManagersTableRowProps) {
   return (
     <GridTableRow gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}>
       <GridTableCell>
@@ -28,7 +28,7 @@ export function ManagersTableRow({ manager, onDelete }: ManagersTableRowProps) {
       <GridTableCell muted>{formatTableMoney(manager.salesTotal)}</GridTableCell>
       <GridTableCell muted>{formatTableMoney(manager.bonusTotal)}</GridTableCell>
       <GridTableRowActionCell>
-        <DeleteManagerButton managerId={manager.id} onDelete={onDelete} />
+        <DeleteManagerButton onRequestDelete={() => onRequestDelete(manager)} />
       </GridTableRowActionCell>
     </GridTableRow>
   )

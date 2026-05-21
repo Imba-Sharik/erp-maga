@@ -5,6 +5,7 @@ import {
   STAGE_LABELS,
   preprojectStageToApi,
   type PreprojectStage,
+  type Project,
 } from '@/entities/project'
 import { Card } from '@/shared/ui/card'
 
@@ -16,9 +17,15 @@ interface ProjectsKanbanProps {
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  onMoveOutsideMag?: (project: Project) => void
 }
 
-export function ProjectsKanban({ listParams, filter, filtersActive }: ProjectsKanbanProps) {
+export function ProjectsKanban({
+  listParams,
+  filter,
+  filtersActive,
+  onMoveOutsideMag,
+}: ProjectsKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
       <OverlayScrollbarsComponent
@@ -40,6 +47,7 @@ export function ProjectsKanban({ listParams, filter, filtersActive }: ProjectsKa
               listParams={listParams}
               filter={filter}
               filtersActive={filtersActive}
+              onMoveOutsideMag={onMoveOutsideMag}
             />
           ))}
         </div>
@@ -53,11 +61,13 @@ function ProjectsKanbanColumnItem({
   listParams,
   filter,
   filtersActive,
+  onMoveOutsideMag,
 }: {
   stage: PreprojectStage
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  onMoveOutsideMag?: (project: Project) => void
 }) {
   return (
     <KanbanColumnWithQuery
@@ -68,6 +78,7 @@ function ProjectsKanbanColumnItem({
       listParams={listParams}
       filter={filter}
       filtersActive={filtersActive}
+      onMoveOutsideMag={onMoveOutsideMag}
     />
   )
 }
