@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
-import { isOutsideMagStage, type ProjectDetail as ProjectDetailEntity } from '@/entities/project'
+import {
+  isOutsideMagStage,
+  STAGE_FUNNEL,
+  type ProjectDetail as ProjectDetailEntity,
+} from '@/entities/project'
 import { useStageFlow } from '@/features/advance-stage'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import { ProjectDetailAside } from '@/widgets/project-detail-aside'
@@ -11,7 +15,8 @@ import { ProjectDetailTabsRow } from './project-detail-tabs-row'
 
 export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   const [outsideMagOpen, setOutsideMagOpen] = useState(false)
-  const showOutsideMagButton = !isOutsideMagStage(project.stage)
+  const showOutsideMagButton =
+    STAGE_FUNNEL[project.stage] === 'pre_project' && !isOutsideMagStage(project.stage)
 
   const flow = useStageFlow({
     projectId: Number(project.id),
