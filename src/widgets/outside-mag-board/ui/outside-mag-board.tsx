@@ -93,8 +93,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
         onOpenChange={(open) => {
           if (!open) setReturnTarget(null)
         }}
-        projectId={returnTarget?.id ?? ''}
-        projectTitle={returnTarget?.title}
+        project={returnTarget}
       />
     </div>
   )
