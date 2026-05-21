@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
@@ -19,6 +20,7 @@ import {
 } from '@/entities/project'
 import { useCurrentUser } from '@/entities/current-user'
 import type { ProjectArticles } from '@/entities/project-articles'
+import { stageDraftActions } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
@@ -94,7 +96,39 @@ export function StageSectionCurrent({
     mode: 'onSubmit',
   })
 
-  const handleAdvance = form.handleSubmit((values) => onAdvance?.(values as Partial<StageFormData>))
+  // Черновик: при уходе со страницы с недозаполненной формой сохраняем введённое.
+  // submittedRef — нажали ли «Следующий этап» (тогда черновик не нужен).
+  const submittedRef = useRef(false)
+
+  useEffect(() => {
+    return () => {
+      if (submittedRef.current) return
+      const values = form.getValues() as Record<string, unknown>
+      const base = defaults as Record<string, unknown>
+      const changed = fields.some((f) => (values[f.name] ?? '') !== (base[f.name] ?? ''))
+      if (!changed) return
+      stageDraftActions.save(project.id, {
+        stage,
+        authorId: currentUser.id,
+        values: values as Partial<StageFormData>,
+        savedAt: new Date().toISOString(),
+      })
+    }
+    // Срабатывает только при размонтировании; project/stage/form/fields стабильны.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const submitStage = form.handleSubmit((values) =>
+    onAdvance?.(values as Partial<StageFormData>),
+  )
+
+  const handleAdvance = () => {
+    submittedRef.current = true
+    // Валидация не прошла — снимаем флаг: недозаполненную форму всё равно сохраняем в черновик.
+    void submitStage().then(() => {
+      if (Object.keys(form.formState.errors).length > 0) submittedRef.current = false
+    })
+  }
 
   const renderField = (f: StageFieldConfig) => {
     if (f.source === 'system' || !canEdit) {

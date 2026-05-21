@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useCurrentUser } from '@/entities/current-user'
 import {
@@ -15,6 +15,7 @@ import {
   type ArticleValues,
   type ProjectArticles,
 } from '@/entities/project-articles'
+import { stageDraftActions } from '@/entities/stage-draft'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
@@ -60,6 +61,13 @@ export interface UseStageFlowOptions {
 
 const PLUM_SYSTEM_LABEL = 'PLUM (синхронизация)'
 
+/** Этапы с финансовыми блоками — их черновик хранит `articles`/`taxRate`, а не RHF-форму. */
+const FINANCE_DRAFT_STAGES: ReadonlySet<ProjectStage> = new Set<ProjectStage>([
+  'ready_to_event',
+  'expenses_entered',
+  'bonus_calculated',
+])
+
 export function useStageFlow({
   projectId,
   initialStage,
@@ -68,15 +76,32 @@ export function useStageFlow({
   const currentUser = useCurrentUser()
   const queryClient = useQueryClient()
   const transitionMutation = useProjectsTransitionsCreate()
+  // Черновик с прошлого визита — только свой (по пользователю) и только если этап не сменился.
+  const initialDraft = useMemo(() => {
+    const draft =
+      projectId === undefined ? undefined : stageDraftActions.get(projectId, currentUser.id)
+    return draft && draft.stage === initialStage ? draft : undefined
+  }, [projectId, initialStage, currentUser.id])
+
   const [currentStage, setCurrentStage] = useState<ProjectStage>(initialStage)
   const [records, setRecords] = useState<StageRecords>(() => ({
     [initialStage]: {
       enteredAt: projectEnteredAt ?? new Date().toISOString(),
       enteredBy: initialStage === 'plum_request' ? PLUM_SYSTEM_LABEL : undefined,
+      values: initialDraft?.values,
     },
   }))
-  const [articles, setArticles] = useState<ProjectArticles>(() => createInitialArticles())
-  const [taxRate, setTaxRateState] = useState<number>(0)
+  const [articles, setArticles] = useState<ProjectArticles>(
+    () => initialDraft?.articles ?? createInitialArticles(),
+  )
+  const [taxRate, setTaxRateState] = useState<number>(() => initialDraft?.taxRate ?? 0)
+
+  // Рефы для сохранения финансового черновика при уходе со страницы.
+  const financeDirtyRef = useRef(false)
+  const currentStageRef = useRef(currentStage)
+  const articlesRef = useRef(articles)
+  const taxRateRef = useRef(taxRate)
+  const authorIdRef = useRef(currentUser.id)
 
   const currentIndex = ALL_STAGE_ORDER.indexOf(currentStage)
 
@@ -115,8 +140,11 @@ export function useStageFlow({
         },
       }))
       setCurrentStage(next)
+      // Этап отправлен — черновик больше не нужен.
+      financeDirtyRef.current = false
+      if (projectId !== undefined) stageDraftActions.clear(projectId, currentUser.id)
     },
-    [currentStage, currentUser.fullName],
+    [currentStage, currentUser.fullName, currentUser.id, projectId],
   )
 
   const advance = useCallback(
@@ -180,6 +208,7 @@ export function useStageFlow({
 
   const updateArticle = useCallback(
     (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => {
+      financeDirtyRef.current = true
       setArticles((prev) => {
         const target = prev[block]
         if (!target) return prev
@@ -196,15 +225,50 @@ export function useStageFlow({
   )
 
   const setTaxRate = useCallback((rate: number) => {
+    financeDirtyRef.current = true
     setTaxRateState(Number.isFinite(rate) ? rate : 0)
   }, [])
 
   const toggleBackline = useCallback(() => {
+    financeDirtyRef.current = true
     setArticles((prev) => ({
       ...prev,
       backline: prev.backline ? null : createEmptyBacklineBlock(),
     }))
   }, [])
+
+  // Держим рефы синхронными с состоянием — они читаются при размонтировании.
+  useEffect(() => {
+    currentStageRef.current = currentStage
+    articlesRef.current = articles
+    taxRateRef.current = taxRate
+    authorIdRef.current = currentUser.id
+  })
+
+  // Протухший черновик (этап проекта сменился где-то ещё) — удаляем.
+  useEffect(() => {
+    if (projectId === undefined) return
+    const draft = stageDraftActions.get(projectId, currentUser.id)
+    if (draft && draft.stage !== initialStage) {
+      stageDraftActions.clear(projectId, currentUser.id)
+    }
+  }, [projectId, initialStage, currentUser.id])
+
+  // Уход со страницы: сохраняем финансовый черновик, если статьи/налог трогали.
+  useEffect(() => {
+    return () => {
+      if (projectId === undefined || !financeDirtyRef.current) return
+      const stage = currentStageRef.current
+      if (!FINANCE_DRAFT_STAGES.has(stage)) return
+      stageDraftActions.save(projectId, {
+        stage,
+        authorId: authorIdRef.current,
+        articles: articlesRef.current,
+        taxRate: taxRateRef.current,
+        savedAt: new Date().toISOString(),
+      })
+    }
+  }, [projectId])
 
   return {
     currentStage,

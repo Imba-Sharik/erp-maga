@@ -42,5 +42,7 @@ export function ProjectDetailPage() {
     )
   }
 
-  return <ProjectDetail project={project} />
+  // key — чтобы при переходе между проектами useStageFlow пересоздавался
+  // (свежее состояние этапов + срабатывает сохранение черновика при уходе).
+  return <ProjectDetail key={project.id} project={project} />
 }

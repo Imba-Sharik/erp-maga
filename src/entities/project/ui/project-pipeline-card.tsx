@@ -1,5 +1,6 @@
 import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { cn } from '@/shared/lib/utils'
 import { Card } from '@/shared/ui/card'
 import {
   DropdownMenu,
@@ -13,9 +14,11 @@ import { ProjectTelegramLink } from './project-telegram-link'
 interface ProjectPipelineCardProps {
   project: Project
   backOrigin?: ProjectBackOrigin
+  /** Есть незавершённый черновик этапа — подсветить карточку жёлтой обводкой. */
+  hasDraft?: boolean
 }
 
-export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCardProps) {
+export function ProjectPipelineCard({ project, backOrigin, hasDraft }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
   const stop = (e: React.MouseEvent | React.KeyboardEvent) => e.stopPropagation()
@@ -31,7 +34,12 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
           goToDetail()
         }
       }}
-      className="focus-visible:ring-ring/50 cursor-pointer gap-1 border-[#D3D3D3] bg-[#F9F9F9] p-2.5 shadow-none transition-colors hover:border-[#B1B1B1] focus-visible:ring-2 focus-visible:outline-none"
+      className={cn(
+        'focus-visible:ring-ring/50 cursor-pointer gap-1 bg-[#F9F9F9] p-2.5 shadow-none transition-colors focus-visible:ring-2 focus-visible:outline-none',
+        hasDraft
+          ? 'border-[#E0A53E] ring-1 ring-[#E0A53E]'
+          : 'border-[#D3D3D3] hover:border-[#B1B1B1]',
+      )}
     >
       <div className="flex items-center justify-between gap-2">
         <h3 className="truncate text-sm font-semibold text-[#454545]">{project.title}</h3>
