@@ -6,6 +6,7 @@ import type {
   ProjectArticles,
 } from '@/entities/project-articles'
 import type { StageRecord } from '@/features/advance-stage'
+import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 
 import { StagePassedBonus } from './stage-passed-bonus'
 import { StagePassedExpenses } from './stage-passed-expenses'
@@ -14,6 +15,7 @@ import { StageSectionCurrent } from './stage-section-current'
 import { StageSectionPassed } from './stage-section-passed'
 
 interface ProjectStageSectionProps {
+  presentation: StagePresentationConfig
   project: ProjectDetail
   stage: ProjectStage
   isCurrent: boolean
@@ -30,6 +32,7 @@ interface ProjectStageSectionProps {
 }
 
 export function ProjectStageSection({
+  presentation,
   project,
   stage,
   isCurrent,
@@ -44,6 +47,7 @@ export function ProjectStageSection({
   getRecord,
 }: ProjectStageSectionProps) {
   const financeProps = {
+    presentation,
     articles,
     taxRate,
     onArticleChange,
@@ -62,6 +66,7 @@ export function ProjectStageSection({
   if (stage === 'bonus_calculated') {
     return (
       <StagePassedBonus
+        presentation={presentation}
         isCurrent={isCurrent}
         articles={articles}
         dataConfirmedRecord={getRecord('data_confirmed')}
