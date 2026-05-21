@@ -11,8 +11,8 @@ const TABS: { key: ProjectTabKey; label: string }[] = [
   { key: 'actions', label: 'Лог действий' },
 ]
 
-// disabled до проработки вкладок «Экономика», «Документы» и «Лог действий»
-const DISABLED_TAB_KEYS = new Set<ProjectTabKey>(['economics', 'documents', 'actions'])
+// disabled до проработки вкладок «Документы» и «Лог действий»
+const DISABLED_TAB_KEYS = new Set<ProjectTabKey>(['documents', 'actions'])
 
 const DEFAULT_TAB: ProjectTabKey = 'data'
 

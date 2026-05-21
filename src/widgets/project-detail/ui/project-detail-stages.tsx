@@ -6,7 +6,15 @@ import {
   type StageFunnel,
 } from '@/entities/project'
 import type { StageFlow } from '@/features/advance-stage'
+import { useProjectTab } from '@/features/project-tabs'
 import { ProjectStageSection } from '@/widgets/project-stage-section'
+
+/** Этапы с финансовыми блоками (Продажная часть / Расходы / Бонус) — видны во вкладке «Экономика». */
+const ECONOMICS_STAGES = new Set<ProjectStage>([
+  'ready_to_event',
+  'expenses_entered',
+  'bonus_calculated',
+])
 
 function FunnelHeader({ funnel }: { funnel: StageFunnel }) {
   const color = funnel === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
@@ -21,9 +29,13 @@ interface ProjectDetailStagesProps {
 }
 
 export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps) {
+  const [tab] = useProjectTab()
+  const economicsOnly = tab === 'economics'
+
   const closing: ProjectStage[] = []
   const preproject: ProjectStage[] = []
   for (const stage of flow.visibleStages) {
+    if (economicsOnly && !ECONOMICS_STAGES.has(stage)) continue
     if (STAGE_FUNNEL[stage] === 'closing') closing.push(stage)
     else preproject.push(stage)
   }
