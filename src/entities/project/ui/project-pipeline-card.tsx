@@ -13,9 +13,14 @@ import { ProjectTelegramLink } from './project-telegram-link'
 interface ProjectPipelineCardProps {
   project: Project
   backOrigin?: ProjectBackOrigin
+  onMoveOutsideMag?: (project: Project) => void
 }
 
-export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCardProps) {
+export function ProjectPipelineCard({
+  project,
+  backOrigin,
+  onMoveOutsideMag,
+}: ProjectPipelineCardProps) {
   const navigate = useNavigate()
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
   const stop = (e: React.MouseEvent | React.KeyboardEvent) => e.stopPropagation()
@@ -48,7 +53,15 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-44">
-            <DropdownMenuItem variant="destructive">Вне контура MAG</DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={(e) => {
+                e.preventDefault()
+                onMoveOutsideMag?.(project)
+              }}
+            >
+              Вне контура MAG
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -71,9 +84,9 @@ export function ProjectPipelineCard({ project, backOrigin }: ProjectPipelineCard
           target="_blank"
           rel="noreferrer"
           onClick={stop}
-          className="inline-flex items-center gap-1.5 text-xs text-funnel-preproject underline-offset-2 hover:underline"
+          className="text-funnel-preproject inline-flex items-center gap-1.5 text-xs underline-offset-2 hover:underline"
         >
-          <span className="inline-flex size-4 items-center justify-center rounded-[5px] bg-funnel-preproject text-white">
+          <span className="bg-funnel-preproject inline-flex size-4 items-center justify-center rounded-[5px] text-white">
             <Link2 className="size-3" />
           </span>
           Карточка в PLUM
