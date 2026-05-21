@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
+import { ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
 import type { ComponentType, SVGProps } from 'react'
 
 import { useUserRole } from '@/entities/user-role'
@@ -15,12 +15,13 @@ import {
   type ProjectArticles,
 } from '@/entities/project-articles'
 import type { StageRecord } from '@/features/advance-stage'
-import { Button } from '@/shared/ui/button'
+import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
+import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
 
 type Source = 'manager' | 'system'
@@ -143,6 +144,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
 }
 
 interface StagePassedBonusProps {
+  presentation: StagePresentationConfig
   isCurrent?: boolean
   articles: ProjectArticles
   /** Запись этапа 9 (`data_confirmed`) — оттуда берём «Кто подтвердил». */
@@ -152,6 +154,7 @@ interface StagePassedBonusProps {
 }
 
 export function StagePassedBonus({
+  presentation,
   isCurrent = false,
   articles,
   dataConfirmedRecord,
@@ -160,7 +163,7 @@ export function StagePassedBonus({
 }: StagePassedBonusProps) {
   const role = useUserRole()
   const canEdit = canEditStage('bonus_calculated', role)
-  const editable = canEdit && isCurrent
+  const editable = !presentation.readOnly && canEdit && isCurrent
 
   const rows = buildBonusRows(articles)
   const totalBonus = rows.reduce((acc, row) => acc + calcRow(row.values).bonusAmount, 0)
@@ -172,62 +175,46 @@ export function StagePassedBonus({
   }
 
   return (
-    <Collapsible defaultOpen className="w-full">
-      <div className="flex flex-col gap-5 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
-            <span className="font-medium text-[#454545]">
-              {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
-            </span>
-            <span className="text-funnel-closing font-semibold">Бонус рассчитан</span>
-            <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
-          </CollapsibleTrigger>
-          {isCurrent && canEdit && (
-            <Button
-              type="button"
-              onClick={() => onAdvance?.()}
-              className="h-[38px] rounded-[10px] px-4 text-sm"
-            >
-              Следующий этап
-              <ArrowRight className="size-3.5" />
-            </Button>
-          )}
-        </div>
-        <CollapsibleContent className="flex flex-col gap-5">
-          <div className="h-px w-full bg-[#F0F0F0]" />
-
-          <Collapsible defaultOpen className="flex flex-col gap-4">
-            <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
-              <span className="font-medium text-[#454545]">
-                Бонус: Продажная часть (основной блок)
-              </span>
-              <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
-                <div className="flex min-w-0 flex-col gap-4">
-                  {rows.map((row) => (
-                    <ArticleRow
-                      key={`${row.block}-${row.kind}`}
-                      row={row}
-                      editable={editable}
-                      onBonusChange={handleBonusChange}
-                    />
-                  ))}
-                </div>
-                <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
-                  <StageField label="Данные подтверждены руководителем">
-                    <ReadonlyBox value={dataConfirmedBy} source="system" />
-                  </StageField>
-                  <StageField label="Итоговый бонус">
-                    <ReadonlyBox value={formatMoney(totalBonus)} source="system" />
-                  </StageField>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+    <StageBlockShell
+      shell={{
+        showStageHeader: presentation.showStageHeader,
+        stageCollapsible: presentation.stageCollapsible,
+        showAdvanceButton: presentation.showAdvanceButton,
+      }}
+      isCurrent={isCurrent}
+      canShowAdvance={canEdit}
+      headerTitle="Бонус рассчитан"
+      headerColorClass="text-funnel-closing"
+      onAdvance={() => onAdvance?.()}
+    >
+      <Collapsible defaultOpen className="flex flex-col gap-4">
+        <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
+          <span className="font-medium text-[#454545]">Бонус: Продажная часть (основной блок)</span>
+          <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="flex min-w-0 flex-col gap-4">
+              {rows.map((row) => (
+                <ArticleRow
+                  key={`${row.block}-${row.kind}`}
+                  row={row}
+                  editable={editable}
+                  onBonusChange={handleBonusChange}
+                />
+              ))}
+            </div>
+            <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
+              <StageField label="Данные подтверждены руководителем">
+                <ReadonlyBox value={dataConfirmedBy} source="system" />
+              </StageField>
+              <StageField label="Итоговый бонус">
+                <ReadonlyBox value={formatMoney(totalBonus)} source="system" />
+              </StageField>
+            </div>
+          </div>
         </CollapsibleContent>
-      </div>
-    </Collapsible>
+      </Collapsible>
+    </StageBlockShell>
   )
 }

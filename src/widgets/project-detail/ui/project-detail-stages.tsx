@@ -7,6 +7,10 @@ import {
 } from '@/entities/project'
 import type { StageFlow } from '@/features/advance-stage'
 import { useProjectTab } from '@/features/project-tabs'
+import {
+  presentationFromTab,
+  STAGE_PRESENTATION,
+} from '@/widgets/project-detail/lib/stage-presentation'
 import { ProjectStageSection } from '@/widgets/project-stage-section'
 
 /** Этапы с финансовыми блоками (Продажная часть / Расходы / Бонус) — видны во вкладке «Экономика». */
@@ -18,9 +22,7 @@ const ECONOMICS_STAGES = new Set<ProjectStage>([
 
 function FunnelHeader({ funnel }: { funnel: StageFunnel }) {
   const color = funnel === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  return (
-    <div className={`${color} text-sm font-semibold`}>{FUNNEL_LABELS[funnel]}</div>
-  )
+  return <div className={`${color} text-sm font-semibold`}>{FUNNEL_LABELS[funnel]}</div>
 }
 
 interface ProjectDetailStagesProps {
@@ -31,6 +33,7 @@ interface ProjectDetailStagesProps {
 export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps) {
   const [tab] = useProjectTab()
   const economicsOnly = tab === 'economics'
+  const presentation = STAGE_PRESENTATION[presentationFromTab(tab)]
 
   const closing: ProjectStage[] = []
   const preproject: ProjectStage[] = []
@@ -41,6 +44,7 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
   }
 
   const sharedProps = {
+    presentation,
     project,
     onAdvance: flow.advance,
     onPatchValues: flow.patchCurrentStageValues,
@@ -54,7 +58,7 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
 
   return (
     <div className="flex w-full flex-col gap-4">
-      {closing.length > 0 && <FunnelHeader funnel="closing" />}
+      {presentation.showFunnelHeaders && closing.length > 0 && <FunnelHeader funnel="closing" />}
       {[...closing].reverse().map((stage) => (
         <ProjectStageSection
           key={stage}
@@ -64,7 +68,9 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
           {...sharedProps}
         />
       ))}
-      {preproject.length > 0 && <FunnelHeader funnel="pre_project" />}
+      {presentation.showFunnelHeaders && preproject.length > 0 && (
+        <FunnelHeader funnel="pre_project" />
+      )}
       {[...preproject].reverse().map((stage) => (
         <ProjectStageSection
           key={stage}

@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, Plus, Trash2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
 import {
@@ -17,13 +17,14 @@ import {
 import type { ProjectStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
+import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 import { cn } from '@/shared/lib/utils'
-import { Button } from '@/shared/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { Input } from '@/shared/ui/input'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
+import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
 
 type Source = 'manager' | 'system'
@@ -165,6 +166,7 @@ function SubsectionHeader({ title }: { title: string }) {
 }
 
 interface FinanceBlockWithBacklineProps {
+  presentation: StagePresentationConfig
   stage: ProjectStage
   headerTitle: string
   headerColorClass: string
@@ -183,6 +185,7 @@ interface FinanceBlockWithBacklineProps {
 }
 
 export function FinanceBlockWithBackline({
+  presentation,
   stage,
   headerTitle,
   headerColorClass,
@@ -200,7 +203,7 @@ export function FinanceBlockWithBackline({
 }: FinanceBlockWithBacklineProps) {
   const role = useUserRole()
   const canEdit = canEditStage(stage, role)
-  const editable = canEdit && isCurrent
+  const editable = !presentation.readOnly && canEdit && isCurrent
   const backlineAdded = articles.backline !== null
 
   const totalSales = projectTotal(articles, 'sales')
@@ -224,152 +227,140 @@ export function FinanceBlockWithBackline({
   }
 
   return (
-    <Collapsible defaultOpen className="w-full">
-      <div className="flex flex-col gap-5 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
-            <span className="font-medium text-[#454545]">
-              {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
-            </span>
-            <span className={cn('font-semibold', headerColorClass)}>{headerTitle}</span>
-            <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
-          </CollapsibleTrigger>
-          {isCurrent && canEdit && (
-            <Button
-              type="button"
-              onClick={() => onAdvance?.()}
-              className="h-[38px] rounded-[10px] px-4 text-sm"
-            >
-              Следующий этап
-              <ArrowRight className="size-3.5" />
-            </Button>
-          )}
-        </div>
-        <CollapsibleContent className="flex flex-col gap-5">
-          <div className="h-px w-full bg-[#F0F0F0]" />
+    <StageBlockShell
+      shell={{
+        showStageHeader: presentation.showStageHeader,
+        stageCollapsible: presentation.stageCollapsible,
+        showAdvanceButton: presentation.showAdvanceButton,
+      }}
+      isCurrent={isCurrent}
+      canShowAdvance={canEdit}
+      headerTitle={headerTitle}
+      headerColorClass={headerColorClass}
+      onAdvance={onAdvance}
+    >
+      <div className="flex flex-col gap-5">
+        <Collapsible defaultOpen className="flex flex-col gap-4">
+          <SubsectionHeader title={`${subsectionTitlePrefix}Продажная часть (основной блок)`} />
+          <CollapsibleContent>
+            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+              {[0, 1, 2, 3].flatMap((rowIdx) => {
+                const left = MAIN_LEFT[rowIdx]
+                const right = MAIN_RIGHT[rowIdx]
+                const slot =
+                  rowIdx === 0 ? (
+                    <StageField key="tax-rate" label="Единый % налога" required>
+                      {editable ? (
+                        <PercentInput value={taxRate} onCommit={onTaxRateChange} />
+                      ) : (
+                        <ReadonlyBox
+                          value={taxRate > 0 ? formatPercent(taxRate) : '—'}
+                          source="manager"
+                        />
+                      )}
+                    </StageField>
+                  ) : rowIdx === 1 ? (
+                    <SimpleField
+                      key="tax-amount"
+                      label="Сумма налога"
+                      value={formatMoney(tax)}
+                      source="system"
+                    />
+                  ) : rowIdx === 2 ? (
+                    <DualField
+                      key="totals"
+                      a={{ label: 'Итого', value: formatMoney(mainTotal) }}
+                      b={{
+                        label: 'Итого с налогом',
+                        value: formatMoney(mainTotal + tax),
+                      }}
+                    />
+                  ) : editable ? (
+                    <ActionField key="action">
+                      {backlineAdded ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="text-funnel-closing border-funnel-closing/40 bg-funnel-closing/10 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
+                        >
+                          <Plus className="size-3.5 rotate-45" />
+                          Бэклайн добавлен
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={onToggleBackline}
+                          className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-sm font-medium"
+                        >
+                          <Plus className="size-3.5" />
+                          Добавить бэклайн
+                        </button>
+                      )}
+                    </ActionField>
+                  ) : null
+                return [renderArticleRow('main', left), renderArticleRow('main', right), slot]
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
+        {backlineAdded && (
           <Collapsible defaultOpen className="flex flex-col gap-4">
-            <SubsectionHeader title={`${subsectionTitlePrefix}Продажная часть (основной блок)`} />
+            <SubsectionHeader title={`${subsectionTitlePrefix}Бэклайн (дополнительный блок)`} />
             <CollapsibleContent>
               <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                {[0, 1, 2, 3].flatMap((rowIdx) => {
-                  const left = MAIN_LEFT[rowIdx]
-                  const right = MAIN_RIGHT[rowIdx]
+                {[0, 1, 2].flatMap((rowIdx) => {
+                  const left = BACKLINE_LEFT[rowIdx]
+                  const right = BACKLINE_RIGHT[rowIdx]
                   const slot =
                     rowIdx === 0 ? (
-                      <StageField key="tax-rate" label="Единый % налога" required>
-                        {editable ? (
-                          <PercentInput value={taxRate} onCommit={onTaxRateChange} />
-                        ) : (
-                          <ReadonlyBox
-                            value={taxRate > 0 ? formatPercent(taxRate) : '—'}
-                            source="manager"
-                          />
-                        )}
-                      </StageField>
-                    ) : rowIdx === 1 ? (
                       <SimpleField
-                        key="tax-amount"
-                        label="Сумма налога"
-                        value={formatMoney(tax)}
+                        key="bl-total"
+                        label="Итого бэклайн"
+                        value={formatMoney(backlineTotal)}
                         source="system"
                       />
-                    ) : rowIdx === 2 ? (
-                      <DualField
-                        key="totals"
-                        a={{ label: 'Итого', value: formatMoney(mainTotal) }}
-                        b={{
-                          label: 'Итого с налогом',
-                          value: formatMoney(mainTotal + tax),
-                        }}
-                      />
-                    ) : editable ? (
-                      <ActionField key="action">
-                        {backlineAdded ? (
-                          <button
-                            type="button"
-                            disabled
-                            className="text-funnel-closing border-funnel-closing/40 bg-funnel-closing/10 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
-                          >
-                            <Plus className="size-3.5 rotate-45" />
-                            Бэклайн добавлен
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={onToggleBackline}
-                            className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-sm font-medium"
-                          >
-                            <Plus className="size-3.5" />
-                            Добавить бэклайн
-                          </button>
-                        )}
+                    ) : rowIdx === 1 && editable ? (
+                      <ActionField key="bl-action">
+                        <button
+                          type="button"
+                          onClick={onToggleBackline}
+                          className="inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                        >
+                          <Trash2 className="size-3.5" />
+                          Удалить бэклайн
+                        </button>
                       </ActionField>
                     ) : null
-                  return [renderArticleRow('main', left), renderArticleRow('main', right), slot]
+                  return [
+                    renderArticleRow('backline', left),
+                    renderArticleRow('backline', right),
+                    slot,
+                  ]
                 })}
               </div>
             </CollapsibleContent>
           </Collapsible>
+        )}
 
-          {backlineAdded && (
-            <Collapsible defaultOpen className="flex flex-col gap-4">
-              <SubsectionHeader title={`${subsectionTitlePrefix}Бэклайн (дополнительный блок)`} />
-              <CollapsibleContent>
-                <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                  {[0, 1, 2].flatMap((rowIdx) => {
-                    const left = BACKLINE_LEFT[rowIdx]
-                    const right = BACKLINE_RIGHT[rowIdx]
-                    const slot =
-                      rowIdx === 0 ? (
-                        <SimpleField
-                          key="bl-total"
-                          label="Итого бэклайн"
-                          value={formatMoney(backlineTotal)}
-                          source="system"
-                        />
-                      ) : rowIdx === 1 && editable ? (
-                        <ActionField key="bl-action">
-                          <button
-                            type="button"
-                            onClick={onToggleBackline}
-                            className="inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                          >
-                            <Trash2 className="size-3.5" />
-                            Удалить бэклайн
-                          </button>
-                        </ActionField>
-                      ) : null
-                    return [
-                      renderArticleRow('backline', left),
-                      renderArticleRow('backline', right),
-                      slot,
-                    ]
-                  })}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
-
-          <div className="flex flex-col gap-4">
-            <span className="text-sm font-medium text-[#454545]">Информация</span>
-            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {infoExtras}
-              <SimpleField
-                label="Статус перевёл менеджер"
-                value={record?.enteredBy ?? '—'}
-                source="system"
-              />
-              <SimpleField
-                label="Дата перехода в статус"
-                value={formatRecordDate(record?.enteredAt) ?? '—'}
-                source="system"
-              />
-            </div>
+        <div className="flex flex-col gap-4">
+          <span className="text-sm font-medium text-[#454545]">Информация</span>
+          <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
+            {infoExtras}
+            <SimpleField
+              label="Статус перевёл менеджер"
+              value={record?.enteredBy ?? '—'}
+              source="system"
+            />
+            <SimpleField
+              label="Дата перехода в статус"
+              value={formatRecordDate(record?.enteredAt) ?? '—'}
+              source="system"
+            />
           </div>
-        </CollapsibleContent>
+        </div>
       </div>
-    </Collapsible>
+    </StageBlockShell>
   )
 }
 
