@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 
-import type { ProjectBackOrigin } from '@/entities/project'
+import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
   EMPTY_COLUMN_FILTERS,
   filterProjectsTable,
@@ -30,6 +31,7 @@ interface OutsideMagBoardProps {
 export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const [search, setSearch] = useState('')
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
+  const [returnTarget, setReturnTarget] = useState<Project | null>(null)
 
   const query = useOutsideMagTableQuery(listDateParams, {
     enabled: !isOutsideMagMocksEnabled,
@@ -80,9 +82,20 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
           isFetchingNextPage={isFetchingNextPage}
           onLoadMore={fetchNextPage}
           backOrigin={OUTSIDE_MAG_BACK}
-          renderRowAction={() => <ReturnFromOutsideMagButton />}
+          renderRowAction={(project) => (
+            <ReturnFromOutsideMagButton onClick={() => setReturnTarget(project)} />
+          )}
         />
       </div>
+
+      <ReturnProjectFromOutsideMagDialog
+        open={returnTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setReturnTarget(null)
+        }}
+        projectId={returnTarget?.id ?? ''}
+        projectTitle={returnTarget?.title}
+      />
     </div>
   )
 }
