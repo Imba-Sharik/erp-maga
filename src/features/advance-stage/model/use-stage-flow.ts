@@ -100,12 +100,8 @@ export function useStageFlow({
   )
   const [taxRate, setTaxRateState] = useState<number>(() => initialDraft?.taxRate ?? 0)
 
-  // Рефы для сохранения финансового черновика при уходе со страницы.
+  // Финансы трогали в этой сессии — гейт для сохранения черновика (не на маунте).
   const financeDirtyRef = useRef(false)
-  const currentStageRef = useRef(currentStage)
-  const articlesRef = useRef(articles)
-  const taxRateRef = useRef(taxRate)
-  const authorIdRef = useRef(currentUser.id)
 
   const currentIndex = ALL_STAGE_ORDER.indexOf(currentStage)
 
@@ -253,14 +249,6 @@ export function useStageFlow({
     }))
   }, [])
 
-  // Держим рефы синхронными с состоянием — они читаются при размонтировании.
-  useEffect(() => {
-    currentStageRef.current = currentStage
-    articlesRef.current = articles
-    taxRateRef.current = taxRate
-    authorIdRef.current = currentUser.id
-  })
-
   // Протухший черновик (этап проекта сменился где-то ещё) — удаляем.
   useEffect(() => {
     if (projectId === undefined) return
@@ -270,21 +258,19 @@ export function useStageFlow({
     }
   }, [projectId, initialStage, currentUser.id])
 
-  // Уход со страницы: сохраняем финансовый черновик, если статьи/налог трогали.
+  // Живое сохранение финансового черновика — при каждом изменении статей/налога.
+  // Так черновик переживает и переход по SPA, и перезагрузку страницы (F5).
   useEffect(() => {
-    return () => {
-      if (projectId === undefined || !financeDirtyRef.current) return
-      const stage = currentStageRef.current
-      if (!FINANCE_DRAFT_STAGES.has(stage)) return
-      stageDraftActions.save(projectId, {
-        stage,
-        authorId: authorIdRef.current,
-        articles: articlesRef.current,
-        taxRate: taxRateRef.current,
-        savedAt: new Date().toISOString(),
-      })
-    }
-  }, [projectId])
+    if (projectId === undefined || !financeDirtyRef.current) return
+    if (!FINANCE_DRAFT_STAGES.has(currentStage)) return
+    stageDraftActions.save(projectId, {
+      stage: currentStage,
+      authorId: currentUser.id,
+      articles,
+      taxRate,
+      savedAt: new Date().toISOString(),
+    })
+  }, [articles, taxRate, currentStage, projectId, currentUser.id])
 
   return {
     currentStage,

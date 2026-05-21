@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
@@ -96,39 +96,29 @@ export function StageSectionCurrent({
     mode: 'onSubmit',
   })
 
-  // Черновик: при уходе со страницы с недозаполненной формой сохраняем введённое.
-  // submittedRef — нажали ли «Следующий этап» (тогда черновик не нужен).
-  const submittedRef = useRef(false)
-
+  // Черновик: при каждом изменении формы пишем введённое в стор.
+  // Так черновик переживает и переход по SPA, и перезагрузку страницы (F5):
+  // unmount-эффекты при перезагрузке не вызываются, а живое сохранение — да.
   useEffect(() => {
-    return () => {
-      if (submittedRef.current) return
-      const values = form.getValues() as Record<string, unknown>
-      const base = defaults as Record<string, unknown>
-      const changed = fields.some((f) => (values[f.name] ?? '') !== (base[f.name] ?? ''))
-      if (!changed) return
-      stageDraftActions.save(project.id, {
-        stage,
-        authorId: currentUser.id,
-        values: values as Partial<StageFormData>,
-        savedAt: new Date().toISOString(),
-      })
-    }
-    // Срабатывает только при размонтировании; project/stage/form/fields стабильны.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const submitStage = form.handleSubmit((values) =>
-    onAdvance?.(values as Partial<StageFormData>),
-  )
-
-  const handleAdvance = () => {
-    submittedRef.current = true
-    // Валидация не прошла — снимаем флаг: недозаполненную форму всё равно сохраняем в черновик.
-    void submitStage().then(() => {
-      if (Object.keys(form.formState.errors).length > 0) submittedRef.current = false
+    const sub = form.watch((values) => {
+      if (!canEdit) return
+      const draftValues = values as Record<string, unknown>
+      const hasContent = fields.some((f) => Boolean(draftValues[f.name]))
+      if (hasContent) {
+        stageDraftActions.save(project.id, {
+          stage,
+          authorId: currentUser.id,
+          values: draftValues as Partial<StageFormData>,
+          savedAt: new Date().toISOString(),
+        })
+      } else {
+        stageDraftActions.clear(project.id, currentUser.id)
+      }
     })
-  }
+    return () => sub.unsubscribe()
+  }, [form, fields, canEdit, project.id, stage, currentUser.id])
+
+  const handleAdvance = form.handleSubmit((values) => onAdvance?.(values as Partial<StageFormData>))
 
   const renderField = (f: StageFieldConfig) => {
     if (f.source === 'system' || !canEdit) {
