@@ -2,7 +2,8 @@ openapi: 3.0.3
 info:
   title: MAG Backend API
   version: 1.0.0
-  description: REST API v1 (JWT).
+  description: REST API v1 (JWT). WebSocket — extension `x-mag-websocket`, компоненты
+    `Ws*`.
 paths:
   /api/v1/auth/token/:
     post:
@@ -10,31 +11,37 @@ paths:
       description: |-
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
+      summary: Получить JWT (email + password)
       tags:
-        - auth
+      - auth
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmailTokenObtainPairRequest'
+              $ref: '#/components/schemas/TokenObtainRequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/EmailTokenObtainPairRequest'
+              $ref: '#/components/schemas/TokenObtainRequestRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/EmailTokenObtainPairRequest'
+              $ref: '#/components/schemas/TokenObtainRequestRequest'
         required: true
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+          description: ''
   /api/v1/auth/token/refresh/:
     post:
       operationId: auth_token_refresh_create
       description: |-
         Takes a refresh type JSON web token and returns an access type JSON web
         token if the refresh token is valid.
+      summary: Обновить access-токен
       tags:
-        - auth
+      - auth
       requestBody:
         content:
           application/json:
@@ -52,7 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenRefresh'
+                $ref: '#/components/schemas/TokenRefreshResponse'
           description: ''
   /api/v1/auth/token/verify/:
     post:
@@ -60,8 +67,9 @@ paths:
       description: |-
         Takes a token and indicates if it is valid.  This view provides no
         information about a token's fitness for a particular use.
+      summary: Проверить токен
       tags:
-        - auth
+      - auth
       requestBody:
         content:
           application/json:
@@ -77,6 +85,233 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/halls/hall-manager-assignments/:
+    get:
+      operationId: halls_manager_assignments_list
+      summary: Матрица зал/лофт → менеджер MAG
+      tags:
+      - halls
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+    post:
+      operationId: halls_manager_assignments_create
+      summary: Создать назначение менеджера
+      tags:
+      - halls
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HallManagerAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HallManagerAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HallManagerAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+  /api/v1/halls/hall-manager-assignments/{id}/:
+    get:
+      operationId: halls_manager_assignments_retrieve
+      summary: Назначение менеджера
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - halls
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+    put:
+      operationId: halls_manager_assignments_update
+      summary: Заменить назначение
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - halls
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HallManagerAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HallManagerAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HallManagerAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+    patch:
+      operationId: halls_manager_assignments_partial_update
+      summary: Изменить назначение
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - halls
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHallManagerAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHallManagerAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHallManagerAssignmentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+    delete:
+      operationId: halls_manager_assignments_destroy
+      summary: Удалить назначение
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - halls
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/halls/halls/:
+    get:
+      operationId: halls_halls_list
+      summary: Справочник залов
+      tags:
+      - halls
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Hall'
+          description: ''
+  /api/v1/halls/lofts/:
+    get:
+      operationId: halls_lofts_list
+      summary: Справочник лофтов
+      tags:
+      - halls
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Loft'
+          description: ''
+  /api/v1/notifications/:
+    get:
+      operationId: notifications_list
+      description: До 100 записей, без пагинации.
+      summary: Список уведомлений текущего пользователя
+      parameters:
+      - in: query
+        name: unread_only
+        schema:
+          type: boolean
+        description: 1 / true / yes — только непрочитанные
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/mark-read/:
+    post:
+      operationId: notifications_mark_read_create
+      summary: Отметить уведомления прочитанными
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationMarkReadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationMarkReadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationMarkReadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkedReadResponse'
+          description: ''
   /api/v1/projects/:
     get:
       operationId: projects_list
@@ -84,70 +319,100 @@ paths:
         plum_status, plum_status__in. Пагинация: limit, offset.'
       summary: Список проектов
       parameters:
-        - in: query
-          name: event_date_after
-          schema:
-            type: string
-            format: date
-          description: event_date >= (ISO yyyy-MM-dd)
-        - in: query
-          name: event_date_before
-          schema:
-            type: string
-            format: date
-          description: event_date <= (ISO yyyy-MM-dd)
-        - in: query
-          name: limit
-          schema:
-            type: integer
-        - in: query
-          name: offset
-          schema:
-            type: integer
-        - in: query
-          name: ordering
-          schema:
-            type: string
-        - in: query
-          name: plum_status
-          schema:
-            type: integer
-          description: Статус мероприятия в Plum (число)
-        - in: query
-          name: plum_status__in
-          schema:
-            type: string
-          description: Несколько статусов Plum через запятую
-        - in: query
-          name: stage
-          schema:
-            type: string
-            enum:
-              - archived
-              - bonus_approved
-              - bonus_calculated
-              - calculation_prepared
-              - closed
-              - contract_signed
-              - data_confirmed
-              - documents_confirmed
-              - event_held
-              - expenses_entered
-              - feedback_received
-              - out_of_mag_scope
-              - plum_request
-              - primary_contact_done
-              - ready_to_event
-          description: Фильтр по одной стадии (для колонок канбана)
-        - in: query
-          name: stage__in
-          schema:
-            type: string
-          description: Несколько стадий через запятую
+      - in: query
+        name: event_date_after
+        schema:
+          type: string
+          format: date
+        description: event_date >= (ISO yyyy-MM-dd)
+      - in: query
+        name: event_date_before
+        schema:
+          type: string
+          format: date
+        description: event_date <= (ISO yyyy-MM-dd)
+      - in: query
+        name: hall_loft
+        schema:
+          type: string
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: mag_manager
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
+        name: ordering
+        schema:
+          type: string
+      - in: query
+        name: out_of_mag_reason
+        schema:
+          type: string
+      - in: query
+        name: plum_status
+        schema:
+          type: integer
+        description: Статус мероприятия в Plum (число)
+      - in: query
+        name: plum_status__in
+        schema:
+          type: string
+        description: Несколько статусов Plum через запятую
+      - in: query
+        name: stage
+        schema:
+          type: string
+          enum:
+          - archived
+          - bonus_approved
+          - bonus_calculated
+          - calculation_prepared
+          - closed
+          - contract_signed
+          - data_confirmed
+          - documents_confirmed
+          - event_held
+          - expenses_entered
+          - feedback_received
+          - out_of_mag_scope
+          - plum_request
+          - primary_contact_done
+          - ready_to_event
+        description: Фильтр по одной стадии (для колонок канбана)
+      - in: query
+        name: stage__in
+        schema:
+          type: string
+        description: Несколько стадий через запятую
+      - in: query
+        name: transferred_at_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: transferred_at_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: transferred_by
+        schema:
+          type: integer
+      - in: query
+        name: venue
+        schema:
+          type: string
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -161,7 +426,7 @@ paths:
         — сегодня, если event_date не передан. Доступ: менеджер MAG, руководитель.'
       summary: Создать проект вручную
       tags:
-        - projects
+      - projects
       requestBody:
         content:
           application/json:
@@ -183,7 +448,7 @@ paths:
               $ref: '#/components/schemas/ProjectCreateRequest'
         required: true
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '201':
           content:
@@ -196,15 +461,15 @@ paths:
       operationId: projects_retrieve
       summary: Карточка проекта
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -212,29 +477,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectDetailSchema'
           description: ''
-    put:
-      operationId: projects_update
+    patch:
+      operationId: projects_partial_update
+      summary: Переназначить менеджера MAG (lead/admin)
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectRequest'
+              $ref: '#/components/schemas/PatchedProjectMagManagerUpdateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ProjectRequest'
+              $ref: '#/components/schemas/PatchedProjectMagManagerUpdateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ProjectRequest'
+              $ref: '#/components/schemas/PatchedProjectMagManagerUpdateRequest'
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -242,178 +508,272 @@ paths:
               schema:
                 $ref: '#/components/schemas/Project'
           description: ''
-    patch:
-      operationId: projects_partial_update
-      summary: Обновить клиентские поля
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-      tags:
-        - projects
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedProjectRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedProjectRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedProjectRequest'
-      security:
-        - jwtAuth: []
-      responses:
-        '200':
+        '403':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/projects/{id}/backline/:
     post:
       operationId: projects_backline_create
+      summary: Добавить бэклайн
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
-        '200':
-          description: No response body
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BacklineCreatedSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
     delete:
       operationId: projects_backline_destroy
+      summary: Удалить бэклайн
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '204':
-          description: No response body
+          description: Бэклайн удалён
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/documents/:
     patch:
       operationId: projects_documents_partial_update
+      summary: Обновить статусы документов
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDocumentsUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDocumentsUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDocumentsUpdateRequest'
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineStateSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/expenses/:
     patch:
       operationId: projects_expenses_partial_update
+      summary: Обновить блок расходов
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExpenseBlockUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExpenseBlockUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExpenseBlockUpdateRequest'
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineStateSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/pipeline/:
     get:
       operationId: projects_pipeline_retrieve
+      summary: Состояние воронки проекта
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineStateSchema'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/sales/:
     get:
       operationId: projects_sales_retrieve
+      summary: Блок продаж (итоги)
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesTotalsSchema'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
     patch:
       operationId: projects_sales_partial_update
+      summary: Обновить блок продаж
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSalesBlockUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSalesBlockUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSalesBlockUpdateRequest'
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesTotalsSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/transition/:
     post:
       operationId: projects_transition_create
-      description: POST /transition/ — alias; предпочтительно /transitions/.
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-      tags:
-        - projects
-      security:
-        - jwtAuth: []
-      responses:
-        '200':
-          description: No response body
-  /api/v1/projects/{id}/transitions/:
-    post:
-      operationId: projects_transitions_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
         Тело плоское: `{ to_stage, ...поля }`. См. docs/api/stages.md.'
       summary: Переход на следующий этап
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - projects
+      - projects
       requestBody:
         content:
           application/json:
@@ -453,12 +813,12 @@ paths:
                   to_stage: event_held
                   tax_rate: 10
                   articles:
-                    - block: main
-                      kind: equipment
-                      sales: 1500000
-                    - block: main
-                      kind: personnel
-                      sales: 350000
+                  - block: main
+                    kind: equipment
+                    sales: 1500000
+                  - block: main
+                    kind: personnel
+                    sales: 350000
                 summary: ready_to_event → event_held
               Предпроект→OutOfMagScope:
                 value:
@@ -482,12 +842,12 @@ paths:
                   to_stage: documents_confirmed
                   expenses_comment: Расходы сверены с бухгалтерией
                   articles:
-                    - block: main
-                      kind: equipment
-                      expense: 800000
-                    - block: main
-                      kind: personnel
-                      expense: 200000
+                  - block: main
+                    kind: equipment
+                    expense: 800000
+                  - block: main
+                    kind: personnel
+                    expense: 200000
                 summary: expenses_entered → documents_confirmed
               DocumentsConfirmed→DataConfirmed:
                 value:
@@ -509,9 +869,9 @@ paths:
                 value:
                   to_stage: bonus_approved
                   articles:
-                    - block: main
-                      kind: equipment
-                      bonus_amount: 70000
+                  - block: main
+                    kind: equipment
+                    bonus_amount: 70000
                 summary: bonus_calculated → bonus_approved
               BonusApproved→Closed:
                 value:
@@ -529,7 +889,7 @@ paths:
               $ref: '#/components/schemas/ProjectTransitionRequest'
         required: true
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -549,14 +909,212 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+  /api/v1/projects/{id}/transitions/:
+    post:
+      operationId: projects_transitions_create
+      description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
+        Тело плоское: `{ to_stage, ...поля }`. См. docs/api/stages.md.'
+      summary: Переход на следующий этап
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectTransitionRequest'
+            examples:
+              PlumRequest→PrimaryContactDone:
+                value:
+                  to_stage: primary_contact_done
+                  client_company: ООО Ромашка
+                  phone: '+79991234567'
+                  contact_person: Иван Иванов
+                  email: ivan@example.com
+                summary: plum_request → primary_contact_done
+              PrimaryContactDone→CalculationPrepared:
+                value:
+                  to_stage: calculation_prepared
+                  contact_comment: Созвонились, ждём ТЗ
+                  contact_channel: phone
+                summary: primary_contact_done → calculation_prepared
+              CalculationPrepared→ContractSigned:
+                value:
+                  to_stage: contract_signed
+                  calculation_comment: Смета согласована с клиентом
+                summary: calculation_prepared → contract_signed
+              ContractSigned→ReadyToEvent:
+                value:
+                  to_stage: ready_to_event
+                  contract_type: with_vat
+                  contract_number: MAG-2026-042
+                  contract_date: '2026-05-01'
+                  legal_entity: ООО MAG
+                  contract_comment: Договор на площадке
+                summary: contract_signed → ready_to_event
+              ReadyToEvent→EventHeld:
+                value:
+                  to_stage: event_held
+                  tax_rate: 10
+                  articles:
+                  - block: main
+                    kind: equipment
+                    sales: 1500000
+                  - block: main
+                    kind: personnel
+                    sales: 350000
+                summary: ready_to_event → event_held
+              Предпроект→OutOfMagScope:
+                value:
+                  to_stage: out_of_mag_scope
+                  reason: event_cancelled
+                  comment: Клиент отменил дату
+                summary: предпроект → out_of_mag_scope
+              OutOfMagScope→ReturnFromOutOfMag:
+                value:
+                  to_stage: return_from_out_of_mag
+                  target_stage: calculation_prepared
+                  comment: Вернули в работу
+                summary: out_of_mag_scope → return_from_out_of_mag
+              EventHeld→ExpensesEntered:
+                value:
+                  to_stage: expenses_entered
+                  post_event_comment: Мероприятие прошло без замечаний
+                summary: event_held → expenses_entered
+              ExpensesEntered→DocumentsConfirmed:
+                value:
+                  to_stage: documents_confirmed
+                  expenses_comment: Расходы сверены с бухгалтерией
+                  articles:
+                  - block: main
+                    kind: equipment
+                    expense: 800000
+                  - block: main
+                    kind: personnel
+                    expense: 200000
+                summary: expenses_entered → documents_confirmed
+              DocumentsConfirmed→DataConfirmed:
+                value:
+                  to_stage: data_confirmed
+                  project_docs_status: present
+                  sublease_docs_status: not_required
+                  staff_receipts_status: present
+                summary: documents_confirmed → data_confirmed
+              FeedbackReceived→DataConfirmed(legacy):
+                value:
+                  to_stage: data_confirmed
+                summary: feedback_received → data_confirmed (legacy)
+              DataConfirmed→BonusCalculated:
+                value:
+                  to_stage: bonus_calculated
+                  data_confirmed_status: confirmed
+                summary: data_confirmed → bonus_calculated
+              BonusCalculated→BonusApproved:
+                value:
+                  to_stage: bonus_approved
+                  articles:
+                  - block: main
+                    kind: equipment
+                    bonus_amount: 70000
+                summary: bonus_calculated → bonus_approved
+              BonusApproved→Closed:
+                value:
+                  to_stage: closed
+                summary: bonus_approved → closed
+              RejectData(откатДанных):
+                value:
+                  to_stage: reject_data
+                summary: reject_data (откат данных)
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectTransitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectTransitionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/projects/calendar/:
+    get:
+      operationId: projects_calendar_list
+      description: Без пагинации. Исключает out_of_mag_scope.
+      summary: Календарь проектов за период
+      parameters:
+      - in: query
+        name: event_date_after
+        schema:
+          type: string
+      - in: query
+        name: event_date_before
+        schema:
+          type: string
+      - in: query
+        name: mag_manager
+        schema:
+          type: integer
+      - in: query
+        name: month
+        schema:
+          type: integer
+      - in: query
+        name: year
+        schema:
+          type: integer
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCalendarResponseSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/legal-entities/:
     get:
       operationId: projects_legal_entities_list
       summary: Справочник юрлиц MAG
       tags:
-        - projects
+      - projects
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -566,14 +1124,229 @@ paths:
                 items:
                   $ref: '#/components/schemas/LegalEntity'
           description: ''
+  /api/v1/projects/out-of-mag/:
+    get:
+      operationId: projects_out_of_mag_list
+      description: 'Доступ: lead, admin. Без пагинации.'
+      summary: Список проектов «Вне контура MAG»
+      parameters:
+      - in: query
+        name: event_date_after
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: event_date_before
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: hall_loft
+        schema:
+          type: string
+      - in: query
+        name: mag_manager
+        schema:
+          type: integer
+      - in: query
+        name: ordering
+        schema:
+          type: string
+      - in: query
+        name: out_of_mag_reason
+        schema:
+          type: string
+      - in: query
+        name: stage
+        schema:
+          type: string
+          enum:
+          - archived
+          - bonus_approved
+          - bonus_calculated
+          - calculation_prepared
+          - closed
+          - contract_signed
+          - data_confirmed
+          - documents_confirmed
+          - event_held
+          - expenses_entered
+          - feedback_received
+          - out_of_mag_scope
+          - plum_request
+          - primary_contact_done
+          - ready_to_event
+        description: |-
+          * `plum_request` - Заявка из Plum
+          * `primary_contact_done` - Первичный контакт выполнен
+          * `calculation_prepared` - Расчёт подготовлен
+          * `contract_signed` - Договор подписан
+          * `ready_to_event` - Готов к проведению
+          * `event_held` - Мероприятие проведено
+          * `expenses_entered` - Расходы внесены
+          * `documents_confirmed` - Документы подтверждены
+          * `feedback_received` - Обратная связь по проекту получена
+          * `data_confirmed` - Данные подтверждены
+          * `bonus_calculated` - Бонус рассчитан
+          * `bonus_approved` - Бонус утверждён
+          * `closed` - Проект закрыт
+          * `archived` - Архив
+          * `out_of_mag_scope` - Вне контура MAG
+      - in: query
+        name: transferred_at_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: transferred_at_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: transferred_by
+        schema:
+          type: integer
+      - in: query
+        name: venue
+        schema:
+          type: string
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutOfMagProject'
+          description: ''
+  /api/v1/users/:
+    get:
+      operationId: users_list
+      description: 'Доступ: lead, admin. Без пагинации.'
+      summary: Список пользователей
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - accountant
+          - admin
+          - lead
+          - manager_mag
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserList'
+          description: ''
+  /api/v1/users/{id}/:
+    get:
+      operationId: users_retrieve
+      summary: Пользователь
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAdmin'
+          description: ''
+    put:
+      operationId: users_update
+      summary: Обновить пользователя (только is_active)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBlockRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserBlockRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserBlockRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAdmin'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      summary: Блокировка / разблокировка пользователя
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserBlockRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserBlockRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserBlockRequestRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAdmin'
+          description: ''
   /api/v1/users/me/:
     get:
       operationId: users_me_retrieve
       summary: Текущий пользователь
       tags:
-        - users
+      - users
       security:
-        - jwtAuth: []
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -583,108 +1356,139 @@ paths:
           description: ''
 components:
   schemas:
-    BlockEnum:
-      enum:
-        - main
-        - backline
-      type: string
-      description: |-
-        * `main` - main
-        * `backline` - backline
-    ContactChannelEnum:
-      enum:
-        - messenger
-        - phone
-        - meeting
-      type: string
-      description: |-
-        * `messenger` - messenger
-        * `phone` - phone
-        * `meeting` - meeting
-    ContractTypeEnum:
-      enum:
-        - with_vat
-        - without_vat
-      type: string
-      description: |-
-        * `with_vat` - С НДС
-        * `without_vat` - Без НДС
-    DataConfirmedStatusEnum:
-      enum:
-        - confirmed
-        - rejected
-      type: string
-      description: |-
-        * `confirmed` - confirmed
-        * `rejected` - rejected
-    EmailTokenObtainPairRequest:
+    BacklineCreatedSchema:
       type: object
       properties:
-        email:
+        id:
+          type: integer
+      required:
+      - id
+    DocumentStatusItemRequest:
+      type: object
+      properties:
+        document_type:
+          enum:
+          - project_closing
+          - subrent_closing
+          - staff_receipts
           type: string
-          writeOnly: true
-          minLength: 1
-        password:
+          description: |-
+            * `project_closing` - Закрывающие по проекту
+            * `subrent_closing` - Закрывающие по субаренде
+            * `staff_receipts` - Расписки персоналу
+          x-spec-enum-id: f856e394deb3d17e
+        status:
           type: string
-          writeOnly: true
           minLength: 1
       required:
-        - email
-        - password
-    KindEnum:
-      enum:
-        - equipment
-        - personnel
-        - sublease
-        - transport
-        - consumables
-        - tm
-        - internet
-        - screen
-      type: string
-      description: |-
-        * `equipment` - equipment
-        * `personnel` - personnel
-        * `sublease` - sublease
-        * `transport` - transport
-        * `consumables` - consumables
-        * `tm` - tm
-        * `internet` - internet
-        * `screen` - screen
-    LastActiveStageEnum:
-      enum:
-        - plum_request
-        - primary_contact_done
-        - calculation_prepared
-        - contract_signed
-        - ready_to_event
-        - event_held
-        - expenses_entered
-        - documents_confirmed
-        - feedback_received
-        - data_confirmed
-        - bonus_calculated
-        - bonus_approved
-        - closed
-        - archived
-        - out_of_mag_scope
-      type: string
-      description: |-
-        * `plum_request` - Заявка из Plum
-        * `primary_contact_done` - Первичный контакт выполнен
-        * `calculation_prepared` - Расчёт подготовлен
-        * `contract_signed` - Договор подписан
-        * `ready_to_event` - Готов к проведению
-        * `event_held` - Мероприятие проведено
-        * `expenses_entered` - Расходы внесены
-        * `documents_confirmed` - Документы подтверждены
-        * `feedback_received` - Обратная связь по проекту получена
-        * `data_confirmed` - Данные подтверждены
-        * `bonus_calculated` - Бонус рассчитан
-        * `bonus_approved` - Бонус утверждён
-        * `closed` - Проект закрыт
-        * `archived` - Архив
-        * `out_of_mag_scope` - Вне контура MAG
+      - document_type
+      - status
+    Hall:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plum_id:
+          type: integer
+          readOnly: true
+          title: ID в Plum
+        name:
+          type: string
+          readOnly: true
+          title: Название
+        loft_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        loft_name:
+          type: string
+          readOnly: true
+          nullable: true
+        synced_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Последняя синхронизация
+      required:
+      - id
+      - loft_id
+      - loft_name
+      - name
+      - plum_id
+      - synced_at
+    HallManagerAssignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        hall:
+          type: integer
+          title: Зал
+        hall_name:
+          type: string
+          readOnly: true
+        loft:
+          type: integer
+          nullable: true
+          title: Лофт
+          description: Пусто — назначение по залу без уточнения лофта
+        loft_name:
+          type: string
+          readOnly: true
+          nullable: true
+        manager:
+          type: integer
+          title: Менеджер MAG
+        manager_email:
+          type: string
+          format: email
+          readOnly: true
+        manager_full_name:
+          type: string
+          readOnly: true
+        updated_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Кто обновил
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - hall
+      - hall_name
+      - id
+      - loft_name
+      - manager
+      - manager_email
+      - manager_full_name
+      - updated_at
+      - updated_by
+    HallManagerAssignmentRequest:
+      type: object
+      properties:
+        hall:
+          type: integer
+          title: Зал
+        loft:
+          type: integer
+          nullable: true
+          title: Лофт
+          description: Пусто — назначение по залу без уточнения лофта
+        manager:
+          type: integer
+          title: Менеджер MAG
+      required:
+      - hall
+      - manager
     LegalEntity:
       type: object
       properties:
@@ -721,17 +1525,168 @@ components:
           type: boolean
           title: Активно
       required:
-        - id
-        - inn
-        - name
-    NullEnum:
-      enum:
-        - null
+      - id
+      - inn
+      - name
+    Loft:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        plum_id:
+          type: integer
+          readOnly: true
+          title: ID в Plum
+        name:
+          type: string
+          readOnly: true
+          title: Название
+        synced_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Последняя синхронизация
+      required:
+      - id
+      - name
+      - plum_id
+      - synced_at
+    MarkedReadResponse:
+      type: object
+      properties:
+        marked_read:
+          type: integer
+      required:
+      - marked_read
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event_type:
+          enum:
+          - project_created
+          - stage_changed
+          - out_of_mag
+          - bonus_approved
+          - data_rejected
+          - manager_assigned
+          - other
+          type: string
+          description: |-
+            * `project_created` - Новый проект
+            * `stage_changed` - Смена стадии
+            * `out_of_mag` - Вне контура MAG
+            * `bonus_approved` - Бонус утверждён
+            * `data_rejected` - Данные не приняты
+            * `manager_assigned` - Назначен менеджер
+            * `other` - Прочее
+          x-spec-enum-id: f29f49d66022e657
+          readOnly: true
+          title: Тип события
+        title:
+          type: string
+          readOnly: true
+          title: Заголовок
+        message:
+          type: string
+          readOnly: true
+          title: Текст
+        payload:
+          readOnly: true
+          title: Данные
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Прочитано
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Создано
+      required:
+      - created_at
+      - event_type
+      - id
+      - message
+      - payload
+      - read_at
+      - title
+    NotificationMarkReadRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: Пусто — отметить все непрочитанные
+    OutOfMagProject:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event_name:
+          type: string
+          title: Название мероприятия
+          maxLength: 500
+        event_date:
+          type: string
+          format: date
+          title: Дата мероприятия
+        hall_loft:
+          type: string
+          title: Зал / лофт
+          maxLength: 2000
+        venue:
+          type: string
+          title: Площадка
+          maxLength: 2000
+        mag_manager:
+          type: string
+          readOnly: true
+        plum_lofthall_manager:
+          type: string
+          title: Менеджер LOFT HALL
+          maxLength: 1000
+        stage_from:
+          type: string
+          nullable: true
+          readOnly: true
+        out_of_mag_reason:
+          type: string
+          nullable: true
+          readOnly: true
+        out_of_mag_transferred_at:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        out_of_mag_transferred_by:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - event_date
+      - event_name
+      - hall_loft
+      - id
+      - mag_manager
+      - out_of_mag_reason
+      - out_of_mag_transferred_at
+      - out_of_mag_transferred_by
+      - stage_from
+      - venue
     PaginatedProjectList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -750,26 +1705,121 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
-    PatchedProjectRequest:
+    PatchedDocumentsUpdateRequest:
       type: object
       properties:
-        client_company:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentStatusItemRequest'
+    PatchedExpenseBlockUpdateRequest:
+      type: object
+      properties:
+        equipment:
           type: string
-          title: Клиент / название компании (редактируемое)
-          maxLength: 500
-        contact_person:
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        personnel:
           type: string
-          title: Контактное лицо (редактируемое)
-          maxLength: 500
-        phone:
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        subrent:
           type: string
-          title: Телефон (редактируемый)
-          maxLength: 64
-        email:
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        transport:
           type: string
-          format: email
-          title: Email (редактируемый)
-          maxLength: 254
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        internet:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        consumables:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        screen:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        tm:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        tax:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        comment:
+          type: string
+        backline:
+          type: object
+          additionalProperties: {}
+    PatchedHallManagerAssignmentRequest:
+      type: object
+      properties:
+        hall:
+          type: integer
+          title: Зал
+        loft:
+          type: integer
+          nullable: true
+          title: Лофт
+          description: Пусто — назначение по залу без уточнения лофта
+        manager:
+          type: integer
+          title: Менеджер MAG
+    PatchedProjectMagManagerUpdateRequest:
+      type: object
+      properties:
+        mag_manager_id:
+          type: integer
+          nullable: true
+    PatchedSalesBlockUpdateRequest:
+      type: object
+      properties:
+        equipment:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        personnel:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        subrent:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        transport:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        internet:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        consumables:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        screen:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        tm:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        contract_tax_percent:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+    PatchedUserBlockRequestRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
     PipelineError:
       type: object
       properties:
@@ -780,7 +1830,112 @@ components:
           description: forbidden | validation | invalid_transition | not_implemented
             | ...
       required:
-        - detail
+      - detail
+    PipelineStateSchema:
+      type: object
+      properties:
+        stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+        stage_label:
+          type: string
+        last_active_stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          - null
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+          nullable: true
+        allowed_transitions:
+          type: array
+          items:
+            type: string
+        can_edit_client:
+          type: boolean
+        can_edit_sales:
+          type: boolean
+        can_edit_expenses:
+          type: boolean
+        data_rejected:
+          type: boolean
+        was_not_ready_for_event:
+          type: boolean
+        blocks:
+          description: primary_contact, calculation, contract, sales, expenses, documents,
+            feedback
+      required:
+      - allowed_transitions
+      - blocks
+      - can_edit_client
+      - can_edit_expenses
+      - can_edit_sales
+      - data_rejected
+      - last_active_stage
+      - stage
+      - stage_label
+      - was_not_ready_for_event
     Project:
       type: object
       properties:
@@ -906,14 +2061,100 @@ components:
           format: email
           readOnly: true
           nullable: true
+        sales_total:
+          type: number
+          format: double
+          readOnly: true
+        net_profit_ex_tax:
+          type: number
+          format: double
+          readOnly: true
+        final_bonus:
+          type: number
+          format: double
+          readOnly: true
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Дата переноса в архив
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Дата закрытия проекта
         stage:
-          allOf:
-            - $ref: '#/components/schemas/StageEnum'
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
           title: Стадия проекта
         last_active_stage:
-          allOf:
-            - $ref: '#/components/schemas/LastActiveStageEnum'
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
           title: Последняя активная стадия
         source_payload:
@@ -933,45 +2174,74 @@ components:
           format: date-time
           readOnly: true
       required:
-        - city
-        - city_label
-        - created_at
-        - event_date
-        - event_format
-        - event_format_label
-        - event_name
-        - event_type
-        - event_type_label
-        - hall_loft
-        - id
-        - last_active_stage
-        - mag_manager
-        - mag_manager_email
-        - plum_card_url
-        - plum_client_company
-        - plum_comment
-        - plum_contact_person
-        - plum_email
-        - plum_event_id
-        - plum_event_payload_hash
-        - plum_event_status
-        - plum_event_status_label
-        - plum_last_synced_at
-        - plum_lofthall_manager
-        - plum_mag_manager
-        - plum_phone
-        - source_payload
-        - stage
-        - sync_error
-        - updated_at
-        - venue
+      - city
+      - city_label
+      - created_at
+      - event_date
+      - event_format
+      - event_format_label
+      - event_name
+      - event_type
+      - event_type_label
+      - final_bonus
+      - hall_loft
+      - id
+      - last_active_stage
+      - mag_manager
+      - mag_manager_email
+      - net_profit_ex_tax
+      - plum_card_url
+      - plum_client_company
+      - plum_comment
+      - plum_contact_person
+      - plum_email
+      - plum_event_id
+      - plum_event_payload_hash
+      - plum_event_status
+      - plum_event_status_label
+      - plum_last_synced_at
+      - plum_lofthall_manager
+      - plum_mag_manager
+      - plum_phone
+      - sales_total
+      - source_payload
+      - stage
+      - sync_error
+      - updated_at
+      - venue
     ProjectArticle:
       type: object
       properties:
         block:
-          $ref: '#/components/schemas/BlockEnum'
+          enum:
+          - main
+          - backline
+          type: string
+          description: |-
+            * `main` - main
+            * `backline` - backline
+          x-spec-enum-id: 98d91df2231f6375
         kind:
-          $ref: '#/components/schemas/KindEnum'
+          enum:
+          - equipment
+          - personnel
+          - sublease
+          - transport
+          - consumables
+          - tm
+          - internet
+          - screen
+          type: string
+          description: |-
+            * `equipment` - equipment
+            * `personnel` - personnel
+            * `sublease` - sublease
+            * `transport` - transport
+            * `consumables` - consumables
+            * `tm` - tm
+            * `internet` - internet
+            * `screen` - screen
+          x-spec-enum-id: 7da2049aa7a59506
         sales:
           type: number
           format: double
@@ -989,12 +2259,98 @@ components:
           type: number
           format: double
       required:
-        - block
-        - bonus_percent
-        - expense
-        - kind
-        - percent
-        - sales
+      - block
+      - bonus_percent
+      - expense
+      - kind
+      - percent
+      - sales
+    ProjectCalendarItemSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+        event_name:
+          type: string
+        event_date:
+          type: string
+          format: date
+        hall_loft:
+          type: string
+        plum_lofthall_manager:
+          type: string
+        stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+        stage_label:
+          type: string
+        mag_manager:
+          type: string
+        mag_manager_id:
+          type: integer
+          nullable: true
+      required:
+      - event_date
+      - event_name
+      - hall_loft
+      - id
+      - mag_manager
+      - mag_manager_id
+      - plum_lofthall_manager
+      - stage
+      - stage_label
+    ProjectCalendarResponseSchema:
+      type: object
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectCalendarItemSchema'
+      required:
+      - count
+      - period_end
+      - period_start
+      - results
     ProjectCreateRequest:
       type: object
       description: |-
@@ -1026,7 +2382,7 @@ components:
           type: string
           format: date
       required:
-        - event_type
+      - event_type
     ProjectDetailSchema:
       type: object
       description: GET /projects/{id}/ и ответ POST /transitions/.
@@ -1132,12 +2488,76 @@ components:
           readOnly: true
           nullable: true
         stage:
-          allOf:
-            - $ref: '#/components/schemas/StageEnum'
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
         last_active_stage:
-          allOf:
-            - $ref: '#/components/schemas/LastActiveStageEnum'
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
         source_payload:
           readOnly: true
@@ -1156,11 +2576,19 @@ components:
           type: string
           readOnly: true
         contact_channel:
+          enum:
+          - messenger
+          - phone
+          - meeting
+          - null
+          type: string
+          description: |-
+            * `messenger` - messenger
+            * `phone` - phone
+            * `meeting` - meeting
+          x-spec-enum-id: 5ad378c7d8f0e856
           readOnly: true
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/ContactChannelEnum'
-            - $ref: '#/components/schemas/NullEnum'
         contacted_at:
           type: string
           format: date-time
@@ -1168,7 +2596,7 @@ components:
           nullable: true
         primary_contact_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         calculation_comment:
@@ -1181,15 +2609,21 @@ components:
           nullable: true
         calculation_prepared_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         contract_type:
+          enum:
+          - with_vat
+          - without_vat
+          - null
+          type: string
+          description: |-
+            * `with_vat` - С НДС
+            * `without_vat` - Без НДС
+          x-spec-enum-id: caed3a61f1a3718c
           readOnly: true
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/ContractTypeEnum'
-            - $ref: '#/components/schemas/NullEnum'
         contract_number:
           type: string
           readOnly: true
@@ -1211,7 +2645,7 @@ components:
           nullable: true
         contract_signed_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         ready_to_event_at:
@@ -1221,7 +2655,7 @@ components:
           nullable: true
         ready_to_event_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         event_held_at:
@@ -1231,7 +2665,7 @@ components:
           nullable: true
         event_held_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         event_readiness:
@@ -1247,7 +2681,7 @@ components:
           nullable: true
         expenses_entered_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         expenses_comment:
@@ -1260,15 +2694,23 @@ components:
           nullable: true
         documents_confirmed_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         project_docs_status:
+          enum:
+          - present
+          - absent
+          - not_required
+          - null
+          type: string
+          description: |-
+            * `present` - present
+            * `absent` - absent
+            * `not_required` - not_required
+          x-spec-enum-id: 4d8653aa82093a09
           readOnly: true
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/StaffReceiptsStatusEnum'
-            - $ref: '#/components/schemas/NullEnum'
         project_docs_confirmed_at:
           type: string
           format: date-time
@@ -1276,15 +2718,23 @@ components:
           nullable: true
         project_docs_confirmed_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         sublease_docs_status:
+          enum:
+          - present
+          - absent
+          - not_required
+          - null
+          type: string
+          description: |-
+            * `present` - present
+            * `absent` - absent
+            * `not_required` - not_required
+          x-spec-enum-id: 4d8653aa82093a09
           readOnly: true
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/StaffReceiptsStatusEnum'
-            - $ref: '#/components/schemas/NullEnum'
         sublease_docs_confirmed_at:
           type: string
           format: date-time
@@ -1292,15 +2742,23 @@ components:
           nullable: true
         sublease_docs_confirmed_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         staff_receipts_status:
+          enum:
+          - present
+          - absent
+          - not_required
+          - null
+          type: string
+          description: |-
+            * `present` - present
+            * `absent` - absent
+            * `not_required` - not_required
+          x-spec-enum-id: 4d8653aa82093a09
           readOnly: true
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/StaffReceiptsStatusEnum'
-            - $ref: '#/components/schemas/NullEnum'
         staff_receipts_confirmed_at:
           type: string
           format: date-time
@@ -1308,15 +2766,21 @@ components:
           nullable: true
         staff_receipts_confirmed_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         data_confirmed_status:
+          enum:
+          - confirmed
+          - rejected
+          - null
+          type: string
+          description: |-
+            * `confirmed` - confirmed
+            * `rejected` - rejected
+          x-spec-enum-id: c1eb6617a9413969
           readOnly: true
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/DataConfirmedStatusEnum'
-            - $ref: '#/components/schemas/NullEnum'
         data_confirmation_at:
           type: string
           format: date-time
@@ -1324,7 +2788,7 @@ components:
           nullable: true
         data_confirmation_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         data_confirmed_at:
@@ -1334,7 +2798,7 @@ components:
           nullable: true
         data_confirmed_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         data_rejected:
@@ -1350,7 +2814,7 @@ components:
           nullable: true
         bonus_calculated_set_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         net_profit_total:
@@ -1372,7 +2836,7 @@ components:
           nullable: true
         bonus_approved_by:
           allOf:
-            - $ref: '#/components/schemas/UserBrief'
+          - $ref: '#/components/schemas/UserBrief'
           readOnly: true
           nullable: true
         closed_at:
@@ -1423,121 +2887,101 @@ components:
             $ref: '#/components/schemas/ProjectArticle'
           readOnly: true
       required:
-        - articles
-        - bonus_approved_at
-        - bonus_approved_by
-        - bonus_approved_total
-        - bonus_calculated_at
-        - bonus_calculated_set_by
-        - bonus_calculated_total
-        - calculation_comment
-        - calculation_prepared_at
-        - calculation_prepared_set_by
-        - city
-        - city_label
-        - client_company
-        - closed_at
-        - closing_funnel_entered_at
-        - contact_channel
-        - contact_comment
-        - contact_person
-        - contacted_at
-        - contract_comment
-        - contract_date
-        - contract_number
-        - contract_signed_at
-        - contract_signed_set_by
-        - contract_type
-        - created_at
-        - data_confirmation_at
-        - data_confirmation_by
-        - data_confirmed_at
-        - data_confirmed_set_by
-        - data_confirmed_status
-        - data_rejected
-        - documents_confirmed_at
-        - documents_confirmed_set_by
-        - email
-        - event_date
-        - event_format
-        - event_format_label
-        - event_held_at
-        - event_held_set_by
-        - event_name
-        - event_readiness
-        - event_type
-        - event_type_label
-        - expenses_backline_total
-        - expenses_comment
-        - expenses_entered_at
-        - expenses_entered_set_by
-        - expenses_main_total
-        - expenses_project_total
-        - hall_loft
-        - id
-        - last_active_stage
-        - legal_entity
-        - mag_manager
-        - mag_manager_email
-        - net_profit_total
-        - phone
-        - plum_card_url
-        - plum_client_company
-        - plum_comment
-        - plum_contact_person
-        - plum_email
-        - plum_event_id
-        - plum_event_payload_hash
-        - plum_event_status
-        - plum_event_status_label
-        - plum_last_synced_at
-        - plum_lofthall_manager
-        - plum_mag_manager
-        - plum_phone
-        - post_event_comment
-        - primary_contact_set_by
-        - project_docs_confirmed_at
-        - project_docs_confirmed_by
-        - project_docs_status
-        - ready_to_event_at
-        - ready_to_event_set_by
-        - sales_backline_total
-        - sales_main_total
-        - sales_project_total
-        - source_payload
-        - staff_receipts_confirmed_at
-        - staff_receipts_confirmed_by
-        - staff_receipts_status
-        - stage
-        - sublease_docs_confirmed_at
-        - sublease_docs_confirmed_by
-        - sublease_docs_status
-        - sync_error
-        - tax_amount
-        - tax_rate
-        - updated_at
-        - venue
-        - was_not_ready_for_event
-    ProjectRequest:
-      type: object
-      properties:
-        client_company:
-          type: string
-          title: Клиент / название компании (редактируемое)
-          maxLength: 500
-        contact_person:
-          type: string
-          title: Контактное лицо (редактируемое)
-          maxLength: 500
-        phone:
-          type: string
-          title: Телефон (редактируемый)
-          maxLength: 64
-        email:
-          type: string
-          format: email
-          title: Email (редактируемый)
-          maxLength: 254
+      - articles
+      - bonus_approved_at
+      - bonus_approved_by
+      - bonus_approved_total
+      - bonus_calculated_at
+      - bonus_calculated_set_by
+      - bonus_calculated_total
+      - calculation_comment
+      - calculation_prepared_at
+      - calculation_prepared_set_by
+      - city
+      - city_label
+      - client_company
+      - closed_at
+      - closing_funnel_entered_at
+      - contact_channel
+      - contact_comment
+      - contact_person
+      - contacted_at
+      - contract_comment
+      - contract_date
+      - contract_number
+      - contract_signed_at
+      - contract_signed_set_by
+      - contract_type
+      - created_at
+      - data_confirmation_at
+      - data_confirmation_by
+      - data_confirmed_at
+      - data_confirmed_set_by
+      - data_confirmed_status
+      - data_rejected
+      - documents_confirmed_at
+      - documents_confirmed_set_by
+      - email
+      - event_date
+      - event_format
+      - event_format_label
+      - event_held_at
+      - event_held_set_by
+      - event_name
+      - event_readiness
+      - event_type
+      - event_type_label
+      - expenses_backline_total
+      - expenses_comment
+      - expenses_entered_at
+      - expenses_entered_set_by
+      - expenses_main_total
+      - expenses_project_total
+      - hall_loft
+      - id
+      - last_active_stage
+      - legal_entity
+      - mag_manager
+      - mag_manager_email
+      - net_profit_total
+      - phone
+      - plum_card_url
+      - plum_client_company
+      - plum_comment
+      - plum_contact_person
+      - plum_email
+      - plum_event_id
+      - plum_event_payload_hash
+      - plum_event_status
+      - plum_event_status_label
+      - plum_last_synced_at
+      - plum_lofthall_manager
+      - plum_mag_manager
+      - plum_phone
+      - post_event_comment
+      - primary_contact_set_by
+      - project_docs_confirmed_at
+      - project_docs_confirmed_by
+      - project_docs_status
+      - ready_to_event_at
+      - ready_to_event_set_by
+      - sales_backline_total
+      - sales_main_total
+      - sales_project_total
+      - source_payload
+      - staff_receipts_confirmed_at
+      - staff_receipts_confirmed_by
+      - staff_receipts_status
+      - stage
+      - sublease_docs_confirmed_at
+      - sublease_docs_confirmed_by
+      - sublease_docs_status
+      - sync_error
+      - tax_amount
+      - tax_rate
+      - updated_at
+      - venue
+      - was_not_ready_for_event
     ProjectTransitionRequest:
       type: object
       description: |-
@@ -1545,8 +2989,26 @@ components:
         Обязателен to_stage; остальные поля — по таблице этапов (см. stages.md).
       properties:
         to_stage:
-          allOf:
-            - $ref: '#/components/schemas/ToStageEnum'
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          - reject_data
+          - return_from_out_of_mag
+          type: string
+          x-spec-enum-id: 69e1ee0236235aae
           description: |-
             Следующая стадия или действие: reject_data, return_from_out_of_mag
 
@@ -1568,8 +3030,26 @@ components:
             * `reject_data` - Отклонить данные (откат)
             * `return_from_out_of_mag` - Вернуть из «Вне контура MAG»
         target_stage:
-          allOf:
-            - $ref: '#/components/schemas/TargetStageEnum'
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          - reject_data
+          - return_from_out_of_mag
+          type: string
+          x-spec-enum-id: 69e1ee0236235aae
           description: |-
             Alias для to_stage (обязателен при return_from_out_of_mag)
 
@@ -1607,8 +3087,12 @@ components:
           type: string
           minLength: 1
         contact_channel:
-          allOf:
-            - $ref: '#/components/schemas/ContactChannelEnum'
+          enum:
+          - messenger
+          - phone
+          - meeting
+          type: string
+          x-spec-enum-id: 5ad378c7d8f0e856
           description: |-
             phone на API = call в БД
 
@@ -1619,7 +3103,14 @@ components:
           type: string
           minLength: 1
         contract_type:
-          $ref: '#/components/schemas/ContractTypeEnum'
+          enum:
+          - with_vat
+          - without_vat
+          type: string
+          description: |-
+            * `with_vat` - С НДС
+            * `without_vat` - Без НДС
+          x-spec-enum-id: caed3a61f1a3718c
         contract_number:
           type: string
           minLength: 1
@@ -1657,173 +3148,135 @@ components:
           type: string
           minLength: 1
         project_docs_status:
-          $ref: '#/components/schemas/StaffReceiptsStatusEnum'
+          enum:
+          - present
+          - absent
+          - not_required
+          type: string
+          description: |-
+            * `present` - present
+            * `absent` - absent
+            * `not_required` - not_required
+          x-spec-enum-id: 4d8653aa82093a09
         sublease_docs_status:
-          $ref: '#/components/schemas/StaffReceiptsStatusEnum'
+          enum:
+          - present
+          - absent
+          - not_required
+          type: string
+          description: |-
+            * `present` - present
+            * `absent` - absent
+            * `not_required` - not_required
+          x-spec-enum-id: 4d8653aa82093a09
         staff_receipts_status:
-          $ref: '#/components/schemas/StaffReceiptsStatusEnum'
+          enum:
+          - present
+          - absent
+          - not_required
+          type: string
+          description: |-
+            * `present` - present
+            * `absent` - absent
+            * `not_required` - not_required
+          x-spec-enum-id: 4d8653aa82093a09
         data_confirmed_status:
-          $ref: '#/components/schemas/DataConfirmedStatusEnum'
+          enum:
+          - confirmed
+          - rejected
+          type: string
+          description: |-
+            * `confirmed` - confirmed
+            * `rejected` - rejected
+          x-spec-enum-id: c1eb6617a9413969
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          enum:
+          - event_cancelled
+          - other_rental
+          - no_equipment
+          type: string
+          description: |-
+            * `event_cancelled` - Отмена мероприятия
+            * `other_rental` - Работает другой прокат
+            * `no_equipment` - Без оборудования
+          x-spec-enum-id: 99127f80ca313c0f
         comment:
           type: string
           minLength: 1
       required:
-        - to_stage
-    ReasonEnum:
-      enum:
-        - event_cancelled
-        - other_rental
-        - no_equipment
-      type: string
-      description: |-
-        * `event_cancelled` - Отмена мероприятия
-        * `other_rental` - Работает другой прокат
-        * `no_equipment` - Без оборудования
-    RoleEnum:
-      enum:
-        - manager
-        - director
-        - accountant
-        - admin
-      type: string
-      description: |-
-        * `manager` - manager
-        * `director` - director
-        * `accountant` - accountant
-        * `admin` - admin
-    StaffReceiptsStatusEnum:
-      enum:
-        - present
-        - absent
-        - not_required
-      type: string
-      description: |-
-        * `present` - present
-        * `absent` - absent
-        * `not_required` - not_required
-    StageEnum:
-      enum:
-        - plum_request
-        - primary_contact_done
-        - calculation_prepared
-        - contract_signed
-        - ready_to_event
-        - event_held
-        - expenses_entered
-        - documents_confirmed
-        - feedback_received
-        - data_confirmed
-        - bonus_calculated
-        - bonus_approved
-        - closed
-        - archived
-        - out_of_mag_scope
-      type: string
-      description: |-
-        * `plum_request` - Заявка из Plum
-        * `primary_contact_done` - Первичный контакт выполнен
-        * `calculation_prepared` - Расчёт подготовлен
-        * `contract_signed` - Договор подписан
-        * `ready_to_event` - Готов к проведению
-        * `event_held` - Мероприятие проведено
-        * `expenses_entered` - Расходы внесены
-        * `documents_confirmed` - Документы подтверждены
-        * `feedback_received` - Обратная связь по проекту получена
-        * `data_confirmed` - Данные подтверждены
-        * `bonus_calculated` - Бонус рассчитан
-        * `bonus_approved` - Бонус утверждён
-        * `closed` - Проект закрыт
-        * `archived` - Архив
-        * `out_of_mag_scope` - Вне контура MAG
-    TargetStageEnum:
-      enum:
-        - plum_request
-        - primary_contact_done
-        - calculation_prepared
-        - contract_signed
-        - ready_to_event
-        - event_held
-        - expenses_entered
-        - documents_confirmed
-        - feedback_received
-        - data_confirmed
-        - bonus_calculated
-        - bonus_approved
-        - closed
-        - archived
-        - out_of_mag_scope
-        - reject_data
-        - return_from_out_of_mag
-      type: string
-      description: |-
-        * `plum_request` - Заявка из Plum
-        * `primary_contact_done` - Первичный контакт выполнен
-        * `calculation_prepared` - Расчёт подготовлен
-        * `contract_signed` - Договор подписан
-        * `ready_to_event` - Готов к проведению
-        * `event_held` - Мероприятие проведено
-        * `expenses_entered` - Расходы внесены
-        * `documents_confirmed` - Документы подтверждены
-        * `feedback_received` - Обратная связь по проекту получена
-        * `data_confirmed` - Данные подтверждены
-        * `bonus_calculated` - Бонус рассчитан
-        * `bonus_approved` - Бонус утверждён
-        * `closed` - Проект закрыт
-        * `archived` - Архив
-        * `out_of_mag_scope` - Вне контура MAG
-        * `reject_data` - Отклонить данные (откат)
-        * `return_from_out_of_mag` - Вернуть из «Вне контура MAG»
-    ToStageEnum:
-      enum:
-        - plum_request
-        - primary_contact_done
-        - calculation_prepared
-        - contract_signed
-        - ready_to_event
-        - event_held
-        - expenses_entered
-        - documents_confirmed
-        - feedback_received
-        - data_confirmed
-        - bonus_calculated
-        - bonus_approved
-        - closed
-        - archived
-        - out_of_mag_scope
-        - reject_data
-        - return_from_out_of_mag
-      type: string
-      description: |-
-        * `plum_request` - Заявка из Plum
-        * `primary_contact_done` - Первичный контакт выполнен
-        * `calculation_prepared` - Расчёт подготовлен
-        * `contract_signed` - Договор подписан
-        * `ready_to_event` - Готов к проведению
-        * `event_held` - Мероприятие проведено
-        * `expenses_entered` - Расходы внесены
-        * `documents_confirmed` - Документы подтверждены
-        * `feedback_received` - Обратная связь по проекту получена
-        * `data_confirmed` - Данные подтверждены
-        * `bonus_calculated` - Бонус рассчитан
-        * `bonus_approved` - Бонус утверждён
-        * `closed` - Проект закрыт
-        * `archived` - Архив
-        * `out_of_mag_scope` - Вне контура MAG
-        * `reject_data` - Отклонить данные (откат)
-        * `return_from_out_of_mag` - Вернуть из «Вне контура MAG»
-    TokenRefresh:
+      - to_stage
+    SalesArticleLineSchema:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        amount:
+          type: string
+        percent:
+          type: string
+      required:
+      - amount
+      - key
+      - label
+      - percent
+    SalesTotalsSchema:
+      type: object
+      properties:
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/SalesArticleLineSchema'
+        backline_articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/SalesArticleLineSchema'
+        contract_tax_percent:
+          type: string
+        subtotal:
+          type: string
+        backline_subtotal:
+          type: string
+        tax_amount:
+          type: string
+        total:
+          type: string
+        total_with_tax:
+          type: string
+      required:
+      - articles
+      - backline_articles
+      - backline_subtotal
+      - contract_tax_percent
+      - subtotal
+      - tax_amount
+      - total
+      - total_with_tax
+    TokenObtainRequestRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    TokenPairResponse:
       type: object
       properties:
         access:
           type: string
-          readOnly: true
         refresh:
           type: string
       required:
-        - access
-        - refresh
+      - access
+      - refresh
     TokenRefreshRequest:
       type: object
       properties:
@@ -1831,7 +3284,14 @@ components:
           type: string
           minLength: 1
       required:
-        - refresh
+      - refresh
+    TokenRefreshResponse:
+      type: object
+      properties:
+        access:
+          type: string
+      required:
+      - access
     TokenVerifyRequest:
       type: object
       properties:
@@ -1840,14 +3300,40 @@ components:
           writeOnly: true
           minLength: 1
       required:
-        - token
+      - token
     TransitionArticleRequest:
       type: object
       properties:
         block:
-          $ref: '#/components/schemas/BlockEnum'
+          enum:
+          - main
+          - backline
+          type: string
+          description: |-
+            * `main` - main
+            * `backline` - backline
+          x-spec-enum-id: 98d91df2231f6375
         kind:
-          $ref: '#/components/schemas/KindEnum'
+          enum:
+          - equipment
+          - personnel
+          - sublease
+          - transport
+          - consumables
+          - tm
+          - internet
+          - screen
+          type: string
+          description: |-
+            * `equipment` - equipment
+            * `personnel` - personnel
+            * `sublease` - sublease
+            * `transport` - transport
+            * `consumables` - consumables
+            * `tm` - tm
+            * `internet` - internet
+            * `screen` - screen
+          x-spec-enum-id: 7da2049aa7a59506
         sales:
           type: string
           format: decimal
@@ -1864,8 +3350,70 @@ components:
           pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
           description: Этап bonus_calculated → bonus_approved (override)
       required:
-        - block
-        - kind
+      - block
+      - kind
+    UserAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          title: Имя пользователя
+          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
+            и символы @/./+/-/_.
+        first_name:
+          type: string
+          readOnly: true
+          title: Имя
+        last_name:
+          type: string
+          readOnly: true
+          title: Фамилия
+        role:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          title: Активный
+          description: Отметьте, если пользователь должен считаться активным. Уберите
+            эту отметку вместо удаления учётной записи.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата регистрации
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - date_joined
+      - email
+      - first_name
+      - id
+      - last_name
+      - role
+      - updated_at
+      - username
+    UserBlockRequestRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+      required:
+      - is_active
     UserBrief:
       type: object
       properties:
@@ -1874,8 +3422,42 @@ components:
         full_name:
           type: string
       required:
-        - full_name
-        - id
+      - full_name
+      - id
+    UserList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          title: Имя
+          maxLength: 150
+        last_name:
+          type: string
+          title: Фамилия
+          maxLength: 150
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          title: Активный
+          description: Отметьте, если пользователь должен считаться активным. Уберите
+            эту отметку вместо удаления учётной записи.
+      required:
+      - email
+      - full_name
+      - id
+      - role
     UserMeSchema:
       type: object
       properties:
@@ -1896,8 +3478,13 @@ components:
           type: string
           readOnly: true
         role:
-          allOf:
-            - $ref: '#/components/schemas/RoleEnum'
+          enum:
+          - manager
+          - director
+          - accountant
+          - admin
+          type: string
+          x-spec-enum-id: 61fb76a44b4d9c03
           readOnly: true
           description: |-
             Роль для UI (manager_mag→manager, lead→director)
@@ -1922,18 +3509,149 @@ components:
           format: date-time
           readOnly: true
       required:
-        - created_at
-        - date_joined
-        - email
-        - first_name
-        - id
-        - is_staff
-        - last_name
-        - role
-        - updated_at
-        - username
+      - created_at
+      - date_joined
+      - email
+      - first_name
+      - id
+      - is_staff
+      - last_name
+      - role
+      - updated_at
+      - username
+    WsNotificationPayload:
+      type: object
+      required:
+      - id
+      - event_type
+      - title
+      - message
+      - payload
+      - created_at
+      properties:
+        id:
+          type: integer
+        event_type:
+          type: string
+          enum:
+          - project_created
+          - stage_changed
+          - out_of_mag
+          - bonus_approved
+          - data_rejected
+          - manager_assigned
+          - other
+        title:
+          type: string
+        message:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    WsClientMessage:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum:
+          - mark_read
+          - ping
+        ids:
+          type: array
+          items:
+            type: integer
+          description: Для mark_read; пусто — все непрочитанные
+    WsServerMessage:
+      oneOf:
+      - $ref: '#/components/schemas/WsConnectedMessage'
+      - $ref: '#/components/schemas/WsNotificationMessage'
+      - $ref: '#/components/schemas/WsMarkedReadMessage'
+      - $ref: '#/components/schemas/WsPongMessage'
+    WsConnectedMessage:
+      type: object
+      required:
+      - type
+      - unread_count
+      - items
+      properties:
+        type:
+          type: string
+          enum:
+          - connected
+        unread_count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WsNotificationPayload'
+    WsNotificationMessage:
+      type: object
+      required:
+      - type
+      - notification
+      properties:
+        type:
+          type: string
+          enum:
+          - notification
+        notification:
+          $ref: '#/components/schemas/WsNotificationPayload'
+    WsMarkedReadMessage:
+      type: object
+      required:
+      - type
+      - count
+      properties:
+        type:
+          type: string
+          enum:
+          - marked_read
+        count:
+          type: integer
+    WsPongMessage:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - pong
   securitySchemes:
     jwtAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+tags:
+- name: auth
+  description: 'JWT: вход, refresh, verify'
+- name: users
+  description: Пользователи и профиль
+- name: projects
+  description: Проекты, воронка, календарь
+- name: halls
+  description: Залы, лофты, матрица менеджеров
+- name: notifications
+  description: Уведомления (REST)
+- name: websocket
+  description: WebSocket-протокол (см. x-mag-websocket)
+x-mag-websocket:
+  notifications:
+    url: ws://{host}/ws/notifications/?token={access_jwt}
+    auth:
+    - 'Query: ?token=<access_jwt>'
+    - 'Header: Authorization: Bearer <access_jwt>'
+    clientSend:
+      $ref: '#/components/schemas/WsClientMessage'
+    serverReceive:
+      $ref: '#/components/schemas/WsServerMessage'
+    notes: 'REST-дубликат: GET /api/v1/notifications/, POST /api/v1/notifications/mark-read/'
