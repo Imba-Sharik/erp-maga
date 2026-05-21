@@ -12,7 +12,11 @@ import {
 const INITIAL_VISIBLE = 25
 const STEP = 25
 
-function columnCountLabel(visible: number, backendTotal: number | undefined, filtersActive: boolean): string {
+function columnCountLabel(
+  visible: number,
+  backendTotal: number | undefined,
+  filtersActive: boolean,
+): string {
   if (backendTotal === undefined) return String(visible)
   if (filtersActive || visible !== backendTotal) return `${visible} / ${backendTotal}`
   return String(backendTotal)
@@ -28,6 +32,7 @@ export interface PipelineKanbanColumnProps {
   onLoadMore?: () => void
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
+  onMoveOutsideMag?: (project: Project) => void
 }
 
 export function PipelineKanbanColumn({
@@ -40,6 +45,7 @@ export function PipelineKanbanColumn({
   onLoadMore,
   hasNextPage,
   isFetchingNextPage,
+  onMoveOutsideMag,
 }: PipelineKanbanColumnProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
 
@@ -86,7 +92,12 @@ export function PipelineKanbanColumn({
           ) : (
             <>
               {visible.map((p) => (
-                <ProjectPipelineCard key={p.id} project={p} backOrigin={backOrigin} />
+                <ProjectPipelineCard
+                  key={p.id}
+                  project={p}
+                  backOrigin={backOrigin}
+                  onMoveOutsideMag={onMoveOutsideMag}
+                />
               ))}
               {showMoreButton && (
                 <button

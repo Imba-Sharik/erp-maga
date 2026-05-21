@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 
-import { MOCK_MANAGERS } from '@/entities/manager'
+import { MOCK_MANAGERS, type Manager } from '@/entities/manager'
+import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
 import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
 import { filterManagersTable } from '../lib/filter-managers-table'
@@ -34,6 +35,7 @@ function ManagersTableHeader() {
 
 export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
   const [deletedIds, setDeletedIds] = useState<Set<string>>(() => new Set())
+  const [deleteTarget, setDeleteTarget] = useState<Manager | null>(null)
 
   const managers = useMemo(() => {
     const visible = MOCK_MANAGERS.filter((m) => !deletedIds.has(m.id))
@@ -45,17 +47,29 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
   }
 
   return (
-    <GridTableView
-      minWidth={MANAGERS_TABLE_MIN_WIDTH}
-      gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}
-      header={<ManagersTableHeader />}
-      isEmpty={managers.length === 0}
-      emptyMessage="Менеджеры не найдены."
-      skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
-    >
-      {managers.map((manager) => (
-        <ManagersTableRow key={manager.id} manager={manager} onDelete={handleDelete} />
-      ))}
-    </GridTableView>
+    <>
+      <GridTableView
+        minWidth={MANAGERS_TABLE_MIN_WIDTH}
+        gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}
+        header={<ManagersTableHeader />}
+        isEmpty={managers.length === 0}
+        emptyMessage="Менеджеры не найдены."
+        skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
+      >
+        {managers.map((manager) => (
+          <ManagersTableRow key={manager.id} manager={manager} onRequestDelete={setDeleteTarget} />
+        ))}
+      </GridTableView>
+
+      <ConfirmDeleteManagerDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
+        managerId={deleteTarget?.id ?? ''}
+        managerName={deleteTarget?.fullName ?? ''}
+        onConfirmed={handleDelete}
+      />
+    </>
   )
 }
