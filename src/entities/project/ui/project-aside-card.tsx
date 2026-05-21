@@ -33,7 +33,7 @@ export function ProjectAsideCard({
       ) : (
         <div className="h-1" />
       )}
-      <div className="divide-y divide-[#F0F0F0]">{children}</div>
+      <div className="divide-y divide-[#F0F0F0] [&>*:last-child]:pb-0">{children}</div>
     </div>
   )
 }

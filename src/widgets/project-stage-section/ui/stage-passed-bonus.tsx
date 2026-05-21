@@ -175,12 +175,12 @@ export function StagePassedBonus({
     <Collapsible defaultOpen className="w-full">
       <div className="flex flex-col gap-5 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CollapsibleTrigger className="flex items-center gap-1.5 text-sm">
+          <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
             <span className="font-medium text-[#454545]">
               {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
             </span>
             <span className="text-funnel-closing font-semibold">Бонус рассчитан</span>
-            <ChevronDown className="text-muted-foreground size-3.5" />
+            <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
           </CollapsibleTrigger>
           {isCurrent && canEdit && (
             <Button
@@ -197,11 +197,11 @@ export function StagePassedBonus({
           <div className="h-px w-full bg-[#F0F0F0]" />
 
           <Collapsible defaultOpen className="flex flex-col gap-4">
-            <CollapsibleTrigger className="flex items-center gap-1.5 text-sm">
+            <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
               <span className="font-medium text-[#454545]">
                 Бонус: Продажная часть (основной блок)
               </span>
-              <ChevronDown className="text-muted-foreground size-3.5" />
+              <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
