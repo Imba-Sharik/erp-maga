@@ -2,6 +2,7 @@ import type { KeyboardEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { GridTableCell, GridTableRow, GridTableRowActionCell } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import {
@@ -13,7 +14,6 @@ import {
 import { getTableGridTemplate } from '../lib/table-columns'
 import { ProjectManagerCell, type ProjectManagerCellProps } from './project-manager-cell'
 import {
-  Cell,
   EmptyTableCell,
   formatTableDate,
   ProjectArchivedAtCell,
@@ -23,9 +23,6 @@ import {
   ProjectTitleCell,
 } from './table-row-cells'
 
-const ROW_NAV_CLASS =
-  'grid w-full cursor-pointer items-center text-left transition-colors hover:bg-[#FAF9F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
-
 function handleRowKeyDown(e: KeyboardEvent<HTMLDivElement>, goToDetail: () => void) {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
@@ -33,8 +30,25 @@ function handleRowKeyDown(e: KeyboardEvent<HTMLDivElement>, goToDetail: () => vo
   }
 }
 
-function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
-  e.stopPropagation()
+interface ProjectTableNavRowProps {
+  gridTemplate: string
+  goToDetail: () => void
+  children: ReactNode
+}
+
+function ProjectTableNavRow({ gridTemplate, goToDetail, children }: ProjectTableNavRowProps) {
+  return (
+    <GridTableRow
+      navigable
+      gridTemplate={gridTemplate}
+      role="button"
+      tabIndex={0}
+      onClick={goToDetail}
+      onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
+    >
+      {children}
+    </GridTableRow>
+  )
 }
 
 export interface ProjectsTableRowManagerProps {
@@ -80,14 +94,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'outside-mag') {
     return (
-      <div
-        className={ROW_NAV_CLASS}
-        style={{ gridTemplateColumns: gridTemplate }}
-        role="button"
-        tabIndex={0}
-        onClick={goToDetail}
-        onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
-      >
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -101,27 +108,14 @@ export function ProjectsTableRow({
           <EmptyTableCell />
           <EmptyTableCell />
         </div>
-        <div
-          className="flex min-h-[44px] items-center justify-center px-2 py-2"
-          onClick={stopRowNavigation}
-          onPointerDown={stopRowNavigation}
-        >
-          {renderRowAction?.(project)}
-        </div>
-      </div>
+        <GridTableRowActionCell>{renderRowAction?.(project)}</GridTableRowActionCell>
+      </ProjectTableNavRow>
     )
   }
 
   if (columnView === 'general') {
     return (
-      <div
-        className={ROW_NAV_CLASS}
-        style={{ gridTemplateColumns: gridTemplate }}
-        role="button"
-        tabIndex={0}
-        onClick={goToDetail}
-        onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
-      >
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -130,25 +124,18 @@ export function ProjectsTableRow({
         <ProjectManagerCell {...managerCellProps} />
         <div className="contents">
           <ProjectStageTableCell stage={project.stage} />
-          <Cell muted>{formatTableDate(project.date)}</Cell>
-          <Cell muted>{project.company || '—'}</Cell>
-          <Cell muted>{project.phone || '—'}</Cell>
-          <Cell muted>{formatTableDate(project.createdAt)}</Cell>
+          <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
+          <GridTableCell muted>{project.company || '—'}</GridTableCell>
+          <GridTableCell muted>{project.phone || '—'}</GridTableCell>
+          <GridTableCell muted>{formatTableDate(project.createdAt)}</GridTableCell>
         </div>
-      </div>
+      </ProjectTableNavRow>
     )
   }
 
   if (columnView === 'closing-general') {
     return (
-      <div
-        className={ROW_NAV_CLASS}
-        style={{ gridTemplateColumns: gridTemplate }}
-        role="button"
-        tabIndex={0}
-        onClick={goToDetail}
-        onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
-      >
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -156,59 +143,45 @@ export function ProjectsTableRow({
         </div>
         <ProjectManagerCell {...managerCellProps} />
         <div className="contents">
-          <Cell muted>{formatTableDate(project.date)}</Cell>
-          <Cell muted>{project.company || '—'}</Cell>
-          <Cell muted>{project.phone || '—'}</Cell>
+          <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
+          <GridTableCell muted>{project.company || '—'}</GridTableCell>
+          <GridTableCell muted>{project.phone || '—'}</GridTableCell>
           <ProjectArchivedAtCell project={project} />
         </div>
-      </div>
+      </ProjectTableNavRow>
     )
   }
 
   if (columnView === 'closing-economics') {
     return (
-      <div
-        className={ROW_NAV_CLASS}
-        style={{ gridTemplateColumns: gridTemplate }}
-        role="button"
-        tabIndex={0}
-        onClick={goToDetail}
-        onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
-      >
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
         <div className="contents">
           <ProjectTitleCell project={project} />
         </div>
         <ProjectManagerCell {...managerCellProps} />
         <div className="contents">
-          <Cell muted>{project.company || '—'}</Cell>
-          <Cell muted>{formatTableMoney(resolveSalesTotal(project))}</Cell>
-          <Cell muted>{formatTableMoney(resolveNetProfitTotal(project))}</Cell>
-          <Cell muted>{formatTableMoney(resolveTotalBonus(project))}</Cell>
+          <GridTableCell muted>{project.company || '—'}</GridTableCell>
+          <GridTableCell muted>{formatTableMoney(resolveSalesTotal(project))}</GridTableCell>
+          <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
+          <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>
         </div>
-      </div>
+      </ProjectTableNavRow>
     )
   }
 
   return (
-    <div
-      className={ROW_NAV_CLASS}
-      style={{ gridTemplateColumns: gridTemplate }}
-      role="button"
-      tabIndex={0}
-      onClick={goToDetail}
-      onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
-    >
+    <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
       <div className="contents">
         <ProjectTitleCell project={project} />
       </div>
       <ProjectManagerCell {...managerCellProps} />
       <div className="contents">
-        <Cell muted>{project.company || '—'}</Cell>
+        <GridTableCell muted>{project.company || '—'}</GridTableCell>
         <ProjectStageTableCell stage={project.stage} />
-        <Cell muted>{formatTableMoney(resolveSalesTotal(project))}</Cell>
-        <Cell muted>{formatTableMoney(resolveNetProfitTotal(project))}</Cell>
-        <Cell muted>{formatTableMoney(resolveTotalBonus(project))}</Cell>
+        <GridTableCell muted>{formatTableMoney(resolveSalesTotal(project))}</GridTableCell>
+        <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
+        <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>
       </div>
-    </div>
+    </ProjectTableNavRow>
   )
 }

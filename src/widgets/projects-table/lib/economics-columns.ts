@@ -1,5 +1,6 @@
 import { ALL_STAGE_ORDER, type Project, type ProjectStage } from '@/entities/project'
-import { formatMoney } from '@/entities/project-articles'
+
+export { formatTableMoney } from '@/shared/lib/format-table-money'
 
 export type ProjectsTableColumnView =
   | 'general'
@@ -17,11 +18,6 @@ function isStageAtLeast(stage: ProjectStage, threshold: ProjectStage): boolean {
   const min = STAGE_INDEX.get(threshold)
   if (current === undefined || min === undefined) return false
   return current >= min
-}
-
-export function formatTableMoney(value: number | null | undefined): string {
-  if (value === null || value === undefined) return '—'
-  return formatMoney(value)
 }
 
 export function resolveSalesTotal(project: Project): number | null {
