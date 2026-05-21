@@ -7,7 +7,7 @@ function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
 export function GridTableRowActionCell({ children }: { children: ReactNode }) {
   return (
     <div
-      className="flex min-h-[44px] items-center justify-center px-2 py-2"
+      className="flex min-h-[44px] min-w-0 items-center justify-center self-center px-1"
       onClick={stopRowNavigation}
       onPointerDown={stopRowNavigation}
     >

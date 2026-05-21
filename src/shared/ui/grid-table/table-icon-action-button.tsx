@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 
 interface TableIconActionButtonProps {
@@ -21,12 +22,15 @@ export function TableIconActionButton({
     <Button
       type="button"
       variant="outline"
-      size="sm"
+      size="icon-sm"
       disabled={disabled}
       title={title}
       aria-label={ariaLabel}
       onClick={onClick}
-      className="h-8 w-8 rounded-[8px] border-none bg-[#f8f8f8] px-2.5 text-[#ACACAC]"
+      className={cn(
+        'cursor-pointer size-8 shrink-0 rounded-[8px] border-none bg-[#f8f8f8] p-0 text-[#ACACAC]',
+        'shadow-none focus-visible:ring-2 focus-visible:ring-ring/50',
+      )}
     >
       {icon}
     </Button>
