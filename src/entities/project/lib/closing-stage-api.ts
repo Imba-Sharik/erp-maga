@@ -1,9 +1,9 @@
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import type { ClosingStage } from '../model/types'
 
 /** Значения `stage` в API для воронки закрытия. */
-export const CLOSING_STAGE_TO_API: Record<ClosingStage, StageEnum> = {
+export const CLOSING_STAGE_TO_API: Record<ClosingStage, ProjectStageEnumKey> = {
   event_held: 'event_held',
   expenses_entered: 'expenses_entered',
   documents_confirmed: 'documents_confirmed',
@@ -13,6 +13,6 @@ export const CLOSING_STAGE_TO_API: Record<ClosingStage, StageEnum> = {
   closed: 'closed',
 }
 
-export function closingStageToApi(stage: ClosingStage): StageEnum {
+export function closingStageToApi(stage: ClosingStage): ProjectStageEnumKey {
   return CLOSING_STAGE_TO_API[stage]
 }

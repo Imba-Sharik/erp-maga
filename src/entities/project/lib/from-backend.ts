@@ -2,7 +2,8 @@ import { formatDistanceToNow, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
+import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import type { Project, ProjectDetail, ProjectEconomics, ProjectStage } from '../model/types'
 
@@ -36,7 +37,7 @@ function hasAnyEconomics(e: ProjectEconomics): boolean {
   )
 }
 
-const STAGE_MAP: Partial<Record<StageEnum, ProjectStage>> = {
+const STAGE_MAP: Partial<Record<ProjectStageEnumKey, ProjectStage>> = {
   plum_request: 'plum_request',
   primary_contact_done: 'primary_contact_done',
   calculation_prepared: 'calculation_prepared',
@@ -70,7 +71,9 @@ function formatLastUpdate(iso: string | undefined): string {
   }
 }
 
-export function mapBackendProject(b: BackendProject): Project | null {
+type BackendProjectListable = BackendProject | ProjectDetailSchema
+
+export function mapBackendProject(b: BackendProjectListable): Project | null {
   const stage = b.stage ? STAGE_MAP[b.stage] : undefined
   if (!stage) return null
 
@@ -111,7 +114,7 @@ export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
   return result
 }
 
-export function mapBackendProjectDetail(b: BackendProject): ProjectDetail | null {
+export function mapBackendProjectDetail(b: ProjectDetailSchema): ProjectDetail | null {
   const base = mapBackendProject(b)
   if (!base) return null
 
