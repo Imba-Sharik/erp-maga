@@ -73,10 +73,7 @@ export function GridTableView({
           </div>
 
           {isLoading ? (
-            <GridTableSkeleton
-              columnCount={skeletonColumnCount ?? 1}
-              gridTemplate={gridTemplate}
-            />
+            <GridTableSkeleton columnCount={skeletonColumnCount ?? 1} gridTemplate={gridTemplate} />
           ) : isError ? (
             <div className="flex h-40 items-center justify-center px-4 text-sm text-red-600">
               {errorMessage}

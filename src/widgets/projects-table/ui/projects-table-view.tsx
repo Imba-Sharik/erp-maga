@@ -7,11 +7,7 @@ import {
   type ProjectBackOrigin,
 } from '@/entities/project'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
-import {
-  GridTableHeaderCell,
-  GridTableHeaderLabel,
-  GridTableView,
-} from '@/shared/ui/grid-table'
+import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'

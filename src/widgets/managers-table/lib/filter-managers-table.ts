@@ -6,10 +6,7 @@ export interface ManagersTableFilter {
   loft: string | null
 }
 
-export function filterManagersTable(
-  managers: Manager[],
-  filter: ManagersTableFilter,
-): Manager[] {
+export function filterManagersTable(managers: Manager[], filter: ManagersTableFilter): Manager[] {
   const search = filter.search.trim().toLowerCase()
 
   return managers.filter((manager) => {

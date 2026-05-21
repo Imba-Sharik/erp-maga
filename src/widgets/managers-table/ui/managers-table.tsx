@@ -1,11 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import { MOCK_MANAGERS } from '@/entities/manager'
-import {
-  GridTableHeaderCell,
-  GridTableHeaderLabel,
-  GridTableView,
-} from '@/shared/ui/grid-table'
+import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
