@@ -166,16 +166,27 @@ const { data, isLoading, error } = useProjectsRetrieve(id!) // kubb-хук
 
 Четыре таба, активный — `Данные о проекте`:
 
-| Tab key     | Содержимое                    | MVP? |
-| ----------- | ----------------------------- | ---- |
-| `data`      | LeftStack со StageSection-ами | ✅   |
-| `economics` | Расчёт по позициям, P&L       | ❌   |
-| `documents` | Файлы: договор, смета, акты   | ❌   |
-| `actions`   | Аудит-лог (кто, что, когда)   | ❌   |
-
-В MVP — заглушки для трёх вкладок (`Coming soon`).
+| Tab key     | Содержимое                                                                                                           | MVP? |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- | ---- |
+| `data`      | LeftStack со StageSection-ами (редактирование по роли на текущем этапе)                                              | ✅   |
+| `economics` | Те же финансовые блоки (`ready_to_event`, `expenses_entered`, `bonus_calculated`), только read-only, без шапки этапа | ✅   |
+| `documents` | Файлы: договор, смета, акты                                                                                          | ❌   |
+| `actions`   | Аудит-лог (кто, что, когда)                                                                                          | ❌   |
 
 Состояние таба — query-параметр `?tab=`. Это даёт shareable URL и сохранение между ререндерами.
+
+### Режим представления (`StagePresentationConfig`)
+
+Вкладка маппится в конфиг в [`widgets/project-detail/lib/stage-presentation.ts`](../../src/widgets/project-detail/lib/stage-presentation.ts) и прокидывается в `ProjectStageSection` → финансовые блоки.
+
+| Режим               | `readOnly` | Шапка этапа | Внешний collapse | CTA «Следующий этап» | Заголовки воронок |
+| ------------------- | ---------- | ----------- | ---------------- | -------------------- | ----------------- |
+| `pipeline` (`data`) | нет        | да          | да               | да                   | да                |
+| `economics`         | да         | нет         | нет              | нет                  | да                |
+
+На `economics` порядок: закрывающая воронка (бонус → расходы), затем предпроектная (продажи). Видны только этапы из `flow.visibleStages`, попадающие в `ECONOMICS_STAGES`.
+
+Оболочка карточки — [`StageBlockShell`](../../src/widgets/project-stage-section/ui/stage-block-shell.tsx). Тело блоков общее с вкладкой «Данные»; отличия — только chrome и `readOnly`.
 
 ## Машина состояний воронки — `useStageFlow`
 
