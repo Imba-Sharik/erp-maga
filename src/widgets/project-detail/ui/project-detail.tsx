@@ -42,8 +42,8 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
       <MoveProjectOutsideMagDialog
         open={outsideMagOpen}
         onOpenChange={setOutsideMagOpen}
-        projectId={project.id}
-        projectTitle={project.title}
+        project={project}
+        redirectOnSuccess="/outside-mag"
       />
     </div>
   )

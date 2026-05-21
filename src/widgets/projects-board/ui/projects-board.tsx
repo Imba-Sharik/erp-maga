@@ -48,8 +48,7 @@ export function ProjectsBoard({ listDateParams }: ProjectsBoardProps) {
         onOpenChange={(open) => {
           if (!open) setOutsideMagTarget(null)
         }}
-        projectId={outsideMagTarget?.id ?? ''}
-        projectTitle={outsideMagTarget?.title}
+        project={outsideMagTarget}
       />
     </div>
   )

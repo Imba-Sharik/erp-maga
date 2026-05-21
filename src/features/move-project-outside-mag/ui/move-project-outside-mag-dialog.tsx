@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
+import type { Project } from '@/entities/project'
 import { OUTSIDE_MAG_REASON_OPTIONS } from '@/entities/project'
 import { Button } from '@/shared/ui/button'
 import {
@@ -31,30 +33,35 @@ type FormValues = z.infer<typeof formSchema>
 export interface MoveProjectOutsideMagDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  projectId: string
-  projectTitle?: string
+  project: Project | null
+  /** После успеха — переход (например `/outside-mag` с деталки). */
+  redirectOnSuccess?: string
 }
 
 export function MoveProjectOutsideMagDialog({
   open,
   onOpenChange,
-  projectId,
-  projectTitle,
+  project,
+  redirectOnSuccess,
 }: MoveProjectOutsideMagDialogProps) {
+  const navigate = useNavigate()
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {} as Partial<FormValues>,
   })
 
-  const { submit, isPending } = useMoveProjectOutsideMag({
+  const { submit, isPending, isError, errorMessage, reset } = useMoveProjectOutsideMag({
     onSuccess: () => {
       onOpenChange(false)
       form.reset()
+      reset()
+      if (redirectOnSuccess) navigate(redirectOnSuccess)
     },
   })
 
   const handleSubmit = (values: FormValues) => {
-    submit({ projectId, reason: values.reason })
+    if (!project) return
+    submit({ project, reason: values.reason })
   }
 
   return (
@@ -62,7 +69,10 @@ export function MoveProjectOutsideMagDialog({
       open={open}
       onOpenChange={(next) => {
         onOpenChange(next)
-        if (!next) form.reset()
+        if (!next) {
+          form.reset()
+          reset()
+        }
       }}
     >
       <DialogContent className="sm:max-w-md" showCloseButton>
@@ -70,7 +80,7 @@ export function MoveProjectOutsideMagDialog({
           <DialogTitle className="font-heading text-[#1B1A17]">
             Перевести во «Вне контура MAG»?
           </DialogTitle>
-          {projectTitle ? <DialogDescription>Проект: {projectTitle}</DialogDescription> : null}
+          {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}
         </DialogHeader>
 
         <Form {...form}>
@@ -99,6 +109,9 @@ export function MoveProjectOutsideMagDialog({
                 </FormItem>
               )}
             />
+            {isError && errorMessage ? (
+              <p className="text-destructive text-sm">{errorMessage}</p>
+            ) : null}
             <DialogFooter className="gap-2 sm:gap-2">
               <Button
                 type="button"
@@ -112,7 +125,7 @@ export function MoveProjectOutsideMagDialog({
               <Button
                 type="submit"
                 className="rounded-[10px] bg-black text-white hover:bg-black/90"
-                disabled={isPending}
+                disabled={isPending || !project}
               >
                 Перевести
               </Button>
