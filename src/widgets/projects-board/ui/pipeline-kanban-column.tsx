@@ -35,6 +35,7 @@ export interface PipelineKanbanColumnProps {
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
   onMoveOutsideMag?: (project: Project) => void
+  onChangeManager?: (project: Project) => void
 }
 
 export function PipelineKanbanColumn({
@@ -48,6 +49,7 @@ export function PipelineKanbanColumn({
   hasNextPage,
   isFetchingNextPage,
   onMoveOutsideMag,
+  onChangeManager,
 }: PipelineKanbanColumnProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
   const drafts = useStageDrafts()
@@ -102,6 +104,7 @@ export function PipelineKanbanColumn({
                   backOrigin={backOrigin}
                   hasDraft={Boolean(drafts[draftKey(p.id, currentUser.id)])}
                   onMoveOutsideMag={onMoveOutsideMag}
+                  onChangeManager={onChangeManager}
                 />
               ))}
               {showMoreButton && (
