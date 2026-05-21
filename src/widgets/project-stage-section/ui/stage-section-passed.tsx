@@ -131,12 +131,12 @@ export function StageSectionPassed({
     <Collapsible defaultOpen className="w-full">
       <div className="flex flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CollapsibleTrigger className="flex items-center gap-1.5 text-sm">
+          <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
             <span className="font-medium text-[#454545]">
               {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
             </span>
             <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
-            <ChevronDown className="text-muted-foreground size-3.5" />
+            <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
           </CollapsibleTrigger>
           {isCurrent && canEdit && (
             <Button
