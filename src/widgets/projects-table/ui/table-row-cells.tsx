@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react'
 import { format, parseISO } from 'date-fns'
 
 import { ProjectStageBadge, type Project, type ProjectStage } from '@/entities/project'
+import { GridTableCell, TABLE_EMPTY } from '@/shared/ui/grid-table'
 
-export const TABLE_EMPTY = '—'
+export { TABLE_EMPTY }
 
 export function formatTableDate(iso: string): string {
   if (!iso) return TABLE_EMPTY
@@ -14,46 +14,30 @@ export function formatTableDate(iso: string): string {
   }
 }
 
-export function Cell({ children, muted }: { children: ReactNode; muted?: boolean }) {
-  return (
-    <div
-      className={`flex min-h-[44px] min-w-0 items-center px-3 py-2 text-sm ${
-        muted ? 'text-[#ACACAC]' : 'text-[#454545]'
-      }`}
-    >
-      {typeof children === 'string' ? (
-        <span className="w-full truncate">{children}</span>
-      ) : (
-        children
-      )}
-    </div>
-  )
-}
-
 export function ProjectTitleCell({ project }: { project: Project }) {
   return (
-    <Cell>
+    <GridTableCell>
       <span className="w-full truncate font-medium text-[#454545]">
         {project.title || TABLE_EMPTY}
       </span>
-    </Cell>
+    </GridTableCell>
   )
 }
 
 export function ProjectLoftCell({ project }: { project: Project }) {
-  return <Cell muted>{project.loft || TABLE_EMPTY}</Cell>
+  return <GridTableCell muted>{project.loft || TABLE_EMPTY}</GridTableCell>
 }
 
 export function ProjectHallCell({ project }: { project: Project }) {
-  return <Cell muted>{project.hall || TABLE_EMPTY}</Cell>
+  return <GridTableCell muted>{project.hall || TABLE_EMPTY}</GridTableCell>
 }
 
 export function EmptyTableCell() {
-  return <Cell muted>{TABLE_EMPTY}</Cell>
+  return <GridTableCell muted>{TABLE_EMPTY}</GridTableCell>
 }
 
 export function ProjectArchivedAtCell({ project }: { project: Project }) {
-  return <Cell muted>{formatTableDate(project.archivedAt ?? '')}</Cell>
+  return <GridTableCell muted>{formatTableDate(project.archivedAt ?? '')}</GridTableCell>
 }
 
 /** Этап в ячейке таблицы: не вылезает за колонку, полный текст в `title`. */
@@ -61,10 +45,10 @@ export function ProjectStageTableCell({ stage }: { stage?: ProjectStage }) {
   if (!stage) return <EmptyTableCell />
 
   return (
-    <Cell>
+    <GridTableCell>
       <div className="w-full min-w-0">
         <ProjectStageBadge stage={stage} truncate />
       </div>
-    </Cell>
+    </GridTableCell>
   )
 }

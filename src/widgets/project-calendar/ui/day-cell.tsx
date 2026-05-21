@@ -51,7 +51,7 @@ export function DayCell({
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
           '@max-[560px]/calendar:gap-0.5 @max-[560px]/calendar:p-1',
-          isSelected && 'border border-[#ADADAD] bg-linear-to-br from-white to-[#D9D9D9]',
+          isSelected && 'bg-linear-to-br from-white to-[#D9D9D9]',
         )}
       >
         <span className="relative inline-flex shrink-0 items-center justify-center">

@@ -6,6 +6,7 @@ import {
   DashboardIcon,
   FolderIcon,
   ListChecksIcon,
+  ManagersControlIcon,
   SettingsIcon,
   OutOfScopeIcon,
 } from '@/shared/assets'
@@ -18,6 +19,7 @@ export type RoleNavItemId =
   | 'projects'
   | 'closing'
   | 'outside-mag'
+  | 'managers'
   | 'notifications'
   | 'settings'
 
@@ -50,6 +52,13 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
     title: 'Вне контура MAG',
     url: '/outside-mag',
     icon: OutOfScopeIcon,
+    roles: ['director'],
+  },
+  {
+    id: 'managers',
+    title: 'Менеджеры',
+    url: '/managers',
+    icon: ManagersControlIcon,
     roles: ['director'],
   },
   { id: 'notifications', title: 'Уведомления', url: '/notifications', icon: BellIcon },

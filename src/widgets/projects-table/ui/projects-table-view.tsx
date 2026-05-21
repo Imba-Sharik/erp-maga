@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { Loader2 } from 'lucide-react'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+import { useCallback, useState, type ReactNode } from 'react'
 
 import {
   ALL_STAGE_LABELS,
@@ -8,9 +6,8 @@ import {
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
-import { Card } from '@/shared/ui/card'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
-import { Skeleton } from '@/shared/ui/skeleton'
+import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
@@ -61,7 +58,6 @@ export function ProjectsTableView({
   backOrigin = DEFAULT_BACK_ORIGIN,
   renderRowAction,
 }: ProjectsTableViewProps) {
-  const sentinelRef = useRef<HTMLDivElement>(null)
   const gridTemplate = getTableGridTemplate(columnView)
   const minWidth = getTableMinWidth(columnView)
   const [managerOverrides, setManagerOverrides] = useState<Record<string, string>>({})
@@ -86,107 +82,70 @@ export function ProjectsTableView({
     setEditingManagerProjectId(null)
   }, [])
 
-  useEffect(() => {
-    const el = sentinelRef.current
-    if (!el || !hasNextPage) return
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) onLoadMore()
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [hasNextPage, onLoadMore])
+  const header =
+    columnView === 'general' ? (
+      <GeneralTableHeader
+        columnFilters={columnFilters}
+        managerOptions={managerOptions}
+        onColumnFilterChange={onColumnFilterChange}
+      />
+    ) : columnView === 'economics' ? (
+      <EconomicsTableHeader
+        columnFilters={columnFilters}
+        managerOptions={managerOptions}
+        onColumnFilterChange={onColumnFilterChange}
+      />
+    ) : columnView === 'closing-general' ? (
+      <ClosingGeneralTableHeader
+        columnFilters={columnFilters}
+        managerOptions={managerOptions}
+        onColumnFilterChange={onColumnFilterChange}
+      />
+    ) : columnView === 'closing-economics' ? (
+      <ClosingEconomicsTableHeader
+        columnFilters={columnFilters}
+        managerOptions={managerOptions}
+        onColumnFilterChange={onColumnFilterChange}
+      />
+    ) : (
+      <OutsideMagTableHeader
+        columnFilters={columnFilters}
+        managerOptions={managerOptions}
+        onColumnFilterChange={onColumnFilterChange}
+      />
+    )
 
   return (
-    <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-visible border-[#B1B1B1] py-0 shadow-none">
-      <OverlayScrollbarsComponent
-        options={{
-          overflow: { x: 'scroll', y: 'scroll' },
-          scrollbars: {
-            visibility: 'auto',
-            autoHide: 'never',
-            autoHideDelay: 800,
-          },
-        }}
-        className="projects-table-scroll-area min-h-0 flex-1"
-      >
-        <div style={{ minWidth }}>
-          <div
-            className="sticky top-0 z-10 grid items-center border-b border-[#D3D3D3] bg-white"
-            style={{ gridTemplateColumns: gridTemplate }}
-          >
-            {columnView === 'general' ? (
-              <GeneralTableHeader
-                columnFilters={columnFilters}
-                managerOptions={managerOptions}
-                onColumnFilterChange={onColumnFilterChange}
-              />
-            ) : columnView === 'economics' ? (
-              <EconomicsTableHeader
-                columnFilters={columnFilters}
-                managerOptions={managerOptions}
-                onColumnFilterChange={onColumnFilterChange}
-              />
-            ) : columnView === 'closing-general' ? (
-              <ClosingGeneralTableHeader
-                columnFilters={columnFilters}
-                managerOptions={managerOptions}
-                onColumnFilterChange={onColumnFilterChange}
-              />
-            ) : columnView === 'closing-economics' ? (
-              <ClosingEconomicsTableHeader
-                columnFilters={columnFilters}
-                managerOptions={managerOptions}
-                onColumnFilterChange={onColumnFilterChange}
-              />
-            ) : (
-              <OutsideMagTableHeader
-                columnFilters={columnFilters}
-                managerOptions={managerOptions}
-                onColumnFilterChange={onColumnFilterChange}
-              />
-            )}
-          </div>
-
-          {isLoading ? (
-            <TableSkeleton columnView={columnView} gridTemplate={gridTemplate} />
-          ) : isError ? (
-            <div className="flex h-40 items-center justify-center px-4 text-sm text-red-600">
-              Не удалось загрузить проекты.
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="flex h-40 items-center justify-center px-4 text-sm text-[#ACACAC]">
-              Проекты не найдены.
-            </div>
-          ) : (
-            <>
-              {projects.map((project) => (
-                <ProjectsTableRow
-                  key={project.id}
-                  project={project}
-                  columnView={columnView}
-                  backOrigin={backOrigin}
-                  renderRowAction={renderRowAction}
-                  displayManager={getDisplayManager(project)}
-                  managerOptions={managerOptions}
-                  isEditingManager={editingManagerProjectId === project.id}
-                  onStartEditManager={() => handleStartEditManager(project.id)}
-                  onAssignManager={(manager) => handleAssignManager(project.id, manager)}
-                  onCancelEditManager={handleCancelEditManager}
-                />
-              ))}
-              {hasNextPage && (
-                <div
-                  ref={sentinelRef}
-                  className="flex h-12 items-center justify-center text-[#ACACAC]"
-                >
-                  {isFetchingNextPage && <Loader2 className="size-4 animate-spin" />}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </OverlayScrollbarsComponent>
-    </Card>
+    <GridTableView
+      minWidth={minWidth}
+      gridTemplate={gridTemplate}
+      header={header}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage="Не удалось загрузить проекты."
+      isEmpty={!isLoading && !isError && projects.length === 0}
+      emptyMessage="Проекты не найдены."
+      skeletonColumnCount={TABLE_COLUMN_COUNT[columnView]}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      onLoadMore={onLoadMore}
+    >
+      {projects.map((project) => (
+        <ProjectsTableRow
+          key={project.id}
+          project={project}
+          columnView={columnView}
+          backOrigin={backOrigin}
+          renderRowAction={renderRowAction}
+          displayManager={getDisplayManager(project)}
+          managerOptions={managerOptions}
+          isEditingManager={editingManagerProjectId === project.id}
+          onStartEditManager={() => handleStartEditManager(project.id)}
+          onAssignManager={(manager) => handleAssignManager(project.id, manager)}
+          onCancelEditManager={handleCancelEditManager}
+        />
+      ))}
+    </GridTableView>
   )
 }
 
@@ -201,27 +160,27 @@ function GeneralTableHeader({
 }) {
   return (
     <>
-      <HeaderLabel>Название проекта</HeaderLabel>
-      <HeaderCell>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderCell>
         <TableHeaderLoftFilter
           columnFilters={columnFilters}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <TableHeaderHallFilter
           columnFilters={columnFilters}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
           managerOptions={managerOptions}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <ClearableSelect
           placeholder="Этап проекта"
           value={columnFilters.stage}
@@ -229,11 +188,11 @@ function GeneralTableHeader({
           onChange={(v) => onColumnFilterChange('stage', v)}
           triggerClassName={HEADER_FILTER_TRIGGER}
         />
-      </HeaderCell>
-      <HeaderLabel>Дата мероприятия</HeaderLabel>
-      <HeaderLabel>Компания</HeaderLabel>
-      <HeaderLabel>Телефон</HeaderLabel>
-      <HeaderLabel>Появление в системе</HeaderLabel>
+      </GridTableHeaderCell>
+      <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Появление в системе</GridTableHeaderLabel>
     </>
   )
 }
@@ -249,32 +208,32 @@ function OutsideMagTableHeader({
 }) {
   return (
     <>
-      <HeaderLabel>Название проекта</HeaderLabel>
-      <HeaderCell>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderCell>
         <TableHeaderLoftFilter
           columnFilters={columnFilters}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <TableHeaderHallFilter
           columnFilters={columnFilters}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
           managerOptions={managerOptions}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderLabel>Крайний этап</HeaderLabel>
-      <HeaderLabel>Дата перевода</HeaderLabel>
-      <HeaderLabel>Кто перевёл</HeaderLabel>
-      <HeaderLabel>Причина перевода</HeaderLabel>
-      <HeaderLabel>Комментарий</HeaderLabel>
-      <HeaderCell aria-hidden />
+      </GridTableHeaderCell>
+      <GridTableHeaderLabel>Крайний этап</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Дата перевода</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Кто перевёл</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Причина перевода</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Комментарий</GridTableHeaderLabel>
+      <GridTableHeaderCell aria-hidden />
     </>
   )
 }
@@ -290,16 +249,16 @@ function EconomicsTableHeader({
 }) {
   return (
     <>
-      <HeaderLabel>Название проекта</HeaderLabel>
-      <HeaderCell>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
           managerOptions={managerOptions}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderLabel>Компания</HeaderLabel>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
+      <GridTableHeaderCell>
         <ClearableSelect
           placeholder="Этап проекта"
           value={columnFilters.stage}
@@ -307,29 +266,11 @@ function EconomicsTableHeader({
           onChange={(v) => onColumnFilterChange('stage', v)}
           triggerClassName={HEADER_FILTER_TRIGGER}
         />
-      </HeaderCell>
-      <HeaderLabel>Сумма продаж</HeaderLabel>
-      <HeaderLabel>Чистая прибыль</HeaderLabel>
-      <HeaderLabel>Итоговый бонус</HeaderLabel>
+      </GridTableHeaderCell>
+      <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
     </>
-  )
-}
-
-function HeaderLabel({ children }: { children: ReactNode }) {
-  return <div className="min-w-0 truncate px-3 py-3 text-sm text-[#454545]">{children}</div>
-}
-
-function HeaderCell({
-  children,
-  'aria-hidden': ariaHidden,
-}: {
-  children?: ReactNode
-  'aria-hidden'?: boolean
-}) {
-  return (
-    <div className="min-w-0 px-3 py-2" aria-hidden={ariaHidden}>
-      {children}
-    </div>
   )
 }
 
@@ -344,30 +285,30 @@ function ClosingGeneralTableHeader({
 }) {
   return (
     <>
-      <HeaderLabel>Название проекта</HeaderLabel>
-      <HeaderCell>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderCell>
         <TableHeaderLoftFilter
           columnFilters={columnFilters}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <TableHeaderHallFilter
           columnFilters={columnFilters}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderCell>
+      </GridTableHeaderCell>
+      <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
           managerOptions={managerOptions}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderLabel>Дата мероприятия</HeaderLabel>
-      <HeaderLabel>Компания</HeaderLabel>
-      <HeaderLabel>Телефон</HeaderLabel>
-      <HeaderLabel>Дата архивации</HeaderLabel>
+      </GridTableHeaderCell>
+      <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Дата архивации</GridTableHeaderLabel>
     </>
   )
 }
@@ -383,42 +324,18 @@ function ClosingEconomicsTableHeader({
 }) {
   return (
     <>
-      <HeaderLabel>Название проекта</HeaderLabel>
-      <HeaderCell>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
           managerOptions={managerOptions}
           onColumnFilterChange={onColumnFilterChange}
         />
-      </HeaderCell>
-      <HeaderLabel>Компания</HeaderLabel>
-      <HeaderLabel>Сумма продаж</HeaderLabel>
-      <HeaderLabel>Чистая прибыль</HeaderLabel>
-      <HeaderLabel>Итоговый бонус</HeaderLabel>
-    </>
-  )
-}
-
-function TableSkeleton({
-  columnView,
-  gridTemplate,
-}: {
-  columnView: ProjectsTableColumnView
-  gridTemplate: string
-}) {
-  const colCount = TABLE_COLUMN_COUNT[columnView]
-
-  return (
-    <>
-      {Array.from({ length: 10 }).map((_, row) => (
-        <div key={row} className="grid items-center" style={{ gridTemplateColumns: gridTemplate }}>
-          {Array.from({ length: colCount }).map((__, col) => (
-            <div key={col} className="px-3 py-3.5">
-              <Skeleton className="h-3.5 w-full max-w-30" />
-            </div>
-          ))}
-        </div>
-      ))}
+      </GridTableHeaderCell>
+      <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
     </>
   )
 }

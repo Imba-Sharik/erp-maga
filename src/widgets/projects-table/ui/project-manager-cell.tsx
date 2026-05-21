@@ -11,8 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 
+import { GridTableCell } from '@/shared/ui/grid-table'
+
 import { buildManagerSelectOptions } from '../lib/manager-select-options'
-import { Cell, TABLE_EMPTY } from './table-row-cells'
+import { TABLE_EMPTY } from './table-row-cells'
 
 export interface ProjectManagerCellProps {
   manager: string
@@ -48,7 +50,7 @@ export function ProjectManagerCell({
 
   return (
     <div className="min-w-0" onClick={stopRowNavigation} onPointerDown={stopRowNavigation}>
-      <Cell>
+      <GridTableCell>
         <span className="flex w-full min-w-0 items-center gap-1.5">
           <DropdownMenu open={isEditing} onOpenChange={handleOpenChange}>
             <DropdownMenuTrigger asChild>
@@ -88,7 +90,7 @@ export function ProjectManagerCell({
             {displayName}
           </span>
         </span>
-      </Cell>
+      </GridTableCell>
     </div>
   )
 }
