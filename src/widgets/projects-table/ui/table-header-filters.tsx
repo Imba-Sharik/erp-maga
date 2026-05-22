@@ -1,4 +1,4 @@
-import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
+import { useVenueCatalog } from '@/entities/venue'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
@@ -16,13 +16,16 @@ export function TableHeaderLoftFilter({
   columnFilters,
   onColumnFilterChange,
 }: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
+  const { loftOptions, isLoading, isError } = useVenueCatalog()
+
   return (
     <ClearableSelect
       placeholder="LOFT"
       value={columnFilters.loft}
-      options={LOFT_OPTIONS}
+      options={loftOptions}
       onChange={(v) => onColumnFilterChange('loft', v)}
       triggerClassName={HEADER_FILTER_TRIGGER}
+      disabled={isLoading || isError}
     />
   )
 }
@@ -31,13 +34,16 @@ export function TableHeaderHallFilter({
   columnFilters,
   onColumnFilterChange,
 }: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
+  const { hallOptions, isLoading, isError } = useVenueCatalog()
+
   return (
     <ClearableSelect
       placeholder="Зал"
       value={columnFilters.hall}
-      options={HALL_OPTIONS}
+      options={hallOptions}
       onChange={(v) => onColumnFilterChange('hall', v)}
       triggerClassName={HEADER_FILTER_TRIGGER}
+      disabled={isLoading || isError}
     />
   )
 }
