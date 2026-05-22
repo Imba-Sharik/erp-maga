@@ -48,7 +48,12 @@ export function StageFieldDemoEditable({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={field.placeholder}
-          className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] bg-white text-sm"
+          // fieldSizing: fixed инлайном — гасит авторост базового shadcn-textarea
+          // (field-sizing-content). Классом ненадёжно: tailwind-merge не схлопывает
+          // field-sizing-*, и content побеждает по порядку в CSS.
+          // Высота держится по row-span-2, текст скроллится внутри, соседние поля не уезжают.
+          style={{ fieldSizing: 'fixed' }}
+          className="native-os-scrollbar h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] bg-white text-sm"
         />
       ) : (
         <Input

@@ -129,7 +129,7 @@ export function StageSectionPassed({
 
   return (
     <Collapsible defaultOpen className="w-full">
-      <div className="flex flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
+      <div className="flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
             <span className="font-medium text-[#454545]">
@@ -149,7 +149,7 @@ export function StageSectionPassed({
             </Button>
           )}
         </div>
-        <CollapsibleContent className="flex flex-col gap-4">
+        <CollapsibleContent className="flex flex-col gap-4 pt-4">
           <div className="h-px w-full bg-[#F0F0F0]" />
           {fields.length === 0 && extras.length === 0 ? (
             <p className="text-muted-foreground text-sm italic">

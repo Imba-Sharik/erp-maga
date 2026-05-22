@@ -14,6 +14,16 @@ export function formatTableDate(iso: string): string {
   }
 }
 
+/** Дата + время — для «Дата подтверждения» в закрытых запросах. */
+export function formatTableDateTime(iso: string): string {
+  if (!iso) return TABLE_EMPTY
+  try {
+    return format(parseISO(iso), 'dd.MM.yyyy HH:mm')
+  } catch {
+    return iso
+  }
+}
+
 export function ProjectTitleCell({ project }: { project: Project }) {
   return (
     <GridTableCell>

@@ -1,7 +1,9 @@
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { RequireRole } from './guards/require-role'
+import { RoleHomeRedirect } from './guards/role-home'
 import { AppLayout } from './layouts/app-layout'
 import { CalendarPage } from '@/pages/calendar'
+import { ClosedRequestsPage } from '@/pages/closed-requests'
 import { ClosingPage } from '@/pages/closing'
 import { DashboardPage } from '@/pages/dashboard'
 import { LoginPage } from '@/pages/login'
@@ -12,6 +14,8 @@ import { OutsideMagPage } from '@/pages/outside-mag'
 import { ProfilePage } from '@/pages/profile'
 import { ProjectDetailPage } from '@/pages/project-detail'
 import { ProjectsPage } from '@/pages/projects'
+import { RequestDetailPage } from '@/pages/request-detail'
+import { RequestsPage } from '@/pages/requests'
 import { SettingsPage } from '@/pages/settings'
 
 const router = createBrowserRouter([
@@ -24,12 +28,57 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <NotFoundPage />,
     children: [
-      { index: true, element: <Navigate to="/projects" replace /> },
+      { index: true, element: <RoleHomeRedirect /> },
       { path: 'dashboard', element: <DashboardPage /> },
-      { path: 'calendar', element: <CalendarPage /> },
-      { path: 'projects', element: <ProjectsPage /> },
+      {
+        path: 'calendar',
+        element: (
+          <RequireRole roles={['manager', 'director']}>
+            <CalendarPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'projects',
+        element: (
+          <RequireRole roles={['manager', 'director']}>
+            <ProjectsPage />
+          </RequireRole>
+        ),
+      },
       { path: 'projects/:id', element: <ProjectDetailPage /> },
-      { path: 'closing', element: <ClosingPage /> },
+      {
+        path: 'closing',
+        element: (
+          <RequireRole roles={['manager', 'director']}>
+            <ClosingPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'requests',
+        element: (
+          <RequireRole roles={['accountant']}>
+            <RequestsPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'requests/:id',
+        element: (
+          <RequireRole roles={['accountant']}>
+            <RequestDetailPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'closed-requests',
+        element: (
+          <RequireRole roles={['accountant']}>
+            <ClosedRequestsPage />
+          </RequireRole>
+        ),
+      },
       {
         path: 'outside-mag',
         element: (

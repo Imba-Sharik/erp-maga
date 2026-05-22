@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom'
 
 import { useUserRole, type UserRole } from '@/entities/user-role'
 
+import { roleHomePath } from './role-home'
+
 type RequireRoleProps = {
   roles: readonly UserRole[]
   children: ReactNode
@@ -11,7 +13,7 @@ type RequireRoleProps = {
 export function RequireRole({ roles, children }: RequireRoleProps) {
   const role = useUserRole()
   if (!roles.includes(role)) {
-    return <Navigate to="/projects" replace />
+    return <Navigate to={roleHomePath(role)} replace />
   }
   return children
 }

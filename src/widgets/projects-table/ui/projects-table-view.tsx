@@ -83,7 +83,11 @@ export function ProjectsTableView({
   }, [])
 
   const header =
-    columnView === 'general' ? (
+    columnView === 'requests' ? (
+      <RequestsTableHeader />
+    ) : columnView === 'closed-requests' ? (
+      <ClosedRequestsTableHeader />
+    ) : columnView === 'general' ? (
       <GeneralTableHeader
         columnFilters={columnFilters}
         managerOptions={managerOptions}
@@ -336,6 +340,37 @@ function ClosingEconomicsTableHeader({
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
       <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
       <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
+    </>
+  )
+}
+
+/** Запросы бухгалтера — фиксированные колонки без фильтров. */
+function RequestsTableHeader() {
+  return (
+    <>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Появление в системе</GridTableHeaderLabel>
+    </>
+  )
+}
+
+/** Закрытые запросы бухгалтера — то же + «Дата подтверждения». */
+function ClosedRequestsTableHeader() {
+  return (
+    <>
+      <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
+      <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Дата подтверждения</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Появление в системе</GridTableHeaderLabel>
     </>
   )
 }

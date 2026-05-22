@@ -162,7 +162,11 @@ export function StageSectionCurrent({
                   {...field}
                   value={(field.value as string) ?? ''}
                   placeholder={f.placeholder}
-                  className="h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
+                  // fieldSizing: fixed гасит авторост базового shadcn-textarea
+                  // (field-sizing-content) — высота держится по row-span-2,
+                  // текст скроллится внутри, соседние поля не уезжают.
+                  style={{ fieldSizing: 'fixed' }}
+                  className="native-os-scrollbar h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
                 />
               ) : f.type === 'select' ? (
                 <Select

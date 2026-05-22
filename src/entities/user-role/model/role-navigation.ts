@@ -20,6 +20,8 @@ export type RoleNavItemId =
   | 'closing'
   | 'outside-mag'
   | 'managers'
+  | 'requests'
+  | 'closed-requests'
   | 'notifications'
   | 'settings'
 
@@ -38,15 +40,28 @@ export type RoleNavItemDef = {
 
 export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
   { id: 'dashboard', title: 'Дашборд', url: '/dashboard', icon: DashboardIcon },
-  { id: 'calendar', title: 'Календарь', url: '/calendar', icon: CalendarIcon },
+  {
+    id: 'calendar',
+    title: 'Календарь',
+    url: '/calendar',
+    icon: CalendarIcon,
+    roles: ['manager', 'director'],
+  },
   {
     id: 'projects',
     title: 'Проекты',
     url: '/projects',
     icon: FolderIcon,
+    roles: ['manager', 'director'],
     titleByRole: { director: 'Все проекты' },
   },
-  { id: 'closing', title: 'Закрытие', url: '/closing', icon: ListChecksIcon },
+  {
+    id: 'closing',
+    title: 'Закрытие',
+    url: '/closing',
+    icon: ListChecksIcon,
+    roles: ['manager', 'director'],
+  },
   {
     id: 'outside-mag',
     title: 'Вне контура MAG',
@@ -60,6 +75,20 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
     url: '/managers',
     icon: ManagersControlIcon,
     roles: ['director'],
+  },
+  {
+    id: 'requests',
+    title: 'Запросы',
+    url: '/requests',
+    icon: ListChecksIcon,
+    roles: ['accountant'],
+  },
+  {
+    id: 'closed-requests',
+    title: 'Закрытые запросы',
+    url: '/closed-requests',
+    icon: FolderIcon,
+    roles: ['accountant'],
   },
   { id: 'notifications', title: 'Уведомления', url: '/notifications', icon: BellIcon },
   { id: 'settings', title: 'Настройки', url: '/settings', icon: SettingsIcon },
