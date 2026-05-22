@@ -6,6 +6,8 @@ import type { Project as BackendProject } from '@/shared/api/generated/types/Pro
 import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
+import { mapBackendArticles } from '@/entities/project-articles'
+
 import type {
   Project,
   ProjectDetail,
@@ -313,5 +315,7 @@ export function mapBackendProjectDetail(b: ProjectDetailSchema): ProjectDetail |
     finance: { sales: null, expenses: null, bonuses: null, netProfit: null },
     history: [],
     ...(Object.keys(stageSnapshots).length > 0 ? { stageSnapshots } : {}),
+    articles: mapBackendArticles(b.articles),
+    taxRate: b.tax_rate,
   }
 }

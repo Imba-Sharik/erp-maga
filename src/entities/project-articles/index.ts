@@ -11,6 +11,7 @@ export {
   BACKLINE_ARTICLE_KINDS,
 } from './model/types'
 export { createInitialArticles, createEmptyBacklineBlock } from './lib/initial'
+export { mapBackendArticles } from './lib/from-backend'
 export { DEFAULT_BONUS_PERCENT } from './lib/defaults'
 export {
   blockTotal,
