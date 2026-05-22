@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { VenueCatalogBootstrap } from '@/app/providers/venue-catalog-bootstrap'
 import { BreadcrumbProvider } from '@/shared/hooks/use-breadcrumb'
 import { formatRuHeaderDate } from '@/shared/lib/date/format-ru-header-date'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
@@ -52,6 +53,7 @@ function AppLayoutHeader() {
 export function AppLayout() {
   return (
     <BreadcrumbProvider>
+      <VenueCatalogBootstrap />
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="h-svh max-h-svh min-h-0 overflow-hidden">
