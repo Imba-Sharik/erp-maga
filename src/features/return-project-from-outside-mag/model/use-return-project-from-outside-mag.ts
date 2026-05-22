@@ -10,9 +10,9 @@ import {
 } from '@/shared/api/project-transition'
 import {
   moveProjectInKanbanCache,
-  type KanbanCacheSnapshot,
-  restoreKanbanCaches,
-  snapshotKanbanCaches,
+  type QueryCacheSnapshot,
+  restoreQueryCaches,
+  snapshotTransitionCaches,
 } from '@/shared/api/projects-kanban'
 
 import { buildReturnFromOutsideMagBody } from '../lib/build-return-from-outside-mag-body'
@@ -45,7 +45,10 @@ export function useReturnProjectFromOutsideMag({
         stage: targetApiStage,
       }
 
-      const kanbanSnapshot: KanbanCacheSnapshot = snapshotKanbanCaches(queryClient)
+      const cacheSnapshot: QueryCacheSnapshot = snapshotTransitionCaches(queryClient, {
+        projectsList: true,
+        outsideMag: true,
+      })
       removeProjectFromOutsideMagCaches(queryClient, projectId)
       moveProjectInKanbanCache(queryClient, {
         project: apiRow,
@@ -60,7 +63,7 @@ export function useReturnProjectFromOutsideMag({
         {
           onSuccess: () => onSuccess?.(),
           onError: () => {
-            restoreKanbanCaches(queryClient, kanbanSnapshot)
+            restoreQueryCaches(queryClient, cacheSnapshot)
             transition.reset()
           },
         },

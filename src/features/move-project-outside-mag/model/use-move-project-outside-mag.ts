@@ -6,9 +6,9 @@ import { projectStageToApi, projectToApiListRow } from '@/entities/project'
 import { useProjectTransition } from '@/shared/api/project-transition'
 import {
   removeProjectFromMatchingCaches,
-  restoreKanbanCaches,
-  snapshotKanbanCaches,
-  type KanbanCacheSnapshot,
+  restoreQueryCaches,
+  snapshotTransitionCaches,
+  type QueryCacheSnapshot,
 } from '@/shared/api/projects-kanban'
 
 import { buildOutsideMagTransitionBody } from '../lib/build-outside-mag-transition-body'
@@ -35,7 +35,9 @@ export function useMoveProjectOutsideMag({ onSuccess }: UseMoveProjectOutsideMag
 
       const apiRow = projectToApiListRow(input.project)
       const fromApiStage = projectStageToApi(input.project.stage)
-      const kanbanSnapshot: KanbanCacheSnapshot = snapshotKanbanCaches(queryClient)
+      const cacheSnapshot: QueryCacheSnapshot = snapshotTransitionCaches(queryClient, {
+        projectsList: true,
+      })
 
       removeProjectFromMatchingCaches(queryClient, apiRow, {
         boardApiStage: fromApiStage,
@@ -44,7 +46,7 @@ export function useMoveProjectOutsideMag({ onSuccess }: UseMoveProjectOutsideMag
       transition.submit(projectId, buildOutsideMagTransitionBody(input.reason), {
         onSuccess: () => onSuccess?.(),
         onError: () => {
-          restoreKanbanCaches(queryClient, kanbanSnapshot)
+          restoreQueryCaches(queryClient, cacheSnapshot)
           transition.reset()
         },
       })

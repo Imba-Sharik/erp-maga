@@ -10,6 +10,8 @@ export {
   type KanbanCacheSnapshot,
   type MoveProjectInKanbanCacheInput,
   type PrependProjectToCachesOptions,
+  type QueryCacheSnapshot,
+  type SnapshotTransitionCachesOptions,
   eventDateMatchesListParams,
   forEachMatchingProjectsListQuery,
   matchesBoardColumn,
@@ -21,5 +23,9 @@ export {
   removeProjectFromMatchingCaches,
   removeProjectFromPaginatedCache,
   restoreKanbanCaches,
+  restoreQueryCaches,
   snapshotKanbanCaches,
+  snapshotOutsideMagListCaches,
+  snapshotProjectsListCaches,
+  snapshotTransitionCaches,
 } from './kanban-projects-cache'

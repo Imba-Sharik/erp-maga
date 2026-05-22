@@ -7,9 +7,12 @@ import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { isKanbanBoardQueryKey } from './kanban-board-query'
 
-export type KanbanCacheSnapshot = ReadonlyArray<
+export type QueryCacheSnapshot = ReadonlyArray<
   readonly [queryKey: readonly unknown[], data: unknown]
 >
+
+/** @deprecated Используйте `QueryCacheSnapshot`. */
+export type KanbanCacheSnapshot = QueryCacheSnapshot
 
 function isProjectsListRootKey(first: unknown): boolean {
   return (
@@ -18,6 +21,26 @@ function isProjectsListRootKey(first: unknown): boolean {
     'url' in first &&
     (first as { url: string }).url === '/api/v1/projects/'
   )
+}
+
+function isOutOfMagListRootKey(first: unknown): boolean {
+  return (
+    typeof first === 'object' &&
+    first !== null &&
+    'url' in first &&
+    (first as { url: string }).url === '/api/v1/projects/out-of-mag/'
+  )
+}
+
+function collectQueriesSnapshot(
+  queryClient: QueryClient,
+  predicate: (first: unknown) => boolean,
+): QueryCacheSnapshot {
+  return queryClient
+    .getQueriesData({
+      predicate: (query) => predicate(query.queryKey[0]),
+    })
+    .map(([queryKey, data]) => [queryKey, data] as const)
 }
 
 function listParamsFromQueryKey(queryKey: readonly unknown[]): ProjectsListQueryParams | undefined {
@@ -251,16 +274,41 @@ export function moveProjectInKanbanCache(
   patchBoardColumn(queryClient, project, toApiStage, 'prepend')
 }
 
-export function snapshotKanbanCaches(queryClient: QueryClient): KanbanCacheSnapshot {
-  return queryClient
-    .getQueriesData({
-      predicate: (query) => isKanbanBoardQueryKey(query.queryKey[0]),
-    })
-    .map(([queryKey, data]) => [queryKey, data] as const)
+export function snapshotKanbanCaches(queryClient: QueryClient): QueryCacheSnapshot {
+  return collectQueriesSnapshot(queryClient, isKanbanBoardQueryKey)
 }
 
-export function restoreKanbanCaches(queryClient: QueryClient, snapshot: KanbanCacheSnapshot): void {
+/** Все кэши списков `/api/v1/projects/` (канбан, календарь и т.д.). */
+export function snapshotProjectsListCaches(queryClient: QueryClient): QueryCacheSnapshot {
+  return collectQueriesSnapshot(queryClient, isProjectsListRootKey)
+}
+
+/** Кэши `GET /api/v1/projects/out-of-mag/`. */
+export function snapshotOutsideMagListCaches(queryClient: QueryClient): QueryCacheSnapshot {
+  return collectQueriesSnapshot(queryClient, isOutOfMagListRootKey)
+}
+
+export interface SnapshotTransitionCachesOptions {
+  projectsList?: boolean
+  outsideMag?: boolean
+}
+
+/** Снимок кэшей, которые мутируют move/return при optimistic transition. */
+export function snapshotTransitionCaches(
+  queryClient: QueryClient,
+  { projectsList = false, outsideMag = false }: SnapshotTransitionCachesOptions,
+): QueryCacheSnapshot {
+  const parts: QueryCacheSnapshot[] = []
+  if (projectsList) parts.push(snapshotProjectsListCaches(queryClient))
+  if (outsideMag) parts.push(snapshotOutsideMagListCaches(queryClient))
+  return parts.flat()
+}
+
+export function restoreQueryCaches(queryClient: QueryClient, snapshot: QueryCacheSnapshot): void {
   for (const [queryKey, data] of snapshot) {
     queryClient.setQueryData(queryKey, data)
   }
 }
+
+/** @deprecated Используйте `restoreQueryCaches`. */
+export const restoreKanbanCaches = restoreQueryCaches
