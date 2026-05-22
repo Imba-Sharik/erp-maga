@@ -2,20 +2,20 @@ import { useCallback, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 import type { Project as ApiProject } from '@/shared/api/generated/types/Project'
-import type { StageEnum } from '@/shared/api/generated/types/StageEnum'
-import { invalidateKanbanBoardQueries } from '@/widgets/projects-board/lib/kanban-board-query'
+import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 import {
+  invalidateKanbanBoardQueries,
   moveProjectInKanbanCache,
   restoreKanbanCaches,
   snapshotKanbanCaches,
   type KanbanCacheSnapshot,
-} from '@/widgets/projects-board/lib/kanban-projects-cache'
+} from '@/shared/api/projects-kanban'
 
 export interface OptimisticKanbanStageMoveInput {
   /** Проект с уже обновлённым `stage` (= `toApiStage`). */
   project: ApiProject
-  fromApiStage: StageEnum
-  toApiStage: StageEnum
+  fromApiStage: ProjectStageEnumKey
+  toApiStage: ProjectStageEnumKey
 }
 
 /**

@@ -14,6 +14,7 @@ import {
   countProjectsInMonth,
   getProjectsForDates,
   groupByDay,
+  isOutsideMagStage,
   mapBackendProjects,
 } from '@/entities/project'
 import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
@@ -55,7 +56,10 @@ export function CalendarPage() {
     ordering: PROJECTS_LIST_DEFAULT_ORDERING,
     limit: 100,
   })
-  const projects = useMemo(() => (data ? mapBackendProjects(data.results) : []), [data])
+  const projects = useMemo(() => {
+    const mapped = data ? mapBackendProjects(data.results) : []
+    return mapped.filter((p) => !isOutsideMagStage(p.stage))
+  }, [data])
 
   const projectsByDay = useMemo(
     () =>

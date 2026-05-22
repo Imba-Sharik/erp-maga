@@ -17,7 +17,8 @@ import { OUTSIDE_MAG_MOCK_PROJECTS } from '../model/outside-mag-mock-projects'
 import { OutsideMagSearchToolbar } from './outside-mag-search-toolbar'
 import { ReturnFromOutsideMagButton } from './return-from-outside-mag-button'
 
-const isOutsideMagMocksEnabled = import.meta.env.DEV || env.USE_MOCKS
+/** Только явный флаг; в dev без VITE_USE_MOCKS=true — реальный GET /projects/out-of-mag/. */
+const isOutsideMagMocksEnabled = env.USE_MOCKS
 
 const OUTSIDE_MAG_BACK: ProjectBackOrigin = {
   to: '/outside-mag',
@@ -93,8 +94,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
         onOpenChange={(open) => {
           if (!open) setReturnTarget(null)
         }}
-        projectId={returnTarget?.id ?? ''}
-        projectTitle={returnTarget?.title}
+        project={returnTarget}
       />
     </div>
   )

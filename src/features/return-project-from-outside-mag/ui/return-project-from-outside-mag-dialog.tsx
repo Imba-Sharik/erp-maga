@@ -2,7 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { PRE_PROJECT_STAGES, STAGE_LABELS, type PreprojectStage } from '@/entities/project'
+import {
+  PRE_PROJECT_STAGES,
+  STAGE_LABELS,
+  type PreprojectStage,
+  type Project,
+} from '@/entities/project'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -37,30 +42,30 @@ type FormValues = z.infer<typeof formSchema>
 export interface ReturnProjectFromOutsideMagDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  projectId: string
-  projectTitle?: string
+  project: Project | null
 }
 
 export function ReturnProjectFromOutsideMagDialog({
   open,
   onOpenChange,
-  projectId,
-  projectTitle,
+  project,
 }: ReturnProjectFromOutsideMagDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {} as Partial<FormValues>,
   })
 
-  const { submit, isPending } = useReturnProjectFromOutsideMag({
+  const { submit, isPending, isError, errorMessage, reset } = useReturnProjectFromOutsideMag({
     onSuccess: () => {
       onOpenChange(false)
       form.reset()
+      reset()
     },
   })
 
   const handleSubmit = (values: FormValues) => {
-    submit({ projectId, targetStage: values.targetStage })
+    if (!project) return
+    submit({ project, targetStage: values.targetStage })
   }
 
   return (
@@ -68,7 +73,10 @@ export function ReturnProjectFromOutsideMagDialog({
       open={open}
       onOpenChange={(next) => {
         onOpenChange(next)
-        if (!next) form.reset()
+        if (!next) {
+          form.reset()
+          reset()
+        }
       }}
     >
       <DialogContent className="sm:max-w-md" showCloseButton>
@@ -76,7 +84,7 @@ export function ReturnProjectFromOutsideMagDialog({
           <DialogTitle className="font-heading text-[#1B1A17]">
             Вернуть проект в воронку?
           </DialogTitle>
-          {projectTitle ? <DialogDescription>Проект: {projectTitle}</DialogDescription> : null}
+          {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}
         </DialogHeader>
 
         <Form {...form}>
@@ -105,6 +113,9 @@ export function ReturnProjectFromOutsideMagDialog({
                 </FormItem>
               )}
             />
+            {isError && errorMessage ? (
+              <p className="text-destructive text-sm">{errorMessage}</p>
+            ) : null}
             <DialogFooter className="gap-2 sm:gap-2">
               <Button
                 type="button"
@@ -118,7 +129,7 @@ export function ReturnProjectFromOutsideMagDialog({
               <Button
                 type="submit"
                 className="rounded-[10px] bg-black text-white hover:bg-black/90"
-                disabled={isPending}
+                disabled={isPending || !project}
               >
                 Вернуть
               </Button>

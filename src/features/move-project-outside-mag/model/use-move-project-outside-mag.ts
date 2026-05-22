@@ -1,11 +1,20 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
-import type { OutsideMagReason } from '@/entities/project'
+import type { OutsideMagReason, Project } from '@/entities/project'
+import { projectStageToApi, projectToApiListRow } from '@/entities/project'
+import { useProjectTransition } from '@/shared/api/project-transition'
+import {
+  removeProjectFromMatchingCaches,
+  restoreQueryCaches,
+  snapshotTransitionCaches,
+  type QueryCacheSnapshot,
+} from '@/shared/api/projects-kanban'
 
 import { buildOutsideMagTransitionBody } from '../lib/build-outside-mag-transition-body'
 
 export interface MoveProjectOutsideMagInput {
-  projectId: string
+  project: Project
   reason: OutsideMagReason
 }
 
@@ -13,24 +22,43 @@ interface UseMoveProjectOutsideMagOptions {
   onSuccess?: () => void
 }
 
-/**
- * TODO: POST /projects/{id}/transitions/ с телом из buildOutsideMagTransitionBody.
- */
 export function useMoveProjectOutsideMag({ onSuccess }: UseMoveProjectOutsideMagOptions = {}) {
+  const queryClient = useQueryClient()
+  const transition = useProjectTransition({
+    fallbackErrorMessage: 'Не удалось перевести проект во «Вне контура MAG»',
+  })
+
   const submit = useCallback(
     (input: MoveProjectOutsideMagInput) => {
-      const _body = buildOutsideMagTransitionBody(input.reason)
-      void _body
-      onSuccess?.()
+      const projectId = Number(input.project.id)
+      if (!Number.isFinite(projectId)) return
+
+      const apiRow = projectToApiListRow(input.project)
+      const fromApiStage = projectStageToApi(input.project.stage)
+      const cacheSnapshot: QueryCacheSnapshot = snapshotTransitionCaches(queryClient, {
+        projectsList: true,
+      })
+
+      removeProjectFromMatchingCaches(queryClient, apiRow, {
+        boardApiStage: fromApiStage,
+      })
+
+      transition.submit(projectId, buildOutsideMagTransitionBody(input.reason), {
+        onSuccess: () => onSuccess?.(),
+        onError: () => {
+          restoreQueryCaches(queryClient, cacheSnapshot)
+          transition.reset()
+        },
+      })
     },
-    [onSuccess],
+    [onSuccess, queryClient, transition],
   )
 
   return {
     submit,
-    isPending: false,
-    isError: false,
-    errorMessage: null as string | null,
-    reset: () => {},
+    isPending: transition.isPending,
+    isError: transition.isError,
+    errorMessage: transition.errorMessage,
+    reset: transition.reset,
   }
 }

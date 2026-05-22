@@ -61,6 +61,12 @@ export interface Project {
   createdAt: string
   /** Последняя активная стадия до перевода в «Вне контура» (если есть в API). */
   lastActiveStage?: ProjectStage
+  /** Метаданные перевода во «Вне контура MAG» (список out-of-mag). */
+  outsideMag?: {
+    reason: string | null
+    transferredAt: string | null
+    transferredBy: string | null
+  }
   economics?: ProjectEconomics
   /** ISO-datetime архивации проекта. */
   archivedAt?: string

@@ -5,8 +5,8 @@ export {
   snapshotKanbanCaches,
   restoreKanbanCaches,
   prependProjectToMatchingCaches,
-} from '@/widgets/projects-board/lib/kanban-projects-cache'
+} from '@/shared/api/projects-kanban'
 export type {
   KanbanCacheSnapshot,
   MoveProjectInKanbanCacheInput,
-} from '@/widgets/projects-board/lib/kanban-projects-cache'
+} from '@/shared/api/projects-kanban'
