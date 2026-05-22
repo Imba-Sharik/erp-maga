@@ -240,9 +240,9 @@ export function FinanceBlockWithBackline({
       onAdvance={onAdvance}
     >
       <div className="flex flex-col gap-5">
-        <Collapsible defaultOpen className="flex flex-col gap-4">
+        <Collapsible defaultOpen className="flex flex-col">
           <SubsectionHeader title={`${subsectionTitlePrefix}Продажная часть (основной блок)`} />
-          <CollapsibleContent>
+          <CollapsibleContent className="pt-4">
             <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
               {[0, 1, 2, 3].flatMap((rowIdx) => {
                 const left = MAIN_LEFT[rowIdx]
@@ -305,9 +305,9 @@ export function FinanceBlockWithBackline({
         </Collapsible>
 
         {backlineAdded && (
-          <Collapsible defaultOpen className="flex flex-col gap-4">
+          <Collapsible defaultOpen className="flex flex-col">
             <SubsectionHeader title={`${subsectionTitlePrefix}Бэклайн (дополнительный блок)`} />
-            <CollapsibleContent>
+            <CollapsibleContent className="pt-4">
               <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
                 {[0, 1, 2].flatMap((rowIdx) => {
                   const left = BACKLINE_LEFT[rowIdx]

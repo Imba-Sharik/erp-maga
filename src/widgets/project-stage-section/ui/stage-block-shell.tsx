@@ -59,7 +59,7 @@ export function StageBlockShell({
   )
 
   const card = (
-    <div className="flex flex-col gap-5 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
+    <div className="flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-5">
       {(showHeaderRow || showAdvance) && (
         <div className="flex flex-wrap items-center justify-between gap-3">
           {showHeaderRow ? headerContent : null}
@@ -76,9 +76,11 @@ export function StageBlockShell({
         </div>
       )}
       {shell.stageCollapsible ? (
-        <CollapsibleContent className="flex flex-col gap-5">{body}</CollapsibleContent>
+        // pt-5 (а не gap на карточке) — отступ входит в анимируемую высоту,
+        // иначе при сворачивании gap исчезает скачком в момент unmount.
+        <CollapsibleContent className="flex flex-col gap-5 pt-5">{body}</CollapsibleContent>
       ) : (
-        body
+        <div className="flex flex-col gap-5">{body}</div>
       )}
     </div>
   )

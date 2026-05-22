@@ -187,12 +187,12 @@ export function StagePassedBonus({
       headerColorClass="text-funnel-closing"
       onAdvance={() => onAdvance?.()}
     >
-      <Collapsible defaultOpen className="flex flex-col gap-4">
+      <Collapsible defaultOpen className="flex flex-col">
         <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
           <span className="font-medium text-[#454545]">Бонус: Продажная часть (основной блок)</span>
           <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent className="pt-4">
           <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
             <div className="flex min-w-0 flex-col gap-4">
               {rows.map((row) => (
