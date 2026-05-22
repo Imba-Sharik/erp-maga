@@ -9,7 +9,7 @@ export function DeleteManagerButton({ onRequestDelete }: DeleteManagerButtonProp
   return (
     <TableIconActionButton
       icon={<CircleCrossIcon className="size-4 shrink-0 [&_path]:fill-current" />}
-      aria-label="Удалить менеджера"
+      aria-label="Заблокировать менеджера"
       onClick={onRequestDelete}
     />
   )
