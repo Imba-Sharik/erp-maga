@@ -7,6 +7,7 @@ import {
   removeProjectFromOutsideMagCaches,
   useProjectTransition,
 } from '@/features/project-transition'
+import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import {
   moveProjectInKanbanCache,
   type KanbanCacheSnapshot,
@@ -52,13 +53,18 @@ export function useReturnProjectFromOutsideMag({
         toApiStage: targetApiStage,
       })
 
-      transition.submit(projectId, buildReturnFromOutsideMagBody(input.targetStage), {
-        onSuccess: () => onSuccess?.(),
-        onError: () => {
-          restoreKanbanCaches(queryClient, kanbanSnapshot)
-          transition.reset()
+      // payload не в сгенерированном OpenAPI; бэк читает target_stage из payload.
+      transition.submit(
+        projectId,
+        buildReturnFromOutsideMagBody(input.targetStage) as unknown as ProjectTransitionRequest,
+        {
+          onSuccess: () => onSuccess?.(),
+          onError: () => {
+            restoreKanbanCaches(queryClient, kanbanSnapshot)
+            transition.reset()
+          },
         },
-      })
+      )
     },
     [onSuccess, queryClient, transition],
   )
