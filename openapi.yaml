@@ -284,7 +284,10 @@ paths:
 
         **Счётчики:** активные — все стадии кроме `closed`, `archived`, `out_of_mag_scope`; закрытые — `closed` + `archived`.
 
-        **Суммы:** `sales_total` — `total_with_tax` по блокам продаж; `bonuses_total` — сумма `approved_bonus`, где `bonus_calculation.recipient` = менеджер.
+        **Суммы (all-time, без `out_of_mag_scope`):**
+        - `sales_total` — сумма продаж (subtotal статей, без налога);
+        - `net_profit_total` — чистая прибыль из расчёта бонуса, без строки «налог»;
+        - `final_bonus_total` — итоговый бонус (`approved_bonus` или `total_bonus` расчёта).
 
         CRUD назначений: `GET/POST /halls/hall-manager-assignments/`. Не склеивать с `GET /users/?role=manager_mag`.
       summary: Справочник менеджеров MAG (матрица)
@@ -325,7 +328,8 @@ paths:
                       active_projects_count: 4
                       closed_projects_count: 11
                       sales_total: '1250000.00'
-                      bonuses_total: '87500.00'
+                      net_profit_total: '320000.00'
+                      final_bonus_total: '87500.00'
                   summary: Менеджер с привязками и метриками
           description: ''
         '403':
@@ -1718,21 +1722,29 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
-        bonuses_total:
+          description: Сумма продаж (subtotal статей, без налога), all-time
+        net_profit_total:
           type: string
           format: decimal
           pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: Чистая прибыль без строки «налог» из расчёта бонуса
+        final_bonus_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: 'Итоговый бонус: approved_bonus или total_bonus из расчёта'
       required:
       - active_projects_count
       - assignments
-      - bonuses_total
       - closed_projects_count
       - email
+      - final_bonus_total
       - first_name
       - full_name
       - id
       - is_active
       - last_name
+      - net_profit_total
       - sales_total
     MarkedReadResponse:
       type: object

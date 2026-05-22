@@ -34,6 +34,6 @@ export function fromManagerDirectory(dto: ManagerDirectory): Manager {
     activeProjectsCount: dto.active_projects_count,
     closedProjectsCount: dto.closed_projects_count,
     salesTotal: parseDecimal(dto.sales_total),
-    bonusTotal: parseDecimal(dto.bonuses_total),
+    bonusTotal: parseDecimal(dto.final_bonus_total),
   }
 }
