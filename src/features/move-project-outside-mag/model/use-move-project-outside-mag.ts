@@ -3,13 +3,13 @@ import { useCallback } from 'react'
 
 import type { OutsideMagReason, Project } from '@/entities/project'
 import { projectStageToApi, projectToApiListRow } from '@/entities/project'
-import { useProjectTransition } from '@/features/project-transition'
+import { useProjectTransition } from '@/shared/api/project-transition'
 import {
   removeProjectFromMatchingCaches,
   restoreKanbanCaches,
   snapshotKanbanCaches,
   type KanbanCacheSnapshot,
-} from '@/widgets/projects-board/lib/kanban-projects-cache'
+} from '@/shared/api/projects-kanban'
 
 import { buildOutsideMagTransitionBody } from '../lib/build-outside-mag-transition-body'
 

@@ -4,7 +4,7 @@ import type { Project as ApiProject } from '@/shared/api/generated/types/Project
 import {
   prependProjectToMatchingCaches,
   removeProjectFromMatchingCaches,
-} from '@/widgets/projects-board/lib/kanban-projects-cache'
+} from '@/shared/api/projects-kanban'
 
 function cacheOptionsForProject(project: ApiProject) {
   return {

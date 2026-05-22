@@ -3,17 +3,17 @@ import { useCallback } from 'react'
 
 import type { PreprojectStage, Project } from '@/entities/project'
 import { preprojectStageToApi, projectToApiListRow } from '@/entities/project'
+import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import {
   removeProjectFromOutsideMagCaches,
   useProjectTransition,
-} from '@/features/project-transition'
-import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
+} from '@/shared/api/project-transition'
 import {
   moveProjectInKanbanCache,
   type KanbanCacheSnapshot,
   restoreKanbanCaches,
   snapshotKanbanCaches,
-} from '@/widgets/projects-board/lib/kanban-projects-cache'
+} from '@/shared/api/projects-kanban'
 
 import { buildReturnFromOutsideMagBody } from '../lib/build-return-from-outside-mag-body'
 

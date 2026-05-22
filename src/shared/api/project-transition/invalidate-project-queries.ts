@@ -1,10 +1,10 @@
 import type { QueryClient } from '@tanstack/react-query'
 
-import { invalidateKanbanBoardQueries } from '@/widgets/projects-board/lib/kanban-board-query'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsOutOfMagListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsOutOfMagList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
+import { invalidateKanbanBoardQueries } from '@/shared/api/projects-kanban'
 
 export function invalidateProjectsListQueries(queryClient: QueryClient): void {
   queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })

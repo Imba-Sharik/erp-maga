@@ -1,4 +1,12 @@
 export {
+  type BoardListParams,
+  type KanbanBoardScope,
+  invalidateKanbanBoardQueries,
+  isKanbanBoardQueryKey,
+  kanbanColumnMatchesProjectStage,
+  kanbanColumnQueryKey,
+} from './kanban-board-query'
+export {
   type KanbanCacheSnapshot,
   type MoveProjectInKanbanCacheInput,
   type PrependProjectToCachesOptions,
@@ -14,4 +22,4 @@ export {
   removeProjectFromPaginatedCache,
   restoreKanbanCaches,
   snapshotKanbanCaches,
-} from '@/shared/api/projects-kanban'
+} from './kanban-projects-cache'

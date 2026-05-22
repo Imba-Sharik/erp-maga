@@ -6,8 +6,8 @@ import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/proje
 import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 
-import { getTransitionErrorMessage } from '../lib/get-transition-error-message'
-import { invalidateProjectAfterTransition } from '../lib/invalidate-project-queries'
+import { getTransitionErrorMessage } from './get-transition-error-message'
+import { invalidateProjectAfterTransition } from './invalidate-project-queries'
 
 interface UseProjectTransitionOptions {
   fallbackErrorMessage?: string
