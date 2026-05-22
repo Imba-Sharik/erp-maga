@@ -1,9 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import { MOCK_MANAGERS, type Manager } from '@/entities/manager'
+import { useManagersDirectory, type Manager, type ManagerAssignmentMode } from '@/entities/manager'
+import { useVenueCatalog } from '@/entities/venue'
 import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
+import { useUpdateManagerAssignments } from '@/features/update-manager-assignments'
 import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
+import {
+  buildHallAssignmentOptions,
+  buildLoftAssignmentOptions,
+} from '../lib/build-assignment-options'
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
   MANAGERS_TABLE_COLUMN_COUNT,
@@ -34,17 +40,41 @@ function ManagersTableHeader() {
 }
 
 export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
-  const [deletedIds, setDeletedIds] = useState<Set<string>>(() => new Set())
   const [deleteTarget, setDeleteTarget] = useState<Manager | null>(null)
+  const [editing, setEditing] = useState<{
+    managerId: string
+    mode: ManagerAssignmentMode
+  } | null>(null)
 
-  const managers = useMemo(() => {
-    const visible = MOCK_MANAGERS.filter((m) => !deletedIds.has(m.id))
-    return filterManagersTable(visible, { search, hall, loft })
-  }, [search, hall, loft, deletedIds])
+  const { managers: allManagers, isLoading, isError } = useManagersDirectory()
+  const { halls, isLoading: isCatalogLoading, isError: isCatalogError } = useVenueCatalog()
+  const { apply, isPendingFor } = useUpdateManagerAssignments()
 
-  const handleDelete = (id: string) => {
-    setDeletedIds((prev) => new Set(prev).add(id))
-  }
+  const hallOptions = useMemo(() => buildHallAssignmentOptions(halls), [halls])
+  const loftOptions = useMemo(() => buildLoftAssignmentOptions(halls), [halls])
+  const catalogDisabled = isCatalogLoading || isCatalogError
+
+  const managers = useMemo(
+    () => filterManagersTable(allManagers, { search, hall, loft }),
+    [allManagers, search, hall, loft],
+  )
+
+  const handleEditOpenChange = useCallback(
+    (managerId: string, mode: ManagerAssignmentMode, open: boolean) => {
+      if (open) setEditing({ managerId, mode })
+      else setEditing((prev) => (prev?.managerId === managerId && prev.mode === mode ? null : prev))
+    },
+    [],
+  )
+
+  const handleApplyAssignments = useCallback(
+    (manager: Manager, mode: ManagerAssignmentMode, selectedKeys: string[]) => {
+      void apply({ manager, mode, selectedKeys })
+    },
+    [apply],
+  )
+
+  const emptyMessage = isError ? 'Не удалось загрузить список менеджеров.' : 'Менеджеры не найдены.'
 
   return (
     <>
@@ -52,12 +82,24 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
         minWidth={MANAGERS_TABLE_MIN_WIDTH}
         gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}
         header={<ManagersTableHeader />}
-        isEmpty={managers.length === 0}
-        emptyMessage="Менеджеры не найдены."
+        isEmpty={!isLoading && managers.length === 0}
+        isLoading={isLoading}
+        emptyMessage={emptyMessage}
         skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
       >
         {managers.map((manager) => (
-          <ManagersTableRow key={manager.id} manager={manager} onRequestDelete={setDeleteTarget} />
+          <ManagersTableRow
+            key={manager.id}
+            manager={manager}
+            hallOptions={hallOptions}
+            loftOptions={loftOptions}
+            editing={editing}
+            catalogDisabled={catalogDisabled}
+            isPendingFor={isPendingFor}
+            onEditOpenChange={handleEditOpenChange}
+            onApplyAssignments={handleApplyAssignments}
+            onRequestDelete={setDeleteTarget}
+          />
         ))}
       </GridTableView>
 
@@ -68,7 +110,7 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
         }}
         managerId={deleteTarget?.id ?? ''}
         managerName={deleteTarget?.fullName ?? ''}
-        onConfirmed={handleDelete}
+        onConfirmed={() => setDeleteTarget(null)}
       />
     </>
   )

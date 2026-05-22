@@ -1,5 +1,6 @@
-import { deleteManagerMock } from '@/entities/manager'
 import { Button } from '@/shared/ui/button'
+
+import { useDeactivateManager } from '../model/use-deactivate-manager'
 import {
   Dialog,
   DialogContent,
@@ -24,19 +25,26 @@ export function ConfirmDeleteManagerDialog({
   managerName,
   onConfirmed,
 }: ConfirmDeleteManagerDialogProps) {
+  const { deactivate, isPending } = useDeactivateManager({
+    onSuccess: () => {
+      onConfirmed(managerId)
+      onOpenChange(false)
+    },
+  })
+
   const handleConfirm = () => {
-    deleteManagerMock(managerId)
-    onConfirmed(managerId)
-    onOpenChange(false)
+    deactivate(managerId)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Удалить менеджера?</DialogTitle>
+          <DialogTitle className="font-heading text-[#1B1A17]">
+            Заблокировать менеджера?
+          </DialogTitle>
           <DialogDescription>
-            Удалить менеджера {managerName}? Это действие нельзя отменить.
+            Заблокировать менеджера {managerName}? Он исчезнет из списка активных менеджеров MAG.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-2">
@@ -45,6 +53,7 @@ export function ConfirmDeleteManagerDialog({
             variant="outline"
             className="rounded-[10px]"
             onClick={() => onOpenChange(false)}
+            disabled={isPending}
           >
             Отмена
           </Button>
@@ -53,8 +62,9 @@ export function ConfirmDeleteManagerDialog({
             variant="destructive"
             className="rounded-[10px]"
             onClick={handleConfirm}
+            disabled={isPending}
           >
-            Удалить
+            {isPending ? 'Блокировка…' : 'Заблокировать'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -88,6 +88,12 @@ paths:
   /api/v1/halls/hall-manager-assignments/:
     get:
       operationId: halls_manager_assignments_list
+      description: |-
+        Список назначений для редактирования матрицы (lead, admin).
+
+        В выдаче только строки, где менеджер **`role=manager_mag`** и **`is_active=true`** (заблокированные и «снятые» менеджеры не показываются).
+
+        Для отображения списка менеджеров с вложенными `assignments` и метриками используйте **`GET /managers/`**.
       summary: Матрица зал/лофт → менеджер MAG
       tags:
       - halls
@@ -101,6 +107,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
     post:
       operationId: halls_manager_assignments_create
@@ -261,6 +273,70 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Loft'
+          description: ''
+  /api/v1/managers/:
+    get:
+      operationId: managers_directory_list
+      description: |-
+        Единый список для UI матрицы: профиль, привязки зал/лофт (`assignments` с `label`), счётчики активных/закрытых проектов, суммы продаж и бонусов (all-time).
+
+        **Кто в списке:** только `role=manager_mag` и `is_active=true` (заблокированные / снятые с роли не возвращаются).
+
+        **Счётчики:** активные — все стадии кроме `closed`, `archived`, `out_of_mag_scope`; закрытые — `closed` + `archived`.
+
+        **Суммы (all-time, без `out_of_mag_scope`):**
+        - `sales_total` — сумма продаж (subtotal статей, без налога);
+        - `net_profit_total` — чистая прибыль из расчёта бонуса, без строки «налог»;
+        - `final_bonus_total` — итоговый бонус (`approved_bonus` или `total_bonus` расчёта).
+
+        CRUD назначений: `GET/POST /halls/hall-manager-assignments/`. Не склеивать с `GET /users/?role=manager_mag`.
+      summary: Справочник менеджеров MAG (матрица)
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManagerDirectory'
+              examples:
+                МенеджерСПривязкамиИМетриками:
+                  value:
+                  - - id: 5
+                      email: ivan@example.com
+                      first_name: Иван
+                      last_name: Иванов
+                      full_name: Иван Иванов
+                      is_active: true
+                      assignments:
+                      - id: 12
+                        hall_id: 10
+                        hall_name: Зал 1
+                        loft_id: 2
+                        loft_name: Loft A
+                        label: Loft A — Зал 1
+                      - id: 13
+                        hall_id: 10
+                        hall_name: Зал 1
+                        loft_id: null
+                        loft_name: null
+                        label: Зал 1
+                      active_projects_count: 4
+                      closed_projects_count: 11
+                      sales_total: '1250000.00'
+                      net_profit_total: '320000.00'
+                      final_bonus_total: '87500.00'
+                  summary: Менеджер с привязками и метриками
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/notifications/:
     get:
@@ -1061,29 +1137,45 @@ paths:
   /api/v1/projects/calendar/:
     get:
       operationId: projects_calendar_list
-      description: Без пагинации. Исключает out_of_mag_scope.
-      summary: Календарь проектов за период
+      description: |-
+        Отдельная ручка под UI календаря (не общий список `/projects/`).
+
+        **Период** — один из вариантов:
+        - `?year=2026&month=5` — весь календарный месяц по `event_date`;
+        - `?event_date_after=2026-05-01&event_date_before=2026-05-31` — произвольный диапазон.
+
+        Без пагинации. Проекты в стадии `out_of_mag_scope` не возвращаются (см. `GET /projects/out-of-mag/`).
+
+        **Доступ:** manager_mag — только свои проекты; lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
+      summary: 'Календарь: проекты за месяц / период'
       parameters:
       - in: query
         name: event_date_after
         schema:
           type: string
+          format: date
+        description: Начало периода (ISO date), альтернатива year+month
       - in: query
         name: event_date_before
         schema:
           type: string
+          format: date
+        description: Конец периода (ISO date), вместе с event_date_after
       - in: query
         name: mag_manager
         schema:
           type: integer
+        description: Фильтр по менеджеру MAG (только lead, admin)
       - in: query
         name: month
         schema:
           type: integer
+        description: Месяц 1–12 (обязателен вместе с year)
       - in: query
         name: year
         schema:
           type: integer
+        description: Год периода (вместе с month — все проекты за календарный месяц)
       tags:
       - projects
       security:
@@ -1094,6 +1186,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProjectCalendarResponseSchema'
+              examples:
+                ОтветКалендаря:
+                  value:
+                    period_start: '2026-05-01'
+                    period_end: '2026-05-31'
+                    count: 1
+                    results:
+                    - id: 1
+                      event_name: Свадьба Ивановых
+                      event_date: '2026-05-10'
+                      hall_loft: Зал A
+                      plum_lofthall_manager: Петров
+                      stage: calculation_prepared
+                      stage_label: Расчёт подготовлен
+                      mag_manager: Иванов Иван
+                      mag_manager_id: 5
+                  summary: Ответ календаря
           description: ''
         '400':
           content:
@@ -1226,7 +1335,10 @@ paths:
   /api/v1/users/:
     get:
       operationId: users_list
-      description: 'Доступ: lead, admin. Без пагинации.'
+      description: |-
+        Доступ: lead, admin. Без пагинации.
+
+        Для экрана матрицы менеджеров (привязки зал/лофт + метрики по проектам) используйте **`GET /managers/`**, а не склейку с `?role=manager_mag`.
       summary: Список пользователей
       parameters:
       - in: query
@@ -1254,6 +1366,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserList'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/users/{id}/:
     get:
@@ -1552,6 +1670,82 @@ components:
       - name
       - plum_id
       - synced_at
+    ManagerAssignment:
+      type: object
+      properties:
+        id:
+          type: integer
+        hall_id:
+          type: integer
+        hall_name:
+          type: string
+        loft_id:
+          type: integer
+          nullable: true
+        loft_name:
+          type: string
+          nullable: true
+        label:
+          type: string
+      required:
+      - hall_id
+      - hall_name
+      - id
+      - label
+      - loft_id
+      - loft_name
+    ManagerDirectory:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        full_name:
+          type: string
+        is_active:
+          type: boolean
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagerAssignment'
+        active_projects_count:
+          type: integer
+        closed_projects_count:
+          type: integer
+        sales_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: Сумма продаж (subtotal статей, без налога), all-time
+        net_profit_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: Чистая прибыль без строки «налог» из расчёта бонуса
+        final_bonus_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: 'Итоговый бонус: approved_bonus или total_bonus из расчёта'
+      required:
+      - active_projects_count
+      - assignments
+      - closed_projects_count
+      - email
+      - final_bonus_total
+      - first_name
+      - full_name
+      - id
+      - is_active
+      - last_name
+      - net_profit_total
+      - sales_total
     MarkedReadResponse:
       type: object
       properties:
