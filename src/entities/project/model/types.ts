@@ -70,6 +70,8 @@ export interface Project {
   economics?: ProjectEconomics
   /** ISO-datetime архивации проекта. */
   archivedAt?: string
+  /** ISO-datetime подтверждения документов бухгалтером (этап documents_confirmed). */
+  documentsConfirmedAt?: string
 }
 
 export type ContractType = 'with_vat' | 'without_vat'
@@ -161,6 +163,16 @@ export interface ProjectFinance {
   netProfit: number | null
 }
 
+/** Снимок этапа из detail-схемы — гидрирует пройденные этапы при загрузке проекта. */
+export interface StageSnapshot {
+  /** Когда проект попал на этап. */
+  enteredAt?: string
+  /** Кто перевёл проект на этап. */
+  enteredBy?: string
+  /** Значения полей этапа. */
+  values: Partial<StageFormData>
+}
+
 export interface ProjectDetail extends Project {
   enteredSystemAt: string
   history: StageHistoryEntry[]
@@ -171,4 +183,6 @@ export interface ProjectDetail extends Project {
   clientCompany: string
   clientStatus: PlumStatus
   finance: ProjectFinance
+  /** Снимки пройденных этапов с бэка — для гидрации `useStageFlow` после перезагрузки. */
+  stageSnapshots?: Partial<Record<ProjectStage, StageSnapshot>>
 }

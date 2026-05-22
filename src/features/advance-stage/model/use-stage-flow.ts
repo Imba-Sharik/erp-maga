@@ -60,6 +60,8 @@ export interface UseStageFlowOptions {
   projectEnteredAt?: string
   /** Название проекта — подставляется в текст уведомлений руководителю. */
   projectTitle?: string
+  /** Снимки пройденных этапов с бэка — гидрируют `records`, чтобы данные пережили перезагрузку. */
+  initialRecords?: StageRecords
 }
 
 const PLUM_SYSTEM_LABEL = 'PLUM (синхронизация)'
@@ -76,6 +78,7 @@ export function useStageFlow({
   initialStage,
   projectEnteredAt,
   projectTitle,
+  initialRecords,
 }: UseStageFlowOptions): StageFlow {
   const currentUser = useCurrentUser()
   const queryClient = useQueryClient()
@@ -88,13 +91,20 @@ export function useStageFlow({
   }, [projectId, initialStage, currentUser.id])
 
   const [currentStage, setCurrentStage] = useState<ProjectStage>(initialStage)
-  const [records, setRecords] = useState<StageRecords>(() => ({
-    [initialStage]: {
-      enteredAt: projectEnteredAt ?? new Date().toISOString(),
-      enteredBy: initialStage === 'plum_request' ? PLUM_SYSTEM_LABEL : undefined,
-      values: initialDraft?.values,
-    },
-  }))
+  const [records, setRecords] = useState<StageRecords>(() => {
+    // Гидрация пройденных этапов снимками с бэка + запись текущего этапа.
+    const seeded: StageRecords = { ...initialRecords }
+    const current = seeded[initialStage]
+    seeded[initialStage] = {
+      ...current,
+      enteredAt: current?.enteredAt ?? projectEnteredAt ?? new Date().toISOString(),
+      enteredBy:
+        current?.enteredBy ?? (initialStage === 'plum_request' ? PLUM_SYSTEM_LABEL : undefined),
+      // Черновик перебивает значения с бэка — несохранённая правка текущего этапа.
+      values: { ...current?.values, ...initialDraft?.values },
+    }
+    return seeded
+  })
   const [articles, setArticles] = useState<ProjectArticles>(
     () => initialDraft?.articles ?? createInitialArticles(),
   )

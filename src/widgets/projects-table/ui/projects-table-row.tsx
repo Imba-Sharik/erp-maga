@@ -15,6 +15,7 @@ import { getTableGridTemplate } from '../lib/table-columns'
 import { ProjectManagerCell, type ProjectManagerCellProps } from './project-manager-cell'
 import {
   formatTableDate,
+  formatTableDateTime,
   ProjectArchivedAtCell,
   ProjectHallCell,
   ProjectLoftCell,
@@ -80,7 +81,10 @@ export function ProjectsTableRow({
 }: ProjectsTableRowProps) {
   const navigate = useNavigate()
   const gridTemplate = getTableGridTemplate(columnView)
-  const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
+  // ЛК бухгалтера ведёт на свою деталь /requests/:id, остальные — на /projects/:id.
+  const detailBase =
+    columnView === 'requests' || columnView === 'closed-requests' ? '/requests' : '/projects'
+  const goToDetail = () => navigate(`${detailBase}/${project.id}`, { state: backOrigin })
 
   const managerCellProps: ProjectManagerCellProps = {
     manager: displayManager,
@@ -167,6 +171,42 @@ export function ProjectsTableRow({
           <GridTableCell muted>{formatTableMoney(resolveSalesTotal(project))}</GridTableCell>
           <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
           <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>
+        </div>
+      </ProjectTableNavRow>
+    )
+  }
+
+  // Запросы / Закрытые запросы (ЛК бухгалтера) — менеджер без редактирования.
+  if (columnView === 'requests') {
+    return (
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+        <div className="contents">
+          <ProjectTitleCell project={project} />
+          <ProjectLoftCell project={project} />
+          <ProjectHallCell project={project} />
+          <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+          <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
+          <GridTableCell muted>{project.company || '—'}</GridTableCell>
+          <GridTableCell muted>{formatTableDate(project.createdAt)}</GridTableCell>
+        </div>
+      </ProjectTableNavRow>
+    )
+  }
+
+  if (columnView === 'closed-requests') {
+    return (
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+        <div className="contents">
+          <ProjectTitleCell project={project} />
+          <ProjectLoftCell project={project} />
+          <ProjectHallCell project={project} />
+          <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+          <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
+          <GridTableCell muted>{project.company || '—'}</GridTableCell>
+          <GridTableCell muted>
+            {formatTableDateTime(project.documentsConfirmedAt ?? '')}
+          </GridTableCell>
+          <GridTableCell muted>{formatTableDate(project.createdAt)}</GridTableCell>
         </div>
       </ProjectTableNavRow>
     )

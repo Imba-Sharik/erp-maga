@@ -6,7 +6,14 @@ import type { Project as BackendProject } from '@/shared/api/generated/types/Pro
 import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
-import type { Project, ProjectDetail, ProjectEconomics, ProjectStage } from '../model/types'
+import type {
+  Project,
+  ProjectDetail,
+  ProjectEconomics,
+  ProjectStage,
+  StageFormData,
+  StageSnapshot,
+} from '../model/types'
 
 /** Поля итогов, которые бэк может отдавать в списке, но их нет в сгенерированном Project. */
 type BackendProjectListExtras = {
@@ -102,6 +109,10 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     plumCardUrl: b.plum_card_url,
     lastUpdate: formatLastUpdate(b.updated_at),
     createdAt: b.created_at,
+    // documents_confirmed_at пока есть только в ProjectDetailSchema, не в списке.
+    ...('documents_confirmed_at' in b && b.documents_confirmed_at
+      ? { documentsConfirmedAt: b.documents_confirmed_at }
+      : {}),
     ...(hasAnyEconomics(economics) ? { economics } : {}),
   }
 }
@@ -152,9 +163,143 @@ export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
   return result
 }
 
+function userBriefName(
+  user: { full_name?: string | null } | null | undefined,
+): string | undefined {
+  return user?.full_name ?? undefined
+}
+
+interface SnapshotInput {
+  enteredAt?: string | null
+  enteredBy?: string
+  values: Record<string, string | null | undefined>
+}
+
+/** Собирает снимок этапа, отбрасывая пустые значения. `undefined`, если этап пуст. */
+function buildSnapshot({ enteredAt, enteredBy, values }: SnapshotInput): StageSnapshot | undefined {
+  const cleaned: Record<string, string> = {}
+  for (const [key, value] of Object.entries(values)) {
+    if (value) cleaned[key] = value
+  }
+  const at = enteredAt ?? undefined
+  if (Object.keys(cleaned).length === 0 && !at && !enteredBy) return undefined
+  return { enteredAt: at, enteredBy, values: cleaned as Partial<StageFormData> }
+}
+
+/**
+ * Снимки пройденных этапов из detail-схемы. Нужны, чтобы после перезагрузки страницы
+ * `useStageFlow` показал значения пройденных этапов (иначе они рисуются как «—»).
+ * Финансовые этапы (ready/expenses/bonus) хранят `articles` — здесь не гидрируются.
+ */
+function mapStageSnapshots(b: ProjectDetailSchema): Partial<Record<ProjectStage, StageSnapshot>> {
+  const snapshots: Partial<Record<ProjectStage, StageSnapshot>> = {}
+  const put = (stage: ProjectStage, snapshot: StageSnapshot | undefined) => {
+    if (snapshot) snapshots[stage] = snapshot
+  }
+
+  put(
+    'plum_request',
+    buildSnapshot({
+      enteredAt: b.created_at,
+      values: {
+        clientCompany: b.client_company || b.plum_client_company,
+        phone: b.phone || b.plum_phone,
+        contactPerson: b.contact_person || b.plum_contact_person,
+        email: b.email || b.plum_email,
+      },
+    }),
+  )
+
+  put(
+    'primary_contact_done',
+    buildSnapshot({
+      enteredAt: b.contacted_at,
+      enteredBy: userBriefName(b.primary_contact_set_by),
+      values: {
+        contactComment: b.contact_comment,
+        contactChannel: b.contact_channel,
+        contactedAt: b.contacted_at,
+      },
+    }),
+  )
+
+  put(
+    'calculation_prepared',
+    buildSnapshot({
+      enteredAt: b.calculation_prepared_at,
+      enteredBy: userBriefName(b.calculation_prepared_set_by),
+      values: { calcComment: b.calculation_comment },
+    }),
+  )
+
+  put(
+    'contract_signed',
+    buildSnapshot({
+      enteredAt: b.contract_signed_at,
+      enteredBy: userBriefName(b.contract_signed_set_by),
+      values: {
+        contractType: b.contract_type,
+        contractNumber: b.contract_number,
+        contractDate: b.contract_date,
+        legalEntity: b.legal_entity,
+        contractComment: b.contract_comment,
+      },
+    }),
+  )
+
+  put(
+    'event_held',
+    buildSnapshot({
+      enteredAt: b.event_held_at,
+      enteredBy: userBriefName(b.event_held_set_by),
+      values: {
+        postEventComment: b.post_event_comment,
+        eventReadiness:
+          b.event_readiness === true
+            ? 'ready'
+            : b.event_readiness === false
+              ? 'not_ready'
+              : undefined,
+      },
+    }),
+  )
+
+  put(
+    'documents_confirmed',
+    buildSnapshot({
+      enteredAt: b.documents_confirmed_at,
+      enteredBy: userBriefName(b.documents_confirmed_set_by),
+      values: {
+        projectDocsStatus: b.project_docs_status,
+        projectDocsConfirmedAt: b.project_docs_confirmed_at,
+        projectDocsConfirmedBy: userBriefName(b.project_docs_confirmed_by),
+        subleaseDocsStatus: b.sublease_docs_status,
+        subleaseDocsConfirmedAt: b.sublease_docs_confirmed_at,
+        subleaseDocsConfirmedBy: userBriefName(b.sublease_docs_confirmed_by),
+        staffReceiptsStatus: b.staff_receipts_status,
+        staffReceiptsConfirmedAt: b.staff_receipts_confirmed_at,
+        staffReceiptsConfirmedBy: userBriefName(b.staff_receipts_confirmed_by),
+      },
+    }),
+  )
+
+  put(
+    'data_confirmed',
+    buildSnapshot({
+      enteredAt: b.data_confirmation_at,
+      enteredBy: userBriefName(b.data_confirmation_by),
+      values: { dataConfirmedStatus: b.data_confirmed_status },
+    }),
+  )
+
+  return snapshots
+}
+
 export function mapBackendProjectDetail(b: ProjectDetailSchema): ProjectDetail | null {
   const base = mapBackendProject(b)
   if (!base) return null
+
+  const stageSnapshots = mapStageSnapshots(b)
 
   return {
     ...base,
@@ -167,5 +312,6 @@ export function mapBackendProjectDetail(b: ProjectDetailSchema): ProjectDetail |
     clientStatus: 'confirmed',
     finance: { sales: null, expenses: null, bonuses: null, netProfit: null },
     history: [],
+    ...(Object.keys(stageSnapshots).length > 0 ? { stageSnapshots } : {}),
   }
 }

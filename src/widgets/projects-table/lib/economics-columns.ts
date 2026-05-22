@@ -8,6 +8,8 @@ export type ProjectsTableColumnView =
   | 'outside-mag'
   | 'closing-general'
   | 'closing-economics'
+  | 'requests'
+  | 'closed-requests'
 
 const STAGE_INDEX = new Map<ProjectStage, number>(
   ALL_STAGE_ORDER.map((stage, index) => [stage, index]),
