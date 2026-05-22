@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react'
-import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
+import { useVenueCatalog } from '@/entities/venue'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Input } from '@/shared/ui/input'
 
@@ -32,6 +32,8 @@ export function ProjectsBoardToolbar({
   onChangeLoft,
   filtersAlign = 'spread',
 }: ProjectsBoardToolbarProps) {
+  const { hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
+  const selectDisabled = isLoading || isError
   const filtersAtStart = filtersAlign === 'start'
 
   return (
@@ -70,16 +72,18 @@ export function ProjectsBoardToolbar({
         <ClearableSelect
           placeholder="Выберите зал"
           value={hall}
-          options={HALL_OPTIONS}
+          options={hallOptions}
           onChange={onChangeHall}
           triggerClassName={TRIGGER_CLASS}
+          disabled={selectDisabled}
         />
         <ClearableSelect
           placeholder="Выберите LOFT"
           value={loft}
-          options={LOFT_OPTIONS}
+          options={loftOptions}
           onChange={onChangeLoft}
           triggerClassName={TRIGGER_CLASS}
+          disabled={selectDisabled}
         />
       </div>
     </div>

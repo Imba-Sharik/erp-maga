@@ -25,6 +25,7 @@ interface ClearableSelectProps {
   placeholder: string
   clearLabel?: string
   triggerClassName?: string
+  disabled?: boolean
 }
 
 /**
@@ -39,14 +40,16 @@ export function ClearableSelect({
   placeholder,
   clearLabel = 'Не выбрано',
   triggerClassName,
+  disabled = false,
 }: ClearableSelectProps) {
   return (
     <Select
       key={value ?? EMPTY_KEY}
       value={value ?? undefined}
       onValueChange={(v) => onChange(v === RESET_VALUE ? null : v)}
+      disabled={disabled}
     >
-      <SelectTrigger className={triggerClassName}>
+      <SelectTrigger className={triggerClassName} disabled={disabled}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

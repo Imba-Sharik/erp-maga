@@ -16,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
+import { useVenueCatalog } from '@/entities/venue'
 import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
-import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
@@ -44,6 +44,13 @@ export interface CreateProjectDialogProps {
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
   const navigate = useNavigate()
   const currentUser = useCurrentUser()
+  const {
+    hallOptions,
+    loftOptions,
+    isLoading: isVenueCatalogLoading,
+    isError: isVenueCatalogError,
+  } = useVenueCatalog()
+  const selectDisabled = isVenueCatalogLoading || isVenueCatalogError
 
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
@@ -141,9 +148,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <ClearableSelect
                       placeholder="Выберите LOFT"
                       value={field.value || null}
-                      options={LOFT_OPTIONS}
+                      options={loftOptions}
                       onChange={(v) => field.onChange(v ?? '')}
                       triggerClassName={TRIGGER_CLASS}
+                      disabled={selectDisabled}
                     />
                   </FormControl>
                   <FormMessage />
@@ -160,9 +168,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <ClearableSelect
                       placeholder="Выберите зал"
                       value={field.value || null}
-                      options={HALL_OPTIONS}
+                      options={hallOptions}
                       onChange={(v) => field.onChange(v ?? '')}
                       triggerClassName={TRIGGER_CLASS}
+                      disabled={selectDisabled}
                     />
                   </FormControl>
                   <FormMessage />

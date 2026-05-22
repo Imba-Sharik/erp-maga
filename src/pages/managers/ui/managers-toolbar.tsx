@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react'
 
-import { HALL_OPTIONS, LOFT_OPTIONS } from '@/shared/constants/venue-options'
+import { useVenueCatalog } from '@/entities/venue'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Input } from '@/shared/ui/input'
 
@@ -24,6 +24,9 @@ export function ManagersToolbar({
   onChangeHall,
   onChangeLoft,
 }: ManagersToolbarProps) {
+  const { hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
+  const selectDisabled = isLoading || isError
+
   return (
     <div className="flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
       <div className="relative w-full md:w-75">
@@ -41,16 +44,18 @@ export function ManagersToolbar({
         <ClearableSelect
           placeholder="Выберите зал"
           value={hall}
-          options={HALL_OPTIONS}
+          options={hallOptions}
           onChange={onChangeHall}
           triggerClassName={TRIGGER_CLASS}
+          disabled={selectDisabled}
         />
         <ClearableSelect
           placeholder="Выберите LOFT"
           value={loft}
-          options={LOFT_OPTIONS}
+          options={loftOptions}
           onChange={onChangeLoft}
           triggerClassName={TRIGGER_CLASS}
+          disabled={selectDisabled}
         />
       </div>
     </div>
