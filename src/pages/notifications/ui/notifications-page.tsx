@@ -20,11 +20,11 @@ export function NotificationsPage() {
   const visible = notifications.filter((n) => n.channels.some((c) => channelFilter[c]))
 
   return (
-    <div className="flex w-full max-w-4xl flex-col gap-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1B1A17]">Уведомления</h1>
-          <p className="text-sm text-[#8A8A8A]">
+    <div className="flex w-full max-w-4xl flex-col gap-6">
+      <header className="flex shrink-0 flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="font-heading font-bold text-[#1B1A17]">Уведомления</h1>
+          <p className="max-w-[640px] text-sm text-[#ACACAC]">
             События по проектам. Канал ERP — внутри системы, Telegram — пуш-сообщения.
           </p>
         </div>
@@ -44,7 +44,7 @@ export function NotificationsPage() {
             </label>
           ))}
         </div>
-      </div>
+      </header>
 
       {visible.length === 0 ? (
         <p className="text-sm text-[#ACACAC]">
