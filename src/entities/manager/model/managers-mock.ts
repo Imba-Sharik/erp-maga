@@ -5,6 +5,7 @@ export const MOCK_MANAGERS: Manager[] = [
   {
     id: 'mgr-1',
     fullName: 'Петров Пётр Петрович',
+    assignments: [],
     lofts: ['LOFT#1', 'LOFT#2'],
     halls: ['MAIN', 'BACKYARD'],
     activeProjectsCount: 12,
@@ -15,6 +16,7 @@ export const MOCK_MANAGERS: Manager[] = [
   {
     id: 'mgr-2',
     fullName: 'Сидоров Сидор Сидорович',
+    assignments: [],
     lofts: ['LOFT#2', 'LOFT#3'],
     halls: ['BACKYARD', 'ROOFTOP'],
     activeProjectsCount: 8,
@@ -25,6 +27,7 @@ export const MOCK_MANAGERS: Manager[] = [
   {
     id: 'mgr-3',
     fullName: 'Петров Алексей',
+    assignments: [],
     lofts: ['LOFT#1'],
     halls: ['MAIN'],
     activeProjectsCount: 5,
@@ -35,6 +38,7 @@ export const MOCK_MANAGERS: Manager[] = [
   {
     id: 'mgr-4',
     fullName: 'Сидорова Мария',
+    assignments: [],
     lofts: ['LOFT#2'],
     halls: ['BACKYARD', 'ROOFTOP'],
     activeProjectsCount: 9,
@@ -45,6 +49,7 @@ export const MOCK_MANAGERS: Manager[] = [
   {
     id: 'mgr-5',
     fullName: 'Козлов Игорь Викторович',
+    assignments: [],
     lofts: ['LOFT#1', 'LOFT#3'],
     halls: ['MAIN', 'ROOFTOP'],
     activeProjectsCount: 6,
