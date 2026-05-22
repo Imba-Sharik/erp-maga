@@ -1,3 +1,5 @@
+import type { ProjectArticles } from '@/entities/project-articles'
+
 export type ProjectBackOrigin = {
   to: string
   label: string
@@ -185,4 +187,8 @@ export interface ProjectDetail extends Project {
   finance: ProjectFinance
   /** Снимки пройденных этапов с бэка — для гидрации `useStageFlow` после перезагрузки. */
   stageSnapshots?: Partial<Record<ProjectStage, StageSnapshot>>
+  /** Финансовые статьи проекта с бэка (этапы ready/expenses/bonus). */
+  articles?: ProjectArticles
+  /** Процент налога с бэка. */
+  taxRate?: number
 }

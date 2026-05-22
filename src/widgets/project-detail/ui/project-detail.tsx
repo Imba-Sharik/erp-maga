@@ -24,6 +24,8 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
     projectEnteredAt: project.enteredSystemAt,
     projectTitle: project.title,
     initialRecords: project.stageSnapshots,
+    initialArticles: project.articles,
+    initialTaxRate: project.taxRate,
   })
 
   return (

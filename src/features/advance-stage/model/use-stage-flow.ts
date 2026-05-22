@@ -62,6 +62,10 @@ export interface UseStageFlowOptions {
   projectTitle?: string
   /** Снимки пройденных этапов с бэка — гидрируют `records`, чтобы данные пережили перезагрузку. */
   initialRecords?: StageRecords
+  /** Финансовые статьи проекта с бэка — гидрируют `articles` (этапы ready/expenses/bonus). */
+  initialArticles?: ProjectArticles
+  /** Процент налога с бэка — гидрирует `taxRate`. */
+  initialTaxRate?: number
 }
 
 const PLUM_SYSTEM_LABEL = 'PLUM (синхронизация)'
@@ -79,6 +83,8 @@ export function useStageFlow({
   projectEnteredAt,
   projectTitle,
   initialRecords,
+  initialArticles,
+  initialTaxRate,
 }: UseStageFlowOptions): StageFlow {
   const currentUser = useCurrentUser()
   const queryClient = useQueryClient()
@@ -106,9 +112,11 @@ export function useStageFlow({
     return seeded
   })
   const [articles, setArticles] = useState<ProjectArticles>(
-    () => initialDraft?.articles ?? createInitialArticles(),
+    () => initialDraft?.articles ?? initialArticles ?? createInitialArticles(),
   )
-  const [taxRate, setTaxRateState] = useState<number>(() => initialDraft?.taxRate ?? 0)
+  const [taxRate, setTaxRateState] = useState<number>(
+    () => initialDraft?.taxRate ?? initialTaxRate ?? 0,
+  )
 
   // Финансы трогали в этой сессии — гейт для сохранения черновика (не на маунте).
   const financeDirtyRef = useRef(false)
