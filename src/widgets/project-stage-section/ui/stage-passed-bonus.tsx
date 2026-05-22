@@ -166,6 +166,8 @@ export function StagePassedBonus({
   const editable = !presentation.readOnly && canEdit && isCurrent
 
   const rows = buildBonusRows(articles)
+  const mainRows = rows.filter((row) => row.block === 'main')
+  const backlineRows = rows.filter((row) => row.block === 'backline')
   const totalBonus = rows.reduce((acc, row) => acc + calcRow(row.values).bonusAmount, 0)
   const dataConfirmedBy =
     (dataConfirmedRecord?.values?.dataConfirmedBy as string | undefined) ?? '—'
@@ -195,7 +197,16 @@ export function StagePassedBonus({
         <CollapsibleContent className="pt-4">
           <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
             <div className="flex min-w-0 flex-col gap-4">
-              {rows.map((row) => (
+              {mainRows.map((row) => (
+                <ArticleRow
+                  key={`${row.block}-${row.kind}`}
+                  row={row}
+                  editable={editable}
+                  onBonusChange={handleBonusChange}
+                />
+              ))}
+              {backlineRows.length > 0 ? <div className="h-px w-full bg-[#F0F0F0]" /> : null}
+              {backlineRows.map((row) => (
                 <ArticleRow
                   key={`${row.block}-${row.kind}`}
                   row={row}
