@@ -28,7 +28,8 @@ export const stageFormSchemas = {
   }),
   // Все поля опциональные — этап целиком необязателен, его можно пройти не заполняя.
   contract_signed: z.object({
-    contractType: z.enum(['with_vat', 'without_vat']).optional(),
+    // Форма подставляет '' для пустого селекта — без literal('') z.enum падает.
+    contractType: z.union([z.literal(''), z.enum(['with_vat', 'without_vat'])]).optional(),
     contractNumber: z.string().optional(),
     contractDate: z.string().optional(),
     legalEntity: z.string().optional(),
