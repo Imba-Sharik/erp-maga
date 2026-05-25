@@ -5,7 +5,7 @@ import {
   type ProjectStage,
   type StageFunnel,
 } from '@/entities/project'
-import type { StageFlow } from '@/features/advance-stage'
+import { isStageSkipped, type StageFlow } from '@/features/advance-stage'
 import { useProjectTab } from '@/features/project-tabs'
 import {
   presentationFromTab,
@@ -48,6 +48,7 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
     project,
     onAdvance: flow.advance,
     onPatchValues: flow.patchCurrentStageValues,
+    onPatchStageValues: flow.patchStageValues,
     articles: flow.articles,
     taxRate: flow.taxRate,
     onArticleChange: flow.updateArticle,
@@ -64,6 +65,7 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
           key={stage}
           stage={stage}
           isCurrent={flow.isCurrent(stage)}
+          isSkipped={isStageSkipped(stage, flow.currentStage, flow.records)}
           record={flow.getRecord(stage)}
           {...sharedProps}
         />
@@ -76,6 +78,7 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
           key={stage}
           stage={stage}
           isCurrent={flow.isCurrent(stage)}
+          isSkipped={isStageSkipped(stage, flow.currentStage, flow.records)}
           record={flow.getRecord(stage)}
           {...sharedProps}
         />

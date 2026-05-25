@@ -13,15 +13,23 @@ import { StagePassedExpenses } from './stage-passed-expenses'
 import { StagePassedReady } from './stage-passed-ready'
 import { StageSectionCurrent } from './stage-section-current'
 import { StageSectionPassed } from './stage-section-passed'
+import { StageSectionSkipped } from './stage-section-skipped'
 
 interface ProjectStageSectionProps {
   presentation: StagePresentationConfig
   project: ProjectDetail
   stage: ProjectStage
   isCurrent: boolean
+  /** Этап был пропущен (проект перешёл дальше с пустыми полями этого этапа). */
+  isSkipped?: boolean
   record: StageRecord | undefined
   onAdvance: (values?: Partial<StageFormData>) => void
   onPatchValues: (patch: Partial<StageFormData>) => void
+  /**
+   * Поправить поля произвольного этапа задним числом — используется и для
+   * дозаполнения пропущенного, и для редактирования уже заполненного.
+   */
+  onPatchStageValues?: (stage: ProjectStage, values: Partial<StageFormData>) => void
   articles: ProjectArticles
   taxRate: number
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
@@ -31,14 +39,19 @@ interface ProjectStageSectionProps {
   getRecord: (stage: ProjectStage) => StageRecord | undefined
 }
 
+/** Этапы, у которых пройденный вид допускает inline-редактирование задним числом. */
+const EDITABLE_AFTER_PASS: ReadonlySet<ProjectStage> = new Set<ProjectStage>(['contract_signed'])
+
 export function ProjectStageSection({
   presentation,
   project,
   stage,
   isCurrent,
+  isSkipped = false,
   record,
   onAdvance,
   onPatchValues,
+  onPatchStageValues,
   articles,
   taxRate,
   onArticleChange,
@@ -54,6 +67,19 @@ export function ProjectStageSection({
     onTaxRateChange,
     onToggleBackline,
     onAdvance: () => onAdvance(),
+  }
+
+  // Пропущенный этап — отдельная вёрстка с возможностью дозаполнить.
+  if (isSkipped && onPatchStageValues) {
+    return (
+      <StageSectionSkipped
+        project={project}
+        stage={stage}
+        record={record}
+        articles={articles}
+        onFillSkipped={(values) => onPatchStageValues(stage, values)}
+      />
+    )
   }
 
   // Этапы с финансовыми блоками — собственная вёрстка
@@ -99,6 +125,11 @@ export function ProjectStageSection({
       record={record}
       articles={articles}
       onAdvance={onAdvance}
+      onEditPassed={
+        EDITABLE_AFTER_PASS.has(stage) && onPatchStageValues
+          ? (values) => onPatchStageValues(stage, values)
+          : undefined
+      }
     />
   )
 }

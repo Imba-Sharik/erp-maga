@@ -56,6 +56,15 @@ interface StageSectionCurrentProps {
   articles?: ProjectArticles
   onAdvance?: (values: Partial<StageFormData>) => void
   onPatchValues?: (patch: Partial<StageFormData>) => void
+  /**
+   * Режим инлайн-редактирования прошлого этапа:
+   * - `'fill'` — дозаполнить ранее пропущенный этап
+   * - `'edit'` — поправить уже заполненный пройденный этап
+   * Шапка и подпись CTA меняются под режим, отправка идёт в `onEditingSubmit`.
+   */
+  editingMode?: 'fill' | 'edit'
+  onEditingSubmit?: (values: Partial<StageFormData>) => void
+  onCancelEditing?: () => void
 }
 
 /**
@@ -80,6 +89,9 @@ export function StageSectionCurrent({
   articles,
   onAdvance,
   onPatchValues,
+  editingMode,
+  onEditingSubmit,
+  onCancelEditing,
 }: StageSectionCurrentProps) {
   const schema = stageFormSchemas[stage]
   const fields = STAGE_FIELDS[stage]
@@ -119,6 +131,9 @@ export function StageSectionCurrent({
   }, [form, fields, canEdit, project.id, stage, currentUser.id])
 
   const handleAdvance = form.handleSubmit((values) => onAdvance?.(values as Partial<StageFormData>))
+  const handleEditingSubmit = form.handleSubmit((values) =>
+    onEditingSubmit?.(values as Partial<StageFormData>),
+  )
 
   const renderField = (f: StageFieldConfig) => {
     if (f.source === 'system' || !canEdit) {
@@ -227,23 +242,52 @@ export function StageSectionCurrent({
     )
   }
 
+  const EDITING_HEADER_LABEL: Record<'fill' | 'edit', string> = {
+    fill: 'Заполнение пропущенного этапа:',
+    edit: 'Редактирование этапа:',
+  }
+  const headerLabel = editingMode ? EDITING_HEADER_LABEL[editingMode] : 'Текущий этап:'
+  const advanceLabel = stage === 'contract_signed' ? 'Готов к проведению' : 'Следующий этап'
+
   return (
     <div className="flex w-full flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 text-sm">
-          <span className="font-medium text-[#454545]">Текущий этап:</span>
+          <span className="font-medium text-[#454545]">{headerLabel}</span>
           <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
         </div>
         {canEdit && stage !== 'closed' ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
-            <Button
-              type="button"
-              onClick={handleAdvance}
-              className="h-[38px] rounded-[10px] px-4 text-sm"
-            >
-              {stage === 'contract_signed' ? 'Готов к проведению' : 'Следующий этап'}
-              <ArrowRight className="size-3.5" />
-            </Button>
+            {editingMode ? (
+              <>
+                {onCancelEditing ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onCancelEditing}
+                    className="h-[38px] rounded-[10px] border-[#B1B1B1] px-4 text-sm"
+                  >
+                    Отмена
+                  </Button>
+                ) : null}
+                <Button
+                  type="button"
+                  onClick={handleEditingSubmit}
+                  className="h-[38px] rounded-[10px] px-4 text-sm"
+                >
+                  Сохранить
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleAdvance}
+                className="h-[38px] rounded-[10px] px-4 text-sm"
+              >
+                {advanceLabel}
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
           </div>
         ) : null}
       </div>
