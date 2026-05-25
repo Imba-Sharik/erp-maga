@@ -1,26 +1,14 @@
-import type { ProjectStage } from '@/entities/project'
+import type { NotificationEventTypeEnumKey } from '@/shared/api/generated/types/Notification'
 
-/** Роль-адресат уведомления. */
-export type NotificationRecipient = 'accountant' | 'director'
-
-/** Канал доставки. ERP — внутри системы, Telegram — пуш (пока заглушка под будущую интеграцию). */
-export type NotificationChannel = 'erp' | 'telegram'
-
-/**
- * Уведомление. Моковая сущность: создаётся локально при переходе проекта
- * на этап, требующий действия от конкретной роли.
- */
-export interface AppNotification {
-  id: string
-  /** Этап, на который перешёл проект (определяет текст и цвет уведомления). */
-  stage: ProjectStage
-  /** Кому адресовано уведомление. */
-  recipient: NotificationRecipient
-  /** Каналы доставки (пока всегда `['erp']`). */
-  channels: NotificationChannel[]
-  projectId: number | string
-  projectTitle: string
-  /** ISO-datetime создания. */
+/** Уведомление для UI — тонкий слой поверх API Notification. */
+export interface NotificationView {
+  id: number
+  eventType: NotificationEventTypeEnumKey
+  title: string
+  message: string
+  projectId?: number
+  projectTitle?: string
   createdAt: string
-  read: boolean
+  isRead: boolean
+  dotColor: string
 }
