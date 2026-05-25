@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -34,7 +35,14 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
   const [returnTarget, setReturnTarget] = useState<Project | null>(null)
 
-  const query = useOutsideMagTableQuery(listDateParams, {
+  const {
+    selectOptions,
+    filterOptions,
+    isLoading: isManagersLoading,
+    isError: isManagersError,
+  } = useManagersDirectory()
+
+  const query = useOutsideMagTableQuery(listDateParams, columnFilters.manager, {
     enabled: !isOutsideMagMocksEnabled,
   })
 
@@ -45,13 +53,10 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const isFetchingNextPage = isOutsideMagMocksEnabled ? false : query.isFetchingNextPage
   const fetchNextPage = query.fetchNextPage
 
-  const managerOptions = useMemo(() => {
-    const names = new Set<string>()
-    for (const project of projects) {
-      if (project.manager) names.add(project.manager)
-    }
-    return [...names].sort((a, b) => a.localeCompare(b, 'ru'))
-  }, [projects])
+  const managerFilterName = useMemo(
+    () => resolveManagerFilterName(columnFilters.manager, selectOptions),
+    [columnFilters.manager, selectOptions],
+  )
 
   const filtered = useMemo(
     () =>
@@ -59,8 +64,9 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
         search,
         columns: columnFilters,
         columnView: 'outside-mag',
+        ...(isOutsideMagMocksEnabled ? { managerName: managerFilterName } : {}),
       }),
-    [projects, search, columnFilters],
+    [projects, search, columnFilters, isOutsideMagMocksEnabled, managerFilterName],
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
@@ -75,7 +81,10 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
           projects={filtered}
           columnView="outside-mag"
           columnFilters={columnFilters}
-          managerOptions={managerOptions}
+          managerFilterOptions={filterOptions}
+          directoryOptions={selectOptions}
+          managersSelectLoading={isManagersLoading}
+          managersSelectError={isManagersError}
           onColumnFilterChange={handleColumnFilterChange}
           isLoading={isLoading}
           isError={isError}
