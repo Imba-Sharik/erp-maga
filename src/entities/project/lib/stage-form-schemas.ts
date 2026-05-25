@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { isValidRuPhone } from '@/shared/lib/phone/is-valid-ru-phone'
+import type { UserRole } from '@/entities/user-role'
 
 import type { ProjectStage } from '../model/types'
 
@@ -38,17 +39,7 @@ export const stageFormSchemas = {
     postEventComment: z.string().optional(),
   }),
   expenses_entered: z.object({}),
-  documents_confirmed: z.object({
-    projectDocsStatus: z.enum(['present', 'absent', 'not_required'], {
-      error: () => 'Выберите статус по закрывающим проекта',
-    }),
-    subleaseDocsStatus: z.enum(['present', 'absent', 'not_required'], {
-      error: () => 'Выберите статус по субаренде',
-    }),
-    staffReceiptsStatus: z.enum(['present', 'absent', 'not_required'], {
-      error: () => 'Выберите статус по распискам персонала',
-    }),
-  }),
+  documents_confirmed: z.object({}),
   data_confirmed: z.object({
     dataConfirmedStatus: z.enum(['confirmed', 'rejected'], {
       error: () => 'Выберите статус подтверждения данных',
@@ -60,6 +51,66 @@ export const stageFormSchemas = {
   out_of_mag_scope: z.object({}),
   archived: z.object({}),
 } satisfies Record<ProjectStage, z.ZodTypeAny>
+
+const docStatusEnum = z.enum(['present', 'absent', 'not_required', 're_requested'])
+
+const documentsConfirmedAccountantSchema = z
+  .object({
+    projectDocsStatus: z.enum(['present', 'absent', 'not_required', 're_requested'], {
+      error: () => 'Выберите статус по закрывающим проекта',
+    }),
+    subleaseDocsStatus: z.enum(['present', 'absent', 'not_required', 're_requested'], {
+      error: () => 'Выберите статус по субаренде',
+    }),
+    staffReceiptsStatus: z.enum(['present', 'absent', 'not_required', 're_requested'], {
+      error: () => 'Выберите статус по распискам персонала',
+    }),
+  })
+  .superRefine((data, ctx) => {
+    const pending: Array<{ key: keyof typeof data; message: string }> = [
+      {
+        key: 'projectDocsStatus',
+        message: 'Дождитесь повторной загрузки закрывающих по проекту',
+      },
+      {
+        key: 'subleaseDocsStatus',
+        message: 'Дождитесь повторной загрузки закрывающих по субаренде',
+      },
+      {
+        key: 'staffReceiptsStatus',
+        message: 'Дождитесь повторной загрузки расписок по персоналу',
+      },
+    ]
+    for (const { key, message } of pending) {
+      if (data[key] === 're_requested') {
+        ctx.addIssue({ code: 'custom', message, path: [key] })
+      }
+    }
+  })
+
+const documentsConfirmedManagerSchema = z.object({
+  projectDocsFileName: z.string().optional(),
+  subleaseDocsFileName: z.string().optional(),
+  staffReceiptsFileName: z.string().optional(),
+})
+
+/** Руководитель видит селекты статусов в read-only — поля опциональны для формы. */
+const documentsConfirmedDirectorSchema = z.object({
+  projectDocsStatus: docStatusEnum.optional(),
+  subleaseDocsStatus: docStatusEnum.optional(),
+  staffReceiptsStatus: docStatusEnum.optional(),
+})
+
+/** Схема валидации текущего этапа с учётом роли (documents_confirmed разделён). */
+export function getStageFormSchema(stage: ProjectStage, role: UserRole): z.ZodTypeAny {
+  if (stage === 'documents_confirmed') {
+    if (role === 'accountant') return documentsConfirmedAccountantSchema
+    if (role === 'manager') return documentsConfirmedManagerSchema
+    if (role === 'director') return documentsConfirmedDirectorSchema
+    return documentsConfirmedDirectorSchema
+  }
+  return stageFormSchemas[stage]
+}
 
 export type StageFormValues<S extends ProjectStage> = z.infer<(typeof stageFormSchemas)[S]>
 

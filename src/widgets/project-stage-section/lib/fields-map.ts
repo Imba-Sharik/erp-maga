@@ -1,7 +1,11 @@
 import type { ProjectStage, StageFormData } from '@/entities/project'
+import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { UserRole } from '@/entities/user-role'
 
-export type StageFieldType = 'text' | 'textarea' | 'date' | 'select' | 'phone'
+export type StageFieldType = 'text' | 'textarea' | 'date' | 'select' | 'phone' | 'document'
 export type StageFieldSource = 'manager' | 'system'
+export type StageFieldRole = 'manager' | 'accountant' | 'director'
+export type { StageDocumentType }
 
 export interface StageFieldConfig {
   name: keyof StageFormData
@@ -12,6 +16,12 @@ export interface StageFieldConfig {
   options?: { value: string; label: string }[]
   /** Кто заполняет поле — менеджер вводит руками, система проставляет автоматически. */
   source?: StageFieldSource
+  /** Если задано — поле показывается на текущем этапе только этим ролям. */
+  roles?: readonly StageFieldRole[]
+  /** Кто может редактировать; по умолчанию совпадает с `roles`. */
+  editRoles?: readonly StageFieldRole[]
+  /** Тип документа в API (для загрузки файлов). */
+  documentType?: StageDocumentType
   /** Демонстрационное значение, показывается, если в entry.data ничего нет. */
   mockValue?: string
   /** Колспан на сетке passed-секции (по умолчанию 1 из 3). */
@@ -20,10 +30,29 @@ export interface StageFieldConfig {
   narrow?: boolean
 }
 
+/** Поле видно для роли; `roles` не задан — системное поле, видно всем. */
+export function isFieldVisibleForRole(
+  field: StageFieldConfig,
+  role: UserRole,
+  _context: 'current' | 'passed',
+): boolean {
+  if (!field.roles) return true
+  return field.roles.includes(role)
+}
+
+export function filterStageFields(
+  fields: StageFieldConfig[],
+  role: UserRole,
+  context: 'current' | 'passed',
+): StageFieldConfig[] {
+  return fields.filter((f) => isFieldVisibleForRole(f, role, context))
+}
+
 const docStatusOptions = [
   { value: 'present', label: 'Есть' },
   { value: 'absent', label: 'Нет' },
   { value: 'not_required', label: 'Не требуется' },
+  { value: 're_requested', label: 'Запросить повторно' },
 ]
 
 export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
@@ -308,11 +337,22 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   ],
   documents_confirmed: [
     {
+      name: 'projectDocsFileName',
+      label: 'Закрывающие по проекту',
+      type: 'document',
+      source: 'manager',
+      roles: ['manager'],
+      editRoles: ['manager'],
+      documentType: 'project_closing',
+    },
+    {
       name: 'projectDocsStatus',
       label: 'Закрывающие по проекту',
       type: 'select',
       required: true,
       source: 'manager',
+      roles: ['accountant', 'director'],
+      editRoles: ['accountant'],
       options: docStatusOptions,
     },
     {
@@ -328,11 +368,22 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'system',
     },
     {
+      name: 'subleaseDocsFileName',
+      label: 'Закрывающие по субаренде',
+      type: 'document',
+      source: 'manager',
+      roles: ['manager'],
+      editRoles: ['manager'],
+      documentType: 'subrent_closing',
+    },
+    {
       name: 'subleaseDocsStatus',
       label: 'Закрывающие по субаренде',
       type: 'select',
       required: true,
       source: 'manager',
+      roles: ['accountant', 'director'],
+      editRoles: ['accountant'],
       options: docStatusOptions,
     },
     {
@@ -348,11 +399,22 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'system',
     },
     {
+      name: 'staffReceiptsFileName',
+      label: 'Расписки по персоналу',
+      type: 'document',
+      source: 'manager',
+      roles: ['manager'],
+      editRoles: ['manager'],
+      documentType: 'staff_receipts',
+    },
+    {
       name: 'staffReceiptsStatus',
       label: 'Расписки по персоналу',
       type: 'select',
       required: true,
       source: 'manager',
+      roles: ['accountant', 'director'],
+      editRoles: ['accountant'],
       options: docStatusOptions,
     },
     {
