@@ -1,6 +1,8 @@
 import type { ProjectStage } from '@/entities/project'
 import type { UserRole } from '@/entities/user-role'
 
+import type { StageFieldConfig } from './fields-map'
+
 const ALL_ROLES: readonly UserRole[] = ['manager', 'accountant', 'director']
 
 // Полная карта прав по этапам. Тип `Record<...>` (без `Partial`) заставляет
@@ -13,7 +15,7 @@ const STAGE_EDIT_ROLES: Record<ProjectStage, readonly UserRole[]> = {
   ready_to_event: ['manager', 'director'],
   event_held: ['manager', 'director'],
   expenses_entered: ['manager', 'director'],
-  documents_confirmed: ['accountant'],
+  documents_confirmed: ['manager', 'director', 'accountant'],
   data_confirmed: ['director'],
   bonus_calculated: ['director'],
   bonus_approved: ['director'],
@@ -24,4 +26,23 @@ const STAGE_EDIT_ROLES: Record<ProjectStage, readonly UserRole[]> = {
 
 export function canEditStage(stage: ProjectStage, role: UserRole): boolean {
   return STAGE_EDIT_ROLES[stage].includes(role)
+}
+
+export function canEditField(
+  stage: ProjectStage,
+  role: UserRole,
+  field: StageFieldConfig,
+): boolean {
+  if (!canEditStage(stage, role)) return false
+  if (field.source === 'system') return false
+  const editRoles = field.editRoles ?? field.roles
+  if (editRoles && !editRoles.includes(role)) return false
+  return true
+}
+
+/** Кнопка «Следующий этап» — не у всех, кто может редактировать поля этапа. */
+export function canAdvanceStage(stage: ProjectStage, role: UserRole): boolean {
+  if (!canEditStage(stage, role)) return false
+  if (stage === 'documents_confirmed') return role === 'accountant'
+  return true
 }
