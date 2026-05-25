@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useCurrentUser } from '@/entities/current-user'
-import { getStageNotification, useNotificationStore } from '@/entities/notification'
+import { notificationsListQueryKey } from '@/entities/notification'
 import {
   ALL_STAGE_ORDER,
   type ProjectStage,
@@ -58,8 +58,6 @@ export interface UseStageFlowOptions {
   initialStage: ProjectStage
   /** Когда проект попал в воронку (создан в нашей системе после синка PLUM). */
   projectEnteredAt?: string
-  /** Название проекта — подставляется в текст уведомлений руководителю. */
-  projectTitle?: string
   /** Снимки пройденных этапов с бэка — гидрируют `records`, чтобы данные пережили перезагрузку. */
   initialRecords?: StageRecords
   /** Финансовые статьи проекта с бэка — гидрируют `articles` (этапы ready/expenses/bonus). */
@@ -81,7 +79,6 @@ export function useStageFlow({
   projectId,
   initialStage,
   projectEnteredAt,
-  projectTitle,
   initialRecords,
   initialArticles,
   initialTaxRate,
@@ -161,20 +158,8 @@ export function useStageFlow({
       // Этап отправлен — черновик больше не нужен.
       financeDirtyRef.current = false
       if (projectId !== undefined) stageDraftActions.clear(projectId, currentUser.id)
-
-      // Мок: переход на этап, требующий действия роли → уведомление этой роли.
-      const stageNotification = getStageNotification(next)
-      if (stageNotification) {
-        useNotificationStore.getState().push({
-          stage: next,
-          recipient: stageNotification.recipient,
-          channels: stageNotification.channels,
-          projectId: projectId ?? 0,
-          projectTitle: projectTitle ?? `Проект #${projectId ?? '—'}`,
-        })
-      }
     },
-    [currentStage, currentUser.fullName, currentUser.id, projectId, projectTitle],
+    [currentStage, currentUser.fullName, currentUser.id, projectId],
   )
 
   const advance = useCallback(
@@ -205,6 +190,7 @@ export function useStageFlow({
             // List-ключ — префикс с любыми query-параметрами; передаём только url-часть,
             // чтобы матчнулись все варианты (канбан, календарь по разным месяцам).
             queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+            void queryClient.invalidateQueries({ queryKey: notificationsListQueryKey() })
           },
           // Ошибку наверх пробрасываем через mutation.error — UI пока её не показывает,
           // но `isAdvancing` снимет блокировку кнопки, и пользователь сможет ретрайнуть.

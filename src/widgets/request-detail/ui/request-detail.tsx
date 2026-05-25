@@ -15,7 +15,6 @@ export function RequestDetail({ project }: { project: ProjectDetail }) {
     projectId: Number(project.id),
     initialStage: project.stage,
     projectEnteredAt: project.enteredSystemAt,
-    projectTitle: project.title,
     initialRecords: project.stageSnapshots,
   })
 
