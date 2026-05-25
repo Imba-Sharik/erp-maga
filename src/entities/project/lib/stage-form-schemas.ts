@@ -25,13 +25,12 @@ export const stageFormSchemas = {
   calculation_prepared: z.object({
     calcComment: required(),
   }),
+  // Все поля опциональные — этап целиком необязателен, его можно пройти не заполняя.
   contract_signed: z.object({
-    contractType: z.enum(['with_vat', 'without_vat'], {
-      error: () => 'Выберите тип договора',
-    }),
-    contractNumber: required(),
-    contractDate: required(),
-    legalEntity: required(),
+    contractType: z.enum(['with_vat', 'without_vat']).optional(),
+    contractNumber: z.string().optional(),
+    contractDate: z.string().optional(),
+    legalEntity: z.string().optional(),
     contractComment: z.string().optional(),
   }),
   ready_to_event: z.object({}),

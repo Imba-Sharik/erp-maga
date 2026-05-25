@@ -1,4 +1,5 @@
-import { ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight, ChevronDown, Pencil } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/shared/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
@@ -22,6 +23,7 @@ import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canEditStage } from '../lib/stage-permissions'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldReadonly } from './stage-field-readonly'
+import { StageSectionCurrent } from './stage-section-current'
 
 const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -88,6 +90,11 @@ interface StageSectionPassedProps {
   record?: StageRecord
   articles?: ProjectArticles
   onAdvance?: (values?: Partial<StageFormData>) => void
+  /**
+   * Если задан — на пройденной секции появляется кнопка «Редактировать», по
+   * клику показывается RHF-форма этапа в режиме edit. Save вызывает этот колбэк.
+   */
+  onEditPassed?: (values: Partial<StageFormData>) => void
 }
 
 export function StageSectionPassed({
@@ -97,6 +104,7 @@ export function StageSectionPassed({
   record,
   articles,
   onAdvance,
+  onEditPassed,
 }: StageSectionPassedProps) {
   const ctx: ResolveCtx = { project, stage, record, articles }
   const values = record?.values
@@ -106,6 +114,26 @@ export function StageSectionPassed({
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const role = useUserRole()
   const canEdit = canEditStage(stage, role)
+  const [editing, setEditing] = useState(false)
+
+  if (editing && onEditPassed) {
+    return (
+      <StageSectionCurrent
+        project={project}
+        stage={stage}
+        record={record}
+        articles={articles}
+        editingMode="edit"
+        onEditingSubmit={(next) => {
+          onEditPassed(next)
+          setEditing(false)
+        }}
+        onCancelEditing={() => setEditing(false)}
+      />
+    )
+  }
+
+  const showEditButton = !isCurrent && canEdit && Boolean(onEditPassed)
 
   const renderField = (f: StageFieldConfig) =>
     f.source === 'manager' && canEdit && isCurrent ? (
@@ -146,6 +174,17 @@ export function StageSectionPassed({
             >
               Следующий этап
               <ArrowRight className="size-3.5" />
+            </Button>
+          )}
+          {showEditButton && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditing(true)}
+              className="h-[38px] rounded-[10px] border-[#B1B1B1] bg-white px-4 text-sm"
+            >
+              <Pencil className="size-3.5" />
+              Редактировать
             </Button>
           )}
         </div>

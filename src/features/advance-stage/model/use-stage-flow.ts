@@ -43,6 +43,12 @@ export interface StageFlow {
   isAdvancing: boolean
   /** Инкрементальная правка полей текущего этапа (для per-row аудита, документов и т.п.). */
   patchCurrentStageValues: (patch: Partial<StageFormData>) => void
+  /**
+   * Точечно поправить поля любого этапа (пройденного, пропущенного — кроме текущего,
+   * для него есть `patchCurrentStageValues`). TODO: бэк-эндпойнт для PATCH полей
+   * прошлого этапа — сейчас сохраняем только локально.
+   */
+  patchStageValues: (stage: ProjectStage, values: Partial<StageFormData>) => void
 
   // Финансовые статьи (используются на этапах ready/expenses/bonus_calculated).
   articles: ProjectArticles
@@ -98,11 +104,23 @@ export function useStageFlow({
     // Гидрация пройденных этапов снимками с бэка + запись текущего этапа.
     const seeded: StageRecords = { ...initialRecords }
     const current = seeded[initialStage]
+    // Приоритет: значение с бэка (`current?.enteredAt`) → дата создания проекта для
+    // plum_request → момент маунта. Для не-plum «дата создания проекта» бессмысленна,
+    // поэтому пропускаем и сразу падаем в now (= когда пользователь сюда зашёл).
+    const seededEnteredAt =
+      current?.enteredAt ??
+      (initialStage === 'plum_request' ? projectEnteredAt : undefined) ??
+      new Date().toISOString()
+    // Аналогично для автора: бэк → PLUM (для plum_request) → текущий пользователь.
+    // Подменяем на viewer, чтобы поле «Статус перевёл менеджер» сразу было заполнено,
+    // когда бэк не вернул `*_set_by` для текущего этапа.
+    const seededEnteredBy =
+      current?.enteredBy ??
+      (initialStage === 'plum_request' ? PLUM_SYSTEM_LABEL : currentUser.fullName)
     seeded[initialStage] = {
       ...current,
-      enteredAt: current?.enteredAt ?? projectEnteredAt ?? new Date().toISOString(),
-      enteredBy:
-        current?.enteredBy ?? (initialStage === 'plum_request' ? PLUM_SYSTEM_LABEL : undefined),
+      enteredAt: seededEnteredAt,
+      enteredBy: seededEnteredBy,
       // Черновик перебивает значения с бэка — несохранённая правка текущего этапа.
       values: { ...current?.values, ...initialDraft?.values },
     }
@@ -222,6 +240,22 @@ export function useStageFlow({
     [currentStage],
   )
 
+  // Локальная правка полей произвольного этапа (пройденного или пропущенного).
+  // Когда появится PATCH /projects/{id}/contract/ (или аналогичный) — добавим
+  // вызов сюда.
+  const patchStageValues = useCallback(
+    (stage: ProjectStage, values: Partial<StageFormData>) => {
+      setRecords((prev) => ({
+        ...prev,
+        [stage]: {
+          ...prev[stage],
+          values: { ...prev[stage]?.values, ...values },
+        },
+      }))
+    },
+    [],
+  )
+
   const updateArticle = useCallback(
     (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => {
       financeDirtyRef.current = true
@@ -285,6 +319,7 @@ export function useStageFlow({
     advance,
     isAdvancing: transitionMutation.isPending,
     patchCurrentStageValues,
+    patchStageValues,
     articles,
     taxRate,
     updateArticle,

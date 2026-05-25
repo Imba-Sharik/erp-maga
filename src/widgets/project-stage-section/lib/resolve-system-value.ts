@@ -49,7 +49,9 @@ export function resolveSystemValue(
         return project.manager || fallback
       }
       // На остальных этапах — «Статус перевёл менеджер» = автор входа в этап.
-      return record?.enteredBy || project.manager || fallback
+      // Сидинг в `useStageFlow` уже подменяет `enteredBy` на текущего пользователя,
+      // если бэк не прислал `*_set_by`, поэтому здесь дополнительного fallback не нужно.
+      return record?.enteredBy ?? undefined
 
     case 'projectDocsConfirmedAt':
     case 'subleaseDocsConfirmedAt':
@@ -69,10 +71,11 @@ export function resolveSystemValue(
     case 'bonusCalculatedAt':
     case 'bonusApprovedAt':
     case 'closedAt':
-      return record?.enteredAt || fallback
+      // Без fallback на mockValue — лучше пусто, чем выдуманная дата 2026-05-09.
+      return record?.enteredAt ?? undefined
 
     case 'bonusApprovedBy':
-      return record?.enteredBy || fallback
+      return record?.enteredBy ?? undefined
 
     default:
       return fallback
