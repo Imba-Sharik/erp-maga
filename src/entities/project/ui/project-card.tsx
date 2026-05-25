@@ -14,6 +14,13 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
 
+  // Лёгкие карточки из /projects/calendar/ приходят со слитой строкой hallLoft и
+  // без company/phone/email/type. Скрываем строки, для которых нет данных, чтобы
+  // не показывать «  · ` ·» и пустые лейблы.
+  const venueLabel = [project.hallLoft || project.loft, project.hall, project.manager]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <Card
       role="link"
@@ -31,15 +38,15 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
         <h3 className="text-sm font-semibold text-[#1B1A17]">{project.title}</h3>
         <ProjectStageBadge stage={project.stage} />
       </div>
-      <p className="text-xs text-[#ACACAC]">
-        {project.loft} · {project.hall} · {project.manager}
-      </p>
-      <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>
-      <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>
-      <p className="text-xs text-[#ACACAC]">
-        Телефон: <span className="text-funnel-preproject">{project.phone}</span>
-      </p>
-      <ProjectTelegramLink phone={project.phone} onClick={stop} />
+      {venueLabel && <p className="text-xs text-[#ACACAC]">{venueLabel}</p>}
+      {project.type && <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>}
+      {project.company && <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>}
+      {project.phone && (
+        <p className="text-xs text-[#ACACAC]">
+          Телефон: <span className="text-funnel-preproject">{project.phone}</span>
+        </p>
+      )}
+      {project.phone && <ProjectTelegramLink phone={project.phone} onClick={stop} />}
     </Card>
   )
 }
