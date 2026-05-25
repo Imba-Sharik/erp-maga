@@ -13,7 +13,7 @@ export const stageFormSchemas = {
     clientCompany: required(),
     phone: ruPhone(),
     contactPerson: required(),
-    email: required().email('Невалидный email'),
+    email: z.union([z.literal(''), z.string().email('Невалидный email')]),
     createdAt: z.string().optional(),
   }),
   primary_contact_done: z.object({

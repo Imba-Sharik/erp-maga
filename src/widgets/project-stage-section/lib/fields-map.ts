@@ -64,7 +64,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       label: 'Email',
       type: 'text',
       source: 'manager',
-      required: true,
       mockValue: 'client@gmail.com',
     },
   ],
