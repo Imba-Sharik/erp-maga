@@ -7,6 +7,8 @@ import {
 } from '@/entities/project'
 import { useStageFlow } from '@/features/advance-stage'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
+import { useProjectTab } from '@/features/project-tabs'
+import { ProjectActivityLog } from '@/widgets/project-activity-log'
 import { ProjectDetailAside } from '@/widgets/project-detail-aside'
 
 import { ProjectDetailMainCard } from './project-detail-main-card'
@@ -27,6 +29,8 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
     initialTaxRate: project.taxRate,
   })
 
+  const [tab] = useProjectTab()
+
   return (
     <div className="@container w-full">
       <div className="grid grid-cols-1 items-start gap-5 @[1200px]:grid-cols-[minmax(0,1fr)_405px]">
@@ -36,7 +40,11 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
             showOutsideMagButton={showOutsideMagButton}
             onOutsideMagClick={() => setOutsideMagOpen(true)}
           />
-          <ProjectDetailStages project={project} flow={flow} />
+          {tab === 'actions' ? (
+            <ProjectActivityLog project={project} records={flow.records} />
+          ) : (
+            <ProjectDetailStages project={project} flow={flow} />
+          )}
         </div>
         <ProjectDetailAside project={project} />
       </div>
