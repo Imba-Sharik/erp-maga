@@ -13,16 +13,17 @@ import {
 
 import { GridTableCell } from '@/shared/ui/grid-table'
 
-import { buildManagerSelectOptions } from '@/entities/manager'
+import { buildManagerSelectOptions, type ManagerSelectOption } from '@/entities/manager'
 import { TABLE_EMPTY } from './table-row-cells'
 
 export interface ProjectManagerCellProps {
   manager: string
-  managerOptions: string[]
+  directoryOptions: ManagerSelectOption[]
   isEditing: boolean
   onStartEdit: () => void
-  onAssign: (manager: string) => void
+  onAssign: (managerId: string) => void
   onCancelEdit: () => void
+  assignDisabled?: boolean
 }
 
 function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
@@ -31,15 +32,16 @@ function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
 
 export function ProjectManagerCell({
   manager,
-  managerOptions,
+  directoryOptions,
   isEditing,
   onStartEdit,
   onAssign,
   onCancelEdit,
+  assignDisabled = false,
 }: ProjectManagerCellProps) {
   const selectOptions = useMemo(
-    () => buildManagerSelectOptions(managerOptions, manager),
-    [managerOptions, manager],
+    () => buildManagerSelectOptions(directoryOptions, manager),
+    [directoryOptions, manager],
   )
   const displayName = manager || TABLE_EMPTY
 
@@ -61,22 +63,24 @@ export function ProjectManagerCell({
                 className="shrink-0 cursor-pointer text-[#BCBCBC] hover:text-[#454545] data-[state=open]:text-[#454545]"
                 aria-label="Сменить ответственного менеджера"
                 onClick={stopRowNavigation}
+                disabled={assignDisabled}
               >
                 <PenIcon className="size-3 shrink-0 [&_path]:fill-current" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="max-h-60 min-w-48">
-              {selectOptions.map((name) => (
+              {selectOptions.map((option) => (
                 <DropdownMenuItem
-                  key={name}
+                  key={option.id}
                   className="justify-between gap-2"
+                  disabled={assignDisabled || option.id.startsWith('name:')}
                   onClick={(e) => {
                     e.stopPropagation()
-                    onAssign(name)
+                    onAssign(option.id)
                   }}
                 >
-                  <span className="min-w-0 truncate">{name}</span>
-                  {name === manager && (
+                  <span className="min-w-0 truncate">{option.fullName}</span>
+                  {option.fullName === manager && (
                     <CheckIcon className="size-3.5 shrink-0 text-[#454545]" aria-hidden />
                   )}
                 </DropdownMenuItem>

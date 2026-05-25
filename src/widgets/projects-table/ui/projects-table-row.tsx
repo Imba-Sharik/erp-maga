@@ -1,6 +1,7 @@
 import type { KeyboardEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import type { ManagerSelectOption } from '@/entities/manager'
 import { getOutsideMagReasonLabel, type Project, type ProjectBackOrigin } from '@/entities/project'
 import { GridTableCell, GridTableRow, GridTableRowActionCell } from '@/shared/ui/grid-table'
 
@@ -52,12 +53,12 @@ function ProjectTableNavRow({ gridTemplate, goToDetail, children }: ProjectTable
 }
 
 export interface ProjectsTableRowManagerProps {
-  displayManager: string
-  managerOptions: string[]
+  directoryOptions: ManagerSelectOption[]
   isEditingManager: boolean
   onStartEditManager: () => void
-  onAssignManager: (manager: string) => void
+  onAssignManager: (managerId: string) => void
   onCancelEditManager: () => void
+  assignDisabled?: boolean
 }
 
 interface ProjectsTableRowProps extends ProjectsTableRowManagerProps {
@@ -72,12 +73,12 @@ export function ProjectsTableRow({
   columnView,
   backOrigin,
   renderRowAction,
-  displayManager,
-  managerOptions,
+  directoryOptions,
   isEditingManager,
   onStartEditManager,
   onAssignManager,
   onCancelEditManager,
+  assignDisabled,
 }: ProjectsTableRowProps) {
   const navigate = useNavigate()
   const gridTemplate = getTableGridTemplate(columnView)
@@ -87,12 +88,13 @@ export function ProjectsTableRow({
   const goToDetail = () => navigate(`${detailBase}/${project.id}`, { state: backOrigin })
 
   const managerCellProps: ProjectManagerCellProps = {
-    manager: displayManager,
-    managerOptions,
+    manager: project.manager,
+    directoryOptions,
     isEditing: isEditingManager,
     onStartEdit: onStartEditManager,
     onAssign: onAssignManager,
     onCancelEdit: onCancelEditManager,
+    assignDisabled,
   }
 
   if (columnView === 'outside-mag') {

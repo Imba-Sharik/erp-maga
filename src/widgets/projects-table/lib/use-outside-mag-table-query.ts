@@ -14,16 +14,26 @@ interface UseOutsideMagTableQueryOptions {
   enabled?: boolean
 }
 
+function parseMagManagerId(magManagerId: string | null): number | undefined {
+  if (!magManagerId) return undefined
+  const id = Number(magManagerId)
+  return Number.isFinite(id) ? id : undefined
+}
+
 export function useOutsideMagTableQuery(
   listParams: OutsideMagTableListParams,
+  magManagerId: string | null,
   { enabled = true }: UseOutsideMagTableQueryOptions = {},
 ) {
+  const mag_manager = parseMagManagerId(magManagerId)
+
   const params = useMemo(
     (): ProjectsOutOfMagListQueryParams => ({
       ...listParams,
       ordering: listParams.ordering ?? PROJECTS_LIST_DEFAULT_ORDERING,
+      ...(mag_manager !== undefined ? { mag_manager } : {}),
     }),
-    [listParams],
+    [listParams, mag_manager],
   )
 
   const query = useProjectsOutOfMagList(params, {

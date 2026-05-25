@@ -30,6 +30,8 @@ interface UseProjectsTableQueryParams {
   pendingOnly: boolean
   /** Выбранный этап в шапке-фильтре «Этап проекта» (или `null`). */
   stage: string | null
+  /** ID менеджера MAG для `mag_manager` (или `null`). */
+  magManagerId: string | null
 }
 
 /**
@@ -37,15 +39,27 @@ interface UseProjectsTableQueryParams {
  * - выбран конкретный этап в фильтре → точный `stage=<этап>` (новый запрос);
  * - иначе → группа этапов через `stage__in` (зависит от тумблера).
  */
-export function useProjectsTableQuery({ pendingOnly, stage }: UseProjectsTableQueryParams) {
+function parseMagManagerId(magManagerId: string | null): number | undefined {
+  if (!magManagerId) return undefined
+  const id = Number(magManagerId)
+  return Number.isFinite(id) ? id : undefined
+}
+
+export function useProjectsTableQuery({
+  pendingOnly,
+  stage,
+  magManagerId,
+}: UseProjectsTableQueryParams) {
   const stageParams: StageParams = stage
     ? { stage: stage as ProjectsListQueryParamsStageEnumKey }
     : { stage__in: pendingOnly ? PENDING_STAGE_IN : PREPROJECT_STAGE_IN }
 
+  const mag_manager = parseMagManagerId(magManagerId)
+
   const query = useInfiniteQuery({
     queryKey: [
       'projects-table',
-      { ...stageParams, ordering: PROJECTS_LIST_DEFAULT_ORDERING },
+      { ...stageParams, ordering: PROJECTS_LIST_DEFAULT_ORDERING, mag_manager },
     ] as const,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
@@ -55,6 +69,7 @@ export function useProjectsTableQuery({ pendingOnly, stage }: UseProjectsTableQu
           ordering: PROJECTS_LIST_DEFAULT_ORDERING,
           limit: PAGE_SIZE,
           offset: pageParam,
+          ...(mag_manager !== undefined ? { mag_manager } : {}),
         },
         { signal },
       ),

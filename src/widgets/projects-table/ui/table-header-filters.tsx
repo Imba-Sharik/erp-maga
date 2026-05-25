@@ -1,5 +1,5 @@
 import { useVenueCatalog } from '@/entities/venue'
-import { ClearableSelect } from '@/shared/ui/clearable-select'
+import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
 
@@ -8,8 +8,10 @@ export const HEADER_FILTER_TRIGGER =
 
 interface TableHeaderFiltersProps {
   columnFilters: ColumnFilters
-  managerOptions: string[]
+  managerOptions: readonly SelectOption[]
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+  managerOptionsLoading?: boolean
+  managerOptionsError?: boolean
 }
 
 export function TableHeaderLoftFilter({
@@ -52,6 +54,8 @@ export function TableHeaderManagerFilter({
   columnFilters,
   managerOptions,
   onColumnFilterChange,
+  managerOptionsLoading = false,
+  managerOptionsError = false,
 }: TableHeaderFiltersProps) {
   return (
     <ClearableSelect
@@ -60,6 +64,7 @@ export function TableHeaderManagerFilter({
       options={managerOptions}
       onChange={(v) => onColumnFilterChange('manager', v)}
       triggerClassName={HEADER_FILTER_TRIGGER}
+      disabled={managerOptionsLoading || managerOptionsError}
     />
   )
 }

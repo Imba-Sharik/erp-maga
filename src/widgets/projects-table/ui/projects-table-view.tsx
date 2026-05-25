@@ -10,8 +10,9 @@ import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select
 import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
+import type { ManagerSelectOption } from '@/entities/manager'
+import { useChangeProjectManager } from '@/features/change-project-manager'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
-import { assignProjectManagerMock } from '@/entities/manager'
 import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
 import {
   HEADER_FILTER_TRIGGER,
@@ -33,7 +34,10 @@ interface ProjectsTableViewProps {
   projects: Project[]
   columnView: ProjectsTableColumnView
   columnFilters: ColumnFilters
-  managerOptions: string[]
+  managerFilterOptions: SelectOption[]
+  directoryOptions: ManagerSelectOption[]
+  managersSelectLoading?: boolean
+  managersSelectError?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
   isLoading: boolean
   isError: boolean
@@ -48,7 +52,10 @@ export function ProjectsTableView({
   projects,
   columnView,
   columnFilters,
-  managerOptions,
+  managerFilterOptions,
+  directoryOptions,
+  managersSelectLoading = false,
+  managersSelectError = false,
   onColumnFilterChange,
   isLoading,
   isError,
@@ -60,13 +67,11 @@ export function ProjectsTableView({
 }: ProjectsTableViewProps) {
   const gridTemplate = getTableGridTemplate(columnView)
   const minWidth = getTableMinWidth(columnView)
-  const [managerOverrides, setManagerOverrides] = useState<Record<string, string>>({})
   const [editingManagerProjectId, setEditingManagerProjectId] = useState<string | null>(null)
 
-  const getDisplayManager = useCallback(
-    (project: Project) => managerOverrides[project.id] ?? project.manager,
-    [managerOverrides],
-  )
+  const { submit: assignManager, isPending: isAssigningManager } = useChangeProjectManager({
+    onSuccess: () => setEditingManagerProjectId(null),
+  })
 
   const handleStartEditManager = useCallback((projectId: string) => {
     setEditingManagerProjectId(projectId)
@@ -76,11 +81,12 @@ export function ProjectsTableView({
     setEditingManagerProjectId(null)
   }, [])
 
-  const handleAssignManager = useCallback((projectId: string, manager: string) => {
-    setManagerOverrides((prev) => ({ ...prev, [projectId]: manager }))
-    assignProjectManagerMock(projectId, manager)
-    setEditingManagerProjectId(null)
-  }, [])
+  const handleAssignManager = useCallback(
+    (projectId: string, managerId: string) => {
+      assignManager({ projectId, managerId })
+    },
+    [assignManager],
+  )
 
   const header =
     columnView === 'requests' ? (
@@ -90,31 +96,41 @@ export function ProjectsTableView({
     ) : columnView === 'general' ? (
       <GeneralTableHeader
         columnFilters={columnFilters}
-        managerOptions={managerOptions}
+        managerFilterOptions={managerFilterOptions}
+        managersSelectLoading={managersSelectLoading}
+        managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
       />
     ) : columnView === 'economics' ? (
       <EconomicsTableHeader
         columnFilters={columnFilters}
-        managerOptions={managerOptions}
+        managerFilterOptions={managerFilterOptions}
+        managersSelectLoading={managersSelectLoading}
+        managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
       />
     ) : columnView === 'closing-general' ? (
       <ClosingGeneralTableHeader
         columnFilters={columnFilters}
-        managerOptions={managerOptions}
+        managerFilterOptions={managerFilterOptions}
+        managersSelectLoading={managersSelectLoading}
+        managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
       />
     ) : columnView === 'closing-economics' ? (
       <ClosingEconomicsTableHeader
         columnFilters={columnFilters}
-        managerOptions={managerOptions}
+        managerFilterOptions={managerFilterOptions}
+        managersSelectLoading={managersSelectLoading}
+        managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
       />
     ) : (
       <OutsideMagTableHeader
         columnFilters={columnFilters}
-        managerOptions={managerOptions}
+        managerFilterOptions={managerFilterOptions}
+        managersSelectLoading={managersSelectLoading}
+        managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
       />
     )
@@ -141,12 +157,12 @@ export function ProjectsTableView({
           columnView={columnView}
           backOrigin={backOrigin}
           renderRowAction={renderRowAction}
-          displayManager={getDisplayManager(project)}
-          managerOptions={managerOptions}
+          directoryOptions={directoryOptions}
           isEditingManager={editingManagerProjectId === project.id}
           onStartEditManager={() => handleStartEditManager(project.id)}
-          onAssignManager={(manager) => handleAssignManager(project.id, manager)}
+          onAssignManager={(managerId) => handleAssignManager(project.id, managerId)}
           onCancelEditManager={handleCancelEditManager}
+          assignDisabled={isAssigningManager}
         />
       ))}
     </GridTableView>
@@ -155,11 +171,15 @@ export function ProjectsTableView({
 
 function GeneralTableHeader({
   columnFilters,
-  managerOptions,
+  managerFilterOptions,
+  managersSelectLoading,
+  managersSelectError,
   onColumnFilterChange,
 }: {
   columnFilters: ColumnFilters
-  managerOptions: string[]
+  managerFilterOptions: SelectOption[]
+  managersSelectLoading?: boolean
+  managersSelectError?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
 }) {
   return (
@@ -180,7 +200,9 @@ function GeneralTableHeader({
       <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
-          managerOptions={managerOptions}
+          managerOptions={managerFilterOptions}
+          managerOptionsLoading={managersSelectLoading}
+          managerOptionsError={managersSelectError}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
@@ -201,15 +223,21 @@ function GeneralTableHeader({
   )
 }
 
+type ManagerHeaderProps = {
+  columnFilters: ColumnFilters
+  managerFilterOptions: SelectOption[]
+  managersSelectLoading?: boolean
+  managersSelectError?: boolean
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}
+
 function OutsideMagTableHeader({
   columnFilters,
-  managerOptions,
+  managerFilterOptions,
+  managersSelectLoading,
+  managersSelectError,
   onColumnFilterChange,
-}: {
-  columnFilters: ColumnFilters
-  managerOptions: string[]
-  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
-}) {
+}: ManagerHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -228,7 +256,9 @@ function OutsideMagTableHeader({
       <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
-          managerOptions={managerOptions}
+          managerOptions={managerFilterOptions}
+          managerOptionsLoading={managersSelectLoading}
+          managerOptionsError={managersSelectError}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
@@ -244,20 +274,20 @@ function OutsideMagTableHeader({
 
 function EconomicsTableHeader({
   columnFilters,
-  managerOptions,
+  managerFilterOptions,
+  managersSelectLoading,
+  managersSelectError,
   onColumnFilterChange,
-}: {
-  columnFilters: ColumnFilters
-  managerOptions: string[]
-  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
-}) {
+}: ManagerHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
-          managerOptions={managerOptions}
+          managerOptions={managerFilterOptions}
+          managerOptionsLoading={managersSelectLoading}
+          managerOptionsError={managersSelectError}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
@@ -280,13 +310,11 @@ function EconomicsTableHeader({
 
 function ClosingGeneralTableHeader({
   columnFilters,
-  managerOptions,
+  managerFilterOptions,
+  managersSelectLoading,
+  managersSelectError,
   onColumnFilterChange,
-}: {
-  columnFilters: ColumnFilters
-  managerOptions: string[]
-  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
-}) {
+}: ManagerHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -305,7 +333,9 @@ function ClosingGeneralTableHeader({
       <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
-          managerOptions={managerOptions}
+          managerOptions={managerFilterOptions}
+          managerOptionsLoading={managersSelectLoading}
+          managerOptionsError={managersSelectError}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
@@ -319,20 +349,20 @@ function ClosingGeneralTableHeader({
 
 function ClosingEconomicsTableHeader({
   columnFilters,
-  managerOptions,
+  managerFilterOptions,
+  managersSelectLoading,
+  managersSelectError,
   onColumnFilterChange,
-}: {
-  columnFilters: ColumnFilters
-  managerOptions: string[]
-  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
-}) {
+}: ManagerHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderManagerFilter
           columnFilters={columnFilters}
-          managerOptions={managerOptions}
+          managerOptions={managerFilterOptions}
+          managerOptionsLoading={managersSelectLoading}
+          managerOptionsError={managersSelectError}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
