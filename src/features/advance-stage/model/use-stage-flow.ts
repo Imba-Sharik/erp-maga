@@ -44,9 +44,11 @@ export interface StageFlow {
   /** Инкрементальная правка полей текущего этапа (для per-row аудита, документов и т.п.). */
   patchCurrentStageValues: (patch: Partial<StageFormData>) => void
   /**
-   * Точечно поправить поля любого этапа (пройденного, пропущенного — кроме текущего,
-   * для него есть `patchCurrentStageValues`). TODO: бэк-эндпойнт для PATCH полей
-   * прошлого этапа — сейчас сохраняем только локально.
+   * Точечно поправить поля прошлого/пропущенного этапа. Для текущего этапа
+   * используйте `patchCurrentStageValues`.
+   *
+   * TODO: когда бэк добавит `PATCH /projects/{id}/contract/` (или аналогичный),
+   * добавить mutation-вызов в реализацию ниже — потребители не меняются.
    */
   patchStageValues: (stage: ProjectStage, values: Partial<StageFormData>) => void
 

@@ -2,12 +2,8 @@ import { ALL_STAGE_ORDER, type ProjectStage } from '@/entities/project'
 
 import type { StageRecords } from '../model/use-stage-flow'
 
-/** Этапы, которые можно пропустить полностью. */
+/** Этапы, которые можно пропустить полностью (форма опциональна, advance проходит с пустыми полями). */
 const SKIPPABLE_STAGES: ReadonlySet<ProjectStage> = new Set<ProjectStage>(['contract_signed'])
-
-export function isStageSkippable(stage: ProjectStage): boolean {
-  return SKIPPABLE_STAGES.has(stage)
-}
 
 /**
  * Этап считается пропущенным, если проект уже перешёл дальше, а ключевые
