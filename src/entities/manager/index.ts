@@ -1,4 +1,6 @@
 export type { Manager, ManagerAssignment } from './model/types'
+export type { ManagerSelectOption } from './model/manager-select-option'
+export { resolveManagerFilterName } from './model/manager-select-option'
 export type { ManagerAssignmentMode } from './lib/assignment-keys'
 export {
   findAssignmentByKey,
@@ -9,6 +11,4 @@ export {
 } from './lib/assignment-keys'
 export { invalidateManagersDirectory } from './lib/invalidate-managers-directory'
 export { useManagersDirectory } from './model/use-managers-directory'
-export { assignProjectManagerMock } from './lib/mock-assign-project-manager'
-export { MOCK_EXTRA_MANAGERS, buildManagerSelectOptions } from './lib/manager-select-options'
-export { getMockManagersForSelect } from './lib/get-mock-managers-for-select'
+export { buildManagerSelectOptions } from './lib/manager-select-options'

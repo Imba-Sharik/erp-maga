@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { useUserRole } from '@/entities/user-role'
 import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
@@ -31,6 +32,13 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
   const [archiveMode, setArchiveMode] = useState(false)
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
 
+  const {
+    selectOptions,
+    filterOptions,
+    isLoading: isManagersLoading,
+    isError: isManagersError,
+  } = useManagersDirectory()
+
   // Kanban filters
   const [search, setSearch] = useState('')
   const [city, setCity] = useState<string | null>(null)
@@ -45,16 +53,12 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
   const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
   const filter = useMemo(() => ({ search, city, hall, loft }), [search, city, hall, loft])
 
-  // Archive query
   const archiveQuery = useClosingArchiveQuery()
 
-  const archiveManagerOptions = useMemo(() => {
-    const names = new Set<string>()
-    for (const project of archiveQuery.projects) {
-      if (project.manager) names.add(project.manager)
-    }
-    return [...names].sort((a, b) => a.localeCompare(b, 'ru'))
-  }, [archiveQuery.projects])
+  const archiveManagerFilterName = useMemo(
+    () => resolveManagerFilterName(columnFilters.manager, selectOptions),
+    [columnFilters.manager, selectOptions],
+  )
 
   const filteredArchive = useMemo(
     () =>
@@ -62,8 +66,9 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
         search: archiveSearch,
         columns: columnFilters,
         columnView,
+        managerName: archiveManagerFilterName,
       }),
-    [archiveQuery.projects, archiveSearch, columnFilters, columnView],
+    [archiveQuery.projects, archiveSearch, columnFilters, columnView, archiveManagerFilterName],
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
@@ -108,7 +113,10 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
             projects={filteredArchive}
             columnView={columnView}
             columnFilters={columnFilters}
-            managerOptions={archiveManagerOptions}
+            managerFilterOptions={filterOptions}
+            directoryOptions={selectOptions}
+            managersSelectLoading={isManagersLoading}
+            managersSelectError={isManagersError}
             onColumnFilterChange={handleColumnFilterChange}
             isLoading={archiveQuery.isLoading}
             isError={archiveQuery.isError}

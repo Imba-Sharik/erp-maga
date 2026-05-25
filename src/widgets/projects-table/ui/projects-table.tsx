@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 
+import { useManagersDirectory } from '@/entities/manager'
+
 import {
   EMPTY_COLUMN_FILTERS,
   filterProjectsTable,
@@ -17,18 +19,19 @@ export function ProjectsTable() {
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
   const [columnView, setColumnView] = useState<ProjectsTableColumnView>('general')
 
-  // Этап и тумблер «Ожидают обработки» меняют сам запрос (набор этапов).
-  const { projects, hasNextPage, isLoading, isError, isFetchingNextPage, fetchNextPage } =
-    useProjectsTableQuery({ pendingOnly, stage: columnFilters.stage })
+  const {
+    selectOptions,
+    filterOptions,
+    isLoading: isManagersLoading,
+    isError: isManagersError,
+  } = useManagersDirectory()
 
-  // Опции «Отв. менеджер» — уникальные менеджеры из загруженных страниц.
-  const managerOptions = useMemo(() => {
-    const names = new Set<string>()
-    for (const project of projects) {
-      if (project.manager) names.add(project.manager)
-    }
-    return [...names].sort((a, b) => a.localeCompare(b, 'ru'))
-  }, [projects])
+  const { projects, hasNextPage, isLoading, isError, isFetchingNextPage, fetchNextPage } =
+    useProjectsTableQuery({
+      pendingOnly,
+      stage: columnFilters.stage,
+      magManagerId: columnFilters.manager,
+    })
 
   const filtered = useMemo(
     () => filterProjectsTable(projects, { search, columns: columnFilters, columnView }),
@@ -53,7 +56,10 @@ export function ProjectsTable() {
         projects={filtered}
         columnView={columnView}
         columnFilters={columnFilters}
-        managerOptions={managerOptions}
+        managerFilterOptions={filterOptions}
+        directoryOptions={selectOptions}
+        managersSelectLoading={isManagersLoading}
+        managersSelectError={isManagersError}
         onColumnFilterChange={handleColumnFilterChange}
         isLoading={isLoading}
         isError={isError}

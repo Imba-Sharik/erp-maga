@@ -3,7 +3,11 @@ import { Search } from 'lucide-react'
 
 import type { ProjectBackOrigin } from '@/entities/project'
 import { Input } from '@/shared/ui/input'
-import { EMPTY_COLUMN_FILTERS, filterProjectsTable, ProjectsTableView } from '@/widgets/projects-table'
+import {
+  EMPTY_COLUMN_FILTERS,
+  filterProjectsTable,
+  ProjectsTableView,
+} from '@/widgets/projects-table'
 
 import { useRequestsTableQuery, type RequestsTableVariant } from '../lib/use-requests-table-query'
 
@@ -54,7 +58,8 @@ export function RequestsTable({ variant }: RequestsTableProps) {
         projects={filtered}
         columnView={config.columnView}
         columnFilters={EMPTY_COLUMN_FILTERS}
-        managerOptions={[]}
+        managerFilterOptions={[]}
+        directoryOptions={[]}
         onColumnFilterChange={() => {}}
         isLoading={isLoading}
         isError={isError}
