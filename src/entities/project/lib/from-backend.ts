@@ -167,9 +167,9 @@ export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
 }
 
 /**
- * Маппер лёгких карточек из `/api/v1/projects/calendar/`. У схемы нет
- * `loft`/`hall` по отдельности (только слитая строка `hall_loft`), нет
- * `company`/`phone`/`email`/`type` — UI рендерит то, что доступно.
+ * Маппер лёгких карточек из `/api/v1/projects/calendar/`. Из отсутствующих
+ * относительно общего `Project` — `email`, отдельные `loft`/`hall` (бэк отдаёт
+ * слитую строку `hall_loft`) и `city`. Остальное доступно.
  */
 export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project | null {
   const stage = b.stage ? STAGE_MAP[b.stage] : undefined
@@ -185,9 +185,9 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     hall: '',
     hallLoft: b.hall_loft,
     manager: takeFirstManager(b.mag_manager),
-    type: '',
-    company: '',
-    phone: '',
+    type: b.event_type_label ?? '',
+    company: b.client_company ?? '',
+    phone: b.phone ?? '',
     email: '',
     plumCardUrl: '',
     lastUpdate: '',

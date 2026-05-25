@@ -651,6 +651,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+  /api/v1/projects/{id}/contract/:
+    patch:
+      operationId: projects_contract_partial_update
+      description: 'Доступно при `can_edit_contract === true`: стадии от `contract_signed`
+        до `bonus_approved` включительно (не closed/archived/out_of_mag); менеджер
+        проекта или lead. Все поля запроса опциональны (partial update).'
+      summary: Обновить данные договора (стадия «Договор подписан»)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedContractBlockUpdateRequest'
+            examples:
+              ЧастичноеОбновлениеНаContractSigned:
+                value:
+                  contract_type: with_vat
+                  contract_number: MAG-2026-042
+                  contract_date: '2026-05-01'
+                  legal_entity: ООО MAG
+                summary: Частичное обновление на contract_signed
+              ТолькоНомерДоговора:
+                value:
+                  contract_number: MAG-2026-099
+                summary: Только номер договора
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedContractBlockUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedContractBlockUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractBlockSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/documents/:
     patch:
       operationId: projects_documents_partial_update
@@ -840,7 +899,10 @@ paths:
     post:
       operationId: projects_transition_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. См. docs/api/stages.md.'
+        Тело плоское: `{ to_stage, ...поля }`. На стадии `contract_signed` данные
+        договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH
+        /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля
+        в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -884,6 +946,10 @@ paths:
                   legal_entity: ООО MAG
                   contract_comment: Договор на площадке
                 summary: contract_signed → ready_to_event
+              ContractSigned→ReadyToEvent(безПолейДоговора):
+                value:
+                  to_stage: ready_to_event
+                summary: contract_signed → ready_to_event (без полей договора)
               ReadyToEvent→EventHeld:
                 value:
                   to_stage: event_held
@@ -989,7 +1055,10 @@ paths:
     post:
       operationId: projects_transitions_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. См. docs/api/stages.md.'
+        Тело плоское: `{ to_stage, ...поля }`. На стадии `contract_signed` данные
+        договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH
+        /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля
+        в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -1033,6 +1102,10 @@ paths:
                   legal_entity: ООО MAG
                   contract_comment: Договор на площадке
                 summary: contract_signed → ready_to_event
+              ContractSigned→ReadyToEvent(безПолейДоговора):
+                value:
+                  to_stage: ready_to_event
+                summary: contract_signed → ready_to_event (без полей договора)
               ReadyToEvent→EventHeld:
                 value:
                   to_stage: event_held
@@ -1196,6 +1269,10 @@ paths:
                     - id: 1
                       event_name: Свадьба Ивановых
                       event_date: '2026-05-10'
+                      event_type: 2
+                      event_type_label: Свадьба
+                      client_company: ООО Ромашка
+                      phone: +7 999 000-00-00
                       hall_loft: Зал A
                       plum_lofthall_manager: Петров
                       stage: calculation_prepared
@@ -1481,6 +1558,33 @@ components:
           type: integer
       required:
       - id
+    ContractBlockSchema:
+      type: object
+      properties:
+        contract_type:
+          enum:
+          - with_vat
+          - without_vat
+          - null
+          type: string
+          description: |-
+            * `with_vat` - С НДС
+            * `without_vat` - Без НДС
+          x-spec-enum-id: caed3a61f1a3718c
+          nullable: true
+        contract_number:
+          type: string
+        contract_date:
+          type: string
+          format: date
+          nullable: true
+        legal_entity_id:
+          type: integer
+          nullable: true
+        legal_entity:
+          type: string
+        comment:
+          type: string
     DocumentStatusItemRequest:
       type: object
       properties:
@@ -1899,6 +2003,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
+    PatchedContractBlockUpdateRequest:
+      type: object
+      description: PATCH /projects/{id}/contract/ на стадии contract_signed — все
+        поля опциональны.
+      properties:
+        contract_type:
+          enum:
+          - with_vat
+          - without_vat
+          - null
+          type: string
+          description: |-
+            * `with_vat` - С НДС
+            * `without_vat` - Без НДС
+          x-spec-enum-id: caed3a61f1a3718c
+          nullable: true
+        contract_number:
+          type: string
+          maxLength: 128
+        contract_date:
+          type: string
+          format: date
+          nullable: true
+        legal_entity:
+          type: string
+          description: Название юрлица
+          maxLength: 500
+        legal_entity_name:
+          type: string
+          maxLength: 500
+        legal_entity_id:
+          type: integer
+          nullable: true
+        comment:
+          type: string
+        contract_comment:
+          type: string
     PatchedDocumentsUpdateRequest:
       type: object
       properties:
@@ -2108,6 +2249,11 @@ components:
             type: string
         can_edit_client:
           type: boolean
+        can_edit_contract:
+          type: boolean
+          description: Можно PATCH /projects/{id}/contract/ (менеджер проекта или
+            lead). true с contract_signed до bonus_approved; false на closed/archived/out_of_mag
+            и на ранних стадиях до contract_signed.
         can_edit_sales:
           type: boolean
         can_edit_expenses:
@@ -2123,6 +2269,7 @@ components:
       - allowed_transitions
       - blocks
       - can_edit_client
+      - can_edit_contract
       - can_edit_expenses
       - can_edit_sales
       - data_rejected
@@ -2469,6 +2616,19 @@ components:
         event_date:
           type: string
           format: date
+        event_type:
+          type: integer
+          nullable: true
+          description: Код типа мероприятия Plum/LoftHall
+        event_type_label:
+          type: string
+          description: Человекочитаемый тип (из справочника LoftHall)
+        client_company:
+          type: string
+          description: 'Компания: client_company, иначе plum_client_company'
+        phone:
+          type: string
+          description: 'Телефон: phone, иначе plum_phone'
         hall_loft:
           type: string
         plum_lofthall_manager:
@@ -2516,12 +2676,16 @@ components:
           type: integer
           nullable: true
       required:
+      - client_company
       - event_date
       - event_name
+      - event_type
+      - event_type_label
       - hall_loft
       - id
       - mag_manager
       - mag_manager_id
+      - phone
       - plum_lofthall_manager
       - stage
       - stage_label
@@ -2810,6 +2974,7 @@ components:
           enum:
           - with_vat
           - without_vat
+          - ''
           - null
           type: string
           description: |-
@@ -3276,7 +3441,7 @@ components:
         email:
           type: string
           format: email
-          minLength: 1
+          description: 'plum_request → primary_contact_done: необязательно'
         contact_comment:
           type: string
           minLength: 1
@@ -3301,21 +3466,24 @@ components:
           - with_vat
           - without_vat
           type: string
+          x-spec-enum-id: caed3a61f1a3718c
           description: |-
+            Необязательно. На стадии contract_signed удобнее PATCH /projects/{id}/contract/
+
             * `with_vat` - С НДС
             * `without_vat` - Без НДС
-          x-spec-enum-id: caed3a61f1a3718c
         contract_number:
           type: string
           minLength: 1
+          description: Необязательно
         contract_date:
           type: string
           format: date
+          description: Необязательно
         legal_entity:
           type: string
           minLength: 1
-          description: Название юрлица (строка; справочник legal-entities пока не
-            обязателен)
+          description: Название юрлица (строка; справочник legal-entities не обязателен)
         legal_entity_name:
           type: string
           minLength: 1
