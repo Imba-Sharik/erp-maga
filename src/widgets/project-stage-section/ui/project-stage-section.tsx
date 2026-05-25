@@ -40,7 +40,10 @@ interface ProjectStageSectionProps {
 }
 
 /** Этапы, у которых пройденный вид допускает inline-редактирование задним числом. */
-const EDITABLE_AFTER_PASS: ReadonlySet<ProjectStage> = new Set<ProjectStage>(['contract_signed'])
+const EDITABLE_AFTER_PASS: ReadonlySet<ProjectStage> = new Set<ProjectStage>([
+  'contract_signed',
+  'documents_confirmed',
+])
 
 export function ProjectStageSection({
   presentation,

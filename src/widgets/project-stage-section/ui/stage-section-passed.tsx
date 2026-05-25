@@ -18,9 +18,10 @@ import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
 import { PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
-import { canEditStage } from '../lib/stage-permissions'
+import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldReadonly } from './stage-field-readonly'
 import { StageSectionCurrent } from './stage-section-current'
@@ -66,6 +67,7 @@ function readField(
   if (!raw) return undefined
 
   if (f.type === 'date') return formatDate(raw)
+  if (f.type === 'document') return raw
   if (f.type === 'select') {
     if (f.options) return f.options.find((o) => o.value === raw)?.label ?? raw
     if (f.name === 'contactChannel')
@@ -114,6 +116,7 @@ export function StageSectionPassed({
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const role = useUserRole()
   const canEdit = canEditStage(stage, role)
+  const canAdvance = canAdvanceStage(stage, role)
   const [editing, setEditing] = useState(false)
 
   if (editing && onEditPassed) {
@@ -135,8 +138,9 @@ export function StageSectionPassed({
 
   const showEditButton = !isCurrent && canEdit && Boolean(onEditPassed)
 
-  const renderField = (f: StageFieldConfig) =>
-    f.source === 'manager' && canEdit && isCurrent ? (
+  const renderField = (f: StageFieldConfig) => {
+    const fieldEditable = canEditField(stage, role, f)
+    return f.source === 'manager' && f.type !== 'document' && fieldEditable && isCurrent ? (
       <StageFieldDemoEditable
         key={f.name}
         field={f}
@@ -149,11 +153,16 @@ export function StageSectionPassed({
         label={f.label}
         value={readField(ctx, values, f)}
         multiline={f.type === 'textarea'}
-        source={isCurrent && canEdit ? f.source : 'system'}
+        source={getReadonlyFieldSource(f, {
+          fieldEditable,
+          isCurrent,
+          canEditStage: canEdit,
+        })}
         isSelect={f.type === 'select'}
         className={spanClass(f.span, f.type === 'textarea')}
       />
     )
+  }
 
   return (
     <Collapsible defaultOpen className="w-full">
@@ -166,7 +175,7 @@ export function StageSectionPassed({
             <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
             <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
           </CollapsibleTrigger>
-          {isCurrent && canEdit && (
+          {isCurrent && canAdvance && (
             <Button
               type="button"
               onClick={() => onAdvance?.(values)}

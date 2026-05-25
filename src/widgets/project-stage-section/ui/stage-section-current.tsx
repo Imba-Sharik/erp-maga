@@ -1,9 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight } from 'lucide-react'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import type { z } from 'zod'
-
+import { useEffect, useMemo } from 'react'
+import { useForm, type Resolver } from 'react-hook-form'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
@@ -13,7 +11,8 @@ import { Textarea } from '@/shared/ui/textarea'
 import {
   ALL_STAGE_LABELS,
   STAGE_FUNNEL,
-  stageFormSchemas,
+  getStageFormSchema,
+  type DocumentStatus,
   type ProjectDetail,
   type ProjectStage,
   type StageFormData,
@@ -24,29 +23,30 @@ import { stageDraftActions } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
-import { STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import {
+  confirmedAtLabelForDocStatus,
+  FILE_NAME_TO_STATUS_FIELD,
+  getStageDocumentFieldVariant,
+} from '../lib/document-status-fields'
+import { filterStageFields, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
-import { canEditStage } from '../lib/stage-permissions'
+import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { StageDateField } from './stage-date-field'
+import { StageDocumentField } from './stage-document-field'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 
-type SignedSchema = (typeof stageFormSchemas)['contract_signed']
-type SignedFormValues = z.infer<SignedSchema>
+type SignedFormValues = Record<string, unknown>
 
-function getDefaults(stage: ProjectStage, data: Partial<StageFormData>): SignedFormValues {
-  const fields = STAGE_FIELDS[stage]
+function getDefaults(fields: StageFieldConfig[], data: Partial<StageFormData>): SignedFormValues {
   const result: Record<string, unknown> = {}
   for (const f of fields) {
     const v = data[f.name]
-    if (f.type === 'select') {
-      result[f.name] = v ?? ''
-    } else {
-      result[f.name] = v ?? ''
-    }
+    result[f.name] = v ?? ''
   }
-  return result as SignedFormValues
+  return result
 }
 
 interface StageSectionCurrentProps {
@@ -82,6 +82,12 @@ const CONFIRM_META_BY_STATUS: Partial<
   dataConfirmedStatus: { atField: 'dataConfirmedAt', byField: 'dataConfirmedBy' },
 }
 
+const CONFIRMED_AT_TO_STATUS_FIELD: Partial<Record<keyof StageFormData, keyof StageFormData>> = {
+  projectDocsConfirmedAt: 'projectDocsStatus',
+  subleaseDocsConfirmedAt: 'subleaseDocsStatus',
+  staffReceiptsConfirmedAt: 'staffReceiptsStatus',
+}
+
 export function StageSectionCurrent({
   project,
   stage,
@@ -93,29 +99,31 @@ export function StageSectionCurrent({
   onEditingSubmit,
   onCancelEditing,
 }: StageSectionCurrentProps) {
-  const schema = stageFormSchemas[stage]
-  const fields = STAGE_FIELDS[stage]
-  const defaults = getDefaults(stage, record?.values ?? {})
+  const role = useUserRole()
+  const allFields = STAGE_FIELDS[stage]
+  const visibleFields = useMemo(
+    () => filterStageFields(allFields, role, 'current'),
+    [allFields, role],
+  )
+  const schema = getStageFormSchema(stage, role)
+  const defaults = getDefaults(visibleFields, record?.values ?? {})
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  const role = useUserRole()
   const canEdit = canEditStage(stage, role)
+  const canAdvance = canAdvanceStage(stage, role)
   const currentUser = useCurrentUser()
 
   const form = useForm<SignedFormValues>({
-    resolver: zodResolver(schema as SignedSchema),
+    resolver: zodResolver(schema as never) as Resolver<SignedFormValues>,
     defaultValues: defaults,
     mode: 'onSubmit',
   })
 
-  // Черновик: при каждом изменении формы пишем введённое в стор.
-  // Так черновик переживает и переход по SPA, и перезагрузку страницы (F5):
-  // unmount-эффекты при перезагрузке не вызываются, а живое сохранение — да.
   useEffect(() => {
     const sub = form.watch((values) => {
       if (!canEdit) return
       const draftValues = values as Record<string, unknown>
-      const hasContent = fields.some((f) => Boolean(draftValues[f.name]))
+      const hasContent = visibleFields.some((f) => Boolean(draftValues[f.name]))
       if (hasContent) {
         stageDraftActions.save(project.id, {
           stage,
@@ -128,7 +136,14 @@ export function StageSectionCurrent({
       }
     })
     return () => sub.unsubscribe()
-  }, [form, fields, canEdit, project.id, stage, currentUser.id])
+  }, [form, visibleFields, canEdit, project.id, stage, currentUser.id])
+
+  const watchedValues = form.watch() as Partial<StageFormData>
+
+  const mergedValues = useMemo(
+    () => ({ ...record?.values, ...watchedValues }),
+    [record?.values, watchedValues],
+  )
 
   const handleAdvance = form.handleSubmit((values) => onAdvance?.(values as Partial<StageFormData>))
   const handleEditingSubmit = form.handleSubmit((values) =>
@@ -136,11 +151,14 @@ export function StageSectionCurrent({
   )
 
   const renderField = (f: StageFieldConfig) => {
-    if (f.source === 'system' || !canEdit) {
+    const fieldEditable = canEditField(stage, role, f)
+    const values = record?.values ?? {}
+
+    if (f.source === 'system' || !fieldEditable) {
       const raw =
         f.source === 'system'
           ? resolveSystemValue(f.name, f.mockValue, { project, stage, record, articles })
-          : undefined
+          : (values[f.name] as string | undefined)
       let display = raw
       if (raw && f.type === 'select') {
         display = f.options?.find((o) => o.value === raw)?.label ?? raw
@@ -148,12 +166,21 @@ export function StageSectionCurrent({
         const d = new Date(raw)
         if (!Number.isNaN(d.getTime())) display = d.toLocaleDateString('ru-RU')
       }
+      if (!display && f.source !== 'system') return null
+      const statusForLabelField = CONFIRMED_AT_TO_STATUS_FIELD[f.name]
+      const readonlyLabel =
+        statusForLabelField != null
+          ? confirmedAtLabelForDocStatus(
+              mergedValues[statusForLabelField] as DocumentStatus | undefined,
+              f.label,
+            )
+          : f.label
       return (
         <StageFieldReadonly
           key={f.name}
-          label={f.label}
+          label={readonlyLabel}
           value={display}
-          source="system"
+          source={getReadonlyFieldSource(f, { fieldEditable })}
           isSelect={f.type === 'select'}
           multiline={f.type === 'textarea'}
         />
@@ -163,7 +190,7 @@ export function StageSectionCurrent({
       <FormField
         key={f.name}
         control={form.control}
-        name={f.name as keyof SignedFormValues}
+        name={f.name as string}
         render={({ field }) => (
           <FormItem
             className={
@@ -172,14 +199,32 @@ export function StageSectionCurrent({
           >
             <StageFieldLabel form label={f.label} required={f.required} />
             <FormControl>
-              {f.type === 'textarea' ? (
+              {f.type === 'document' && f.documentType ? (
+                <StageDocumentField
+                  projectId={project.id}
+                  documentType={f.documentType}
+                  value={(field.value as string) ?? ''}
+                  variant={getStageDocumentFieldVariant(
+                    (field.value as string) || undefined,
+                    (() => {
+                      const statusField =
+                        f.name in FILE_NAME_TO_STATUS_FIELD
+                          ? FILE_NAME_TO_STATUS_FIELD[
+                              f.name as keyof typeof FILE_NAME_TO_STATUS_FIELD
+                            ]
+                          : undefined
+                      return statusField
+                        ? (mergedValues[statusField] as DocumentStatus | undefined)
+                        : undefined
+                    })(),
+                  )}
+                  onChange={field.onChange}
+                />
+              ) : f.type === 'textarea' ? (
                 <Textarea
                   {...field}
                   value={(field.value as string) ?? ''}
                   placeholder={f.placeholder}
-                  // fieldSizing: fixed гасит авторост базового shadcn-textarea
-                  // (field-sizing-content) — высота держится по row-span-2,
-                  // текст скроллится внутри, соседние поля не уезжают.
                   style={{ fieldSizing: 'fixed' }}
                   className="native-os-scrollbar h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
                 />
@@ -188,16 +233,17 @@ export function StageSectionCurrent({
                   value={(field.value as string) ?? ''}
                   onValueChange={(value) => {
                     field.onChange(value)
-                    // Если у статуса есть пара `*ConfirmedAt`/`*ConfirmedBy` — штампим их
-                    // прямо в момент выбора, для per-row аудита.
                     const meta = CONFIRM_META_BY_STATUS[f.name as keyof StageFormData]
-                    if (meta) {
-                      onPatchValues?.({
-                        [f.name]: value,
-                        [meta.atField]: new Date().toISOString(),
-                        [meta.byField]: currentUser.fullName,
-                      })
+                    const patch: Partial<StageFormData> = {
+                      [f.name]: value as DocumentStatus,
+                      ...(meta
+                        ? {
+                            [meta.atField]: new Date().toISOString(),
+                            [meta.byField]: currentUser.fullName,
+                          }
+                        : {}),
                     }
+                    onPatchValues?.(patch)
                   }}
                 >
                   <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
@@ -256,7 +302,7 @@ export function StageSectionCurrent({
           <span className="font-medium text-[#454545]">{headerLabel}</span>
           <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
         </div>
-        {canEdit && stage !== 'closed' ? (
+        {canAdvance && stage !== 'closed' ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             {editingMode ? (
               <>
@@ -295,7 +341,7 @@ export function StageSectionCurrent({
       <Form {...form}>
         <form className="flex flex-col gap-4" noValidate>
           <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-            {renderNarrowPairs(fields, renderField)}
+            {renderNarrowPairs(visibleFields, renderField)}
           </div>
         </form>
       </Form>
