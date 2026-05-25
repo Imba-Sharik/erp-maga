@@ -30,13 +30,13 @@ export interface StageFieldConfig {
   narrow?: boolean
 }
 
-/** Поле видно на текущем этапе для роли (на passed — все поля этапа). */
+/** Поле видно для роли; `roles` не задан — системное поле, видно всем. */
 export function isFieldVisibleForRole(
   field: StageFieldConfig,
   role: UserRole,
-  context: 'current' | 'passed',
+  _context: 'current' | 'passed',
 ): boolean {
-  if (context === 'passed' || !field.roles) return true
+  if (!field.roles) return true
   return field.roles.includes(role)
 }
 

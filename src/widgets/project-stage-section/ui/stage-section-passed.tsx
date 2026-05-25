@@ -1,5 +1,7 @@
 import { ArrowRight, ChevronDown, Pencil } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+
+import { cn } from '@/shared/lib/utils'
 
 import { Button } from '@/shared/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
@@ -8,6 +10,7 @@ import {
   STAGE_FUNNEL,
   contactChannelLabels,
   contractTypeLabels,
+  type DocumentStatus,
   type ProjectDetail,
   type ProjectStage,
   type StageFormData,
@@ -17,12 +20,20 @@ import type { ProjectArticles } from '@/entities/project-articles'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 
-import { PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import {
+  confirmedAtLabelForDocStatus,
+  CONFIRMED_AT_TO_STATUS_FIELD,
+  FILE_NAME_TO_STATUS_FIELD,
+  getStageDocumentFieldVariant,
+} from '../lib/document-status-fields'
+import { filterStageFields, PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
+import { StageDocumentField } from './stage-document-field'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
+import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 import { StageSectionCurrent } from './stage-section-current'
 
@@ -110,11 +121,15 @@ export function StageSectionPassed({
 }: StageSectionPassedProps) {
   const ctx: ResolveCtx = { project, stage, record, articles }
   const values = record?.values
-  const fields = STAGE_FIELDS[stage]
+  const role = useUserRole()
+  const allFields = STAGE_FIELDS[stage]
+  const visibleFields = useMemo(
+    () => filterStageFields(allFields, role, 'passed'),
+    [allFields, role],
+  )
   const extras = PASSED_EXTRAS[stage]
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  const role = useUserRole()
   const canEdit = canEditStage(stage, role)
   const canAdvance = canAdvanceStage(stage, role)
   const [editing, setEditing] = useState(false)
@@ -140,17 +155,59 @@ export function StageSectionPassed({
 
   const renderField = (f: StageFieldConfig) => {
     const fieldEditable = canEditField(stage, role, f)
-    return f.source === 'manager' && f.type !== 'document' && fieldEditable && isCurrent ? (
-      <StageFieldDemoEditable
-        key={f.name}
-        field={f}
-        initialValue={fallbackValue(ctx, values, f)}
-        className={spanClass(f.span, f.type === 'textarea')}
-      />
-    ) : (
+
+    if (f.type === 'document' && f.documentType) {
+      const fileName = readField(ctx, values, f) ?? ''
+      const statusField =
+        f.name in FILE_NAME_TO_STATUS_FIELD
+          ? FILE_NAME_TO_STATUS_FIELD[f.name as keyof typeof FILE_NAME_TO_STATUS_FIELD]
+          : undefined
+      const status = statusField
+        ? (values?.[statusField] as DocumentStatus | undefined)
+        : undefined
+
+      return (
+        <div
+          key={f.name}
+          className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}
+        >
+          <StageFieldLabel label={f.label} />
+          <StageDocumentField
+            projectId={project.id}
+            documentType={f.documentType}
+            value={fileName}
+            variant={getStageDocumentFieldVariant(fileName || undefined, status)}
+            onChange={() => {}}
+            disabled
+          />
+        </div>
+      )
+    }
+
+    if (f.source === 'manager' && f.type !== 'document' && fieldEditable && isCurrent) {
+      return (
+        <StageFieldDemoEditable
+          key={f.name}
+          field={f}
+          initialValue={fallbackValue(ctx, values, f)}
+          className={spanClass(f.span, f.type === 'textarea')}
+        />
+      )
+    }
+
+    const statusForLabelField = CONFIRMED_AT_TO_STATUS_FIELD[f.name]
+    const readonlyLabel =
+      statusForLabelField != null
+        ? confirmedAtLabelForDocStatus(
+            values?.[statusForLabelField] as DocumentStatus | undefined,
+            f.label,
+          )
+        : f.label
+
+    return (
       <StageFieldReadonly
         key={f.name}
-        label={f.label}
+        label={readonlyLabel}
         value={readField(ctx, values, f)}
         multiline={f.type === 'textarea'}
         source={getReadonlyFieldSource(f, {
@@ -199,13 +256,13 @@ export function StageSectionPassed({
         </div>
         <CollapsibleContent className="flex flex-col gap-4 pt-4">
           <div className="h-px w-full bg-[#F0F0F0]" />
-          {fields.length === 0 && extras.length === 0 ? (
+          {visibleFields.length === 0 && extras.length === 0 ? (
             <p className="text-muted-foreground text-sm italic">
               Подробное содержимое раздела — в следующей итерации
             </p>
           ) : (
             <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {renderNarrowPairs(fields, renderField)}
+              {renderNarrowPairs(visibleFields, renderField)}
               {extras.map((extra) =>
                 extra.source === 'manager' ? (
                   <StageFieldReadonly
