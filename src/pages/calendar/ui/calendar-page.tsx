@@ -9,18 +9,16 @@ import {
   startOfWeek,
 } from 'date-fns'
 import { mergeDates, removeDates } from '@/widgets/project-calendar/lib/date-range'
+import { filterCalendarProjects } from '@/widgets/project-calendar/lib/filter-calendar-projects'
 import type { PaintMode } from '@/widgets/project-calendar/lib/use-calendar-paint-select'
 import {
   countProjectsInMonth,
   getProjectsForDates,
   groupByDay,
-  isOutsideMagStage,
-  mapBackendProjects,
+  mapBackendCalendarProjects,
 } from '@/entities/project'
-import { useProjectsList } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { useProjectsCalendarList } from '@/shared/api/generated/hooks/projectsController/useProjectsCalendarList'
 import { useElementSize } from '@/shared/hooks/use-element-size'
-import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import { DaySchedule } from '@/widgets/day-schedule'
 import { ProjectCalendar } from '@/widgets/project-calendar'
 
@@ -50,23 +48,23 @@ export function CalendarPage() {
     }
   }, [visibleMonth])
 
-  const { data, isLoading, isFetching } = useProjectsList({
+  // Используем `/projects/calendar/` — отдельную лёгкую ручку без пагинации,
+  // которая уже фильтрует `out_of_mag_scope` на сервере. Возвращает 9-полевую
+  // карточку (event_name/hall_loft/mag_manager/stage), достаточно для сетки.
+  const { data, isLoading, isFetching } = useProjectsCalendarList({
     event_date_after,
     event_date_before,
-    ordering: PROJECTS_LIST_DEFAULT_ORDERING,
-    limit: 100,
   })
-  const projects = useMemo(() => {
-    const mapped = data ? mapBackendProjects(data.results) : []
-    return mapped.filter((p) => !isOutsideMagStage(p.stage))
-  }, [data])
+  const projects = useMemo(
+    () => (data ? mapBackendCalendarProjects(data.results) : []),
+    [data],
+  )
 
   const projectsByDay = useMemo(
     () =>
       groupByDay(
-        filterProjects(projects, {
+        filterCalendarProjects(projects, {
           search: projectSearch,
-          city: null,
           hall,
           loft,
         }),

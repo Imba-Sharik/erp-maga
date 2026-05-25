@@ -52,6 +52,12 @@ export interface Project {
   city: string
   loft: string
   hall: string
+  /**
+   * Слитая строка «зал + лофт», как её отдаёт лёгкая ручка `/projects/calendar/`.
+   * Заполнена только в календарном контексте, когда `loft`/`hall` пустые. UI
+   * рендерит её вместо пары «loft · hall».
+   */
+  hallLoft?: string
   manager: string
   type: string
   company: string

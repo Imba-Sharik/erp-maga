@@ -25,6 +25,8 @@ export {
   mapBackendProjectDetail,
   mapBackendOutOfMagProject,
   mapBackendOutOfMagProjects,
+  mapBackendCalendarProject,
+  mapBackendCalendarProjects,
 } from './lib/from-backend'
 export { projectToApiListRow } from './lib/project-to-api-list-row'
 export { getOutsideMagReasonLabel } from './lib/outside-mag-reason'

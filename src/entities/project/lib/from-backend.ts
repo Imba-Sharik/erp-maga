@@ -3,6 +3,7 @@ import { ru } from 'date-fns/locale'
 
 import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
+import type { ProjectCalendarItemSchema } from '@/shared/api/generated/types/ProjectCalendarItemSchema'
 import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
@@ -160,6 +161,44 @@ export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
   const result: Project[] = []
   for (const item of list) {
     const mapped = mapBackendProject(item)
+    if (mapped) result.push(mapped)
+  }
+  return result
+}
+
+/**
+ * Маппер лёгких карточек из `/api/v1/projects/calendar/`. У схемы нет
+ * `loft`/`hall` по отдельности (только слитая строка `hall_loft`), нет
+ * `company`/`phone`/`email`/`type` — UI рендерит то, что доступно.
+ */
+export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project | null {
+  const stage = b.stage ? STAGE_MAP[b.stage] : undefined
+  if (!stage) return null
+
+  return {
+    id: String(b.id),
+    title: b.event_name,
+    date: b.event_date,
+    stage,
+    city: '',
+    loft: '',
+    hall: '',
+    hallLoft: b.hall_loft,
+    manager: takeFirstManager(b.mag_manager),
+    type: '',
+    company: '',
+    phone: '',
+    email: '',
+    plumCardUrl: '',
+    lastUpdate: '',
+    createdAt: '',
+  }
+}
+
+export function mapBackendCalendarProjects(list: readonly ProjectCalendarItemSchema[]): Project[] {
+  const result: Project[] = []
+  for (const item of list) {
+    const mapped = mapBackendCalendarProject(item)
     if (mapped) result.push(mapped)
   }
   return result
