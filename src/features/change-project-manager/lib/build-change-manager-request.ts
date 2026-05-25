@@ -1,4 +1,7 @@
-/** TODO: уточнить контракт PATCH /projects/{id}/ при появлении в OpenAPI. */
-export function buildChangeManagerRequest(managerName: string) {
-  return { mag_manager: managerName }
+export function buildChangeManagerRequest(managerId: string) {
+  const mag_manager_id = Number(managerId)
+  if (!Number.isFinite(mag_manager_id)) {
+    throw new Error('Invalid manager id')
+  }
+  return { mag_manager_id }
 }

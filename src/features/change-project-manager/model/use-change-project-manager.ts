@@ -1,37 +1,69 @@
-import { useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
 
-import { assignProjectManagerMock } from '@/entities/manager'
+import { invalidateManagersDirectory } from '@/entities/manager'
+import { useProjectsPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsPartialUpdate'
+import {
+  invalidateProjectAfterTransition,
+  invalidateProjectsListQueries,
+} from '@/shared/api/project-transition/invalidate-project-queries'
 
 import { buildChangeManagerRequest } from '../lib/build-change-manager-request'
+import { getChangeManagerErrorMessage } from '../lib/get-change-manager-error-message'
 
 export interface ChangeProjectManagerInput {
   projectId: string
-  manager: string
+  managerId: string
 }
 
 interface UseChangeProjectManagerOptions {
   onSuccess?: () => void
 }
 
-/**
- * TODO: PATCH /projects/{id}/ с телом из buildChangeManagerRequest.
- */
 export function useChangeProjectManager({ onSuccess }: UseChangeProjectManagerOptions = {}) {
+  const queryClient = useQueryClient()
+
+  const mutation = useProjectsPartialUpdate({
+    mutation: {
+      onSuccess: (_data, variables) => {
+        invalidateProjectsListQueries(queryClient)
+        invalidateProjectAfterTransition(queryClient, variables.id)
+        invalidateManagersDirectory(queryClient)
+        queryClient.invalidateQueries({ queryKey: ['projects-table'] })
+        onSuccess?.()
+      },
+    },
+  })
+
   const submit = useCallback(
     (input: ChangeProjectManagerInput) => {
-      const _body = buildChangeManagerRequest(input.manager)
-      void _body
-      assignProjectManagerMock(input.projectId, input.manager)
-      onSuccess?.()
+      const projectId = Number(input.projectId)
+      if (!Number.isFinite(projectId)) return
+
+      let data: ReturnType<typeof buildChangeManagerRequest>
+      try {
+        data = buildChangeManagerRequest(input.managerId)
+      } catch {
+        return
+      }
+
+      if (input.managerId.startsWith('name:')) return
+
+      mutation.mutate({ id: projectId, data })
     },
-    [onSuccess],
+    [mutation],
   )
 
-  return {
-    submit,
-    isPending: false,
-    isError: false,
-    errorMessage: null as string | null,
-    reset: () => {},
-  }
+  const errorMessage = mutation.isError ? getChangeManagerErrorMessage(mutation.error) : null
+
+  return useMemo(
+    () => ({
+      submit,
+      isPending: mutation.isPending,
+      isError: mutation.isError,
+      errorMessage,
+      reset: mutation.reset,
+    }),
+    [submit, mutation.isPending, mutation.isError, mutation.reset, errorMessage],
+  )
 }
