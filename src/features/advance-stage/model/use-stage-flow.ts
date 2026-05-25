@@ -3,11 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useCurrentUser } from '@/entities/current-user'
 import { notificationsListQueryKey } from '@/entities/notification'
-import {
-  ALL_STAGE_ORDER,
-  type ProjectStage,
-  type StageFormData,
-} from '@/entities/project'
+import { ALL_STAGE_ORDER, type ProjectStage, type StageFormData } from '@/entities/project'
 import {
   createEmptyBacklineBlock,
   createInitialArticles,
@@ -19,8 +15,10 @@ import {
 import { stageDraftActions } from '@/entities/stage-draft'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+import { useProjectsContractPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsContractPartialUpdate'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
 
+import { buildContractPatchBody, mapContractBlockToFormData } from '../lib/to-contract-patch-body'
 import { buildTransitionBody } from '../lib/to-transition-body'
 
 export interface StageRecord {
@@ -46,9 +44,6 @@ export interface StageFlow {
   /**
    * Точечно поправить поля прошлого/пропущенного этапа. Для текущего этапа
    * используйте `patchCurrentStageValues`.
-   *
-   * TODO: когда бэк добавит `PATCH /projects/{id}/contract/` (или аналогичный),
-   * добавить mutation-вызов в реализацию ниже — потребители не меняются.
    */
   patchStageValues: (stage: ProjectStage, values: Partial<StageFormData>) => void
 
@@ -94,6 +89,7 @@ export function useStageFlow({
   const currentUser = useCurrentUser()
   const queryClient = useQueryClient()
   const transitionMutation = useProjectsTransitionsCreate()
+  const contractPatchMutation = useProjectsContractPartialUpdate()
   // Черновик с прошлого визита — только свой (по пользователю) и только если этап не сменился.
   const initialDraft = useMemo(() => {
     const draft =
@@ -140,20 +136,11 @@ export function useStageFlow({
 
   const currentIndex = ALL_STAGE_ORDER.indexOf(currentStage)
 
-  const visibleStages = useMemo(
-    () => ALL_STAGE_ORDER.slice(0, currentIndex + 1),
-    [currentIndex],
-  )
+  const visibleStages = useMemo(() => ALL_STAGE_ORDER.slice(0, currentIndex + 1), [currentIndex])
 
-  const isCurrent = useCallback(
-    (stage: ProjectStage) => stage === currentStage,
-    [currentStage],
-  )
+  const isCurrent = useCallback((stage: ProjectStage) => stage === currentStage, [currentStage])
 
-  const getRecord = useCallback(
-    (stage: ProjectStage) => records[stage],
-    [records],
-  )
+  const getRecord = useCallback((stage: ProjectStage) => records[stage], [records])
 
   const applyAdvanceLocally = useCallback(
     (next: ProjectStage, values?: Partial<StageFormData>) => {
@@ -242,10 +229,7 @@ export function useStageFlow({
     [currentStage],
   )
 
-  // Локальная правка полей произвольного этапа (пройденного или пропущенного).
-  // Когда появится PATCH /projects/{id}/contract/ (или аналогичный) — добавим
-  // вызов сюда.
-  const patchStageValues = useCallback(
+  const applyStageValuesLocally = useCallback(
     (stage: ProjectStage, values: Partial<StageFormData>) => {
       setRecords((prev) => ({
         ...prev,
@@ -256,6 +240,35 @@ export function useStageFlow({
       }))
     },
     [],
+  )
+
+  const patchStageValues = useCallback(
+    (stage: ProjectStage, values: Partial<StageFormData>) => {
+      if (stage !== 'contract_signed') {
+        applyStageValuesLocally(stage, values)
+        return
+      }
+
+      if (projectId === undefined) {
+        applyStageValuesLocally(stage, values)
+        return
+      }
+
+      const data = buildContractPatchBody(values)
+      contractPatchMutation.mutate(
+        { id: projectId, data },
+        {
+          onSuccess: (block) => {
+            const synced = mapContractBlockToFormData(block)
+            applyStageValuesLocally(stage, { ...values, ...synced })
+            queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
+            queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+            void queryClient.invalidateQueries({ queryKey: notificationsListQueryKey() })
+          },
+        },
+      )
+    },
+    [applyStageValuesLocally, contractPatchMutation, projectId, queryClient],
   )
 
   const updateArticle = useCallback(
