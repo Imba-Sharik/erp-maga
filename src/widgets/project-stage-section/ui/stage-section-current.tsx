@@ -25,6 +25,7 @@ import type { StageRecord } from '@/features/advance-stage'
 
 import {
   confirmedAtLabelForDocStatus,
+  CONFIRMED_AT_TO_STATUS_FIELD,
   FILE_NAME_TO_STATUS_FIELD,
   getStageDocumentFieldVariant,
 } from '../lib/document-status-fields'
@@ -80,12 +81,6 @@ const CONFIRM_META_BY_STATUS: Partial<
   subleaseDocsStatus: { atField: 'subleaseDocsConfirmedAt', byField: 'subleaseDocsConfirmedBy' },
   staffReceiptsStatus: { atField: 'staffReceiptsConfirmedAt', byField: 'staffReceiptsConfirmedBy' },
   dataConfirmedStatus: { atField: 'dataConfirmedAt', byField: 'dataConfirmedBy' },
-}
-
-const CONFIRMED_AT_TO_STATUS_FIELD: Partial<Record<keyof StageFormData, keyof StageFormData>> = {
-  projectDocsConfirmedAt: 'projectDocsStatus',
-  subleaseDocsConfirmedAt: 'subleaseDocsStatus',
-  staffReceiptsConfirmedAt: 'staffReceiptsStatus',
 }
 
 export function StageSectionCurrent({

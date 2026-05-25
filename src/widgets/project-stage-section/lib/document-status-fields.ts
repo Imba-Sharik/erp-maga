@@ -25,6 +25,14 @@ export const FILE_NAME_TO_STATUS_FIELD = {
   staffReceiptsFileName: 'staffReceiptsStatus',
 } as const satisfies Partial<Record<keyof StageFormData, keyof StageFormData>>
 
+export const CONFIRMED_AT_TO_STATUS_FIELD: Partial<
+  Record<keyof StageFormData, keyof StageFormData>
+> = {
+  projectDocsConfirmedAt: 'projectDocsStatus',
+  subleaseDocsConfirmedAt: 'subleaseDocsStatus',
+  staffReceiptsConfirmedAt: 'staffReceiptsStatus',
+}
+
 export type StageDocumentFieldVariant = 'empty' | 'uploaded' | 'rejected' | 'confirmed'
 
 export function getStageDocumentFieldVariant(
