@@ -33,6 +33,7 @@ export { CLOSING_STAGE_TO_API, closingStageToApi } from './lib/closing-stage-api
 export { projectStageToApi } from './lib/project-stage-api'
 export {
   stageFormSchemas,
+  getStageFormSchema,
   contactChannelLabels,
   contractTypeLabels,
 } from './lib/stage-form-schemas'

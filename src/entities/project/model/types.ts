@@ -80,7 +80,7 @@ export type ContractType = 'with_vat' | 'without_vat'
 export type ContactChannel = 'messenger' | 'phone' | 'meeting'
 export type PlumStatus = 'pending' | 'confirmed'
 
-export type DocumentStatus = 'present' | 'absent' | 'not_required'
+export type DocumentStatus = 'present' | 'absent' | 'not_required' | 're_requested'
 export type EventReadiness = 'ready' | 'not_ready'
 
 export interface StageFormData {
@@ -109,6 +109,9 @@ export interface StageFormData {
   eventReadiness?: EventReadiness
 
   // documents_confirmed
+  projectDocsFileName?: string
+  subleaseDocsFileName?: string
+  staffReceiptsFileName?: string
   projectDocsStatus?: DocumentStatus
   projectDocsConfirmedAt?: string
   projectDocsConfirmedBy?: string
