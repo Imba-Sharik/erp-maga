@@ -9,12 +9,10 @@ export interface CalendarProjectsFilter {
 }
 
 /**
- * Календарь оперирует лёгкими карточками из `/projects/calendar/` — у них нет
- * `loft`/`hall` по отдельности (только слитая строка `hallLoft`) и нет
- * `company`/`phone`/`email`. Поэтому:
- * - hall/loft-фильтры мэтчатся подстрокой против `hallLoft`
- * - поиск идёт только по `title` и `manager`
- * - прошедшие проекты (event_date < сегодня) отбрасываются
+ * Календарь оперирует лёгкими карточками из `/projects/calendar/`. С момента
+ * перехода бэка на FK-поля `hall_name`/`loft_name` фильтры hall/loft мэтчатся
+ * точным совпадением. Поиск — по `title` и `manager`. Прошедшие проекты
+ * (event_date < сегодня) отбрасываются.
  */
 export function filterCalendarProjects(
   projects: Project[],
@@ -25,9 +23,8 @@ export function filterCalendarProjects(
   const todayKey = format(new Date(), 'yyyy-MM-dd')
   return projects.filter((p) => {
     if (p.date && p.date < todayKey) return false
-    const venue = (p.hallLoft || `${p.loft} ${p.hall}`).toLowerCase()
-    if (filter.hall && !venue.includes(filter.hall.toLowerCase())) return false
-    if (filter.loft && !venue.includes(filter.loft.toLowerCase())) return false
+    if (filter.hall && p.hall !== filter.hall) return false
+    if (filter.loft && p.loft !== filter.loft) return false
     if (search) {
       const haystack = `${p.title} ${p.manager}`.toLowerCase()
       if (!haystack.includes(search)) return false

@@ -50,14 +50,10 @@ export interface Project {
   date: string
   stage: ProjectStage
   city: string
+  /** Лофт (loft_name из FK). Может быть пустым, если у зала нет лофта. */
   loft: string
+  /** Зал (hall_name из FK). */
   hall: string
-  /**
-   * Слитая строка «зал + лофт», как её отдаёт лёгкая ручка `/projects/calendar/`.
-   * Заполнена только в календарном контексте, когда `loft`/`hall` пустые. UI
-   * рендерит её вместо пары «loft · hall».
-   */
-  hallLoft?: string
   manager: string
   type: string
   company: string

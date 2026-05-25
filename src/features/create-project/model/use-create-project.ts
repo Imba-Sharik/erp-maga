@@ -1,10 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
+import { useVenueCatalog } from '@/entities/venue'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { useProjectsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsCreate'
 import type { Project } from '@/shared/api/generated/types/Project'
-import type { ProjectCreateRequest } from '@/shared/api/generated/types/ProjectCreateRequest'
 import { getEventTypeLabelById } from '@/shared/constants/event-type-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 
@@ -26,29 +26,29 @@ export interface UseCreateProjectOptions {
   onCreated?: (project: Project) => void
 }
 
-function buildOptimisticFromRequest(data: ProjectCreateRequest, magManager: string): Project {
-  const event_date = data.event_date ?? toIsoLocalDay(new Date())
-  const event_name = (data.title ?? data.event_name ?? '').trim()
-  const event_type = data.event_type
-
-  return buildOptimisticProject({
-    event_name,
-    event_type,
-    event_type_label: getEventTypeLabelById(String(event_type)) ?? '',
-    loft: data.loft ?? data.venue ?? '',
-    hall: data.hall ?? data.hall_loft ?? '',
-    event_date,
-    mag_manager: magManager,
-  })
-}
-
 export function useCreateProject({ magManager, onCreated }: UseCreateProjectOptions) {
   const queryClient = useQueryClient()
+  const { halls, lofts } = useVenueCatalog()
 
   const mutation = useProjectsCreate<CreateProjectMutationContext>({
     mutation: {
       onMutate: async ({ data }) => {
-        const optimistic = buildOptimisticFromRequest(data, magManager)
+        const hallId = data.hall_id
+        const hall = halls.find((h) => h.id === hallId)
+        const loftId = data.loft_id ?? null
+        const loft = loftId != null ? lofts.find((l) => l.id === loftId) : undefined
+
+        const optimistic = buildOptimisticProject({
+          event_name: (data.title ?? data.event_name ?? '').trim(),
+          event_type: data.event_type,
+          event_type_label: getEventTypeLabelById(String(data.event_type)) ?? '',
+          hall_id: hallId,
+          hall_name: hall?.name ?? '',
+          loft_id: loftId,
+          loft_name: loft?.name ?? hall?.loft_name ?? '',
+          event_date: data.event_date ?? toIsoLocalDay(new Date()),
+          mag_manager: magManager,
+        })
         prependCreatedProjectToQueries(queryClient, optimistic)
         return { optimistic }
       },

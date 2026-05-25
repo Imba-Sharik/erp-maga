@@ -6,8 +6,10 @@ export function buildOptimisticProject(params: {
   event_name: string
   event_type: number
   event_type_label: string
-  loft: string
-  hall: string
+  hall_id: number
+  hall_name: string
+  loft_id: number | null
+  loft_name: string
   event_date: string
   mag_manager: string
 }): Project {
@@ -27,8 +29,11 @@ export function buildOptimisticProject(params: {
     event_format: null,
     event_format_label: '',
     event_date: params.event_date,
-    venue: params.loft,
-    hall_loft: params.hall,
+    venue: params.loft_name,
+    hall_id: params.hall_id,
+    hall_name: params.hall_name,
+    loft_id: params.loft_id,
+    loft_name: params.loft_name,
     city: 'Москва',
     city_label: 'Москва',
     plum_event_status: '',

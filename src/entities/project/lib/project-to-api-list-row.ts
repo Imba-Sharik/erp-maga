@@ -34,7 +34,11 @@ export function projectToApiListRow(project: Project): ApiProject {
     event_name: project.title,
     event_date: project.date,
     venue: project.loft,
-    hall_loft: project.hall,
+    // FK-полей не знаем (списочный проект — без id), оставляем null/имена.
+    hall_id: null,
+    hall_name: project.hall,
+    loft_id: null,
+    loft_name: project.loft,
     city: project.city,
     city_label: project.city,
     event_type_label: project.type,

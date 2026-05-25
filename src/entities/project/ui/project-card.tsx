@@ -14,10 +14,10 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
 
-  // Лёгкие карточки из /projects/calendar/ приходят со слитой строкой hallLoft и
-  // без company/phone/email/type. Скрываем строки, для которых нет данных, чтобы
-  // не показывать «  · ` ·» и пустые лейблы.
-  const venueLabel = [project.hallLoft || project.loft, project.hall, project.manager]
+  // У лёгких календарных карточек нет company/phone/email/type — скрываем
+  // строки без данных, чтобы не было «  · ` ·» и пустых лейблов. У части
+  // залов лофта нет — тогда loft пустой, и в строку он не попадёт.
+  const venueLabel = [project.loft, project.hall, project.manager]
     .filter(Boolean)
     .join(' · ')
 

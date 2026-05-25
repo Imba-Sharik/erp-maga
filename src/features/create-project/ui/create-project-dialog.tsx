@@ -32,8 +32,8 @@ const TRIGGER_CLASS =
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
   eventType: z.string().min(1, 'Выберите тип мероприятия'),
-  loft: z.string().min(1, 'Выберите лофт'),
-  hall: z.string().min(1, 'Выберите зал'),
+  loftId: z.string(),
+  hallId: z.string().min(1, 'Выберите зал'),
 }) satisfies z.ZodType<CreateProjectFormValues>
 
 export interface CreateProjectDialogProps {
@@ -45,16 +45,31 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
   const navigate = useNavigate()
   const currentUser = useCurrentUser()
   const {
-    hallOptions,
-    loftOptions,
+    halls,
+    lofts,
     isLoading: isVenueCatalogLoading,
     isError: isVenueCatalogError,
   } = useVenueCatalog()
   const selectDisabled = isVenueCatalogLoading || isVenueCatalogError
 
+  const hallSelectOptions = useMemo(
+    () =>
+      [...halls]
+        .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+        .map((h) => ({ value: String(h.id), label: h.name })),
+    [halls],
+  )
+  const loftSelectOptions = useMemo(
+    () =>
+      [...lofts]
+        .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+        .map((l) => ({ value: String(l.id), label: l.name })),
+    [lofts],
+  )
+
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { title: '', eventType: '', loft: '', hall: '' },
+    defaultValues: { title: '', eventType: '', loftId: '', hallId: '' },
   })
 
   const {
@@ -140,7 +155,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
             />
             <FormField
               control={form.control}
-              name="loft"
+              name="loftId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Лофт</FormLabel>
@@ -148,7 +163,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <ClearableSelect
                       placeholder="Выберите LOFT"
                       value={field.value || null}
-                      options={loftOptions}
+                      options={loftSelectOptions}
                       onChange={(v) => field.onChange(v ?? '')}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}
@@ -160,7 +175,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
             />
             <FormField
               control={form.control}
-              name="hall"
+              name="hallId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Зал</FormLabel>
@@ -168,7 +183,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <ClearableSelect
                       placeholder="Выберите зал"
                       value={field.value || null}
-                      options={hallOptions}
+                      options={hallSelectOptions}
                       onChange={(v) => field.onChange(v ?? '')}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}

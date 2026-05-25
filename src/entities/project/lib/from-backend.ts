@@ -100,8 +100,8 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     stage,
     ...(lastActiveStage ? { lastActiveStage } : {}),
     city: b.city_label || b.city,
-    loft: b.venue,
-    hall: b.hall_loft,
+    loft: b.loft_name ?? '',
+    hall: b.hall_name ?? '',
     // Бэк иногда отдаёт `mag_manager` как «Имя1, Имя2, Имя3» — берём первого
     // как «ведущего менеджера» проекта, остальных пока игнорируем.
     manager: takeFirstManager(b.mag_manager),
@@ -130,8 +130,8 @@ export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
     stage: 'out_of_mag_scope',
     ...(lastActiveStage ? { lastActiveStage } : {}),
     city: '',
-    loft: b.venue,
-    hall: b.hall_loft,
+    loft: b.loft_name ?? '',
+    hall: b.hall_name ?? '',
     manager: takeFirstManager(b.mag_manager),
     type: '',
     company: '',
@@ -168,8 +168,7 @@ export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
 
 /**
  * Маппер лёгких карточек из `/api/v1/projects/calendar/`. Из отсутствующих
- * относительно общего `Project` — `email`, отдельные `loft`/`hall` (бэк отдаёт
- * слитую строку `hall_loft`) и `city`. Остальное доступно.
+ * относительно общего `Project` — `email` и `city`. Остальное доступно.
  */
 export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project | null {
   const stage = b.stage ? STAGE_MAP[b.stage] : undefined
@@ -181,9 +180,8 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     date: b.event_date,
     stage,
     city: '',
-    loft: '',
-    hall: '',
-    hallLoft: b.hall_loft,
+    loft: b.loft_name ?? '',
+    hall: b.hall_name ?? '',
     manager: takeFirstManager(b.mag_manager),
     type: b.event_type_label ?? '',
     company: b.client_company ?? '',
