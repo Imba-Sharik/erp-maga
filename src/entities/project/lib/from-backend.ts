@@ -8,6 +8,8 @@ import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generat
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { mapBackendArticles } from '@/entities/project-articles'
+import { mapBackendDocumentFile, type StageDocumentFile } from '@/entities/project-documents'
+import type { StageDocumentType } from '@/entities/stage-document-files'
 
 import { projectVenueFieldsFromHalls } from './map-project-halls'
 import type {
@@ -94,7 +96,6 @@ const DOCUMENT_STATUSES: ReadonlySet<DocumentStatus> = new Set([
 
 function mapDocStatus(raw: string | null | undefined): DocumentStatus | undefined {
   if (!raw) return undefined
-  if (raw === 'absent') return 're_requested'
   return DOCUMENT_STATUSES.has(raw as DocumentStatus) ? (raw as DocumentStatus) : undefined
 }
 
@@ -362,6 +363,14 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
 
   const stageSnapshots = mapStageSnapshots(b)
 
+  const documentFiles: Partial<Record<StageDocumentType, StageDocumentFile>> = {}
+  const projectClosing = mapBackendDocumentFile(b.project_docs_file)
+  if (projectClosing) documentFiles.project_closing = projectClosing
+  const subrentClosing = mapBackendDocumentFile(b.sublease_docs_file)
+  if (subrentClosing) documentFiles.subrent_closing = subrentClosing
+  const staffReceipts = mapBackendDocumentFile(b.staff_receipts_file)
+  if (staffReceipts) documentFiles.staff_receipts = staffReceipts
+
   return {
     ...base,
     enteredSystemAt: b.created_at,
@@ -376,5 +385,6 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
     ...(Object.keys(stageSnapshots).length > 0 ? { stageSnapshots } : {}),
     articles: mapBackendArticles(b.articles),
     taxRate: b.tax_rate,
+    ...(Object.keys(documentFiles).length > 0 ? { documentFiles } : {}),
   }
 }

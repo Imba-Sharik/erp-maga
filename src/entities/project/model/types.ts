@@ -1,4 +1,6 @@
 import type { ProjectArticles } from '@/entities/project-articles'
+import type { StageDocumentFile } from '@/entities/project-documents'
+import type { StageDocumentType } from '@/entities/stage-document-files'
 
 export type ProjectBackOrigin = {
   to: string
@@ -199,4 +201,6 @@ export interface ProjectDetail extends Project {
   articles?: ProjectArticles
   /** Процент налога с бэка. */
   taxRate?: number
+  /** Метаданные закрывающих документов (имя, URL, кто/когда загрузил). */
+  documentFiles?: Partial<Record<StageDocumentType, StageDocumentFile>>
 }
