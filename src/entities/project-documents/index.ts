@@ -9,6 +9,7 @@ export {
   CONFIRMED_AT_TO_STATUS_FIELD,
   STATUS_CONFIRM_META_BY_STATUS,
   documentTypeFromFieldName,
+  statusFieldForConfirmedAt,
 } from './lib/stage-document-registry'
 export type {
   StageDocumentDefinition,

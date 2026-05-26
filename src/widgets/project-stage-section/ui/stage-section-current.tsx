@@ -25,9 +25,9 @@ import type { StageRecord } from '@/features/advance-stage'
 
 import {
   confirmedAtLabelForDocStatus,
-  CONFIRMED_AT_TO_STATUS_FIELD,
   FILE_NAME_TO_STATUS_FIELD,
   getStageDocumentFieldVariant,
+  statusFieldForConfirmedAt,
 } from '../lib/document-status-fields'
 import { filterStageFields, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
@@ -162,7 +162,7 @@ export function StageSectionCurrent({
         if (!Number.isNaN(d.getTime())) display = d.toLocaleDateString('ru-RU')
       }
       if (!display && f.source !== 'system') return null
-      const statusForLabelField = CONFIRMED_AT_TO_STATUS_FIELD[f.name]
+      const statusForLabelField = statusFieldForConfirmedAt(f.name)
       const readonlyLabel =
         statusForLabelField != null
           ? confirmedAtLabelForDocStatus(

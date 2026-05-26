@@ -22,7 +22,7 @@ import type { StageRecord } from '@/features/advance-stage'
 
 import {
   confirmedAtLabelForDocStatus,
-  CONFIRMED_AT_TO_STATUS_FIELD,
+  statusFieldForConfirmedAt,
   FILE_NAME_TO_STATUS_FIELD,
   getStageDocumentFieldVariant,
 } from '../lib/document-status-fields'
@@ -194,7 +194,7 @@ export function StageSectionPassed({
       )
     }
 
-    const statusForLabelField = CONFIRMED_AT_TO_STATUS_FIELD[f.name]
+    const statusForLabelField = statusFieldForConfirmedAt(f.name)
     const readonlyLabel =
       statusForLabelField != null
         ? confirmedAtLabelForDocStatus(

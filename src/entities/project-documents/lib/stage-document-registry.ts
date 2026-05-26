@@ -92,6 +92,15 @@ export function documentTypeFromFieldName(
   return FIELD_TO_DOCUMENT_TYPE[fieldName as StageDocumentFileNameField]
 }
 
+export function statusFieldForConfirmedAt(
+  fieldName: keyof StageFormData,
+): StageDocumentStatusField | undefined {
+  if (!(fieldName in CONFIRMED_AT_TO_STATUS_FIELD)) return undefined
+  return CONFIRMED_AT_TO_STATUS_FIELD[
+    fieldName as StageDocumentDefinition['confirmedAtKey']
+  ]
+}
+
 /** @deprecated Use STAGE_DOCUMENTS */
 export const STAGE_DOCUMENT_SLOTS = STAGE_DOCUMENTS
 
