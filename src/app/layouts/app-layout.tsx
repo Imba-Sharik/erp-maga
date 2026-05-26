@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { RequireAuth } from '@/app/guards/require-auth'
 import { NotificationsBootstrap } from '@/app/providers/notifications-bootstrap'
 import { VenueCatalogBootstrap } from '@/app/providers/venue-catalog-bootstrap'
 import { BreadcrumbProvider } from '@/shared/hooks/use-breadcrumb'
@@ -53,18 +54,20 @@ function AppLayoutHeader() {
 
 export function AppLayout() {
   return (
-    <BreadcrumbProvider>
-      <VenueCatalogBootstrap />
-      <NotificationsBootstrap />
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset className="h-svh max-h-svh min-h-0 overflow-hidden">
-          <AppLayoutHeader />
-          <main className="@container/main flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
-            <Outlet />
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
-    </BreadcrumbProvider>
+    <RequireAuth>
+      <BreadcrumbProvider>
+        <VenueCatalogBootstrap />
+        <NotificationsBootstrap />
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset className="h-svh max-h-svh min-h-0 overflow-hidden">
+            <AppLayoutHeader />
+            <main className="@container/main flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
+              <Outlet />
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </BreadcrumbProvider>
+    </RequireAuth>
   )
 }

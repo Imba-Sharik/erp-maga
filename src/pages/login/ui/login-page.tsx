@@ -1,5 +1,7 @@
 import { MagLogo } from '@/shared/assets'
-import { LoginForm } from '@/features/auth'
+import { DevLoginButtons, LoginForm } from '@/features/auth'
+
+const IS_DEV = import.meta.env.DEV
 
 export function LoginPage() {
   return (
@@ -9,8 +11,14 @@ export function LoginPage() {
         <span className="text-base font-bold text-[#1B1A17]">ERP MAG</span>
       </div>
 
-      <div className="w-full max-w-90 rounded-2xl border border-[#E9E6DD] bg-white p-8">
+      <div className="flex w-full max-w-90 flex-col gap-5 rounded-2xl border border-[#E9E6DD] bg-white p-8">
         <LoginForm />
+        {IS_DEV && (
+          <>
+            <div className="h-px bg-[#E9E6DD]" />
+            <DevLoginButtons />
+          </>
+        )}
       </div>
     </main>
   )

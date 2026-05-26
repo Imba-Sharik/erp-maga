@@ -1,36 +1,23 @@
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-import { setSessionTokens } from '@/entities/session'
-import { useAuthTokenCreate } from '@/shared/api/generated/hooks/authController/useAuthTokenCreate'
+import { useAuthTokenMutation } from './use-auth-token-mutation'
 
 export interface LoginInput {
   email: string
   password: string
 }
 
-/** Ответ `/api/v1/auth/token/` — SimpleJWT-пара (в OpenAPI не описан, тип `any`). */
-interface TokenPairResponse {
-  access: string
-  refresh: string
-}
-
 /**
- * Логин: POST /auth/token/ → сохраняем JWT-пару → редирект в приложение.
- * Кэш сбрасываем — данные могли грузиться под dev-токеном или анонимно.
+ * Логин из формы `/login`. После успеха редиректит на `state.from ?? '/'`.
  */
 export function useLogin() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const location = useLocation()
 
-  const mutation = useAuthTokenCreate({
-    mutation: {
-      onSuccess: (data) => {
-        const { access, refresh } = data as TokenPairResponse
-        setSessionTokens({ access, refresh })
-        void queryClient.invalidateQueries()
-        navigate('/', { replace: true })
-      },
+  const mutation = useAuthTokenMutation({
+    onSuccess: () => {
+      const from = (location.state as { from?: string } | null)?.from
+      navigate(from ?? '/', { replace: true })
     },
   })
 
