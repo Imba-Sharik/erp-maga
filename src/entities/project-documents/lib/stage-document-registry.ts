@@ -100,6 +100,23 @@ export function statusFieldForConfirmedAt(
   ]
 }
 
+/** Поля этапа `documents_confirmed`, которые приходят с бэка (статус + аудит + имя файла). */
+export function pickDocumentStageValues(
+  values?: Partial<StageFormData>,
+): Partial<StageFormData> {
+  if (!values) return {}
+  const picked: Partial<StageFormData> = {}
+  for (const doc of STAGE_DOCUMENTS) {
+    for (const key of [doc.statusKey, doc.confirmedAtKey, doc.confirmedByKey, doc.fileNameKey]) {
+      const value = values[key]
+      if (value !== undefined && value !== null && value !== '') {
+        picked[key] = value as never
+      }
+    }
+  }
+  return picked
+}
+
 /** @deprecated Use STAGE_DOCUMENTS */
 export const STAGE_DOCUMENT_SLOTS = STAGE_DOCUMENTS
 
