@@ -2,7 +2,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { ResponseConfig } from '@/shared/api/client'
 import { useProjectsDocumentFileCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsDocumentFileCreate'
+import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 
 import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
@@ -11,6 +13,12 @@ interface UploadStageDocumentArgs {
   projectId: string | number
   documentType: StageDocumentType
   file: File
+}
+
+function unwrapProjectDetail(
+  detail: BackendProjectDetail | ResponseConfig<BackendProjectDetail>,
+): BackendProjectDetail {
+  return 'status' in detail ? detail.data : detail
 }
 
 /** Загрузка/замена закрывающего документа на бэке. */
@@ -25,7 +33,7 @@ export function useUploadStageDocument() {
         { document_type: documentType, id, data: { file } },
         {
           onSuccess: (detail) => {
-            queryClient.setQueryData(projectsRetrieveQueryKey(id), detail)
+            queryClient.setQueryData(projectsRetrieveQueryKey(id), unwrapProjectDetail(detail))
             invalidateProjectAfterTransition(queryClient, id)
           },
         },
