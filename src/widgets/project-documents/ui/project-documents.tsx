@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 
 import type { ProjectDetail } from '@/entities/project'
 import { DOCUMENT_STATUS_LABELS, resolveStageDocuments } from '@/entities/project-documents'
-import { useStageDocumentFilesStore } from '@/entities/stage-document-files'
 import type { StageFlow } from '@/features/advance-stage'
 import { StageDocumentField } from '@/features/stage-document'
 
@@ -12,12 +11,11 @@ interface ProjectDocumentsProps {
 }
 
 export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) {
-  const files = useStageDocumentFilesStore((s) => s.files)
   const values = getRecord('documents_confirmed')?.values
 
   const items = useMemo(
-    () => resolveStageDocuments(project.id, values),
-    [project.id, values, files],
+    () => resolveStageDocuments(project, values),
+    [project, values],
   )
 
   if (items.length === 0) {
