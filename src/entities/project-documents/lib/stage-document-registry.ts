@@ -42,9 +42,8 @@ export type StageDocumentFileNameField = StageDocumentDefinition['fileNameKey']
 
 export const DOCUMENT_STATUS_OPTIONS = [
   { value: 'present', label: 'Есть' },
-  { value: 'absent', label: 'Нет' },
-  { value: 'not_required', label: 'Не требуется' },
   { value: 're_requested', label: 'Запросить повторно' },
+  { value: 'not_required', label: 'Не требуется' },
 ] as const satisfies ReadonlyArray<{ value: DocumentStatus; label: string }>
 
 export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = Object.fromEntries(
@@ -99,6 +98,23 @@ export function statusFieldForConfirmedAt(
   return CONFIRMED_AT_TO_STATUS_FIELD[
     fieldName as StageDocumentDefinition['confirmedAtKey']
   ]
+}
+
+/** Поля этапа `documents_confirmed`, которые приходят с бэка (статус + аудит + имя файла). */
+export function pickDocumentStageValues(
+  values?: Partial<StageFormData>,
+): Partial<StageFormData> {
+  if (!values) return {}
+  const picked: Partial<StageFormData> = {}
+  for (const doc of STAGE_DOCUMENTS) {
+    for (const key of [doc.statusKey, doc.confirmedAtKey, doc.confirmedByKey, doc.fileNameKey]) {
+      const value = values[key]
+      if (value !== undefined && value !== null && value !== '') {
+        picked[key] = value as never
+      }
+    }
+  }
+  return picked
 }
 
 /** @deprecated Use STAGE_DOCUMENTS */

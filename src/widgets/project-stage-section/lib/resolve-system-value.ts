@@ -57,14 +57,14 @@ export function resolveSystemValue(
     case 'subleaseDocsConfirmedAt':
     case 'staffReceiptsConfirmedAt':
     case 'dataConfirmedAt':
-      // Per-row штамп от select-onChange; если строка ещё не подтверждена — пусто.
-      return record?.values?.[fieldName] || fallback
+      // Только с бэка; mockValue и локальные заглушки не подставляем.
+      return record?.values?.[fieldName] ?? undefined
 
     case 'projectDocsConfirmedBy':
     case 'subleaseDocsConfirmedBy':
     case 'staffReceiptsConfirmedBy':
     case 'dataConfirmedBy':
-      return record?.values?.[fieldName] || fallback
+      return record?.values?.[fieldName] ?? undefined
 
     case 'contactedAt':
     case 'closingFunnelEnteredAt':

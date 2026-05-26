@@ -1,5 +1,8 @@
-import { resolveStageDocumentSource } from '@/entities/project-documents'
+import { useMutation } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
+
 import type { StageDocumentType } from '@/entities/stage-document-files'
+import client from '@/shared/api/client'
 
 import { downloadBlob } from '../lib/download-blob'
 
@@ -9,29 +12,39 @@ interface DownloadStageDocumentArgs {
   fileName?: string
 }
 
-/**
- * Скачивание документа этапа. Пока — только локальный cache (zustand).
- * TODO: remote URL с API, когда появится endpoint.
- */
-export function useDownloadStageDocument() {
-  const download = ({ projectId, documentType, fileName }: DownloadStageDocumentArgs) => {
-    const source = resolveStageDocumentSource(projectId, documentType, fileName)
-    if (!source) {
-      window.alert('Файл недоступен для скачивания.')
-      return
-    }
-    if (source.kind === 'local') {
-      downloadBlob(source.file, fileName ?? source.file.name)
-      return
-    }
-    const anchor = document.createElement('a')
-    anchor.href = source.url
-    anchor.download = source.fileName
-    anchor.rel = 'noopener'
-    document.body.appendChild(anchor)
-    anchor.click()
-    anchor.remove()
-  }
+async function fetchDocumentFile({
+  projectId,
+  documentType,
+  fileName,
+}: DownloadStageDocumentArgs): Promise<void> {
+  const id = Number(projectId)
+  const response = await client<Blob>({
+    method: 'GET',
+    url: `/api/v1/projects/${id}/documents/${documentType}/file/`,
+    responseType: 'blob',
+  })
+  const blob = response.data
+  const name = fileName?.trim() || 'document'
+  downloadBlob(new File([blob], name), name)
+}
 
-  return { download }
+/** Скачивание закрывающего документа через `GET /projects/:id/documents/:type/file/`. */
+export function useDownloadStageDocument() {
+  const mutation = useMutation({ mutationFn: fetchDocumentFile })
+
+  const download = useCallback(
+    (args: DownloadStageDocumentArgs) => mutation.mutateAsync(args),
+    [mutation],
+  )
+
+  return useMemo(
+    () => ({
+      download,
+      isPending: mutation.isPending,
+      isError: mutation.isError,
+      error: mutation.error,
+      reset: mutation.reset,
+    }),
+    [download, mutation.isPending, mutation.isError, mutation.error, mutation.reset],
+  )
 }

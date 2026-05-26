@@ -4,11 +4,15 @@ import type { ProjectTransitionRequest } from '@/shared/api/generated/types/Proj
 import type { ProjectTransitionRequestToStageEnumKey } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import type { TransitionArticleRequest } from '@/shared/api/generated/types/TransitionArticleRequest'
 
-/** В transition уходит только то, что принимает бэк; `re_requested` — локальный UI-статус. */
+/** Статус документа для transition: enum, пустая строка при skip или omit. */
 function apiDocStatus(
-  status: DocumentStatus | undefined,
-): 'present' | 'absent' | 'not_required' | undefined {
-  if (status === 'present' || status === 'absent' || status === 'not_required') return status
+  status: DocumentStatus | '' | undefined,
+  fromStage: ProjectStage,
+): ProjectTransitionRequest['project_docs_status'] {
+  if (status === 'present' || status === 're_requested' || status === 'not_required') {
+    return status
+  }
+  if (fromStage === 'documents_confirmed') return null
   return undefined
 }
 
@@ -97,12 +101,11 @@ export function buildTransitionBody({
   if (v.legalEntity) body.legal_entity = v.legalEntity
   if (v.contractComment) body.contract_comment = v.contractComment
   if (v.postEventComment) body.post_event_comment = v.postEventComment
-  const projectDocsStatus = apiDocStatus(v.projectDocsStatus)
-  if (projectDocsStatus) body.project_docs_status = projectDocsStatus
-  const subleaseDocsStatus = apiDocStatus(v.subleaseDocsStatus)
-  if (subleaseDocsStatus) body.sublease_docs_status = subleaseDocsStatus
-  const staffReceiptsStatus = apiDocStatus(v.staffReceiptsStatus)
-  if (staffReceiptsStatus) body.staff_receipts_status = staffReceiptsStatus
+  if (currentStage === 'documents_confirmed') {
+    body.project_docs_status = apiDocStatus(v.projectDocsStatus, currentStage)
+    body.sublease_docs_status = apiDocStatus(v.subleaseDocsStatus, currentStage)
+    body.staff_receipts_status = apiDocStatus(v.staffReceiptsStatus, currentStage)
+  }
   if (v.dataConfirmedStatus) {
     body.data_confirmed_status =
       v.dataConfirmedStatus as ProjectTransitionRequest['data_confirmed_status']

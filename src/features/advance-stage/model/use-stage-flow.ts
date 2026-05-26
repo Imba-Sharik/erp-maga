@@ -12,6 +12,7 @@ import {
   type ArticleValues,
   type ProjectArticles,
 } from '@/entities/project-articles'
+import { pickDocumentStageValues } from '@/entities/project-documents'
 import { stageDraftActions } from '@/entities/stage-draft'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
@@ -71,6 +72,27 @@ export interface UseStageFlowOptions {
 
 const PLUM_SYSTEM_LABEL = 'PLUM (синхронизация)'
 
+/** Audit-поля документов приходят с бэка; пустой localStorage-черновик не должен их затирать. */
+function isDocumentAuditField(key: string): boolean {
+  return key.endsWith('ConfirmedAt') || key.endsWith('ConfirmedBy')
+}
+
+function mergeDraftValues(
+  backend: Partial<StageFormData> | undefined,
+  draft: Partial<StageFormData> | undefined,
+): Partial<StageFormData> {
+  if (!draft) return backend ?? {}
+  const merged: Partial<StageFormData> = { ...backend }
+  for (const [key, value] of Object.entries(draft) as [keyof StageFormData, unknown][]) {
+    if (value === undefined || value === null) continue
+    const backendValue = backend?.[key]
+    if (isDocumentAuditField(String(key)) && !value) continue
+    if (value === '' && backendValue) continue
+    merged[key] = value as never
+  }
+  return merged
+}
+
 /** Этапы с финансовыми блоками — их черновик хранит `articles`/`taxRate`, а не RHF-форму. */
 const FINANCE_DRAFT_STAGES: ReadonlySet<ProjectStage> = new Set<ProjectStage>([
   'ready_to_event',
@@ -120,7 +142,7 @@ export function useStageFlow({
       enteredAt: seededEnteredAt,
       enteredBy: seededEnteredBy,
       // Черновик перебивает значения с бэка — несохранённая правка текущего этапа.
-      values: { ...current?.values, ...initialDraft?.values },
+      values: mergeDraftValues(current?.values, initialDraft?.values),
     }
     return seeded
   })
@@ -301,6 +323,31 @@ export function useStageFlow({
       backline: prev.backline ? null : createEmptyBacklineBlock(),
     }))
   }, [])
+
+  // После PATCH документов / refetch GET — подтягиваем статус и аудит с бэка в локальный flow.
+  useEffect(() => {
+    const backendSnap = initialRecords?.documents_confirmed
+    if (!backendSnap?.values) return
+    const fromBackend = pickDocumentStageValues(backendSnap.values)
+    if (Object.keys(fromBackend).length === 0) return
+
+    setRecords((prev) => {
+      const prevValues = prev.documents_confirmed?.values ?? {}
+      const mergedValues = { ...prevValues, ...fromBackend }
+      const changed = (Object.keys(fromBackend) as (keyof StageFormData)[]).some(
+        (key) => prevValues[key] !== mergedValues[key],
+      )
+      if (!changed) return prev
+      return {
+        ...prev,
+        documents_confirmed: {
+          ...prev.documents_confirmed,
+          ...backendSnap,
+          values: mergedValues,
+        },
+      }
+    })
+  }, [initialRecords?.documents_confirmed])
 
   // Протухший черновик (этап проекта сменился где-то ещё) — удаляем.
   useEffect(() => {

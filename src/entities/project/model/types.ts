@@ -1,4 +1,6 @@
 import type { ProjectArticles } from '@/entities/project-articles'
+import type { StageDocumentFile } from '@/entities/project-documents'
+import type { StageDocumentType } from '@/entities/stage-document-files'
 
 export type ProjectBackOrigin = {
   to: string
@@ -85,7 +87,7 @@ export type ContractType = 'with_vat' | 'without_vat'
 export type ContactChannel = 'messenger' | 'phone' | 'meeting'
 export type PlumStatus = 'pending' | 'confirmed'
 
-export type DocumentStatus = 'present' | 'absent' | 'not_required' | 're_requested'
+export type DocumentStatus = 'present' | 're_requested' | 'not_required'
 export type EventReadiness = 'ready' | 'not_ready'
 
 export interface StageFormData {
@@ -199,4 +201,6 @@ export interface ProjectDetail extends Project {
   articles?: ProjectArticles
   /** Процент налога с бэка. */
   taxRate?: number
+  /** Метаданные закрывающих документов (имя, URL, кто/когда загрузил). */
+  documentFiles?: Partial<Record<StageDocumentType, StageDocumentFile>>
 }

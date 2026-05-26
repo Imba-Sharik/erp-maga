@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react'
+import { useId, useRef, useState } from 'react'
 
 import type { StageDocumentFieldVariant } from '@/entities/project-documents'
 import type { StageDocumentType } from '@/entities/stage-document-files'
@@ -9,6 +9,7 @@ import { Button } from '@/shared/ui/button'
 import type { StageDocumentInteraction } from '../lib/document-interaction'
 import { useDownloadStageDocument } from '../model/use-download-stage-document'
 import { useUploadStageDocument } from '../model/use-upload-stage-document'
+import { ConfirmDownloadDialog } from './confirm-download-dialog'
 
 const FILE_ACCEPT =
   'image/*,.pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -47,19 +48,34 @@ export function StageDocumentField({
 }: StageDocumentFieldProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
-  const { upload } = useUploadStageDocument()
-  const { download } = useDownloadStageDocument()
+  const upload = useUploadStageDocument()
+  const download = useDownloadStageDocument()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const isUpload = interaction === 'upload'
+  const busy = upload.isPending || download.isPending
+  const interactionDisabled = disabled || busy
 
   const openPicker = () => {
-    if (!isUpload || disabled || variant === 'confirmed') return
+    if (!isUpload || interactionDisabled || variant === 'confirmed') return
     inputRef.current?.click()
   }
 
-  const handleDownload = () => {
-    if (!value) return
-    download({ projectId, documentType, fileName: value })
+  const requestDownload = () => {
+    if (!value || interactionDisabled) return
+    setConfirmOpen(true)
+  }
+
+  const confirmDownload = () => {
+    download
+      .download({ projectId, documentType, fileName: value })
+      .then(() => {
+        setConfirmOpen(false)
+      })
+      .catch(() => {
+        setConfirmOpen(false)
+        window.alert('Не удалось скачать файл. Попробуйте позже.')
+      })
   }
 
   const handleFile = (file: File | undefined) => {
@@ -72,21 +88,22 @@ export function StageDocumentField({
       window.alert('Файл слишком большой. Максимальный размер — 20 МБ.')
       return
     }
-    upload({ projectId, documentType, file })
+    upload.upload({ projectId, documentType, file })
     onChange(file.name)
   }
 
   const showFileRow =
     variant === 'uploaded' || variant === 'confirmed' || (variant === 'rejected' && Boolean(value))
   const canReplace = isUpload && (variant === 'uploaded' || variant === 'rejected')
-  const canDownload = !isUpload && Boolean(value)
+  const canDownload = Boolean(value)
 
   const fileNameClassName = cn(
-    'min-w-0 flex-1 truncate text-sm',
+    'min-w-0 flex-1 truncate text-left text-sm',
     variant === 'confirmed' && 'text-[#2E7D32]',
     variant === 'rejected' && 'text-[#D25252]',
     variant === 'uploaded' && 'text-[#B0B0B0]',
     canDownload && 'cursor-pointer underline-offset-2 hover:underline',
+    interactionDisabled && 'cursor-not-allowed opacity-70',
   )
 
   return (
@@ -98,7 +115,7 @@ export function StageDocumentField({
           type="file"
           accept={FILE_ACCEPT}
           className="sr-only"
-          disabled={disabled || variant === 'confirmed'}
+          disabled={interactionDisabled || variant === 'confirmed'}
           onChange={(e) => {
             handleFile(e.target.files?.[0])
             e.target.value = ''
@@ -129,8 +146,8 @@ export function StageDocumentField({
                 type="button"
                 className={fileNameClassName}
                 title={value}
-                disabled={disabled}
-                onClick={handleDownload}
+                disabled={interactionDisabled}
+                onClick={requestDownload}
               >
                 {value}
               </button>
@@ -146,7 +163,7 @@ export function StageDocumentField({
               variant="outline"
               size="icon"
               className="size-9 shrink-0 cursor-pointer rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
-              disabled={disabled}
+              disabled={interactionDisabled}
               aria-label="Выбрать другой файл"
               onClick={openPicker}
             >
@@ -158,11 +175,22 @@ export function StageDocumentField({
         <Button
           type="button"
           className="h-9 w-full cursor-pointer justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
-          disabled={disabled}
+          disabled={interactionDisabled}
           onClick={openPicker}
         >
-          Добавить документ
+          {upload.isPending ? 'Загрузка…' : 'Добавить документ'}
         </Button>
+      ) : null}
+      {canDownload ? (
+        <ConfirmDownloadDialog
+          open={confirmOpen}
+          onOpenChange={(next) => {
+            if (!download.isPending) setConfirmOpen(next)
+          }}
+          fileName={value}
+          onConfirm={confirmDownload}
+          isPending={download.isPending}
+        />
       ) : null}
     </div>
   )
