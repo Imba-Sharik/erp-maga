@@ -3350,6 +3350,11 @@ components:
           - $ref: '#/components/schemas/UserBrief'
           nullable: true
           readOnly: true
+        project_docs_file:
+          allOf:
+          - $ref: '#/components/schemas/ProjectDocumentFile'
+          nullable: true
+          readOnly: true
         project_docs_file_name:
           type: string
           nullable: true
@@ -3358,12 +3363,22 @@ components:
           type: string
           nullable: true
           readOnly: true
+        sublease_docs_file:
+          allOf:
+          - $ref: '#/components/schemas/ProjectDocumentFile'
+          nullable: true
+          readOnly: true
         sublease_docs_file_name:
           type: string
           nullable: true
           readOnly: true
         sublease_docs_file_url:
           type: string
+          nullable: true
+          readOnly: true
+        staff_receipts_file:
+          allOf:
+          - $ref: '#/components/schemas/ProjectDocumentFile'
           nullable: true
           readOnly: true
         staff_receipts_file_name:
@@ -3556,6 +3571,7 @@ components:
       - primary_contact_set_by
       - project_docs_confirmed_at
       - project_docs_confirmed_by
+      - project_docs_file
       - project_docs_file_name
       - project_docs_file_url
       - project_docs_status
@@ -3568,12 +3584,14 @@ components:
       - source_payload
       - staff_receipts_confirmed_at
       - staff_receipts_confirmed_by
+      - staff_receipts_file
       - staff_receipts_file_name
       - staff_receipts_file_url
       - staff_receipts_status
       - stage
       - sublease_docs_confirmed_at
       - sublease_docs_confirmed_by
+      - sublease_docs_file
       - sublease_docs_file_name
       - sublease_docs_file_url
       - sublease_docs_status
@@ -3582,6 +3600,37 @@ components:
       - tax_rate
       - updated_at
       - was_not_ready_for_event
+    ProjectDocumentFile:
+      type: object
+      properties:
+        file_name:
+          type: string
+          nullable: true
+        file_url:
+          type: string
+          nullable: true
+        content_type:
+          type: string
+          nullable: true
+        size:
+          type: integer
+          nullable: true
+          description: Размер в байтах
+        uploaded_at:
+          type: string
+          format: date-time
+          nullable: true
+        uploaded_by:
+          allOf:
+          - $ref: '#/components/schemas/UserBrief'
+          nullable: true
+      required:
+      - content_type
+      - file_name
+      - file_url
+      - size
+      - uploaded_at
+      - uploaded_by
     ProjectDocumentUploadRequestRequest:
       type: object
       properties:
