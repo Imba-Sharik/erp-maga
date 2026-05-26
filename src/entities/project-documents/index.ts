@@ -24,8 +24,8 @@ export type {
   ProjectStageDocumentItem,
   ResolveStageDocumentsOptions,
 } from './lib/resolve-stage-documents'
-export { resolveStageDocumentSource } from './lib/resolve-document-source'
-export type { StageDocumentSource } from './lib/resolve-document-source'
+export type { StageDocumentFile } from './model/document-file'
+export { mapBackendDocumentFile } from './lib/map-document-file'
 export {
   hasReRequestedStatus,
   isDocumentsStageSettled,
