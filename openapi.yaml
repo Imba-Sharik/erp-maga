@@ -393,8 +393,9 @@ paths:
       operationId: projects_list
       description: 'Фильтры: event_date_after, event_date_before, stage, stage__in,
         plum_status, plum_status__in, mag_manager, hall_id, loft_id, hall (подстрока
-        в названии зала), loft (подстрока в названии лофта). Пагинация: limit, offset.
-        В элементе списка: halls[] (все залы мероприятия).'
+        в названии зала), loft (подстрока в названии лофта). Пагинация: limit, offset
+        (LimitOffset, по умолчанию limit=10). В элементе списка: halls[] (внутренние
+        hall_id/loft_id MAG), sync_error — предупреждение синка (напр. зал не в каталоге).'
       summary: Список проектов
       parameters:
       - in: query
@@ -512,9 +513,11 @@ paths:
           description: ''
     post:
       operationId: projects_create
-      description: 'Форма «Новый проект»: название, тип, hall_ids[] из GET /halls/
-        (или один hall_id). Дата мероприятия — сегодня, если event_date не передан.
-        Доступ: менеджер MAG, руководитель.'
+      description: 'Ручное создание (не из Plum). **Тело:** `event_type` (обяз.),
+        `event_name` или `title` (обяз.), `hall_ids` — внутренние id из `GET /api/v1/halls/halls/`
+        (минимум один) или alias `hall_id`; опционально `event_date` (иначе сегодня).
+        **Ответ 201:** `ProjectSerializer` с `halls[]`. Менеджер MAG: создатель =
+        `mag_manager`; lead: из матрицы залов. Доступ: менеджер MAG, руководитель.'
       summary: Создать проект вручную
       tags:
       - projects
@@ -573,10 +576,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectDetailSchema'
+                $ref: '#/components/schemas/ProjectDetail'
           description: ''
     patch:
       operationId: projects_partial_update
+      description: 'Тело: `{ "mag_manager_id": <user_id> | null }`.'
       summary: Переназначить менеджера MAG (lead/admin)
       parameters:
       - in: path
@@ -606,6 +610,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Project'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
         '403':
           content:
             application/json:
@@ -624,6 +634,18 @@ paths:
         required: true
       tags:
       - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BacklineCreatedSchemaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BacklineCreatedSchemaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BacklineCreatedSchemaRequest'
+        required: true
       security:
       - jwtAuth: []
       responses:
@@ -763,6 +785,99 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PipelineStateSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/projects/{id}/documents/{document_type}/file/:
+    get:
+      operationId: projects_document_file_retrieve
+      summary: Скачать файл закрывающего документа
+      parameters:
+      - in: path
+        name: document_type
+        schema:
+          type: string
+          enum:
+          - project_closing
+          - staff_receipts
+          - subrent_closing
+        description: project_closing — закрывающие по проекту; subrent_closing — по
+          субаренде; staff_receipts — расписки.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: Файл
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Файл не найден
+    post:
+      operationId: projects_document_file_create
+      description: Менеджер MAG (или руководитель) прикрепляет файл на любом этапе
+        закрытия. При повторной загрузке после запроса бухгалтера уходит отдельное
+        уведомление.
+      summary: Загрузить или заменить файл закрывающего документа
+      parameters:
+      - in: path
+        name: document_type
+        schema:
+          type: string
+          enum:
+          - project_closing
+          - staff_receipts
+          - subrent_closing
+        description: project_closing — закрывающие по проекту; subrent_closing — по
+          субаренде; staff_receipts — расписки.
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectDocumentUploadRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetail'
           description: ''
         '400':
           content:
@@ -1013,13 +1128,13 @@ paths:
                     kind: personnel
                     expense: 200000
                 summary: expenses_entered → documents_confirmed
-              DocumentsConfirmed→DataConfirmed:
+              DocumentsConfirmed→DataConfirmed(всеСтатусыОпциональны):
                 value:
                   to_stage: data_confirmed
                   project_docs_status: present
-                  sublease_docs_status: not_required
+                  sublease_docs_status: ''
                   staff_receipts_status: present
-                summary: documents_confirmed → data_confirmed
+                summary: documents_confirmed → data_confirmed (все статусы опциональны)
               FeedbackReceived→DataConfirmed(legacy):
                 value:
                   to_stage: data_confirmed
@@ -1059,7 +1174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectDetailSchema'
+                $ref: '#/components/schemas/ProjectDetail'
           description: ''
         '400':
           content:
@@ -1169,13 +1284,13 @@ paths:
                     kind: personnel
                     expense: 200000
                 summary: expenses_entered → documents_confirmed
-              DocumentsConfirmed→DataConfirmed:
+              DocumentsConfirmed→DataConfirmed(всеСтатусыОпциональны):
                 value:
                   to_stage: data_confirmed
                   project_docs_status: present
-                  sublease_docs_status: not_required
+                  sublease_docs_status: ''
                   staff_receipts_status: present
-                summary: documents_confirmed → data_confirmed
+                summary: documents_confirmed → data_confirmed (все статусы опциональны)
               FeedbackReceived→DataConfirmed(legacy):
                 value:
                   to_stage: data_confirmed
@@ -1215,7 +1330,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectDetailSchema'
+                $ref: '#/components/schemas/ProjectDetail'
           description: ''
         '400':
           content:
@@ -1243,7 +1358,7 @@ paths:
 
         **Доступ:** manager_mag — только свои проекты; lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
 
-        В `results`: event_type, event_type_label, client_company, phone, halls[] — все залы из Plum (hall_id, hall_name, loft_id, loft_name).
+        В `results`: event_type, event_type_label, client_company, phone, halls[] — залы проекта (внутренние hall_id / loft_id MAG; данные из каталога и ProjectEventHall). При отсутствии зала в каталоге — sync_error на проекте.
       summary: 'Календарь: проекты за месяц / период'
       parameters:
       - in: query
@@ -1613,6 +1728,13 @@ components:
           type: integer
       required:
       - id
+    BacklineCreatedSchemaRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+      required:
+      - id
     ContractBlockSchema:
       type: object
       properties:
@@ -1655,8 +1777,18 @@ components:
             * `staff_receipts` - Расписки персоналу
           x-spec-enum-id: f856e394deb3d17e
         status:
+          enum:
+          - present
+          - re_requested
+          - not_required
+          - absent
           type: string
-          minLength: 1
+          description: |-
+            * `present` - present
+            * `re_requested` - re_requested
+            * `not_required` - not_required
+            * `absent` - absent
+          x-spec-enum-id: e4c6036433a99365
       required:
       - document_type
       - status
@@ -1926,6 +2058,9 @@ components:
           - bonus_approved
           - data_rejected
           - manager_assigned
+          - documents_uploaded
+          - documents_re_requested
+          - documents_reuploaded
           - other
           type: string
           description: |-
@@ -1935,8 +2070,11 @@ components:
             * `bonus_approved` - Бонус утверждён
             * `data_rejected` - Данные не приняты
             * `manager_assigned` - Назначен менеджер
+            * `documents_uploaded` - Документы загружены
+            * `documents_re_requested` - Повторный запрос документов
+            * `documents_reuploaded` - Документы прикреплены повторно
             * `other` - Прочее
-          x-spec-enum-id: f29f49d66022e657
+          x-spec-enum-id: d535249535aa2240
           readOnly: true
           title: Тип события
         title:
@@ -2790,9 +2928,9 @@ components:
           format: date
       required:
       - event_type
-    ProjectDetailSchema:
+    ProjectDetail:
       type: object
-      description: GET /projects/{id}/ и ответ POST /transitions/.
+      description: Все залы мероприятия (из Plum или ручного hall_ids).
       properties:
         id:
           type: integer
@@ -2800,24 +2938,30 @@ components:
         plum_event_id:
           type: string
           readOnly: true
+          title: ID мероприятия Plum
         plum_card_url:
           type: string
           format: uri
           readOnly: true
+          title: Ссылка на карточку Plum
         plum_last_synced_at:
           type: string
           format: date-time
           readOnly: true
+          title: Дата последней синхронизации
         plum_event_payload_hash:
           type: string
           readOnly: true
+          title: SHA-256 нормализованного JSON мероприятия Plum
         event_name:
           type: string
           readOnly: true
+          title: Название мероприятия
         event_date:
           type: string
           format: date
           readOnly: true
+          title: Дата мероприятия
         halls:
           type: array
           items:
@@ -2826,6 +2970,7 @@ components:
         city:
           type: string
           readOnly: true
+          title: Город
         city_label:
           type: string
           readOnly: true
@@ -2833,6 +2978,7 @@ components:
           type: integer
           readOnly: true
           nullable: true
+          title: Тип мероприятия Plum (код)
         event_type_label:
           type: string
           readOnly: true
@@ -2840,59 +2986,93 @@ components:
           type: integer
           readOnly: true
           nullable: true
+          title: Формат мероприятия Plum (код)
         event_format_label:
           type: string
           readOnly: true
         plum_event_status:
           type: string
           readOnly: true
+          title: Статус мероприятия в Plum
         plum_event_status_label:
           type: string
           readOnly: true
         plum_comment:
           type: string
           readOnly: true
+          title: Комментарий из Plum
         plum_client_company:
           type: string
           readOnly: true
+          title: Клиент / название компании
         plum_contact_person:
           type: string
           readOnly: true
+          title: Контактное лицо
         plum_phone:
           type: string
           readOnly: true
+          title: Телефон
         plum_email:
           type: string
           format: email
           readOnly: true
+          title: Email
         plum_lofthall_manager:
           type: string
           readOnly: true
+          title: Менеджер LOFT HALL
         plum_mag_manager:
           type: string
           readOnly: true
+          title: Менеджер MAG (Plum)
         client_company:
           type: string
           readOnly: true
+          title: Клиент / название компании (редактируемое)
         contact_person:
           type: string
           readOnly: true
+          title: Контактное лицо (редактируемое)
         phone:
           type: string
           readOnly: true
+          title: Телефон (редактируемый)
         email:
           type: string
           format: email
           readOnly: true
+          title: Email (редактируемый)
         mag_manager:
           type: string
           readOnly: true
-          description: Строка для UI (первый из plum_mag_manager или ФИО User)
         mag_manager_email:
           type: string
           format: email
           readOnly: true
           nullable: true
+        sales_total:
+          type: number
+          format: double
+          readOnly: true
+        net_profit_ex_tax:
+          type: number
+          format: double
+          readOnly: true
+        final_bonus:
+          type: number
+          format: double
+          readOnly: true
+        archived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Дата переноса в архив
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
         stage:
           enum:
           - plum_request
@@ -2929,6 +3109,7 @@ components:
             * `out_of_mag_scope` - Вне контура MAG
           x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
+          title: Стадия проекта
         last_active_stage:
           enum:
           - plum_request
@@ -2965,15 +3146,19 @@ components:
             * `out_of_mag_scope` - Вне контура MAG
           x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
+          title: Последняя активная стадия
         source_payload:
           readOnly: true
+          title: Последний payload Plum
         sync_error:
           type: string
           readOnly: true
+          title: Ошибка последней синхронизации
         created_at:
           type: string
           format: date-time
           readOnly: true
+          title: Дата создания проекта в ERP
         updated_at:
           type: string
           format: date-time
@@ -2982,63 +3167,52 @@ components:
           type: string
           readOnly: true
         contact_channel:
-          enum:
-          - messenger
-          - phone
-          - meeting
-          - null
           type: string
-          description: |-
-            * `messenger` - messenger
-            * `phone` - phone
-            * `meeting` - meeting
-          x-spec-enum-id: 5ad378c7d8f0e856
-          readOnly: true
           nullable: true
+          readOnly: true
         contacted_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         primary_contact_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         calculation_comment:
           type: string
           readOnly: true
         calculation_prepared_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         calculation_prepared_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         contract_type:
           enum:
           - with_vat
           - without_vat
-          - ''
           - null
           type: string
           description: |-
-            * `with_vat` - С НДС
-            * `without_vat` - Без НДС
-          x-spec-enum-id: caed3a61f1a3718c
-          readOnly: true
+            * `with_vat` - with_vat
+            * `without_vat` - without_vat
+          x-spec-enum-id: b610c08531aa624d
           nullable: true
+          readOnly: true
         contract_number:
           type: string
           readOnly: true
         contract_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
+          readOnly: true
         legal_entity:
           type: string
           readOnly: true
@@ -3048,33 +3222,33 @@ components:
         contract_signed_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         contract_signed_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         ready_to_event_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         ready_to_event_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         event_held_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         event_held_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         event_readiness:
           type: boolean
           readOnly: true
@@ -3084,130 +3258,146 @@ components:
         expenses_entered_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         expenses_entered_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         expenses_comment:
           type: string
           readOnly: true
         documents_confirmed_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         documents_confirmed_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         project_docs_status:
           enum:
           - present
-          - absent
+          - re_requested
           - not_required
           - null
           type: string
           description: |-
             * `present` - present
-            * `absent` - absent
+            * `re_requested` - re_requested
             * `not_required` - not_required
-          x-spec-enum-id: 4d8653aa82093a09
-          readOnly: true
+          x-spec-enum-id: ed4d6536636ecea2
           nullable: true
+          readOnly: true
         project_docs_confirmed_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         project_docs_confirmed_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         sublease_docs_status:
           enum:
           - present
-          - absent
+          - re_requested
           - not_required
           - null
           type: string
           description: |-
             * `present` - present
-            * `absent` - absent
+            * `re_requested` - re_requested
             * `not_required` - not_required
-          x-spec-enum-id: 4d8653aa82093a09
-          readOnly: true
+          x-spec-enum-id: ed4d6536636ecea2
           nullable: true
+          readOnly: true
         sublease_docs_confirmed_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         sublease_docs_confirmed_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         staff_receipts_status:
           enum:
           - present
-          - absent
+          - re_requested
           - not_required
           - null
           type: string
           description: |-
             * `present` - present
-            * `absent` - absent
+            * `re_requested` - re_requested
             * `not_required` - not_required
-          x-spec-enum-id: 4d8653aa82093a09
-          readOnly: true
+          x-spec-enum-id: ed4d6536636ecea2
           nullable: true
+          readOnly: true
         staff_receipts_confirmed_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         staff_receipts_confirmed_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
-        data_confirmed_status:
-          enum:
-          - confirmed
-          - rejected
-          - null
+          readOnly: true
+        project_docs_file_name:
           type: string
-          description: |-
-            * `confirmed` - confirmed
-            * `rejected` - rejected
-          x-spec-enum-id: c1eb6617a9413969
-          readOnly: true
           nullable: true
+          readOnly: true
+        project_docs_file_url:
+          type: string
+          nullable: true
+          readOnly: true
+        sublease_docs_file_name:
+          type: string
+          nullable: true
+          readOnly: true
+        sublease_docs_file_url:
+          type: string
+          nullable: true
+          readOnly: true
+        staff_receipts_file_name:
+          type: string
+          nullable: true
+          readOnly: true
+        staff_receipts_file_url:
+          type: string
+          nullable: true
+          readOnly: true
+        data_confirmed_status:
+          type: string
+          nullable: true
+          readOnly: true
         data_confirmation_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         data_confirmation_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         data_confirmed_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         data_confirmed_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         data_rejected:
           type: boolean
           readOnly: true
@@ -3217,13 +3407,13 @@ components:
         bonus_calculated_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         bonus_calculated_set_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
+          readOnly: true
         net_profit_total:
           type: number
           format: double
@@ -3239,23 +3429,17 @@ components:
         bonus_approved_at:
           type: string
           format: date-time
-          readOnly: true
           nullable: true
+          readOnly: true
         bonus_approved_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
-          readOnly: true
           nullable: true
-        closed_at:
-          type: string
-          format: date-time
           readOnly: true
-          nullable: true
         closing_funnel_entered_at:
           type: string
           format: date-time
           readOnly: true
-          nullable: true
         sales_main_total:
           type: number
           format: double
@@ -3294,6 +3478,7 @@ components:
             $ref: '#/components/schemas/ProjectArticle'
           readOnly: true
       required:
+      - archived_at
       - articles
       - bonus_approved_at
       - bonus_approved_by
@@ -3344,12 +3529,14 @@ components:
       - expenses_entered_set_by
       - expenses_main_total
       - expenses_project_total
+      - final_bonus
       - halls
       - id
       - last_active_stage
       - legal_entity
       - mag_manager
       - mag_manager_email
+      - net_profit_ex_tax
       - net_profit_total
       - phone
       - plum_card_url
@@ -3369,36 +3556,54 @@ components:
       - primary_contact_set_by
       - project_docs_confirmed_at
       - project_docs_confirmed_by
+      - project_docs_file_name
+      - project_docs_file_url
       - project_docs_status
       - ready_to_event_at
       - ready_to_event_set_by
       - sales_backline_total
       - sales_main_total
       - sales_project_total
+      - sales_total
       - source_payload
       - staff_receipts_confirmed_at
       - staff_receipts_confirmed_by
+      - staff_receipts_file_name
+      - staff_receipts_file_url
       - staff_receipts_status
       - stage
       - sublease_docs_confirmed_at
       - sublease_docs_confirmed_by
+      - sublease_docs_file_name
+      - sublease_docs_file_url
       - sublease_docs_status
       - sync_error
       - tax_amount
       - tax_rate
       - updated_at
       - was_not_ready_for_event
+    ProjectDocumentUploadRequestRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Фото, скан или офисный документ (без видео, аудио и GIF).
+      required:
+      - file
     ProjectHallItem:
       type: object
       description: Один зал мероприятия (+ лофт этого зала).
       properties:
         hall_id:
           type: integer
+          description: Внутренний id зала MAG (не plum_id); см. GET /api/v1/halls/halls/
         hall_name:
           type: string
         loft_id:
           type: integer
           nullable: true
+          description: Внутренний id лофта MAG или null
         loft_name:
           type: string
       required:
@@ -3577,36 +3782,45 @@ components:
         project_docs_status:
           enum:
           - present
-          - absent
+          - re_requested
           - not_required
+          - ''
+          - null
           type: string
           description: |-
             * `present` - present
-            * `absent` - absent
+            * `re_requested` - re_requested
             * `not_required` - not_required
-          x-spec-enum-id: 4d8653aa82093a09
+          x-spec-enum-id: ed4d6536636ecea2
+          nullable: true
         sublease_docs_status:
           enum:
           - present
-          - absent
+          - re_requested
           - not_required
+          - ''
+          - null
           type: string
           description: |-
             * `present` - present
-            * `absent` - absent
+            * `re_requested` - re_requested
             * `not_required` - not_required
-          x-spec-enum-id: 4d8653aa82093a09
+          x-spec-enum-id: ed4d6536636ecea2
+          nullable: true
         staff_receipts_status:
           enum:
           - present
-          - absent
+          - re_requested
           - not_required
+          - ''
+          - null
           type: string
           description: |-
             * `present` - present
-            * `absent` - absent
+            * `re_requested` - re_requested
             * `not_required` - not_required
-          x-spec-enum-id: 4d8653aa82093a09
+          x-spec-enum-id: ed4d6536636ecea2
+          nullable: true
         data_confirmed_status:
           enum:
           - confirmed
@@ -3923,6 +4137,9 @@ components:
         is_staff:
           type: boolean
           readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
         date_joined:
           type: string
           format: date-time
@@ -3941,6 +4158,7 @@ components:
       - email
       - first_name
       - id
+      - is_active
       - is_staff
       - last_name
       - role
@@ -3967,6 +4185,9 @@ components:
           - bonus_approved
           - data_rejected
           - manager_assigned
+          - documents_uploaded
+          - documents_re_requested
+          - documents_reuploaded
           - other
         title:
           type: string
