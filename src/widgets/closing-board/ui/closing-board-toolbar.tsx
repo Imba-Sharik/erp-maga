@@ -46,7 +46,7 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+      <div className="flex shrink-0 flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between 2xl:gap-4">
         <ProjectsBoardToolbar
           filtersAlign="start"
           search={props.search}
