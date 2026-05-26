@@ -9,16 +9,17 @@ export function ProjectDetailTabsRow({
   onOutsideMagClick?: () => void
 }) {
   return (
-    <div className="flex w-full items-center justify-between gap-4">
+    <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
       <ProjectTabs />
       {showOutsideMagButton ? (
         <Button
           type="button"
           variant="outline"
-          className="h-10 cursor-pointer rounded-[10px] border-[#D25252] bg-[#FFF3F3] px-4 text-sm text-[#D25252] hover:bg-[#FFE5E5] hover:text-[#D25252]"
+          className="h-9 self-start w-full shrink-0 cursor-pointer rounded-[10px] border-[#D25252] bg-[#FFF3F3] px-4 text-xs text-[#D25252] hover:bg-[#FFE5E5] hover:text-[#D25252] md:h-10 md:w-auto md:text-sm"
           onClick={onOutsideMagClick}
         >
-          Вне контура MAG
+          <span className="md:hidden">Вне контура</span>
+          <span className="hidden md:inline">Вне контура MAG</span>
         </Button>
       ) : null}
     </div>
