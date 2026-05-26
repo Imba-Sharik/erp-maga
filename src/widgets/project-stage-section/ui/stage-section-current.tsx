@@ -19,9 +19,11 @@ import {
 } from '@/entities/project'
 import { useCurrentUser } from '@/entities/current-user'
 import type { ProjectArticles } from '@/entities/project-articles'
+import { DOC_PAIR_BY_STATUS_FIELD } from '@/entities/project-documents'
 import { stageDraftActions } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
+import { useUpdateDocumentStatus } from '@/features/update-document-status'
 
 import {
   confirmedAtLabelForDocStatus,
@@ -107,6 +109,7 @@ export function StageSectionCurrent({
   const canEdit = canEditStage(stage, role)
   const canAdvance = canAdvanceStage(stage, role)
   const currentUser = useCurrentUser()
+  const { update: updateDocumentStatus } = useUpdateDocumentStatus()
 
   const form = useForm<SignedFormValues>({
     resolver: zodResolver(schema as never) as Resolver<SignedFormValues>,
@@ -245,6 +248,18 @@ export function StageSectionCurrent({
                         : {}),
                     }
                     onPatchValues?.(patch)
+
+                    const docPair =
+                      DOC_PAIR_BY_STATUS_FIELD[
+                        f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD
+                      ]
+                    if (docPair && isDocStatus) {
+                      updateDocumentStatus({
+                        projectId: project.id,
+                        documentType: docPair.documentType,
+                        status: value as DocumentStatus,
+                      })
+                    }
                   }}
                 >
                   <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
