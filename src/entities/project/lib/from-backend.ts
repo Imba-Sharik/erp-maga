@@ -4,7 +4,7 @@ import { ru } from 'date-fns/locale'
 import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { ProjectCalendarItemSchema } from '@/shared/api/generated/types/ProjectCalendarItemSchema'
-import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
+import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { mapBackendArticles } from '@/entities/project-articles'
@@ -14,6 +14,7 @@ import type {
   Project,
   ProjectDetail,
   ProjectEconomics,
+  DocumentStatus,
   ProjectStage,
   StageFormData,
   StageSnapshot,
@@ -83,7 +84,19 @@ function formatLastUpdate(iso: string | undefined): string {
   }
 }
 
-type BackendProjectListable = BackendProject | ProjectDetailSchema
+type BackendProjectListable = BackendProject | BackendProjectDetail
+
+const DOCUMENT_STATUSES: ReadonlySet<DocumentStatus> = new Set([
+  'present',
+  're_requested',
+  'not_required',
+])
+
+function mapDocStatus(raw: string | null | undefined): DocumentStatus | undefined {
+  if (!raw) return undefined
+  if (raw === 'absent') return 're_requested'
+  return DOCUMENT_STATUSES.has(raw as DocumentStatus) ? (raw as DocumentStatus) : undefined
+}
 
 export function mapBackendProject(b: BackendProjectListable): Project | null {
   const stage = b.stage ? STAGE_MAP[b.stage] : undefined
@@ -211,8 +224,9 @@ export function mapBackendCalendarProjects(list: readonly ProjectCalendarItemSch
 }
 
 function userBriefName(
-  user: { full_name?: string | null } | null | undefined,
+  user: string | { full_name?: string | null } | null | undefined,
 ): string | undefined {
+  if (typeof user === 'string') return user || undefined
   return user?.full_name ?? undefined
 }
 
@@ -238,7 +252,7 @@ function buildSnapshot({ enteredAt, enteredBy, values }: SnapshotInput): StageSn
  * `useStageFlow` показал значения пройденных этапов (иначе они рисуются как «—»).
  * Финансовые этапы (ready/expenses/bonus) хранят `articles` — здесь не гидрируются.
  */
-function mapStageSnapshots(b: ProjectDetailSchema): Partial<Record<ProjectStage, StageSnapshot>> {
+function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage, StageSnapshot>> {
   const snapshots: Partial<Record<ProjectStage, StageSnapshot>> = {}
   const put = (stage: ProjectStage, snapshot: StageSnapshot | undefined) => {
     if (snapshot) snapshots[stage] = snapshot
@@ -317,13 +331,13 @@ function mapStageSnapshots(b: ProjectDetailSchema): Partial<Record<ProjectStage,
       enteredAt: b.documents_confirmed_at,
       enteredBy: userBriefName(b.documents_confirmed_set_by),
       values: {
-        projectDocsStatus: b.project_docs_status,
+        projectDocsStatus: mapDocStatus(b.project_docs_status),
         projectDocsConfirmedAt: b.project_docs_confirmed_at,
         projectDocsConfirmedBy: userBriefName(b.project_docs_confirmed_by),
-        subleaseDocsStatus: b.sublease_docs_status,
+        subleaseDocsStatus: mapDocStatus(b.sublease_docs_status),
         subleaseDocsConfirmedAt: b.sublease_docs_confirmed_at,
         subleaseDocsConfirmedBy: userBriefName(b.sublease_docs_confirmed_by),
-        staffReceiptsStatus: b.staff_receipts_status,
+        staffReceiptsStatus: mapDocStatus(b.staff_receipts_status),
         staffReceiptsConfirmedAt: b.staff_receipts_confirmed_at,
         staffReceiptsConfirmedBy: userBriefName(b.staff_receipts_confirmed_by),
       },
@@ -342,7 +356,7 @@ function mapStageSnapshots(b: ProjectDetailSchema): Partial<Record<ProjectStage,
   return snapshots
 }
 
-export function mapBackendProjectDetail(b: ProjectDetailSchema): ProjectDetail | null {
+export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail | null {
   const base = mapBackendProject(b)
   if (!base) return null
 

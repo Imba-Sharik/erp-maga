@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 
 import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
-import type { ProjectDetailSchema } from '@/shared/api/generated/types/ProjectDetailSchema'
+import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 
 import { getTransitionErrorMessage } from './get-transition-error-message'
@@ -24,7 +24,7 @@ export function useProjectTransition({
       projectId: number,
       data: ProjectTransitionRequest,
       options?: {
-        onSuccess?: (detail: ProjectDetailSchema) => void
+        onSuccess?: (detail: BackendProjectDetail) => void
         onError?: () => void
       },
     ) => {
