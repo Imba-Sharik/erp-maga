@@ -10,6 +10,7 @@ import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag
 import { useProjectTab } from '@/features/project-tabs'
 import { ProjectActivityLog } from '@/widgets/project-activity-log'
 import { ProjectDetailAside } from '@/widgets/project-detail-aside'
+import { ProjectDocuments } from '@/widgets/project-documents'
 
 import { ProjectDetailMainCard } from './project-detail-main-card'
 import { ProjectDetailStages } from './project-detail-stages'
@@ -42,6 +43,8 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
           />
           {tab === 'actions' ? (
             <ProjectActivityLog project={project} records={flow.records} />
+          ) : tab === 'documents' ? (
+            <ProjectDocuments project={project} getRecord={flow.getRecord} />
           ) : (
             <ProjectDetailStages project={project} flow={flow} />
           )}
