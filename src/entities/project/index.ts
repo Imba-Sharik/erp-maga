@@ -1,4 +1,6 @@
 export { DEFAULT_PROJECTS_BACK_ORIGIN } from './model/project-back-origins'
+export type { StageDocumentFieldVariant } from '@/entities/project-documents'
+export { getStageDocumentFieldVariant } from '@/entities/project-documents'
 export type {
   Project,
   ProjectEconomics,
