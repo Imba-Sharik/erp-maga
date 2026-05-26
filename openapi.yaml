@@ -3389,6 +3389,11 @@ components:
           type: string
           nullable: true
           readOnly: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectDocumentStatus'
+          readOnly: true
         data_confirmed_status:
           type: string
           nullable: true
@@ -3526,6 +3531,7 @@ components:
       - data_confirmed_set_by
       - data_confirmed_status
       - data_rejected
+      - documents
       - documents_confirmed_at
       - documents_confirmed_set_by
       - email
@@ -3631,6 +3637,55 @@ components:
       - size
       - uploaded_at
       - uploaded_by
+    ProjectDocumentStatus:
+      type: object
+      properties:
+        document_type:
+          enum:
+          - project_closing
+          - subrent_closing
+          - staff_receipts
+          type: string
+          description: |-
+            * `project_closing` - project_closing
+            * `subrent_closing` - subrent_closing
+            * `staff_receipts` - staff_receipts
+          x-spec-enum-id: 80aea474a535d69e
+        status:
+          enum:
+          - present
+          - re_requested
+          - not_required
+          - null
+          type: string
+          description: |-
+            * `present` - present
+            * `re_requested` - re_requested
+            * `not_required` - not_required
+          x-spec-enum-id: ed4d6536636ecea2
+          nullable: true
+        confirmed_at:
+          type: string
+          format: date-time
+          nullable: true
+        confirmed_by:
+          allOf:
+          - $ref: '#/components/schemas/UserBrief'
+          nullable: true
+        file_name:
+          type: string
+          nullable: true
+        file:
+          allOf:
+          - $ref: '#/components/schemas/ProjectDocumentFile'
+          nullable: true
+      required:
+      - confirmed_at
+      - confirmed_by
+      - document_type
+      - file
+      - file_name
+      - status
     ProjectDocumentUploadRequestRequest:
       type: object
       properties:

@@ -5,6 +5,7 @@ import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProje
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { ProjectCalendarItemSchema } from '@/shared/api/generated/types/ProjectCalendarItemSchema'
 import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
+import type { ProjectDocumentStatus } from '@/shared/api/generated/types/ProjectDocumentStatus'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { mapBackendArticles } from '@/entities/project-articles'
@@ -97,6 +98,19 @@ const DOCUMENT_STATUSES: ReadonlySet<DocumentStatus> = new Set([
 function mapDocStatus(raw: string | null | undefined): DocumentStatus | undefined {
   if (!raw) return undefined
   return DOCUMENT_STATUSES.has(raw as DocumentStatus) ? (raw as DocumentStatus) : undefined
+}
+
+type DocumentsByType = Partial<Record<StageDocumentType, ProjectDocumentStatus>>
+
+function indexDocumentsByType(
+  documents: readonly ProjectDocumentStatus[] | null | undefined,
+): DocumentsByType {
+  const result: DocumentsByType = {}
+  if (!documents) return result
+  for (const doc of documents) {
+    result[doc.document_type] = doc
+  }
+  return result
 }
 
 export function mapBackendProject(b: BackendProjectListable): Project | null {
@@ -258,6 +272,10 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
   const put = (stage: ProjectStage, snapshot: StageSnapshot | undefined) => {
     if (snapshot) snapshots[stage] = snapshot
   }
+  const docs = indexDocumentsByType(b.documents)
+  const projectClosingDoc = docs.project_closing
+  const subrentClosingDoc = docs.subrent_closing
+  const staffReceiptsDoc = docs.staff_receipts
 
   put(
     'plum_request',
@@ -332,15 +350,27 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
       enteredAt: b.documents_confirmed_at,
       enteredBy: userBriefName(b.documents_confirmed_set_by),
       values: {
-        projectDocsStatus: mapDocStatus(b.project_docs_status),
-        projectDocsConfirmedAt: b.project_docs_confirmed_at,
-        projectDocsConfirmedBy: userBriefName(b.project_docs_confirmed_by),
-        subleaseDocsStatus: mapDocStatus(b.sublease_docs_status),
-        subleaseDocsConfirmedAt: b.sublease_docs_confirmed_at,
-        subleaseDocsConfirmedBy: userBriefName(b.sublease_docs_confirmed_by),
-        staffReceiptsStatus: mapDocStatus(b.staff_receipts_status),
-        staffReceiptsConfirmedAt: b.staff_receipts_confirmed_at,
-        staffReceiptsConfirmedBy: userBriefName(b.staff_receipts_confirmed_by),
+        projectDocsStatus: mapDocStatus(projectClosingDoc?.status ?? b.project_docs_status),
+        projectDocsConfirmedAt:
+          projectClosingDoc?.confirmed_at ?? b.project_docs_confirmed_at,
+        projectDocsConfirmedBy: userBriefName(
+          projectClosingDoc?.confirmed_by ?? b.project_docs_confirmed_by,
+        ),
+        projectDocsFileName: projectClosingDoc?.file_name ?? b.project_docs_file_name,
+        subleaseDocsStatus: mapDocStatus(subrentClosingDoc?.status ?? b.sublease_docs_status),
+        subleaseDocsConfirmedAt:
+          subrentClosingDoc?.confirmed_at ?? b.sublease_docs_confirmed_at,
+        subleaseDocsConfirmedBy: userBriefName(
+          subrentClosingDoc?.confirmed_by ?? b.sublease_docs_confirmed_by,
+        ),
+        subleaseDocsFileName: subrentClosingDoc?.file_name ?? b.sublease_docs_file_name,
+        staffReceiptsStatus: mapDocStatus(staffReceiptsDoc?.status ?? b.staff_receipts_status),
+        staffReceiptsConfirmedAt:
+          staffReceiptsDoc?.confirmed_at ?? b.staff_receipts_confirmed_at,
+        staffReceiptsConfirmedBy: userBriefName(
+          staffReceiptsDoc?.confirmed_by ?? b.staff_receipts_confirmed_by,
+        ),
+        staffReceiptsFileName: staffReceiptsDoc?.file_name ?? b.staff_receipts_file_name,
       },
     }),
   )
@@ -363,12 +393,19 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
 
   const stageSnapshots = mapStageSnapshots(b)
 
+  const docs = indexDocumentsByType(b.documents)
   const documentFiles: Partial<Record<StageDocumentType, StageDocumentFile>> = {}
-  const projectClosing = mapBackendDocumentFile(b.project_docs_file)
+  const projectClosing = mapBackendDocumentFile(
+    docs.project_closing?.file ?? b.project_docs_file,
+  )
   if (projectClosing) documentFiles.project_closing = projectClosing
-  const subrentClosing = mapBackendDocumentFile(b.sublease_docs_file)
+  const subrentClosing = mapBackendDocumentFile(
+    docs.subrent_closing?.file ?? b.sublease_docs_file,
+  )
   if (subrentClosing) documentFiles.subrent_closing = subrentClosing
-  const staffReceipts = mapBackendDocumentFile(b.staff_receipts_file)
+  const staffReceipts = mapBackendDocumentFile(
+    docs.staff_receipts?.file ?? b.staff_receipts_file,
+  )
   if (staffReceipts) documentFiles.staff_receipts = staffReceipts
 
   return {
