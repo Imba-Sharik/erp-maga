@@ -1,6 +1,7 @@
 import type { Project as ApiProject } from '@/shared/api/generated/types/Project'
 
 import type { Project } from '../model/types'
+import { projectHallItemsFromVenue } from './map-project-halls'
 import { projectStageToApi } from './project-stage-api'
 
 const EMPTY_API_ROW_FIELDS = {
@@ -20,21 +21,30 @@ const EMPTY_API_ROW_FIELDS = {
   event_format: null,
   event_format_label: '',
   contact_person: '',
+  mag_manager_email: null,
+  sales_total: 0,
+  net_profit_ex_tax: 0,
+  final_bonus: 0,
+  source_payload: null,
+  sync_error: '',
 } as const
 
 /** Проекция UI-проекта для patch React Query кэшей списков и канбана. */
 export function projectToApiListRow(project: Project): ApiProject {
   const stage = projectStageToApi(project.stage)
+  const lastActiveStage = project.lastActiveStage
+    ? projectStageToApi(project.lastActiveStage)
+    : stage
 
   return {
     ...EMPTY_API_ROW_FIELDS,
     id: Number(project.id),
     plum_event_id: `ui-${project.id}`,
     stage,
+    last_active_stage: lastActiveStage,
     event_name: project.title,
     event_date: project.date,
-    venue: project.loft,
-    hall_loft: project.hall,
+    halls: projectHallItemsFromVenue(project.loft, project.hall),
     city: project.city,
     city_label: project.city,
     event_type_label: project.type,
@@ -45,8 +55,5 @@ export function projectToApiListRow(project: Project): ApiProject {
     plum_card_url: project.plumCardUrl,
     updated_at: project.lastUpdate,
     created_at: project.createdAt,
-    ...(project.lastActiveStage
-      ? { last_active_stage: projectStageToApi(project.lastActiveStage) }
-      : {}),
   } as ApiProject
 }

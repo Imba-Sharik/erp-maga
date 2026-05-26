@@ -53,9 +53,8 @@ export interface Project {
   loft: string
   hall: string
   /**
-   * Слитая строка «зал + лофт», как её отдаёт лёгкая ручка `/projects/calendar/`.
-   * Заполнена только в календарном контексте, когда `loft`/`hall` пустые. UI
-   * рендерит её вместо пары «loft · hall».
+   * Компактная подпись залов (несколько `halls[]` в API). UI может показать её
+   * вместо пары «loft · hall», если задана.
    */
   hallLoft?: string
   manager: string

@@ -392,7 +392,9 @@ paths:
     get:
       operationId: projects_list
       description: 'Фильтры: event_date_after, event_date_before, stage, stage__in,
-        plum_status, plum_status__in. Пагинация: limit, offset.'
+        plum_status, plum_status__in, mag_manager, hall_id, loft_id, hall (подстрока
+        в названии зала), loft (подстрока в названии лофта). Пагинация: limit, offset.
+        В элементе списка: halls[] (все залы мероприятия).'
       summary: Список проектов
       parameters:
       - in: query
@@ -408,13 +410,29 @@ paths:
           format: date
         description: event_date <= (ISO yyyy-MM-dd)
       - in: query
-        name: hall_loft
+        name: hall
         schema:
           type: string
+        description: Подстрока в event_halls.hall.name
+      - in: query
+        name: hall_id
+        schema:
+          type: integer
+        description: 'Фильтр: проект содержит зал с этим id (event_halls)'
       - in: query
         name: limit
         schema:
           type: integer
+      - in: query
+        name: loft
+        schema:
+          type: string
+        description: Подстрока в event_halls.loft.name
+      - in: query
+        name: loft_id
+        schema:
+          type: integer
+        description: 'Фильтр: проект содержит лофт с этим id (event_halls)'
       - in: query
         name: mag_manager
         schema:
@@ -481,10 +499,6 @@ paths:
         name: transferred_by
         schema:
           type: integer
-      - in: query
-        name: venue
-        schema:
-          type: string
       tags:
       - projects
       security:
@@ -498,8 +512,9 @@ paths:
           description: ''
     post:
       operationId: projects_create
-      description: 'Форма «Новый проект»: название, тип, лофт, зал. Дата мероприятия
-        — сегодня, если event_date не передан. Доступ: менеджер MAG, руководитель.'
+      description: 'Форма «Новый проект»: название, тип, hall_ids[] из GET /halls/
+        (или один hall_id). Дата мероприятия — сегодня, если event_date не передан.
+        Доступ: менеджер MAG, руководитель.'
       summary: Создать проект вручную
       tags:
       - projects
@@ -509,13 +524,20 @@ paths:
             schema:
               $ref: '#/components/schemas/ProjectCreateRequest'
             examples:
-              НовыйПроект:
+              НовыйПроект(несколькоЗалов):
                 value:
                   title: Корпоратив Acme
                   event_type: 3
-                  loft: LOFT#1
-                  hall: MAIN
-                summary: Новый проект
+                  hall_ids:
+                  - 10
+                  - 11
+                summary: Новый проект (несколько залов)
+              НовыйПроект(одинЗал,AliasHallId):
+                value:
+                  event_name: День рождения
+                  event_type: 1
+                  hall_id: 10
+                summary: Новый проект (один зал, alias hall_id)
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ProjectCreateRequest'
@@ -657,7 +679,7 @@ paths:
       description: 'Доступно при `can_edit_contract === true`: стадии от `contract_signed`
         до `bonus_approved` включительно (не closed/archived/out_of_mag); менеджер
         проекта или lead. Все поля запроса опциональны (partial update).'
-      summary: Обновить данные договора (стадия «Договор подписан»)
+      summary: Обновить данные договора (contract_signed … bonus_approved)
       parameters:
       - in: path
         name: id
@@ -1220,6 +1242,8 @@ paths:
         Без пагинации. Проекты в стадии `out_of_mag_scope` не возвращаются (см. `GET /projects/out-of-mag/`).
 
         **Доступ:** manager_mag — только свои проекты; lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
+
+        В `results`: event_type, event_type_label, client_company, phone, halls[] — все залы из Plum (hall_id, hall_name, loft_id, loft_name).
       summary: 'Календарь: проекты за месяц / период'
       parameters:
       - in: query
@@ -1273,7 +1297,15 @@ paths:
                       event_type_label: Свадьба
                       client_company: ООО Ромашка
                       phone: +7 999 000-00-00
-                      hall_loft: Зал A
+                      halls:
+                      - hall_id: 10
+                        hall_name: Зал A
+                        loft_id: 2
+                        loft_name: Loft Центр
+                      - hall_id: 11
+                        hall_name: Зал B
+                        loft_id: 2
+                        loft_name: Loft Центр
                       plum_lofthall_manager: Петров
                       stage: calculation_prepared
                       stage_label: Расчёт подготовлен
@@ -1313,7 +1345,8 @@ paths:
   /api/v1/projects/out-of-mag/:
     get:
       operationId: projects_out_of_mag_list
-      description: 'Доступ: lead, admin. Без пагинации.'
+      description: 'Доступ: lead, admin. Без пагинации. В каждом элементе: halls[]
+        (зал + лофт, как в основном списке).'
       summary: Список проектов «Вне контура MAG»
       parameters:
       - in: query
@@ -1327,9 +1360,25 @@ paths:
           type: string
           format: date
       - in: query
-        name: hall_loft
+        name: hall
         schema:
           type: string
+        description: Подстрока в названии зала
+      - in: query
+        name: hall_id
+        schema:
+          type: integer
+        description: Фильтр по id зала в halls[]
+      - in: query
+        name: loft
+        schema:
+          type: string
+        description: Подстрока в названии лофта
+      - in: query
+        name: loft_id
+        schema:
+          type: integer
+        description: Фильтр по id лофта в halls[]
       - in: query
         name: mag_manager
         schema:
@@ -1392,10 +1441,6 @@ paths:
         name: transferred_by
         schema:
           type: integer
-      - in: query
-        name: venue
-        schema:
-          type: string
       tags:
       - projects
       security:
@@ -1551,6 +1596,16 @@ paths:
           description: ''
 components:
   schemas:
+    AllowedTransitionSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+      required:
+      - code
+      - label
     BacklineCreatedSchema:
       type: object
       properties:
@@ -1925,6 +1980,7 @@ components:
           description: Пусто — отметить все непрочитанные
     OutOfMagProject:
       type: object
+      description: Все залы мероприятия (из Plum или ручного hall_ids).
       properties:
         id:
           type: integer
@@ -1937,14 +1993,11 @@ components:
           type: string
           format: date
           title: Дата мероприятия
-        hall_loft:
-          type: string
-          title: Зал / лофт
-          maxLength: 2000
-        venue:
-          type: string
-          title: Площадка
-          maxLength: 2000
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectHallItem'
+          readOnly: true
         mag_manager:
           type: string
           readOnly: true
@@ -1972,14 +2025,13 @@ components:
       required:
       - event_date
       - event_name
-      - hall_loft
+      - halls
       - id
       - mag_manager
       - out_of_mag_reason
       - out_of_mag_transferred_at
       - out_of_mag_transferred_by
       - stage_from
-      - venue
     PaginatedProjectList:
       type: object
       required:
@@ -2005,8 +2057,8 @@ components:
             $ref: '#/components/schemas/Project'
     PatchedContractBlockUpdateRequest:
       type: object
-      description: PATCH /projects/{id}/contract/ на стадии contract_signed — все
-        поля опциональны.
+      description: PATCH /projects/{id}/contract/ при can_edit_contract — все поля
+        опциональны.
       properties:
         contract_type:
           enum:
@@ -2246,7 +2298,7 @@ components:
         allowed_transitions:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/AllowedTransitionSchema'
         can_edit_client:
           type: boolean
         can_edit_contract:
@@ -2263,8 +2315,8 @@ components:
         was_not_ready_for_event:
           type: boolean
         blocks:
-          description: primary_contact, calculation, contract, sales, expenses, documents,
-            feedback
+          description: primary_contact, calculation, contract (поля как ContractBlockSchemaSerializer),
+            sales, expenses, documents, feedback
       required:
       - allowed_transitions
       - blocks
@@ -2279,6 +2331,7 @@ components:
       - was_not_ready_for_event
     Project:
       type: object
+      description: Все залы мероприятия (из Plum или ручного hall_ids).
       properties:
         id:
           type: integer
@@ -2310,14 +2363,11 @@ components:
           format: date
           readOnly: true
           title: Дата мероприятия
-        venue:
-          type: string
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectHallItem'
           readOnly: true
-          title: Площадка
-        hall_loft:
-          type: string
-          readOnly: true
-          title: Зал / лофт
         city:
           type: string
           readOnly: true
@@ -2525,7 +2575,7 @@ components:
       - event_type
       - event_type_label
       - final_bonus
-      - hall_loft
+      - halls
       - id
       - last_active_stage
       - mag_manager
@@ -2549,7 +2599,6 @@ components:
       - stage
       - sync_error
       - updated_at
-      - venue
     ProjectArticle:
       type: object
       properties:
@@ -2629,8 +2678,10 @@ components:
         phone:
           type: string
           description: 'Телефон: phone, иначе plum_phone'
-        hall_loft:
-          type: string
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectHallItem'
         plum_lofthall_manager:
           type: string
         stage:
@@ -2681,7 +2732,7 @@ components:
       - event_name
       - event_type
       - event_type_label
-      - hall_loft
+      - halls
       - id
       - mag_manager
       - mag_manager_id
@@ -2712,8 +2763,8 @@ components:
     ProjectCreateRequest:
       type: object
       description: |-
-        Тело POST /projects/ — форма «Новый проект» на фронте.
-        Допускаются alias: title → event_name, loft → venue, hall → hall_loft.
+        POST /projects/ — ручное создание.
+        Залы: hall_ids из GET /halls/ (можно несколько).
       properties:
         event_name:
           type: string
@@ -2724,18 +2775,16 @@ components:
         event_type:
           type: integer
           minimum: 1
-        venue:
-          type: string
-          maxLength: 2000
-        loft:
-          type: string
-          maxLength: 2000
-        hall_loft:
-          type: string
-          maxLength: 2000
-        hall:
-          type: string
-          maxLength: 2000
+        hall_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: Один или несколько id залов из GET /api/v1/halls/halls/
+        hall_id:
+          type: integer
+          minimum: 1
+          description: 'Alias: один зал → [hall_id]'
         event_date:
           type: string
           format: date
@@ -2769,11 +2818,10 @@ components:
           type: string
           format: date
           readOnly: true
-        venue:
-          type: string
-          readOnly: true
-        hall_loft:
-          type: string
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectHallItem'
           readOnly: true
         city:
           type: string
@@ -3296,7 +3344,7 @@ components:
       - expenses_entered_set_by
       - expenses_main_total
       - expenses_project_total
-      - hall_loft
+      - halls
       - id
       - last_active_stage
       - legal_entity
@@ -3339,8 +3387,25 @@ components:
       - tax_amount
       - tax_rate
       - updated_at
-      - venue
       - was_not_ready_for_event
+    ProjectHallItem:
+      type: object
+      description: Один зал мероприятия (+ лофт этого зала).
+      properties:
+        hall_id:
+          type: integer
+        hall_name:
+          type: string
+        loft_id:
+          type: integer
+          nullable: true
+        loft_name:
+          type: string
+      required:
+      - hall_id
+      - hall_name
+      - loft_id
+      - loft_name
     ProjectTransitionRequest:
       type: object
       description: |-

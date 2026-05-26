@@ -9,6 +9,7 @@ import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import { mapBackendArticles } from '@/entities/project-articles'
 
+import { projectVenueFieldsFromHalls } from './map-project-halls'
 import type {
   Project,
   ProjectDetail,
@@ -92,6 +93,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
   const economics = mapEconomics(raw)
 
   const lastActiveStage = b.last_active_stage ? STAGE_MAP[b.last_active_stage] : undefined
+  const venue = projectVenueFieldsFromHalls(b.halls)
 
   return {
     id: String(b.id),
@@ -100,8 +102,9 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     stage,
     ...(lastActiveStage ? { lastActiveStage } : {}),
     city: b.city_label || b.city,
-    loft: b.venue,
-    hall: b.hall_loft,
+    loft: venue.loft,
+    hall: venue.hall,
+    ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
     // Бэк иногда отдаёт `mag_manager` как «Имя1, Имя2, Имя3» — берём первого
     // как «ведущего менеджера» проекта, остальных пока игнорируем.
     manager: takeFirstManager(b.mag_manager),
@@ -122,6 +125,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
 
 export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
   const lastActiveStage = b.stage_from ? STAGE_MAP[b.stage_from as ProjectStageEnumKey] : undefined
+  const venue = projectVenueFieldsFromHalls(b.halls)
 
   return {
     id: String(b.id),
@@ -130,8 +134,9 @@ export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
     stage: 'out_of_mag_scope',
     ...(lastActiveStage ? { lastActiveStage } : {}),
     city: '',
-    loft: b.venue,
-    hall: b.hall_loft,
+    loft: venue.loft,
+    hall: venue.hall,
+    ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
     manager: takeFirstManager(b.mag_manager),
     type: '',
     company: '',
@@ -168,12 +173,13 @@ export function mapBackendProjects(list: readonly BackendProject[]): Project[] {
 
 /**
  * Маппер лёгких карточек из `/api/v1/projects/calendar/`. Из отсутствующих
- * относительно общего `Project` — `email`, отдельные `loft`/`hall` (бэк отдаёт
- * слитую строку `hall_loft`) и `city`. Остальное доступно.
+ * относительно общего `Project` — `email` и `city`. Залы — в `halls[]`.
  */
 export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project | null {
   const stage = b.stage ? STAGE_MAP[b.stage] : undefined
   if (!stage) return null
+
+  const venue = projectVenueFieldsFromHalls(b.halls)
 
   return {
     id: String(b.id),
@@ -181,9 +187,9 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     date: b.event_date,
     stage,
     city: '',
-    loft: '',
-    hall: '',
-    hallLoft: b.hall_loft,
+    loft: venue.loft,
+    hall: venue.hall,
+    ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
     manager: takeFirstManager(b.mag_manager),
     type: b.event_type_label ?? '',
     company: b.client_company ?? '',

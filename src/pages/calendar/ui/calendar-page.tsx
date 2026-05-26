@@ -50,7 +50,7 @@ export function CalendarPage() {
 
   // Используем `/projects/calendar/` — отдельную лёгкую ручку без пагинации,
   // которая уже фильтрует `out_of_mag_scope` на сервере. Возвращает 9-полевую
-  // карточку (event_name/hall_loft/mag_manager/stage), достаточно для сетки.
+  // карточку (event_name/halls/mag_manager/stage), достаточно для сетки.
   const { data, isLoading, isFetching } = useProjectsCalendarList({
     event_date_after,
     event_date_before,
