@@ -1,12 +1,14 @@
 import { useId, useRef } from 'react'
 
-import { useUploadStageDocument } from '@/features/upload-stage-document'
+import type { StageDocumentFieldVariant } from '@/entities/project-documents'
+import type { StageDocumentType } from '@/entities/stage-document-files'
 import { CycleIcon, DocumentIcon } from '@/shared/assets'
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
-import type { StageDocumentType } from '@/entities/stage-document-files'
 
-import type { StageDocumentFieldVariant } from '../lib/document-status-fields'
+import type { StageDocumentInteraction } from '../lib/document-interaction'
+import { useDownloadStageDocument } from '../model/use-download-stage-document'
+import { useUploadStageDocument } from '../model/use-upload-stage-document'
 
 const FILE_ACCEPT =
   'image/*,.pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -24,12 +26,13 @@ function isAllowedFile(file: File): boolean {
   return true
 }
 
-interface StageDocumentFieldProps {
+export interface StageDocumentFieldProps {
   projectId: string | number
   documentType: StageDocumentType
   value: string
   variant: StageDocumentFieldVariant
-  onChange: (fileName: string) => void
+  interaction: StageDocumentInteraction
+  onChange?: (fileName: string) => void
   disabled?: boolean
 }
 
@@ -38,19 +41,29 @@ export function StageDocumentField({
   documentType,
   value,
   variant,
+  interaction,
   onChange,
   disabled,
 }: StageDocumentFieldProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const { upload } = useUploadStageDocument()
+  const { download } = useDownloadStageDocument()
+
+  const isUpload = interaction === 'upload'
 
   const openPicker = () => {
-    if (!disabled && variant !== 'confirmed') inputRef.current?.click()
+    if (!isUpload || disabled || variant === 'confirmed') return
+    inputRef.current?.click()
+  }
+
+  const handleDownload = () => {
+    if (!value) return
+    download({ projectId, documentType, fileName: value })
   }
 
   const handleFile = (file: File | undefined) => {
-    if (!file) return
+    if (!file || !onChange) return
     if (!isAllowedFile(file)) {
       window.alert('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
       return
@@ -65,22 +78,33 @@ export function StageDocumentField({
 
   const showFileRow =
     variant === 'uploaded' || variant === 'confirmed' || (variant === 'rejected' && Boolean(value))
-  const canReplace = variant === 'uploaded' || variant === 'rejected'
+  const canReplace = isUpload && (variant === 'uploaded' || variant === 'rejected')
+  const canDownload = !isUpload && Boolean(value)
+
+  const fileNameClassName = cn(
+    'min-w-0 flex-1 truncate text-sm',
+    variant === 'confirmed' && 'text-[#2E7D32]',
+    variant === 'rejected' && 'text-[#D25252]',
+    variant === 'uploaded' && 'text-[#B0B0B0]',
+    canDownload && 'cursor-pointer underline-offset-2 hover:underline',
+  )
 
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <input
-        id={inputId}
-        ref={inputRef}
-        type="file"
-        accept={FILE_ACCEPT}
-        className="sr-only"
-        disabled={disabled || variant === 'confirmed'}
-        onChange={(e) => {
-          handleFile(e.target.files?.[0])
-          e.target.value = ''
-        }}
-      />
+      {isUpload ? (
+        <input
+          id={inputId}
+          ref={inputRef}
+          type="file"
+          accept={FILE_ACCEPT}
+          className="sr-only"
+          disabled={disabled || variant === 'confirmed'}
+          onChange={(e) => {
+            handleFile(e.target.files?.[0])
+            e.target.value = ''
+          }}
+        />
+      ) : null}
       {showFileRow ? (
         <div className="flex min-w-0 items-stretch gap-2">
           <div
@@ -100,17 +124,21 @@ export function StageDocumentField({
               )}
               aria-hidden
             />
-            <span
-              className={cn(
-                'min-w-0 flex-1 truncate text-sm',
-                variant === 'confirmed' && 'text-[#2E7D32]',
-                variant === 'rejected' && 'text-[#D25252]',
-                variant === 'uploaded' && 'text-[#B0B0B0]',
-              )}
-              title={value}
-            >
-              {value}
-            </span>
+            {canDownload ? (
+              <button
+                type="button"
+                className={fileNameClassName}
+                title={value}
+                disabled={disabled}
+                onClick={handleDownload}
+              >
+                {value}
+              </button>
+            ) : (
+              <span className={fileNameClassName} title={value}>
+                {value}
+              </span>
+            )}
           </div>
           {canReplace ? (
             <Button
@@ -126,7 +154,7 @@ export function StageDocumentField({
             </Button>
           ) : null}
         </div>
-      ) : (
+      ) : isUpload ? (
         <Button
           type="button"
           className="h-9 w-full cursor-pointer justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
@@ -135,7 +163,7 @@ export function StageDocumentField({
         >
           Добавить документ
         </Button>
-      )}
+      ) : null}
     </div>
   )
 }

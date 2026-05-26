@@ -2,16 +2,16 @@ import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { mapBackendProjects } from '@/entities/project'
+import {
+  buildOpenRequestsQueryParams,
+  type AccountantRequestsStageParams,
+} from '@/features/accountant-requests'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
-import type { ProjectsListQueryParamsStageEnumKey } from '@/shared/api/generated/types/projectsController/ProjectsList'
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
 
 const PAGE_SIZE = 50
 
 export type RequestsTableVariant = 'open' | 'closed'
-
-/** Открытые запросы — проект на этапе подтверждения документов, ждёт бухгалтера. */
-const OPEN_STAGE: ProjectsListQueryParamsStageEnumKey = 'documents_confirmed'
 
 /** Закрытые запросы — этапы после подтверждения документов (бухгалтер уже отработал). */
 const CLOSED_STAGE_IN = [
@@ -23,16 +23,14 @@ const CLOSED_STAGE_IN = [
   'archived',
 ].join(',')
 
-type StageParams = { stage: ProjectsListQueryParamsStageEnumKey } | { stage__in: string }
-
 /**
  * Запросы бухгалтера. Этап — всегда параметр запроса:
- * - `open` → `stage=documents_confirmed` (ждут подтверждения);
+ * - `open` → `buildOpenRequestsQueryParams()` (ждут подтверждения);
  * - `closed` → `stage__in=<этапы после подтверждения>`.
  */
 export function useRequestsTableQuery(variant: RequestsTableVariant) {
-  const stageParams: StageParams =
-    variant === 'open' ? { stage: OPEN_STAGE } : { stage__in: CLOSED_STAGE_IN }
+  const stageParams: AccountantRequestsStageParams =
+    variant === 'open' ? buildOpenRequestsQueryParams() : { stage__in: CLOSED_STAGE_IN }
 
   const query = useInfiniteQuery({
     queryKey: ['requests-table', { variant, ...stageParams }] as const,

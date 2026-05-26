@@ -1,0 +1,6 @@
+export type { StageDocumentInteraction } from './lib/document-interaction'
+export { FIELD_TO_DOCUMENT_TYPE, documentTypeFromFieldName } from './lib/document-type-map'
+export { useUploadStageDocument } from './model/use-upload-stage-document'
+export { useDownloadStageDocument } from './model/use-download-stage-document'
+export { StageDocumentField } from './ui/stage-document-field'
+export type { StageDocumentFieldProps } from './ui/stage-document-field'

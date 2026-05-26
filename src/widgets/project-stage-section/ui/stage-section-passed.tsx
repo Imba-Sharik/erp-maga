@@ -22,16 +22,21 @@ import type { StageRecord } from '@/features/advance-stage'
 
 import {
   confirmedAtLabelForDocStatus,
-  CONFIRMED_AT_TO_STATUS_FIELD,
+  statusFieldForConfirmedAt,
   FILE_NAME_TO_STATUS_FIELD,
   getStageDocumentFieldVariant,
 } from '../lib/document-status-fields'
-import { filterStageFields, PASSED_EXTRAS, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import {
+  filterStageFields,
+  PASSED_EXTRAS,
+  STAGE_FIELDS,
+  type StageFieldConfig,
+} from '../lib/fields-map'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
-import { StageDocumentField } from './stage-document-field'
+import { StageDocumentField } from '@/features/stage-document'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
@@ -162,23 +167,17 @@ export function StageSectionPassed({
         f.name in FILE_NAME_TO_STATUS_FIELD
           ? FILE_NAME_TO_STATUS_FIELD[f.name as keyof typeof FILE_NAME_TO_STATUS_FIELD]
           : undefined
-      const status = statusField
-        ? (values?.[statusField] as DocumentStatus | undefined)
-        : undefined
+      const status = statusField ? (values?.[statusField] as DocumentStatus | undefined) : undefined
 
       return (
-        <div
-          key={f.name}
-          className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}
-        >
+        <div key={f.name} className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}>
           <StageFieldLabel label={f.label} />
           <StageDocumentField
             projectId={project.id}
             documentType={f.documentType}
             value={fileName}
             variant={getStageDocumentFieldVariant(fileName || undefined, status)}
-            onChange={() => {}}
-            disabled
+            interaction="download"
           />
         </div>
       )
@@ -195,7 +194,7 @@ export function StageSectionPassed({
       )
     }
 
-    const statusForLabelField = CONFIRMED_AT_TO_STATUS_FIELD[f.name]
+    const statusForLabelField = statusFieldForConfirmedAt(f.name)
     const readonlyLabel =
       statusForLabelField != null
         ? confirmedAtLabelForDocStatus(

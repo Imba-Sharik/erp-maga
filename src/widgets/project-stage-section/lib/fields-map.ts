@@ -1,4 +1,5 @@
 import type { ProjectStage, StageFormData } from '@/entities/project'
+import { DOCUMENT_STATUS_OPTIONS } from '@/entities/project-documents'
 import type { StageDocumentType } from '@/entities/stage-document-files'
 import type { UserRole } from '@/entities/user-role'
 
@@ -48,12 +49,7 @@ export function filterStageFields(
   return fields.filter((f) => isFieldVisibleForRole(f, role, context))
 }
 
-const docStatusOptions = [
-  { value: 'present', label: 'Есть' },
-  { value: 'absent', label: 'Нет' },
-  { value: 'not_required', label: 'Не требуется' },
-  { value: 're_requested', label: 'Запросить повторно' },
-]
+const docStatusOptions = [...DOCUMENT_STATUS_OPTIONS]
 
 export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   plum_request: [
