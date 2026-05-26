@@ -1,17 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, User } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MagLogo, SettingsIcon } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
 import { useUnreadNotificationCount } from '@/entities/notification'
+import { clearSessionTokens } from '@/entities/session'
 import {
-  USER_ROLES,
   USER_ROLE_LABELS,
   useRoleNavItems,
   useUserRole,
-  useUserRoleStore,
-  type UserRole,
 } from '@/entities/user-role'
+import { DEV_ROLES_WITH_CREDS, useDevLogin, type DevRole } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -39,17 +38,26 @@ import {
   useSidebar,
 } from '@/shared/ui/sidebar'
 
+const IS_DEV = import.meta.env.DEV
+
 export function AppSidebar() {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const { state, isMobile } = useSidebar()
   const showCollapseInSidebar = !isMobile && state === 'expanded'
   const queryClient = useQueryClient()
   const role = useUserRole()
-  const setRole = useUserRoleStore((s) => s.setRole)
   const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
   const navItems = useRoleNavItems()
   const unreadCount = useUnreadNotificationCount()
+  const { loginAs, isPending: isDevLoginPending } = useDevLogin()
+
+  const handleLogout = () => {
+    clearSessionTokens()
+    queryClient.clear()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <Sidebar collapsible="icon" className="overflow-hidden pt-1">
@@ -143,23 +151,24 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="text-muted-foreground text-2xs tracking-wide uppercase">
-                  Войти как (dev)
-                </DropdownMenuLabel>
-                <DropdownMenuRadioGroup
-                  value={role}
-                  onValueChange={(v) => {
-                    setRole(v as UserRole)
-                    void queryClient.invalidateQueries()
-                  }}
-                >
-                  {USER_ROLES.map((r) => (
-                    <DropdownMenuRadioItem key={r} value={r}>
-                      {USER_ROLE_LABELS[r]}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-                <DropdownMenuSeparator />
+                {IS_DEV && DEV_ROLES_WITH_CREDS.length > 0 && (
+                  <>
+                    <DropdownMenuLabel className="text-muted-foreground text-2xs tracking-wide uppercase">
+                      Войти как (dev)
+                    </DropdownMenuLabel>
+                    <DropdownMenuRadioGroup
+                      value={role}
+                      onValueChange={(v) => loginAs(v as DevRole)}
+                    >
+                      {DEV_ROLES_WITH_CREDS.map((r) => (
+                        <DropdownMenuRadioItem key={r} value={r} disabled={isDevLoginPending}>
+                          {USER_ROLE_LABELS[r]}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/profile">
                     <User />
@@ -173,7 +182,7 @@ export function AppSidebar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleLogout}>
                   <LogOut />
                   Выйти
                 </DropdownMenuItem>

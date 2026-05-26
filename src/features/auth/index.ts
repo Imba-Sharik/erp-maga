@@ -1,1 +1,5 @@
 export { LoginForm } from './ui/login-form'
+export { DevLoginButtons } from './ui/dev-login-buttons'
+export { useDevLogin } from './model/use-dev-login'
+export { DEV_ROLES_WITH_CREDS, getDevCredentials } from './lib/dev-credentials'
+export type { DevRole, DevCredentials } from './lib/dev-credentials'
