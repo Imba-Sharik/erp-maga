@@ -1,4 +1,4 @@
-import { mapBackendRole, useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
+import { useUserRole, useUserRoleStore, type UserRole } from '@/entities/user-role'
 import { useUsersMeRetrieve } from '@/shared/api/generated/hooks/usersController/useUsersMeRetrieve'
 
 import type { CurrentUser } from '../model/types'
