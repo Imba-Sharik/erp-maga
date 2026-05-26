@@ -43,8 +43,8 @@ function AppLayoutHeader() {
       <div className="min-w-0 flex-1">
         <AppBreadcrumb />
       </div>
-      <div className="flex shrink-0 items-center gap-2 pr-4">
-        <HeaderTodayDate />
+      <div className="flex shrink-0 items-center gap-2 sm:pr-4">
+        <HeaderTodayDate className="hidden sm:block" />
         <HeaderNotificationsButton />
       </div>
     </header>
