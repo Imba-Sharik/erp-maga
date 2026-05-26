@@ -42,9 +42,8 @@ export type StageDocumentFileNameField = StageDocumentDefinition['fileNameKey']
 
 export const DOCUMENT_STATUS_OPTIONS = [
   { value: 'present', label: 'Есть' },
-  { value: 'absent', label: 'Нет' },
-  { value: 'not_required', label: 'Не требуется' },
   { value: 're_requested', label: 'Запросить повторно' },
+  { value: 'not_required', label: 'Не требуется' },
 ] as const satisfies ReadonlyArray<{ value: DocumentStatus; label: string }>
 
 export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = Object.fromEntries(

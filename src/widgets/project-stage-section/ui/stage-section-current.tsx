@@ -231,9 +231,13 @@ export function StageSectionCurrent({
                   onValueChange={(value) => {
                     field.onChange(value)
                     const meta = CONFIRM_META_BY_STATUS[f.name as keyof StageFormData]
+                    const isDocStatus =
+                      value === 'present' ||
+                      value === 're_requested' ||
+                      value === 'not_required'
                     const patch: Partial<StageFormData> = {
-                      [f.name]: value as DocumentStatus,
-                      ...(meta
+                      [f.name]: isDocStatus ? (value as DocumentStatus) : undefined,
+                      ...(meta && isDocStatus
                         ? {
                             [meta.atField]: new Date().toISOString(),
                             [meta.byField]: currentUser.fullName,

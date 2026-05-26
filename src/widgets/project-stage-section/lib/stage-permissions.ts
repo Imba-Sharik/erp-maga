@@ -43,6 +43,6 @@ export function canEditField(
 /** Кнопка «Следующий этап» — не у всех, кто может редактировать поля этапа. */
 export function canAdvanceStage(stage: ProjectStage, role: UserRole): boolean {
   if (!canEditStage(stage, role)) return false
-  if (stage === 'documents_confirmed') return role === 'accountant'
+  if (stage === 'documents_confirmed') return role === 'accountant' || role === 'director'
   return true
 }

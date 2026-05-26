@@ -53,19 +53,16 @@ export const stageFormSchemas = {
   archived: z.object({}),
 } satisfies Record<ProjectStage, z.ZodTypeAny>
 
-const docStatusEnum = z.enum(['present', 'absent', 'not_required', 're_requested'])
+const docStatusField = z.union([
+  z.literal(''),
+  z.enum(['present', 're_requested', 'not_required']),
+])
 
 const documentsConfirmedAccountantSchema = z
   .object({
-    projectDocsStatus: z.enum(['present', 'absent', 'not_required', 're_requested'], {
-      error: () => 'Выберите статус по закрывающим проекта',
-    }),
-    subleaseDocsStatus: z.enum(['present', 'absent', 'not_required', 're_requested'], {
-      error: () => 'Выберите статус по субаренде',
-    }),
-    staffReceiptsStatus: z.enum(['present', 'absent', 'not_required', 're_requested'], {
-      error: () => 'Выберите статус по распискам персонала',
-    }),
+    projectDocsStatus: docStatusField.optional(),
+    subleaseDocsStatus: docStatusField.optional(),
+    staffReceiptsStatus: docStatusField.optional(),
   })
   .superRefine((data, ctx) => {
     const pending: Array<{ key: keyof typeof data; message: string }> = [
@@ -97,9 +94,9 @@ const documentsConfirmedManagerSchema = z.object({
 
 /** Руководитель видит селекты статусов в read-only — поля опциональны для формы. */
 const documentsConfirmedDirectorSchema = z.object({
-  projectDocsStatus: docStatusEnum.optional(),
-  subleaseDocsStatus: docStatusEnum.optional(),
-  staffReceiptsStatus: docStatusEnum.optional(),
+  projectDocsStatus: docStatusField.optional(),
+  subleaseDocsStatus: docStatusField.optional(),
+  staffReceiptsStatus: docStatusField.optional(),
 })
 
 /** Схема валидации текущего этапа с учётом роли (documents_confirmed разделён). */

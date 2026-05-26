@@ -19,8 +19,8 @@ export function hasReRequestedStatus(values?: Partial<StageFormData>): boolean {
 export function isDocumentsStageSettled(values?: Partial<StageFormData>): boolean {
   if (hasReRequestedStatus(values)) return false
   return STAGE_DOCUMENTS.every((d) => {
-    const status = values?.[d.statusKey] as DocumentStatus | undefined
-    return status !== undefined && SETTLED_STATUSES.has(status)
+    const status = values?.[d.statusKey] as DocumentStatus | '' | undefined
+    return status !== undefined && status !== '' && SETTLED_STATUSES.has(status)
   })
 }
 
