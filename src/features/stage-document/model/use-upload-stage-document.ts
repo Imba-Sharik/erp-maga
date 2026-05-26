@@ -1,5 +1,11 @@
-import { stageDocumentFilesActions } from '@/entities/stage-document-files'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
+
 import type { StageDocumentType } from '@/entities/stage-document-files'
+import { useProjectsDocumentFileCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsDocumentFileCreate'
+import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+
+import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
 
 interface UploadStageDocumentArgs {
   projectId: string | number
@@ -7,15 +13,35 @@ interface UploadStageDocumentArgs {
   file: File
 }
 
-/**
- * Заглушка загрузки документа на этапе documents_confirmed.
- * TODO: FormData + POST/PATCH, когда появится endpoint на бэке.
- */
+/** Загрузка/замена закрывающего документа на бэке. */
 export function useUploadStageDocument() {
-  const upload = ({ projectId, documentType, file }: UploadStageDocumentArgs) => {
-    stageDocumentFilesActions.set(projectId, documentType, file)
-    // TODO: await api.uploadProjectDocument(projectId, documentType, file)
-  }
+  const queryClient = useQueryClient()
+  const mutation = useProjectsDocumentFileCreate()
 
-  return { upload }
+  const upload = useCallback(
+    ({ projectId, documentType, file }: UploadStageDocumentArgs) => {
+      const id = Number(projectId)
+      mutation.mutate(
+        { document_type: documentType, id, data: { file } },
+        {
+          onSuccess: (detail) => {
+            queryClient.setQueryData(projectsRetrieveQueryKey(id), detail)
+            invalidateProjectAfterTransition(queryClient, id)
+          },
+        },
+      )
+    },
+    [mutation, queryClient],
+  )
+
+  return useMemo(
+    () => ({
+      upload,
+      isPending: mutation.isPending,
+      isError: mutation.isError,
+      error: mutation.error,
+      reset: mutation.reset,
+    }),
+    [upload, mutation.isPending, mutation.isError, mutation.error, mutation.reset],
+  )
 }
