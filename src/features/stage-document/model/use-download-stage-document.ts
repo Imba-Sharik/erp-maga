@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import type { StageDocumentType } from '@/entities/stage-document-files'
-import { projectsDocumentFileRetrieve } from '@/shared/api/generated/clients/projectsController/projectsDocumentFileRetrieve'
+import client from '@/shared/api/client'
 
 import { downloadBlob } from '../lib/download-blob'
 
@@ -18,9 +18,12 @@ async function fetchDocumentFile({
   fileName,
 }: DownloadStageDocumentArgs): Promise<void> {
   const id = Number(projectId)
-  const blob = (await projectsDocumentFileRetrieve(documentType, id, {
+  const response = await client<Blob>({
+    method: 'GET',
+    url: `/api/v1/projects/${id}/documents/${documentType}/file/`,
     responseType: 'blob',
-  })) as unknown as Blob
+  })
+  const blob = response.data
   const name = fileName?.trim() || 'document'
   downloadBlob(new File([blob], name), name)
 }
