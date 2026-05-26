@@ -14,8 +14,10 @@ axiosInstance.interceptors.request.use((config) => {
   return config
 })
 
-export type RequestConfig<TData = unknown> = AxiosRequestConfig<TData> & {
+export type RequestConfig<TData = unknown> = Omit<AxiosRequestConfig<TData>, 'data'> & {
   baseURL?: string
+  /** Kubb multipart-клиенты передают FormData, собранный из TData через buildFormData. */
+  data?: TData | FormData
 }
 
 export type ResponseConfig<TData = unknown> = AxiosResponse<TData>
