@@ -35,7 +35,7 @@ import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { StageDateField } from './stage-date-field'
-import { StageDocumentField } from './stage-document-field'
+import { StageDocumentField } from '@/features/stage-document'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 
@@ -213,7 +213,9 @@ export function StageSectionCurrent({
                         : undefined
                     })(),
                   )}
+                  interaction="upload"
                   onChange={field.onChange}
+                  disabled={!fieldEditable}
                 />
               ) : f.type === 'textarea' ? (
                 <Textarea
