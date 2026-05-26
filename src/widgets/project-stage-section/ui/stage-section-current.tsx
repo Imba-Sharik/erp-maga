@@ -70,21 +70,6 @@ interface StageSectionCurrentProps {
   onCancelEditing?: () => void
 }
 
-/**
- * Селекты, при выборе значения которых надо сразу штамповать `*ConfirmedAt`/`*ConfirmedBy`
- * текущим юзером — для per-row аудита. Маппинг явный, потому что имена `*At`/`*By`
- * не всегда выводятся из имени статуса (ср. `projectDocsStatus → projectDocsConfirmedAt`
- * vs `dataConfirmedStatus → dataConfirmedAt`).
- */
-const CONFIRM_META_BY_STATUS: Partial<
-  Record<keyof StageFormData, { atField: keyof StageFormData; byField: keyof StageFormData }>
-> = {
-  projectDocsStatus: { atField: 'projectDocsConfirmedAt', byField: 'projectDocsConfirmedBy' },
-  subleaseDocsStatus: { atField: 'subleaseDocsConfirmedAt', byField: 'subleaseDocsConfirmedBy' },
-  staffReceiptsStatus: { atField: 'staffReceiptsConfirmedAt', byField: 'staffReceiptsConfirmedBy' },
-  dataConfirmedStatus: { atField: 'dataConfirmedAt', byField: 'dataConfirmedBy' },
-}
-
 export function StageSectionCurrent({
   project,
   stage,
@@ -102,8 +87,12 @@ export function StageSectionCurrent({
     () => filterStageFields(allFields, role, 'current'),
     [allFields, role],
   )
+  const editableFields = useMemo(
+    () => visibleFields.filter((f) => f.source !== 'system'),
+    [visibleFields],
+  )
   const schema = getStageFormSchema(stage, role)
-  const defaults = getDefaults(visibleFields, record?.values ?? {})
+  const defaults = getDefaults(editableFields, record?.values ?? {})
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const canEdit = canEditStage(stage, role)
@@ -121,7 +110,7 @@ export function StageSectionCurrent({
     const sub = form.watch((values) => {
       if (!canEdit) return
       const draftValues = values as Record<string, unknown>
-      const hasContent = visibleFields.some((f) => Boolean(draftValues[f.name]))
+      const hasContent = editableFields.some((f) => Boolean(draftValues[f.name]))
       if (hasContent) {
         stageDraftActions.save(project.id, {
           stage,
@@ -134,7 +123,7 @@ export function StageSectionCurrent({
       }
     })
     return () => sub.unsubscribe()
-  }, [form, visibleFields, canEdit, project.id, stage, currentUser.id])
+  }, [form, editableFields, canEdit, project.id, stage, currentUser.id])
 
   const watchedValues = form.watch() as Partial<StageFormData>
 
@@ -217,7 +206,12 @@ export function StageSectionCurrent({
                     })(),
                   )}
                   interaction="upload"
-                  onChange={field.onChange}
+                  onChange={(fileName) => {
+                    field.onChange(fileName)
+                    // Оптимистично пробрасываем имя файла в flow.records, чтобы
+                    // вкладка «Документы» сразу видела свежий файл, не ожидая рефетча.
+                    onPatchValues?.({ [f.name]: fileName } as Partial<StageFormData>)
+                  }}
                   disabled={!fieldEditable}
                 />
               ) : f.type === 'textarea' ? (
@@ -233,19 +227,13 @@ export function StageSectionCurrent({
                   value={(field.value as string) ?? ''}
                   onValueChange={(value) => {
                     field.onChange(value)
-                    const meta = CONFIRM_META_BY_STATUS[f.name as keyof StageFormData]
                     const isDocStatus =
                       value === 'present' ||
                       value === 're_requested' ||
                       value === 'not_required'
+                    // Аудит (*ConfirmedAt/*ConfirmedBy) — только с бэка после PATCH, не локальный stub.
                     const patch: Partial<StageFormData> = {
                       [f.name]: isDocStatus ? (value as DocumentStatus) : undefined,
-                      ...(meta && isDocStatus
-                        ? {
-                            [meta.atField]: new Date().toISOString(),
-                            [meta.byField]: currentUser.fullName,
-                          }
-                        : {}),
                     }
                     onPatchValues?.(patch)
 
