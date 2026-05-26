@@ -1,10 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
+import { useVenueCatalog } from '@/entities/venue'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { useProjectsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsCreate'
 import type { Project } from '@/shared/api/generated/types/Project'
 import type { ProjectCreateRequest } from '@/shared/api/generated/types/ProjectCreateRequest'
+import type { ProjectHallItem } from '@/shared/api/generated/types/ProjectHallItem'
 import { getEventTypeLabelById } from '@/shared/constants/event-type-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 
@@ -26,7 +28,25 @@ export interface UseCreateProjectOptions {
   onCreated?: (project: Project) => void
 }
 
-function buildOptimisticFromRequest(data: ProjectCreateRequest, magManager: string): Project {
+function hallItemFromCatalog(hall: {
+  id: number
+  name: string
+  loft_id: number | null
+  loft_name: string | null
+}): ProjectHallItem {
+  return {
+    hall_id: hall.id,
+    hall_name: hall.name,
+    loft_id: hall.loft_id,
+    loft_name: hall.loft_name ?? '',
+  }
+}
+
+function buildOptimisticFromRequest(
+  data: ProjectCreateRequest,
+  magManager: string,
+  halls: ProjectHallItem[],
+): Project {
   const event_date = data.event_date ?? toIsoLocalDay(new Date())
   const event_name = (data.title ?? data.event_name ?? '').trim()
   const event_type = data.event_type
@@ -35,8 +55,7 @@ function buildOptimisticFromRequest(data: ProjectCreateRequest, magManager: stri
     event_name,
     event_type,
     event_type_label: getEventTypeLabelById(String(event_type)) ?? '',
-    loft: data.loft ?? data.venue ?? '',
-    hall: data.hall ?? data.hall_loft ?? '',
+    halls,
     event_date,
     mag_manager: magManager,
   })
@@ -44,11 +63,16 @@ function buildOptimisticFromRequest(data: ProjectCreateRequest, magManager: stri
 
 export function useCreateProject({ magManager, onCreated }: UseCreateProjectOptions) {
   const queryClient = useQueryClient()
+  const { halls: venueHalls } = useVenueCatalog()
 
   const mutation = useProjectsCreate<CreateProjectMutationContext>({
     mutation: {
       onMutate: async ({ data }) => {
-        const optimistic = buildOptimisticFromRequest(data, magManager)
+        const hallId = data.hall_id ?? data.hall_ids?.[0]
+        const catalogHall = hallId != null ? venueHalls.find((h) => h.id === hallId) : undefined
+        const halls = catalogHall ? [hallItemFromCatalog(catalogHall)] : []
+
+        const optimistic = buildOptimisticFromRequest(data, magManager, halls)
         prependCreatedProjectToQueries(queryClient, optimistic)
         return { optimistic }
       },
@@ -72,9 +96,12 @@ export function useCreateProject({ magManager, onCreated }: UseCreateProjectOpti
 
   const create = useCallback(
     (values: CreateProjectFormValues) => {
-      mutation.mutate({ data: toProjectCreateRequest(values) })
+      const hall = venueHalls.find((h) => h.name === values.hall)
+      if (!hall) return
+
+      mutation.mutate({ data: toProjectCreateRequest(values, hall) })
     },
-    [mutation],
+    [mutation, venueHalls],
   )
 
   const errorMessage = mutation.isError ? getCreateProjectErrorMessage(mutation.error) : null

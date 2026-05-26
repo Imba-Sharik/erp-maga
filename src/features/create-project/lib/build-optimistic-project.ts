@@ -1,4 +1,5 @@
 import type { Project } from '@/shared/api/generated/types/Project'
+import type { ProjectHallItem } from '@/shared/api/generated/types/ProjectHallItem'
 
 let optimisticIdSeq = -1
 
@@ -6,8 +7,7 @@ export function buildOptimisticProject(params: {
   event_name: string
   event_type: number
   event_type_label: string
-  loft: string
-  hall: string
+  halls: ProjectHallItem[]
   event_date: string
   mag_manager: string
 }): Project {
@@ -27,8 +27,7 @@ export function buildOptimisticProject(params: {
     event_format: null,
     event_format_label: '',
     event_date: params.event_date,
-    venue: params.loft,
-    hall_loft: params.hall,
+    halls: params.halls,
     city: 'Москва',
     city_label: 'Москва',
     plum_event_status: '',
