@@ -63,7 +63,7 @@ export function StageSectionSkipped({
   return (
     <div
       className={cn(
-        'flex w-full flex-col rounded-[15px] border bg-[#FAF9F6] p-5',
+        '@container flex w-full flex-col rounded-[15px] border bg-[#FAF9F6] p-2.5 @xl:p-5',
         hasDraftHighlight ? stageBlockBorderClass(true) : 'border-dashed border-[#C7C7C7]',
       )}
     >

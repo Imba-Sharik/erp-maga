@@ -17,7 +17,8 @@ const COLUMN_VIEW_OPTIONS: { value: ClosingColumnView; label: string }[] = [
   { value: 'closing-economics', label: 'Данные экономики' },
 ]
 
-const COLUMN_VIEW_TRIGGER = 'h-10! w-full rounded-[10px] border-[#B1B1B1] bg-white sm:w-55'
+const COLUMN_VIEW_TRIGGER =
+  'h-10! min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs @3xl:w-55 @3xl:flex-none @3xl:text-sm'
 
 interface ClosingBoardToolbarKanbanProps {
   archiveMode: false
@@ -46,7 +47,7 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="flex shrink-0 flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between 2xl:gap-4">
+      <div className="@container flex shrink-0 flex-col gap-2.5 @[1000px]:flex-row @[1000px]:items-center @[1000px]:justify-between @[1000px]:gap-4">
         <ProjectsBoardToolbar
           filtersAlign="start"
           search={props.search}
@@ -58,22 +59,27 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
           onChangeHall={props.onChangeHall}
           onChangeLoft={props.onChangeLoft}
         />
-        <ToggleSwitch label="Архивные проекты" checked={false} onChange={props.onToggleArchive} />
+        <ToggleSwitch
+          label="Архивные проекты"
+          checked={false}
+          onChange={props.onToggleArchive}
+          className="self-end text-xs @[1000px]:self-auto @[1000px]:text-sm"
+        />
       </div>
     )
   }
 
   return (
-    <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <div className="flex w-full flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
-        <div className="relative w-full sm:w-75">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
+    <div className="@container flex shrink-0 flex-col gap-2.5 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4">
+      <div className="flex w-full flex-row items-center gap-2 @3xl:gap-3">
+        <div className="relative min-w-0 flex-1 @3xl:w-75 @3xl:flex-none">
+          <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @3xl:left-3 @3xl:size-4" />
           <Input
             type="search"
             placeholder="Поиск проектов"
             value={props.search}
             onChange={(e) => props.onChangeSearch(e.target.value)}
-            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-9 placeholder:text-[#ACACAC]"
+            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-7 pr-1.5 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @3xl:pl-9 @3xl:pr-3 @3xl:text-sm @3xl:placeholder:text-sm"
           />
         </div>
 
@@ -94,7 +100,12 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
         </Select>
       </div>
 
-      <ToggleSwitch label="Архивные проекты" checked={true} onChange={props.onToggleArchive} />
+      <ToggleSwitch
+        label="Архивные проекты"
+        checked={true}
+        onChange={props.onToggleArchive}
+        className="self-end text-xs @3xl:self-auto @3xl:text-sm"
+      />
     </div>
   )
 }

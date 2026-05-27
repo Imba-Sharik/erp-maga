@@ -1,11 +1,12 @@
 import { Search } from 'lucide-react'
 import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
+import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
 const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
 
 const TRIGGER_CLASS =
-  'h-10! w-full min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC] lg:w-41.5 lg:flex-none'
+  'h-10! w-full min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs data-placeholder:text-[#BCBCBC] @4xl:w-41.5 @4xl:flex-none @4xl:text-sm'
 
 interface ProjectsBoardToolbarProps {
   search: string
@@ -16,6 +17,7 @@ interface ProjectsBoardToolbarProps {
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
+  onAddProject?: () => void
   /** Селекты рядом с поиском (слева), без растягивания вправо */
   filtersAlign?: 'start' | 'spread'
 }
@@ -29,6 +31,7 @@ export function ProjectsBoardToolbar({
   onChangeCity,
   onChangeHall,
   onChangeLoft,
+  onAddProject,
   filtersAlign = 'spread',
 }: ProjectsBoardToolbarProps) {
   const { hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
@@ -39,26 +42,37 @@ export function ProjectsBoardToolbar({
     <div
       className={
         filtersAtStart
-          ? 'flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-start lg:gap-4'
-          : 'flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4'
+          ? 'flex shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-center @4xl:justify-start @4xl:gap-4'
+          : 'flex shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-center @4xl:justify-between @4xl:gap-4'
       }
     >
-      <div className="relative w-full min-w-40 md:w-75 self-start">
-        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
-        <Input
-          type="search"
-          placeholder="Поиск проектов"
-          value={search}
-          onChange={(e) => onChangeSearch(e.target.value)}
-          className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-9 placeholder:text-[#ACACAC]"
-        />
+      <div className="flex items-center gap-2 @4xl:w-75">
+        {onAddProject && (
+          <Button
+            type="button"
+            onClick={onAddProject}
+            className="h-10 shrink-0 rounded-[10px] bg-black px-2 text-xs text-white hover:bg-black/90 @4xl:hidden"
+          >
+            Добавить проект
+          </Button>
+        )}
+        <div className="relative min-w-0 flex-1">
+          <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @4xl:left-3 @4xl:size-4" />
+          <Input
+            type="search"
+            placeholder="Поиск проектов"
+            value={search}
+            onChange={(e) => onChangeSearch(e.target.value)}
+            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-7 pr-1.5 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @4xl:pl-9 @4xl:pr-3 @4xl:text-sm @4xl:placeholder:text-sm"
+          />
+        </div>
       </div>
 
       <div
         className={
           filtersAtStart
-            ? 'flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center'
-            : 'flex flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center md:flex-none'
+            ? 'flex flex-row items-center gap-2 @4xl:flex-wrap @4xl:gap-2.5'
+            : 'flex flex-1 flex-row items-center gap-2 @4xl:flex-wrap @4xl:gap-2.5 @4xl:flex-none'
         }
       >
         <VenueFilterSelect

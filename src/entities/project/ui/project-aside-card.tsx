@@ -20,7 +20,7 @@ export function ProjectAsideCard({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-[15px]',
+        '@container flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-2 @xl:p-3.75',
         className,
       )}
     >

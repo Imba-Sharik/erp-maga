@@ -13,7 +13,11 @@ import { useProjectsTableQuery } from '../lib/use-projects-table-query'
 import { ProjectsTableToolbar } from './projects-table-toolbar'
 import { ProjectsTableView } from './projects-table-view'
 
-export function ProjectsTable() {
+interface ProjectsTableProps {
+  onAddProject?: () => void
+}
+
+export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
   const [search, setSearch] = useState('')
   const [pendingOnly, setPendingOnly] = useState(false)
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
@@ -51,6 +55,7 @@ export function ProjectsTable() {
         onChangeSearch={setSearch}
         onTogglePending={setPendingOnly}
         onColumnViewChange={setColumnView}
+        onAddProject={onAddProject}
       />
       <ProjectsTableView
         projects={filtered}
