@@ -158,7 +158,7 @@ function ActionField({ children }: { children: ReactNode }) {
 
 function SubsectionHeader({ title }: { title: string }) {
   return (
-    <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
+    <CollapsibleTrigger className="group flex items-center gap-1.5 text-start text-sm">
       <span className="font-medium text-[#454545]">{title}</span>
       <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
     </CollapsibleTrigger>
