@@ -53,7 +53,8 @@ export function ProjectPipelineCard({
   return (
     <Card
       className={cn(
-        'gap-1 bg-[#F9F9F9] p-2.5 shadow-none transition-colors',
+        'gap-1 p-2.5 shadow-none transition-colors',
+        hasDraft ? null : 'bg-[#F9F9F9]',
         stageCardBorderClass(hasDraft, 'border-[#D3D3D3] hover:border-[#B1B1B1]'),
       )}
     >

@@ -42,6 +42,8 @@
   --sidebar-ring: oklch(0.52 0.07 245);
   --funnel-preproject: #5e83e3;
   --funnel-closing: #4aaa6a;
+  --draft-highlight: #e0a53e;
+  --draft-highlight-muted: #aa8540;
   --font-size-heading: 22px;
 }
 
@@ -75,6 +77,8 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
   --funnel-preproject: #5e83e3;
   --funnel-closing: #4aaa6a;
+  --draft-highlight: #e0a53e;
+  --draft-highlight-muted: #aa8540;
   --font-size-heading: 22px;
 }
 
@@ -103,6 +107,8 @@
   --color-ring: var(--ring);
   --color-funnel-preproject: var(--funnel-preproject);
   --color-funnel-closing: var(--funnel-closing);
+  --color-draft-highlight: var(--draft-highlight);
+  --color-draft-highlight-muted: var(--draft-highlight-muted);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
