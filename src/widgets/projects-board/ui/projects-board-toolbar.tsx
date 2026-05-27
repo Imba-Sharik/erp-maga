@@ -1,6 +1,5 @@
 import { Search } from 'lucide-react'
-import { useVenueCatalog } from '@/entities/venue'
-import { ClearableSelect } from '@/shared/ui/clearable-select'
+import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
 import { Input } from '@/shared/ui/input'
 
 const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
@@ -62,23 +61,23 @@ export function ProjectsBoardToolbar({
             : 'flex flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center md:flex-none'
         }
       >
-        <ClearableSelect
-          placeholder="Выберите город"
+        <VenueFilterSelect
+          filter="city"
           value={city}
           options={CITY_OPTIONS}
           onChange={onChangeCity}
           triggerClassName={TRIGGER_CLASS}
         />
-        <ClearableSelect
-          placeholder="Выберите зал"
+        <VenueFilterSelect
+          filter="hall"
           value={hall}
           options={hallOptions}
           onChange={onChangeHall}
           triggerClassName={TRIGGER_CLASS}
           disabled={selectDisabled}
         />
-        <ClearableSelect
-          placeholder="Выберите LOFT"
+        <VenueFilterSelect
+          filter="loft"
           value={loft}
           options={loftOptions}
           onChange={onChangeLoft}
