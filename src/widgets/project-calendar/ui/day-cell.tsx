@@ -50,7 +50,7 @@ export function DayCell({
       <div
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
-          '@max-[560px]/calendar:gap-0.5 @max-[560px]/calendar:p-1',
+          '@max-[560px]/calendar:gap-1 @max-[560px]/calendar:p-1',
           isSelected && 'bg-linear-to-br from-white to-[#D9D9D9]',
         )}
       >
@@ -73,7 +73,11 @@ export function DayCell({
         <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col items-start">
           {isLoading && !outOfMonth ? (
             <span
-              className="pointer-events-none inline-block h-5 w-10 animate-pulse rounded-full bg-[#EBEBEB]"
+              className={cn(
+                'pointer-events-none shrink-0 animate-pulse rounded-full bg-[#EBEBEB]',
+                'max-md:aspect-square max-md:size-4 max-md:@max-[400px]/calendar:size-3.5',
+                'md:inline-block md:h-5 md:w-10',
+              )}
               aria-hidden
             />
           ) : (
