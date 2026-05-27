@@ -59,18 +59,20 @@ export function ProjectCalendar({
         onChangeHall={onChangeHall}
         isFetching={isFetching}
       />
-      <CalendarGrid
-        visibleMonth={visibleMonth}
-        selectedKeys={selectedKeys}
-        today={today}
-        projectsByDay={projectsByDay}
-        onToggleDate={onToggleDate}
-        onPaintDates={onPaintDates}
-        isLoading={isLoading}
-      />
-      <p className="text-right text-sm text-[#ACACAC]">
-        {totalThisMonth} {pluralProjects(totalThisMonth)} в этом месяце
-      </p>
+      <div>
+        <CalendarGrid
+          visibleMonth={visibleMonth}
+          selectedKeys={selectedKeys}
+          today={today}
+          projectsByDay={projectsByDay}
+          onToggleDate={onToggleDate}
+          onPaintDates={onPaintDates}
+          isLoading={isLoading}
+        />
+        <p className="pt-2 text-right text-xs text-[#ACACAC] sm:pt-4 sm:text-sm">
+          {totalThisMonth} {pluralProjects(totalThisMonth)} в этом месяце
+        </p>
+      </div>
     </div>
   )
 }
