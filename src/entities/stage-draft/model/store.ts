@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { useCurrentUser } from '@/entities/current-user'
+import type { ProjectStage } from '@/entities/project'
+
 import type { StageDraft } from './types'
 
 const STAGE_DRAFTS_STORAGE_KEY = 'mag-erp-stage-drafts'
@@ -23,9 +26,20 @@ export const useStageDraftStore = create<StageDraftState>()(
     (set) => ({
       drafts: {},
       saveDraft: (projectId, draft) =>
-        set((s) => ({
-          drafts: { ...s.drafts, [draftKey(projectId, draft.authorId)]: draft },
-        })),
+        set((s) => {
+          const key = draftKey(projectId, draft.authorId)
+          const existing = s.drafts[key]
+          return {
+            drafts: {
+              ...s.drafts,
+              [key]: {
+                ...existing,
+                ...draft,
+                highlightPending: draft.highlightPending ?? existing?.highlightPending ?? false,
+              },
+            },
+          }
+        }),
       clearDraft: (projectId, authorId) =>
         set((s) => {
           const key = draftKey(projectId, authorId)
@@ -47,8 +61,38 @@ export const stageDraftActions = {
     useStageDraftStore.getState().saveDraft(projectId, draft),
   clear: (projectId: string | number, authorId: string): void =>
     useStageDraftStore.getState().clearDraft(projectId, authorId),
+  /** Пометить черновик для подсветки — вызывается при уходе со страницы проекта. */
+  markHighlightPending: (projectId: string | number, authorId: string): void => {
+    const draft = stageDraftActions.get(projectId, authorId)
+    if (!draft) return
+    stageDraftActions.save(projectId, { ...draft, highlightPending: true })
+  },
 }
 
 /** Реактивная карта всех черновиков — для подсветки карточек в канбане. */
-export const useStageDrafts = (): Record<string, StageDraft> =>
-  useStageDraftStore((s) => s.drafts)
+export const useStageDrafts = (): Record<string, StageDraft> => useStageDraftStore((s) => s.drafts)
+
+/** Черновик текущего пользователя по проекту. */
+export function useProjectStageDraft(
+  projectId: string | number | undefined,
+): StageDraft | undefined {
+  const currentUser = useCurrentUser()
+  return useStageDraftStore((s) =>
+    projectId === undefined ? undefined : s.drafts[draftKey(projectId, currentUser.id)],
+  )
+}
+
+/** Есть ли незавершённый черновик на конкретном этапе проекта. */
+export function useStageHasDraftHighlight(
+  projectId: string | number | undefined,
+  stage: ProjectStage,
+): boolean {
+  const draft = useProjectStageDraft(projectId)
+  return draft?.stage === stage && Boolean(draft.highlightPending)
+}
+
+/** Подсветка карточки проекта в канбане. */
+export function useProjectDraftHighlight(projectId: string | number | undefined): boolean {
+  const draft = useProjectStageDraft(projectId)
+  return Boolean(draft?.highlightPending)
+}

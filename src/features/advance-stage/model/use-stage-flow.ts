@@ -369,6 +369,7 @@ export function useStageFlow({
       articles,
       taxRate,
       savedAt: new Date().toISOString(),
+      highlightPending: false,
     })
   }, [articles, taxRate, currentStage, projectId, currentUser.id])
 
