@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/ui/form'
@@ -20,10 +20,11 @@ import {
 import { useCurrentUser } from '@/entities/current-user'
 import type { ProjectArticles } from '@/entities/project-articles'
 import { DOC_PAIR_BY_STATUS_FIELD } from '@/entities/project-documents'
-import { stageDraftActions } from '@/entities/stage-draft'
+import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 import { useUpdateDocumentStatus } from '@/features/update-document-status'
+import { cn } from '@/shared/lib/utils'
 
 import {
   confirmedAtLabelForDocStatus,
@@ -66,6 +67,7 @@ interface StageSectionCurrentProps {
    * Шапка и подпись CTA меняются под режим, отправка идёт в `onEditingSubmit`.
    */
   editingMode?: 'fill' | 'edit'
+  hasDraftHighlight?: boolean
   onEditingSubmit?: (values: Partial<StageFormData>) => void
   onCancelEditing?: () => void
 }
@@ -78,6 +80,7 @@ export function StageSectionCurrent({
   onAdvance,
   onPatchValues,
   editingMode,
+  hasDraftHighlight,
   onEditingSubmit,
   onCancelEditing,
 }: StageSectionCurrentProps) {
@@ -99,6 +102,11 @@ export function StageSectionCurrent({
   const canAdvance = canAdvanceStage(stage, role)
   const currentUser = useCurrentUser()
   const { update: updateDocumentStatus } = useUpdateDocumentStatus()
+  const isMountRef = useRef(true)
+
+  useEffect(() => {
+    isMountRef.current = false
+  }, [])
 
   const form = useForm<SignedFormValues>({
     resolver: zodResolver(schema as never) as Resolver<SignedFormValues>,
@@ -117,6 +125,7 @@ export function StageSectionCurrent({
           authorId: currentUser.id,
           values: draftValues as Partial<StageFormData>,
           savedAt: new Date().toISOString(),
+          highlightPending: isMountRef.current ? undefined : false,
         })
       } else {
         stageDraftActions.clear(project.id, currentUser.id)
@@ -228,9 +237,7 @@ export function StageSectionCurrent({
                   onValueChange={(value) => {
                     field.onChange(value)
                     const isDocStatus =
-                      value === 'present' ||
-                      value === 're_requested' ||
-                      value === 'not_required'
+                      value === 'present' || value === 're_requested' || value === 'not_required'
                     // Аудит (*ConfirmedAt/*ConfirmedBy) — только с бэка после PATCH, не локальный stub.
                     const patch: Partial<StageFormData> = {
                       [f.name]: isDocStatus ? (value as DocumentStatus) : undefined,
@@ -238,9 +245,7 @@ export function StageSectionCurrent({
                     onPatchValues?.(patch)
 
                     const docPair =
-                      DOC_PAIR_BY_STATUS_FIELD[
-                        f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD
-                      ]
+                      DOC_PAIR_BY_STATUS_FIELD[f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD]
                     if (docPair && isDocStatus) {
                       updateDocumentStatus({
                         projectId: project.id,
@@ -300,7 +305,12 @@ export function StageSectionCurrent({
   const advanceLabel = stage === 'contract_signed' ? 'Готов к проведению' : 'Следующий этап'
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-[15px] border border-[#B1B1B1] bg-white p-5">
+    <div
+      className={cn(
+        'flex w-full flex-col gap-4 rounded-[15px] border bg-white p-5',
+        stageBlockBorderClass(hasDraftHighlight),
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 text-sm">
           <span className="font-medium text-[#454545]">{headerLabel}</span>

@@ -16,6 +16,7 @@ import {
   type StageFormData,
 } from '@/entities/project'
 import type { ProjectArticles } from '@/entities/project-articles'
+import { stageBlockBorderClass } from '@/entities/stage-draft'
 
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
@@ -113,6 +114,7 @@ interface StageSectionPassedProps {
    * клику показывается RHF-форма этапа в режиме edit. Save вызывает этот колбэк.
    */
   onEditPassed?: (values: Partial<StageFormData>) => void
+  hasDraftHighlight?: boolean
 }
 
 export function StageSectionPassed({
@@ -123,6 +125,7 @@ export function StageSectionPassed({
   articles,
   onAdvance,
   onEditPassed,
+  hasDraftHighlight,
 }: StageSectionPassedProps) {
   const ctx: ResolveCtx = { project, stage, record, articles }
   const values = record?.values
@@ -222,7 +225,12 @@ export function StageSectionPassed({
 
   return (
     <Collapsible defaultOpen className="w-full">
-      <div className="flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-5">
+      <div
+        className={cn(
+          'flex flex-col rounded-[15px] border bg-white p-5',
+          stageBlockBorderClass(hasDraftHighlight),
+        )}
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
             <span className="font-medium text-[#454545]">

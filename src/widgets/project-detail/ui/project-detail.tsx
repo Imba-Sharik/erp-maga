@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
+import { useCurrentUser } from '@/entities/current-user'
 import {
   isOutsideMagStage,
   STAGE_FUNNEL,
   type ProjectDetail as ProjectDetailEntity,
 } from '@/entities/project'
+import { stageDraftActions } from '@/entities/stage-draft'
 import { useStageFlow } from '@/features/advance-stage'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import { useProjectTab } from '@/features/project-tabs'
@@ -17,6 +19,7 @@ import { ProjectDetailStages } from './project-detail-stages'
 import { ProjectDetailTabsRow } from './project-detail-tabs-row'
 
 export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
+  const currentUser = useCurrentUser()
   const [outsideMagOpen, setOutsideMagOpen] = useState(false)
   const showOutsideMagButton =
     STAGE_FUNNEL[project.stage] === 'pre_project' && !isOutsideMagStage(project.stage)
@@ -31,6 +34,12 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   })
 
   const [tab] = useProjectTab()
+
+  useEffect(() => {
+    return () => {
+      stageDraftActions.markHighlightPending(project.id, currentUser.id)
+    }
+  }, [project.id, currentUser.id])
 
   return (
     <div className="@container w-full">

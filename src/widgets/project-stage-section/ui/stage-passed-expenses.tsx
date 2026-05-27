@@ -15,6 +15,7 @@ interface StagePassedExpensesProps {
   presentation: StagePresentationConfig
   isCurrent?: boolean
   record?: StageRecord
+  hasDraftHighlight?: boolean
   articles: ProjectArticles
   taxRate: number
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void

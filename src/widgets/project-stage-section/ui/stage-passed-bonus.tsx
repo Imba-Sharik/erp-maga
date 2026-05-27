@@ -151,6 +151,7 @@ interface StagePassedBonusProps {
   dataConfirmedRecord?: StageRecord
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onAdvance?: (values?: Partial<StageFormData>) => void
+  hasDraftHighlight?: boolean
 }
 
 export function StagePassedBonus({
@@ -160,6 +161,7 @@ export function StagePassedBonus({
   dataConfirmedRecord,
   onArticleChange,
   onAdvance,
+  hasDraftHighlight,
 }: StagePassedBonusProps) {
   const role = useUserRole()
   const canEdit = canEditStage('bonus_calculated', role)
@@ -187,6 +189,7 @@ export function StagePassedBonus({
       canShowAdvance={canEdit}
       headerTitle="Бонус рассчитан"
       headerColorClass="text-funnel-closing"
+      hasDraftHighlight={hasDraftHighlight}
       onAdvance={() => onAdvance?.()}
     >
       <Collapsible defaultOpen className="flex flex-col">

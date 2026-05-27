@@ -5,6 +5,7 @@ import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
+import { stageBlockBorderClass } from '@/entities/stage-draft'
 
 export type StageBlockShellConfig = Pick<
   StagePresentationConfig,
@@ -17,6 +18,7 @@ interface StageBlockShellProps {
   canShowAdvance?: boolean
   headerTitle: string
   headerColorClass?: string
+  hasDraftHighlight?: boolean
   onAdvance?: () => void
   children: ReactNode
 }
@@ -27,6 +29,7 @@ export function StageBlockShell({
   canShowAdvance = false,
   headerTitle,
   headerColorClass = 'text-[#454545]',
+  hasDraftHighlight,
   onAdvance,
   children,
 }: StageBlockShellProps) {
@@ -59,7 +62,12 @@ export function StageBlockShell({
   )
 
   const card = (
-    <div className="flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-5">
+    <div
+      className={cn(
+        'flex flex-col rounded-[15px] border bg-white p-5',
+        stageBlockBorderClass(hasDraftHighlight),
+      )}
+    >
       {(showHeaderRow || showAdvance) && (
         <div className="flex flex-wrap items-center justify-between gap-3">
           {showHeaderRow ? headerContent : null}

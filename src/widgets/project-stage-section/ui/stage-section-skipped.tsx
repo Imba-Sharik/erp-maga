@@ -10,8 +10,10 @@ import {
 } from '@/entities/project'
 import type { ProjectArticles } from '@/entities/project-articles'
 import { useUserRole } from '@/entities/user-role'
+import { stageBlockBorderClass } from '@/entities/stage-draft'
 import type { StageRecord } from '@/features/advance-stage'
 import { Button } from '@/shared/ui/button'
+import { cn } from '@/shared/lib/utils'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { StageSectionCurrent } from './stage-section-current'
@@ -21,6 +23,7 @@ interface StageSectionSkippedProps {
   stage: ProjectStage
   record?: StageRecord
   articles?: ProjectArticles
+  hasDraftHighlight?: boolean
   onFillSkipped: (values: Partial<StageFormData>) => void
 }
 
@@ -29,6 +32,7 @@ export function StageSectionSkipped({
   stage,
   record,
   articles,
+  hasDraftHighlight,
   onFillSkipped,
 }: StageSectionSkippedProps) {
   const [editing, setEditing] = useState(false)
@@ -44,6 +48,7 @@ export function StageSectionSkipped({
         stage={stage}
         record={record}
         articles={articles}
+        hasDraftHighlight={hasDraftHighlight}
         editingMode="fill"
         onEditingSubmit={(values) => {
           onFillSkipped(values)
@@ -55,7 +60,12 @@ export function StageSectionSkipped({
   }
 
   return (
-    <div className="flex w-full flex-col rounded-[15px] border border-dashed border-[#C7C7C7] bg-[#FAF9F6] p-5">
+    <div
+      className={cn(
+        'flex w-full flex-col rounded-[15px] border bg-[#FAF9F6] p-5',
+        hasDraftHighlight ? stageBlockBorderClass(true) : 'border-dashed border-[#C7C7C7]',
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 text-sm">
           <span className="font-medium text-[#6B6B6B]">Этап пропущен:</span>

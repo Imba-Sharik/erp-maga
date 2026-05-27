@@ -5,6 +5,7 @@ import type {
   ArticleValues,
   ProjectArticles,
 } from '@/entities/project-articles'
+import { useStageHasDraftHighlight } from '@/entities/stage-draft'
 import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 
@@ -12,6 +13,7 @@ import { StagePassedBonus } from './stage-passed-bonus'
 import { StagePassedExpenses } from './stage-passed-expenses'
 import { StagePassedReady } from './stage-passed-ready'
 import { StageSectionCurrent } from './stage-section-current'
+import { StageSectionDraftFrame } from './stage-section-draft-frame'
 import { StageSectionPassed } from './stage-section-passed'
 import { StageSectionSkipped } from './stage-section-skipped'
 
@@ -62,6 +64,8 @@ export function ProjectStageSection({
   onToggleBackline,
   getRecord,
 }: ProjectStageSectionProps) {
+  const hasDraftHighlight = useStageHasDraftHighlight(project.id, stage)
+
   const financeProps = {
     presentation,
     articles,
@@ -75,64 +79,94 @@ export function ProjectStageSection({
   // Пропущенный этап — отдельная вёрстка с возможностью дозаполнить.
   if (isSkipped && onPatchStageValues) {
     return (
-      <StageSectionSkipped
-        project={project}
-        stage={stage}
-        record={record}
-        articles={articles}
-        onFillSkipped={(values) => onPatchStageValues(stage, values)}
-      />
+      <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
+        <StageSectionSkipped
+          project={project}
+          stage={stage}
+          record={record}
+          articles={articles}
+          hasDraftHighlight={hasDraftHighlight}
+          onFillSkipped={(values) => onPatchStageValues(stage, values)}
+        />
+      </StageSectionDraftFrame>
     )
   }
 
   // Этапы с финансовыми блоками — собственная вёрстка
   if (stage === 'ready_to_event') {
-    return <StagePassedReady isCurrent={isCurrent} record={record} {...financeProps} />
+    return (
+      <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
+        <StagePassedReady
+          isCurrent={isCurrent}
+          record={record}
+          hasDraftHighlight={hasDraftHighlight}
+          {...financeProps}
+        />
+      </StageSectionDraftFrame>
+    )
   }
   if (stage === 'expenses_entered') {
-    return <StagePassedExpenses isCurrent={isCurrent} record={record} {...financeProps} />
+    return (
+      <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
+        <StagePassedExpenses
+          isCurrent={isCurrent}
+          record={record}
+          hasDraftHighlight={hasDraftHighlight}
+          {...financeProps}
+        />
+      </StageSectionDraftFrame>
+    )
   }
   if (stage === 'bonus_calculated') {
     return (
-      <StagePassedBonus
-        presentation={presentation}
-        isCurrent={isCurrent}
-        articles={articles}
-        dataConfirmedRecord={getRecord('data_confirmed')}
-        onArticleChange={onArticleChange}
-        onAdvance={onAdvance}
-      />
+      <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
+        <StagePassedBonus
+          presentation={presentation}
+          isCurrent={isCurrent}
+          articles={articles}
+          hasDraftHighlight={hasDraftHighlight}
+          dataConfirmedRecord={getRecord('data_confirmed')}
+          onArticleChange={onArticleChange}
+          onAdvance={onAdvance}
+        />
+      </StageSectionDraftFrame>
     )
   }
 
   // Текущий этап с RHF-формой (все, кроме финансовых блоков)
   if (isCurrent) {
     return (
-      <StageSectionCurrent
-        project={project}
-        stage={stage}
-        record={record}
-        articles={articles}
-        onAdvance={onAdvance}
-        onPatchValues={onPatchValues}
-      />
+      <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
+        <StageSectionCurrent
+          project={project}
+          stage={stage}
+          record={record}
+          articles={articles}
+          hasDraftHighlight={hasDraftHighlight}
+          onAdvance={onAdvance}
+          onPatchValues={onPatchValues}
+        />
+      </StageSectionDraftFrame>
     )
   }
 
   // Все остальные (пройденные и закрывающие без отдельного дизайна)
   return (
-    <StageSectionPassed
-      project={project}
-      stage={stage}
-      isCurrent={isCurrent}
-      record={record}
-      articles={articles}
-      onAdvance={onAdvance}
-      onEditPassed={
-        EDITABLE_AFTER_PASS.has(stage) && onPatchStageValues
-          ? (values) => onPatchStageValues(stage, values)
-          : undefined
-      }
-    />
+    <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
+      <StageSectionPassed
+        project={project}
+        stage={stage}
+        isCurrent={isCurrent}
+        record={record}
+        articles={articles}
+        hasDraftHighlight={hasDraftHighlight}
+        onAdvance={onAdvance}
+        onEditPassed={
+          EDITABLE_AFTER_PASS.has(stage) && onPatchStageValues
+            ? (values) => onPatchStageValues(stage, values)
+            : undefined
+        }
+      />
+    </StageSectionDraftFrame>
   )
 }
