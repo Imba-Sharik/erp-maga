@@ -23,18 +23,18 @@ const MONTHS_RU = [
 const YEAR_OPTIONS = [2024, 2025, 2026, 2027]
 
 const SELECT_TRIGGER_BASE =
-  'h-10 min-w-32 flex-1 rounded-[10px] border-[#B1B1B1] bg-white ' +
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white ' +
   'data-placeholder:text-[#BCBCBC] ' +
-  '@min-[880px]/calendar:flex-none'
+  '@min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-32 @min-[880px]/calendar:flex-none'
 
 const SELECT_TRIGGER_YEAR =
-  'h-10 min-w-20 flex-1 rounded-[10px] border-[#B1B1B1] bg-white ' +
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white ' +
   'data-placeholder:text-[#BCBCBC] ' +
-  '@min-[880px]/calendar:flex-none'
+  '@min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-20 @min-[880px]/calendar:flex-none'
 
 const MONTH_NAV_OUTER =
-  'flex h-9 min-w-28 flex-1 items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
-  '@min-[880px]/calendar:flex-none'
+  'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+  '@min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-28 @min-[880px]/calendar:flex-none'
 
 const MONTH_NAV_ARROW_BTN =
   'flex h-full w-5 shrink-0 items-center justify-center text-[#3D3D3D] transition-colors ' +
@@ -82,19 +82,19 @@ export function CalendarToolbar({
           placeholder="Поиск проектов"
           value={projectSearch}
           onChange={(e) => onChangeProjectSearch(e.target.value)}
-          groupClassName="w-full"
+          groupClassName="w-full max-md:h-9! md:h-10"
         />
         <Loader2
           aria-hidden={!isFetching}
           aria-label={isFetching ? 'Загрузка проектов' : undefined}
           className={cn(
-            'size-4 shrink-0 text-[#ACACAC] transition-opacity',
+            'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity xl:block',
             isFetching ? 'animate-spin opacity-100' : 'opacity-0',
           )}
         />
       </div>
 
-      <div className="flex min-w-0 flex-wrap items-center gap-2.5 @min-[880px]/calendar:shrink-0 @min-[880px]/calendar:flex-nowrap">
+      <div className="grid min-w-0 grid-cols-2 gap-2.5 @min-[880px]/calendar:flex @min-[880px]/calendar:shrink-0 @min-[880px]/calendar:flex-nowrap">
         <VenueFilterSelect
           filter="hall"
           value={hall}
