@@ -207,6 +207,15 @@
   }
 }
 
+/* < sm: горизонтальный скроллбар скрыт (канбан, таблицы); прокрутка сохраняется. */
+@media (width < theme(--breakpoint-sm)) {
+  .projects-kanban-scroll-area .os-scrollbar-horizontal,
+  .projects-table-scroll-area .os-scrollbar-horizontal {
+    display: none !important;
+    pointer-events: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
  * Модификатор: readonly-комментарий этапа.
  * --os-padding-axis — верхний/нижний внутренний отступ вертикального скролла,
