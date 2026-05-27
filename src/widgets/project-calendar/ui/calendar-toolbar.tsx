@@ -1,7 +1,6 @@
 import { addMonths, getMonth, getYear, setMonth, setYear } from 'date-fns'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
-import { useVenueCatalog } from '@/entities/venue'
-import { ClearableSelect } from '@/shared/ui/clearable-select'
+import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchBar } from '@/shared/ui/search-bar'
 import { cn } from '@/shared/lib/utils'
@@ -96,16 +95,16 @@ export function CalendarToolbar({
       </div>
 
       <div className="flex min-w-0 flex-wrap items-center gap-2.5 @min-[880px]/calendar:shrink-0 @min-[880px]/calendar:flex-nowrap">
-        <ClearableSelect
-          placeholder="Выберите зал"
+        <VenueFilterSelect
+          filter="hall"
           value={hall}
           options={hallOptions}
           onChange={onChangeHall}
           triggerClassName={SELECT_TRIGGER_BASE}
           disabled={selectDisabled}
         />
-        <ClearableSelect
-          placeholder="Выберите LOFT"
+        <VenueFilterSelect
+          filter="loft"
           value={loft}
           options={loftOptions}
           onChange={onChangeLoft}
