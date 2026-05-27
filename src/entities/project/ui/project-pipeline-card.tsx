@@ -1,6 +1,7 @@
 import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
+import { formatRelativeUpdateLabel } from '@/shared/lib/date/format-relative-update-label'
 import { Card } from '@/shared/ui/card'
 import { stageCardBorderClass } from '@/entities/stage-draft'
 import {
@@ -127,7 +128,9 @@ export function ProjectPipelineCard({
             </span>
             Карточка в PLUM
           </a>
-          <span className="text-2xs text-[#ACACAC]">{project.lastUpdate}</span>
+          <span className="text-2xs text-[#ACACAC]">
+            {formatRelativeUpdateLabel(project.updatedAt)}
+          </span>
         </div>
       </div>
     </Card>

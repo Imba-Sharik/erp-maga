@@ -16,7 +16,7 @@ export const CLOSING_ARCHIVE_MOCK_PROJECTS: Project[] = [
     phone: '+7 (495) 200-10-10',
     email: 'events@gazprom.mock',
     plumCardUrl: 'https://plum.mock/card/a1',
-    lastUpdate: '2 месяца назад',
+    updatedAt: '2026-04-01T12:00:00Z',
     createdAt: '2025-12-01T10:00:00Z',
     archivedAt: '2026-04-01T12:00:00Z',
     economics: {
@@ -40,7 +40,7 @@ export const CLOSING_ARCHIVE_MOCK_PROJECTS: Project[] = [
     phone: '+7 (921) 310-55-55',
     email: 'smirnov.wedding@mock.ru',
     plumCardUrl: 'https://plum.mock/card/a2',
-    lastUpdate: '1 месяц назад',
+    updatedAt: '2026-04-18T09:00:00Z',
     createdAt: '2025-11-15T14:30:00Z',
     archivedAt: '2026-03-18T09:00:00Z',
     economics: {
@@ -64,7 +64,7 @@ export const CLOSING_ARCHIVE_MOCK_PROJECTS: Project[] = [
     phone: '+7 (903) 444-55-66',
     email: 'pr@technobrand.mock',
     plumCardUrl: 'https://plum.mock/card/a3',
-    lastUpdate: '3 месяца назад',
+    updatedAt: '2026-02-28T15:30:00Z',
     createdAt: '2025-10-05T09:15:00Z',
     archivedAt: '2026-02-28T15:30:00Z',
     economics: {
@@ -88,7 +88,7 @@ export const CLOSING_ARCHIVE_MOCK_PROJECTS: Project[] = [
     phone: '+7 (926) 777-88-99',
     email: 'devfest@mock.ru',
     plumCardUrl: 'https://plum.mock/card/a4',
-    lastUpdate: '2 месяца назад',
+    updatedAt: '2026-03-05T11:00:00Z',
     createdAt: '2025-11-20T08:45:00Z',
     archivedAt: '2026-03-05T11:00:00Z',
     economics: {
@@ -112,7 +112,7 @@ export const CLOSING_ARCHIVE_MOCK_PROJECTS: Project[] = [
     phone: '+7 (917) 111-22-33',
     email: 'fashion@mock.ru',
     plumCardUrl: 'https://plum.mock/card/a5',
-    lastUpdate: '5 месяцев назад',
+    updatedAt: '2026-01-15T10:00:00Z',
     createdAt: '2025-09-01T10:00:00Z',
     archivedAt: '2026-01-15T10:00:00Z',
     economics: {
@@ -136,7 +136,7 @@ export const CLOSING_ARCHIVE_MOCK_PROJECTS: Project[] = [
     phone: '+7 (900) 000-11-22',
     email: '',
     plumCardUrl: 'https://plum.mock/card/a6',
-    lastUpdate: '4 месяца назад',
+    updatedAt: '2026-02-10T08:00:00Z',
     createdAt: '2025-10-30T16:00:00Z',
     archivedAt: '2026-02-10T08:00:00Z',
   },
