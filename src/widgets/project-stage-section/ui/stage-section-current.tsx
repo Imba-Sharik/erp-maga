@@ -41,6 +41,7 @@ import { StageDateField } from './stage-date-field'
 import { StageDocumentField } from '@/features/stage-document'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
+import { StageStatusHeader } from './stage-status-header'
 
 type SignedFormValues = Record<string, unknown>
 
@@ -312,10 +313,11 @@ export function StageSectionCurrent({
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 text-sm">
-          <span className="font-medium text-[#454545]">{headerLabel}</span>
-          <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
-        </div>
+        <StageStatusHeader
+          statusLabel={headerLabel}
+          title={ALL_STAGE_LABELS[stage]}
+          titleClassName={funnelColor}
+        />
         {canAdvance && stage !== 'closed' ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             {editingMode ? (
