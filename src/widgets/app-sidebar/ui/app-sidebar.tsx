@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, User } from 'lucide-react'
+import { useCallback } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MagLogo, SettingsIcon } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
@@ -43,7 +44,10 @@ const IS_DEV = import.meta.env.DEV
 export function AppSidebar() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { state, isMobile } = useSidebar()
+  const { state, isMobile, setOpenMobile } = useSidebar()
+  const handleNavClick = useCallback(() => {
+    if (isMobile) setOpenMobile(false)
+  }, [isMobile, setOpenMobile])
   const showCollapseInSidebar = !isMobile && state === 'expanded'
   const queryClient = useQueryClient()
   const role = useUserRole()
@@ -54,9 +58,13 @@ export function AppSidebar() {
   const { loginAs, isPending: isDevLoginPending } = useDevLogin()
 
   const handleLogout = () => {
+    if (isMobile) setOpenMobile(false)
     clearSessionTokens()
     queryClient.clear()
-    navigate('/login', { replace: true })
+    // Defer navigation: даём Radix-овским Sheet/DropdownMenu отработать unmount
+    // и снять body-стили (pointer-events:none), иначе после редиректа на /login
+    // инпуты на мобиле остаются некликабельными.
+    setTimeout(() => navigate('/login', { replace: true }), 0)
   }
 
   return (
@@ -95,7 +103,7 @@ export function AppSidebar() {
                       isActive={isActive}
                       className="hover:text-sidebar-accent-foreground border border-transparent data-[active=true]:border-[#B1B1B1] data-[active=true]:bg-[#FFFFFF] data-[active=true]:font-normal"
                     >
-                      <Link to={item.url}>
+                      <Link to={item.url} onClick={handleNavClick}>
                         <div
                           className={cn(
                             'flex min-w-0 flex-1 items-center gap-2 transition-transform duration-200 ease-out',
@@ -170,13 +178,13 @@ export function AppSidebar() {
                   </>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link to="/profile">
+                  <Link to="/profile" onClick={handleNavClick}>
                     <User />
                     Профиль
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/settings">
+                  <Link to="/settings" onClick={handleNavClick}>
                     <SettingsIcon />
                     Настройки
                   </Link>

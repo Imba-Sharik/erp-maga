@@ -24,7 +24,7 @@ interface ProjectHeaderProps {
 export function ProjectHeader({ project, currentStage }: ProjectHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-2 @sm:flex-row @sm:items-center @sm:justify-between @sm:gap-4">
         <h1 className="text-2xl font-bold text-[#1B1A17]">{project.title}</h1>
         <PlumLink href={project.plumCardUrl} />
       </div>

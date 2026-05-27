@@ -57,20 +57,20 @@ export function StageBlockShell({
   const card = (
     <div
       className={cn(
-        'flex flex-col rounded-[15px] border bg-white p-5',
+        '@container flex flex-col rounded-[15px] border bg-white p-2.5 @xl:p-5',
         stageBlockBorderClass(hasDraftHighlight),
       )}
     >
       {(showHeaderRow || showAdvance) && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
           {showHeaderRow ? headerContent : null}
           {showAdvance ? (
             <Button
               type="button"
               onClick={() => onAdvance?.()}
-              className="h-[38px] rounded-[10px] px-4 text-sm"
+              className="h-[38px] rounded-[10px] px-4"
             >
-              Следующий этап
+              <span className="text-xs @xl:text-sm">Следующий этап</span>
               <ArrowRight className="size-3.5" />
             </Button>
           ) : null}

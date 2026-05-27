@@ -46,7 +46,7 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="flex shrink-0 flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between 2xl:gap-4">
+      <div className="@container flex shrink-0 flex-col gap-2.5 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4">
         <ProjectsBoardToolbar
           filtersAlign="start"
           search={props.search}
@@ -58,7 +58,12 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
           onChangeHall={props.onChangeHall}
           onChangeLoft={props.onChangeLoft}
         />
-        <ToggleSwitch label="Архивные проекты" checked={false} onChange={props.onToggleArchive} />
+        <ToggleSwitch
+          label="Архивные проекты"
+          checked={false}
+          onChange={props.onToggleArchive}
+          className="self-end text-xs @3xl:self-auto @3xl:text-sm"
+        />
       </div>
     )
   }

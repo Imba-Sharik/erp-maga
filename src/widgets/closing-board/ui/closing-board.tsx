@@ -82,7 +82,7 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
+    <div className="@container flex h-full min-h-0 flex-1 flex-col gap-3 @3xl:gap-6">
       {archiveMode ? (
         <ClosingBoardToolbar
           archiveMode={true}

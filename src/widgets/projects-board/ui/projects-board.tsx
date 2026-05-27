@@ -9,9 +9,10 @@ import { ProjectsKanban } from './projects-kanban'
 
 interface ProjectsBoardProps {
   listDateParams: BoardListParams
+  onAddProject?: () => void
 }
 
-export function ProjectsBoard({ listDateParams }: ProjectsBoardProps) {
+export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardProps) {
   const [search, setSearch] = useState('')
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
@@ -33,6 +34,7 @@ export function ProjectsBoard({ listDateParams }: ProjectsBoardProps) {
         onChangeCity={setCity}
         onChangeHall={setHall}
         onChangeLoft={setLoft}
+        onAddProject={onAddProject}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
         <ProjectsKanban

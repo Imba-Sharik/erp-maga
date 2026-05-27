@@ -1,9 +1,22 @@
+import { useEffect } from 'react'
+
 import { MagLogo } from '@/shared/assets'
 import { DevLoginButtons, LoginForm } from '@/features/auth'
 
 const IS_DEV = import.meta.env.DEV
 
 export function LoginPage() {
+  // Подстраховка от залипших body-стилей Radix (Sheet/DropdownMenu) после logout:
+  // если AppLayout размонтировался до того, как Radix успел снять
+  // pointer-events:none / overflow:hidden / data-scroll-locked, инпуты на /login
+  // становятся некликабельными до перезагрузки страницы.
+  useEffect(() => {
+    document.body.style.pointerEvents = ''
+    document.body.style.overflow = ''
+    document.body.style.paddingRight = ''
+    document.body.removeAttribute('data-scroll-locked')
+  }, [])
+
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-8 bg-[#FAF9F6] px-6 pt-6 pb-[14vh]">
       <div className="flex flex-col items-center gap-2.5">
