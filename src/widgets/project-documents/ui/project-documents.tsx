@@ -23,7 +23,7 @@ export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) 
   }
 
   return (
-    <div className="flex flex-col gap-4 overflow-hidden rounded-[14px] border border-[#E9E6DD] bg-white p-5">
+    <div className="@container flex flex-col gap-4 overflow-hidden rounded-[14px] border border-[#E9E6DD] bg-white p-2.5 @xl:p-5">
       {items.map((item) => (
         <div key={item.documentType} className="flex min-w-0 flex-col gap-1.5">
           <span className="text-sm font-medium text-[#454545]">{item.label}</span>

@@ -228,7 +228,7 @@ export function StageSectionPassed({
     <Collapsible defaultOpen className="w-full">
       <div
         className={cn(
-          'flex flex-col rounded-[15px] border bg-white p-5',
+          '@container flex flex-col rounded-[15px] border bg-white p-2.5 @xl:p-5',
           stageBlockBorderClass(hasDraftHighlight),
         )}
       >

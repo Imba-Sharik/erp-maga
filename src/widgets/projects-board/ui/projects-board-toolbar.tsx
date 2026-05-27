@@ -6,7 +6,7 @@ import { Input } from '@/shared/ui/input'
 const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
 
 const TRIGGER_CLASS =
-  'h-10! w-full min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs data-placeholder:text-[#BCBCBC] @3xl:w-41.5 @3xl:flex-none @3xl:text-sm'
+  'h-10! w-full min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs data-placeholder:text-[#BCBCBC] @4xl:w-41.5 @4xl:flex-none @4xl:text-sm'
 
 interface ProjectsBoardToolbarProps {
   search: string
@@ -42,28 +42,28 @@ export function ProjectsBoardToolbar({
     <div
       className={
         filtersAtStart
-          ? '@container flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-start @3xl:gap-4'
-          : '@container flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4'
+          ? 'flex shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-center @4xl:justify-start @4xl:gap-4'
+          : 'flex shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-center @4xl:justify-between @4xl:gap-4'
       }
     >
-      <div className="flex items-center gap-2 @3xl:w-75">
+      <div className="flex items-center gap-2 @4xl:w-75">
         {onAddProject && (
           <Button
             type="button"
             onClick={onAddProject}
-            className="h-10 shrink-0 rounded-[10px] bg-black px-2 text-xs text-white hover:bg-black/90 @3xl:hidden"
+            className="h-10 shrink-0 rounded-[10px] bg-black px-2 text-xs text-white hover:bg-black/90 @4xl:hidden"
           >
             Добавить проект
           </Button>
         )}
         <div className="relative min-w-0 flex-1">
-          <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @3xl:left-3 @3xl:size-4" />
+          <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @4xl:left-3 @4xl:size-4" />
           <Input
             type="search"
             placeholder="Поиск проектов"
             value={search}
             onChange={(e) => onChangeSearch(e.target.value)}
-            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-7 pr-1.5 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @3xl:pl-9 @3xl:pr-3 @3xl:text-sm @3xl:placeholder:text-sm"
+            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-7 pr-1.5 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @4xl:pl-9 @4xl:pr-3 @4xl:text-sm @4xl:placeholder:text-sm"
           />
         </div>
       </div>
@@ -71,8 +71,8 @@ export function ProjectsBoardToolbar({
       <div
         className={
           filtersAtStart
-            ? 'flex flex-row items-center gap-2 @3xl:flex-wrap @3xl:gap-2.5'
-            : 'flex flex-1 flex-row items-center gap-2 @3xl:flex-wrap @3xl:gap-2.5 @3xl:flex-none'
+            ? 'flex flex-row items-center gap-2 @4xl:flex-wrap @4xl:gap-2.5'
+            : 'flex flex-1 flex-row items-center gap-2 @4xl:flex-wrap @4xl:gap-2.5 @4xl:flex-none'
         }
       >
         <VenueFilterSelect
