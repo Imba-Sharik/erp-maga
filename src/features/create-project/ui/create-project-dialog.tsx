@@ -89,7 +89,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       }}
     >
       <DialogContent className="sm:max-w-md" showCloseButton>
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle className="font-heading text-[#1B1A17]">Новый проект</DialogTitle>
           <DialogDescription>
             {previewDateLabel ? `Дата мероприятия будет назначена: ${previewDateLabel}.` : null}
@@ -183,7 +183,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 {errorMessage}
               </p>
             ) : null}
-            <DialogFooter className="gap-2 sm:gap-2">
+            <DialogFooter className="flex-row gap-2 sm:justify-end [&>button]:flex-1 sm:[&>button]:flex-none">
               <Button
                 type="button"
                 variant="outline"
