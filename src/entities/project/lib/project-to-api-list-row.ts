@@ -53,7 +53,7 @@ export function projectToApiListRow(project: Project): ApiProject {
     phone: project.phone,
     email: project.email,
     plum_card_url: project.plumCardUrl,
-    updated_at: project.lastUpdate,
+    updated_at: project.updatedAt,
     created_at: project.createdAt,
   } as ApiProject
 }

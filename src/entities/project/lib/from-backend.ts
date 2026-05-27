@@ -1,6 +1,3 @@
-import { formatDistanceToNow, parseISO } from 'date-fns'
-import { ru } from 'date-fns/locale'
-
 import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { ProjectCalendarItemSchema } from '@/shared/api/generated/types/ProjectCalendarItemSchema'
@@ -78,15 +75,6 @@ function takeFirstManager(raw: string | undefined): string {
   return first ?? ''
 }
 
-function formatLastUpdate(iso: string | undefined): string {
-  if (!iso) return ''
-  try {
-    return formatDistanceToNow(parseISO(iso), { addSuffix: true, locale: ru })
-  } catch {
-    return ''
-  }
-}
-
 type BackendProjectListable = BackendProject | BackendProjectDetail
 
 const DOCUMENT_STATUSES: ReadonlySet<DocumentStatus> = new Set([
@@ -141,7 +129,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     phone: b.phone ?? '',
     email: b.email ?? '',
     plumCardUrl: b.plum_card_url,
-    lastUpdate: formatLastUpdate(b.updated_at),
+    updatedAt: b.updated_at,
     createdAt: b.created_at,
     // documents_confirmed_at пока есть только в ProjectDetailSchema, не в списке.
     ...('documents_confirmed_at' in b && b.documents_confirmed_at
@@ -171,7 +159,7 @@ export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
     phone: '',
     email: '',
     plumCardUrl: '',
-    lastUpdate: formatLastUpdate(b.out_of_mag_transferred_at ?? undefined),
+    updatedAt: b.out_of_mag_transferred_at ?? '',
     createdAt: b.out_of_mag_transferred_at ?? '',
     outsideMag: {
       reason: b.out_of_mag_reason,
@@ -224,7 +212,7 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     phone: b.phone ?? '',
     email: '',
     plumCardUrl: '',
-    lastUpdate: '',
+    updatedAt: '',
     createdAt: '',
   }
 }
@@ -351,22 +339,19 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
       enteredBy: userBriefName(b.documents_confirmed_set_by),
       values: {
         projectDocsStatus: mapDocStatus(projectClosingDoc?.status ?? b.project_docs_status),
-        projectDocsConfirmedAt:
-          projectClosingDoc?.confirmed_at ?? b.project_docs_confirmed_at,
+        projectDocsConfirmedAt: projectClosingDoc?.confirmed_at ?? b.project_docs_confirmed_at,
         projectDocsConfirmedBy: userBriefName(
           projectClosingDoc?.confirmed_by ?? b.project_docs_confirmed_by,
         ),
         projectDocsFileName: projectClosingDoc?.file_name ?? b.project_docs_file_name,
         subleaseDocsStatus: mapDocStatus(subrentClosingDoc?.status ?? b.sublease_docs_status),
-        subleaseDocsConfirmedAt:
-          subrentClosingDoc?.confirmed_at ?? b.sublease_docs_confirmed_at,
+        subleaseDocsConfirmedAt: subrentClosingDoc?.confirmed_at ?? b.sublease_docs_confirmed_at,
         subleaseDocsConfirmedBy: userBriefName(
           subrentClosingDoc?.confirmed_by ?? b.sublease_docs_confirmed_by,
         ),
         subleaseDocsFileName: subrentClosingDoc?.file_name ?? b.sublease_docs_file_name,
         staffReceiptsStatus: mapDocStatus(staffReceiptsDoc?.status ?? b.staff_receipts_status),
-        staffReceiptsConfirmedAt:
-          staffReceiptsDoc?.confirmed_at ?? b.staff_receipts_confirmed_at,
+        staffReceiptsConfirmedAt: staffReceiptsDoc?.confirmed_at ?? b.staff_receipts_confirmed_at,
         staffReceiptsConfirmedBy: userBriefName(
           staffReceiptsDoc?.confirmed_by ?? b.staff_receipts_confirmed_by,
         ),
@@ -395,17 +380,11 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
 
   const docs = indexDocumentsByType(b.documents)
   const documentFiles: Partial<Record<StageDocumentType, StageDocumentFile>> = {}
-  const projectClosing = mapBackendDocumentFile(
-    docs.project_closing?.file ?? b.project_docs_file,
-  )
+  const projectClosing = mapBackendDocumentFile(docs.project_closing?.file ?? b.project_docs_file)
   if (projectClosing) documentFiles.project_closing = projectClosing
-  const subrentClosing = mapBackendDocumentFile(
-    docs.subrent_closing?.file ?? b.sublease_docs_file,
-  )
+  const subrentClosing = mapBackendDocumentFile(docs.subrent_closing?.file ?? b.sublease_docs_file)
   if (subrentClosing) documentFiles.subrent_closing = subrentClosing
-  const staffReceipts = mapBackendDocumentFile(
-    docs.staff_receipts?.file ?? b.staff_receipts_file,
-  )
+  const staffReceipts = mapBackendDocumentFile(docs.staff_receipts?.file ?? b.staff_receipts_file)
   if (staffReceipts) documentFiles.staff_receipts = staffReceipts
 
   return {

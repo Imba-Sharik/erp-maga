@@ -65,7 +65,8 @@ export interface Project {
   phone: string
   email: string
   plumCardUrl: string
-  lastUpdate: string
+  /** ISO-datetime последнего обновления проекта. */
+  updatedAt: string
   /** ISO-datetime создания проекта в системе («появление в системе»). */
   createdAt: string
   /** Последняя активная стадия до перевода в «Вне контура» (если есть в API). */
