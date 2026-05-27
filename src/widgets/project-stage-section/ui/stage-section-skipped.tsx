@@ -17,6 +17,7 @@ import { cn } from '@/shared/lib/utils'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { StageSectionCurrent } from './stage-section-current'
+import { StageStatusHeader } from './stage-status-header'
 
 interface StageSectionSkippedProps {
   project: ProjectDetail
@@ -67,10 +68,12 @@ export function StageSectionSkipped({
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 text-sm">
-          <span className="font-medium text-[#6B6B6B]">Этап пропущен:</span>
-          <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
-        </div>
+        <StageStatusHeader
+          statusLabel="Этап пропущен:"
+          title={ALL_STAGE_LABELS[stage]}
+          titleClassName={funnelColor}
+          statusClassName="font-medium text-[#6B6B6B]"
+        />
         {canEdit ? (
           <Button
             type="button"

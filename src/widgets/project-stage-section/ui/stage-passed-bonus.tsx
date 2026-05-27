@@ -193,7 +193,7 @@ export function StagePassedBonus({
       onAdvance={() => onAdvance?.()}
     >
       <Collapsible defaultOpen className="flex flex-col">
-        <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
+        <CollapsibleTrigger className="group flex items-center gap-1.5 text-start text-sm">
           <span className="font-medium text-[#454545]">Бонус: Продажная часть (основной блок)</span>
           <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
         </CollapsibleTrigger>

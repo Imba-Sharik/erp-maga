@@ -1,10 +1,10 @@
-import { ArrowRight, ChevronDown, Pencil } from 'lucide-react'
+import { ArrowRight, Pencil } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { cn } from '@/shared/lib/utils'
 
 import { Button } from '@/shared/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
+import { Collapsible, CollapsibleContent } from '@/shared/ui/collapsible'
 import {
   ALL_STAGE_LABELS,
   STAGE_FUNNEL,
@@ -42,6 +42,7 @@ import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 import { StageSectionCurrent } from './stage-section-current'
+import { StageStatusHeader } from './stage-status-header'
 
 const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -232,13 +233,12 @@ export function StageSectionPassed({
         )}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
-            <span className="font-medium text-[#454545]">
-              {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
-            </span>
-            <span className={`${funnelColor} font-semibold`}>{ALL_STAGE_LABELS[stage]}</span>
-            <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
-          </CollapsibleTrigger>
+          <StageStatusHeader
+            statusLabel={isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
+            title={ALL_STAGE_LABELS[stage]}
+            titleClassName={funnelColor}
+            collapsible
+          />
           {isCurrent && canAdvance && (
             <Button
               type="button"

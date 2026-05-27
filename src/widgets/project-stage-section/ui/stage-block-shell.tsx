@@ -1,11 +1,13 @@
-import { ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
+import { Collapsible, CollapsibleContent } from '@/shared/ui/collapsible'
 import { stageBlockBorderClass } from '@/entities/stage-draft'
+
+import { StageStatusHeader } from './stage-status-header'
 
 export type StageBlockShellConfig = Pick<
   StagePresentationConfig,
@@ -36,22 +38,13 @@ export function StageBlockShell({
   const showHeaderRow = shell.showStageHeader
   const showAdvance = shell.showAdvanceButton && isCurrent && canShowAdvance
 
-  const stageLabel = (
-    <>
-      <span className="font-medium text-[#454545]">
-        {isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
-      </span>
-      <span className={cn('font-semibold', headerColorClass)}>{headerTitle}</span>
-    </>
-  )
-
-  const headerContent = shell.stageCollapsible ? (
-    <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm">
-      {stageLabel}
-      <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
-    </CollapsibleTrigger>
-  ) : (
-    <div className="flex items-center gap-1.5 text-sm">{stageLabel}</div>
+  const headerContent = (
+    <StageStatusHeader
+      statusLabel={isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
+      title={headerTitle}
+      titleClassName={headerColorClass}
+      collapsible={shell.stageCollapsible}
+    />
   )
 
   const body = (
