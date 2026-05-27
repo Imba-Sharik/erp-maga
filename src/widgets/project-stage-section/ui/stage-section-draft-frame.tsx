@@ -14,7 +14,7 @@ export function StageSectionDraftFrame({
   return (
     <div className="flex w-full flex-col gap-1">
       {children}
-      <p className="text-xs text-[#AA8540]">Продолжите редактирование</p>
+      <p className="text-xs text-draft-highlight-muted">Продолжите редактирование</p>
     </div>
   )
 }
