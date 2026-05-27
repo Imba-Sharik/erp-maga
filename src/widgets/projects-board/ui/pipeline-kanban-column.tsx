@@ -102,7 +102,7 @@ export function PipelineKanbanColumn({
                   key={p.id}
                   project={p}
                   backOrigin={backOrigin}
-                  hasDraft={Boolean(drafts[draftKey(p.id, currentUser.id)])}
+                  hasDraft={Boolean(drafts[draftKey(p.id, currentUser.id)]?.highlightPending)}
                   onMoveOutsideMag={onMoveOutsideMag}
                   onChangeManager={onChangeManager}
                 />

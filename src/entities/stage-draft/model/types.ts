@@ -19,4 +19,9 @@ export interface StageDraft {
   taxRate?: number
   /** ISO-datetime сохранения. */
   savedAt: string
+  /**
+   * Показывать жёлтую обводку — только после ухода со страницы проекта
+   * с незавершённым черновиком, не во время активного ввода.
+   */
+  highlightPending?: boolean
 }

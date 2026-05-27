@@ -180,6 +180,7 @@ interface FinanceBlockWithBacklineProps {
   onTaxRateChange: (rate: number) => void
   onToggleBackline: () => void
   onAdvance?: () => void
+  hasDraftHighlight?: boolean
   /** Дополнительные блоки в секции «Информация» (перед статусом перевода). */
   infoExtras?: ReactNode
 }
@@ -199,6 +200,7 @@ export function FinanceBlockWithBackline({
   onTaxRateChange,
   onToggleBackline,
   onAdvance,
+  hasDraftHighlight,
   infoExtras,
 }: FinanceBlockWithBacklineProps) {
   const role = useUserRole()
@@ -237,6 +239,7 @@ export function FinanceBlockWithBackline({
       canShowAdvance={canEdit}
       headerTitle={headerTitle}
       headerColorClass={headerColorClass}
+      hasDraftHighlight={hasDraftHighlight}
       onAdvance={onAdvance}
     >
       <div className="flex flex-col gap-5">

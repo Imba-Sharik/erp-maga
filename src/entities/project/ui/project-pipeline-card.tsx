@@ -2,6 +2,7 @@ import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
 import { Card } from '@/shared/ui/card'
+import { stageCardBorderClass } from '@/entities/stage-draft'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,9 +53,7 @@ export function ProjectPipelineCard({
     <Card
       className={cn(
         'gap-1 bg-[#F9F9F9] p-2.5 shadow-none transition-colors',
-        hasDraft
-          ? 'border-[#E0A53E] ring-1 ring-[#E0A53E]'
-          : 'border-[#D3D3D3] hover:border-[#B1B1B1]',
+        stageCardBorderClass(hasDraft, 'border-[#D3D3D3] hover:border-[#B1B1B1]'),
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -87,10 +86,7 @@ export function ProjectPipelineCard({
                 </DropdownMenuItem>
               ) : null}
               {onMoveOutsideMag ? (
-                <DropdownMenuItem
-                  variant="destructive"
-                  onSelect={() => onMoveOutsideMag(project)}
-                >
+                <DropdownMenuItem variant="destructive" onSelect={() => onMoveOutsideMag(project)}>
                   Вне контура MAG
                 </DropdownMenuItem>
               ) : null}
