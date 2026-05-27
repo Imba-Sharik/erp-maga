@@ -1,7 +1,6 @@
 import { Search } from 'lucide-react'
 
-import { useVenueCatalog } from '@/entities/venue'
-import { ClearableSelect } from '@/shared/ui/clearable-select'
+import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
 import { Input } from '@/shared/ui/input'
 
 const TRIGGER_CLASS =
@@ -41,16 +40,16 @@ export function ManagersToolbar({
       </div>
 
       <div className="flex flex-1 flex-wrap items-center gap-2.5 md:flex-none">
-        <ClearableSelect
-          placeholder="Выберите зал"
+        <VenueFilterSelect
+          filter="hall"
           value={hall}
           options={hallOptions}
           onChange={onChangeHall}
           triggerClassName={TRIGGER_CLASS}
           disabled={selectDisabled}
         />
-        <ClearableSelect
-          placeholder="Выберите LOFT"
+        <VenueFilterSelect
+          filter="loft"
           value={loft}
           options={loftOptions}
           onChange={onChangeLoft}
