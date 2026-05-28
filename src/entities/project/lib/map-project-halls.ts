@@ -20,8 +20,10 @@ function uniqueNonEmpty(values: readonly string[]): string[] {
 }
 
 function formatHallLoftLine(item: ProjectHallItem): string {
-  const loft = item.loft_name.trim()
-  const hall = item.hall_name.trim()
+  // Схема помечает loft_name как non-nullable string, но реально бэк отдаёт
+  // loft_name: null для зала без лофта (см. пример в openapi). Тип врёт — гардим.
+  const loft = (item.loft_name ?? '').trim()
+  const hall = (item.hall_name ?? '').trim()
   if (loft && hall) return `${loft} — ${hall}`
   return hall || loft
 }
@@ -32,8 +34,11 @@ export function projectVenueFieldsFromHalls(halls: readonly ProjectHallItem[]): 
     return { loft: '', hall: '' }
   }
 
-  const loft = uniqueNonEmpty(halls.map((h) => h.loft_name)).join(', ')
-  const hall = halls.map((h) => h.hall_name).join(', ')
+  const loft = uniqueNonEmpty(halls.map((h) => h.loft_name ?? '')).join(', ')
+  const hall = halls
+    .map((h) => (h.hall_name ?? '').trim())
+    .filter(Boolean)
+    .join(', ')
 
   if (halls.length === 1) {
     return { loft, hall }
