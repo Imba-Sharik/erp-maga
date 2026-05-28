@@ -19,7 +19,12 @@ import {
 } from '@/entities/project'
 import { useCurrentUser } from '@/entities/current-user'
 import type { ProjectArticles } from '@/entities/project-articles'
-import { DOC_PAIR_BY_STATUS_FIELD } from '@/entities/project-documents'
+import {
+  DOC_PAIR_BY_STATUS_FIELD,
+  STATUS_CONFIRM_META_BY_STATUS,
+  resolveDocumentVariantMeta,
+  useDocumentReuploadMarks,
+} from '@/entities/project-documents'
 import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
@@ -33,6 +38,11 @@ import {
   statusFieldForConfirmedAt,
 } from '../lib/document-status-fields'
 import { filterStageFields, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
+import {
+  filterDocumentsConfirmedGridFields,
+  getDocumentsConfirmedFormFields,
+  isDocumentStatusField,
+} from '../lib/documents-confirmed-layout'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
@@ -91,9 +101,13 @@ export function StageSectionCurrent({
     () => filterStageFields(allFields, role, 'current'),
     [allFields, role],
   )
+  const gridFields = useMemo(
+    () => filterDocumentsConfirmedGridFields(visibleFields, stage, role),
+    [visibleFields, stage, role],
+  )
   const editableFields = useMemo(
-    () => visibleFields.filter((f) => f.source !== 'system'),
-    [visibleFields],
+    () => getDocumentsConfirmedFormFields(allFields, visibleFields, stage, role),
+    [allFields, visibleFields, stage, role],
   )
   const schema = getStageFormSchema(stage, role)
   const defaults = getDefaults(editableFields, record?.values ?? {})
@@ -103,6 +117,7 @@ export function StageSectionCurrent({
   const canAdvance = canAdvanceStage(stage, role)
   const currentUser = useCurrentUser()
   const { update: updateDocumentStatus } = useUpdateDocumentStatus()
+  const { marks: reuploadMarks, markReupload, clearReupload } = useDocumentReuploadMarks(project.id)
   const isMountRef = useRef(true)
 
   useEffect(() => {
@@ -146,6 +161,83 @@ export function StageSectionCurrent({
   const handleEditingSubmit = form.handleSubmit((values) =>
     onEditingSubmit?.(values as Partial<StageFormData>),
   )
+
+  const renderDocumentUploadControl = (
+    fileField: StageFieldConfig,
+    fieldEditable: boolean,
+    rhfField: { value: unknown; onChange: (value: string) => void },
+  ) => {
+    const documentType = fileField.documentType
+    if (!documentType) return null
+
+    const statusField =
+      fileField.name in FILE_NAME_TO_STATUS_FIELD
+        ? FILE_NAME_TO_STATUS_FIELD[fileField.name as keyof typeof FILE_NAME_TO_STATUS_FIELD]
+        : undefined
+    const status = statusField
+      ? (mergedValues[statusField] as DocumentStatus | undefined)
+      : undefined
+    const confirmedAtField = statusField
+      ? STATUS_CONFIRM_META_BY_STATUS[statusField]?.atField
+      : undefined
+
+    return (
+      <StageDocumentField
+        projectId={project.id}
+        documentType={documentType}
+        value={(rhfField.value as string) ?? ''}
+        variant={getStageDocumentFieldVariant((rhfField.value as string) || undefined, status, {
+          ...resolveDocumentVariantMeta(project.id, documentType, {
+            uploadedAt: project.documentFiles?.[documentType]?.uploadedAt,
+            confirmedAt: confirmedAtField
+              ? (mergedValues[confirmedAtField] as string | undefined)
+              : undefined,
+            reuploadedAt: reuploadMarks[documentType],
+          }),
+        })}
+        interaction="upload"
+        addButtonLabel={role === 'manager' ? 'Добавить документ' : 'Добавить'}
+        onChange={(fileName) => {
+          rhfField.onChange(fileName)
+          if (status === 're_requested') {
+            markReupload(documentType)
+          }
+          if (role === 'accountant' && statusField) {
+            form.setValue(statusField as string, 'present', { shouldDirty: true })
+          }
+          const patch: Partial<StageFormData> = { [fileField.name]: fileName }
+          if (role === 'accountant' && statusField) {
+            patch[statusField] = 'present'
+          }
+          onPatchValues?.(patch)
+        }}
+        disabled={!fieldEditable || status === 'not_required'}
+      />
+    )
+  }
+
+  const renderAccountantDocumentUpload = (statusFieldName: keyof StageFormData) => {
+    const docPair =
+      DOC_PAIR_BY_STATUS_FIELD[statusFieldName as keyof typeof DOC_PAIR_BY_STATUS_FIELD]
+    if (!docPair) return null
+
+    const fileField = allFields.find((item) => item.name === docPair.fileName)
+    if (!fileField?.documentType) return null
+
+    const fileEditable = canEditField(stage, role, fileField)
+
+    return (
+      <FormField
+        control={form.control}
+        name={fileField.name as string}
+        render={({ field }) =>
+          renderDocumentUploadControl(fileField, fileEditable, field) ?? (
+            <span className="sr-only" />
+          )
+        }
+      />
+    )
+  }
 
   const renderField = (f: StageFieldConfig) => {
     const fieldEditable = canEditField(stage, role, f)
@@ -197,33 +289,7 @@ export function StageSectionCurrent({
             <StageFieldLabel form label={f.label} required={f.required} />
             <FormControl>
               {f.type === 'document' && f.documentType ? (
-                <StageDocumentField
-                  projectId={project.id}
-                  documentType={f.documentType}
-                  value={(field.value as string) ?? ''}
-                  variant={getStageDocumentFieldVariant(
-                    (field.value as string) || undefined,
-                    (() => {
-                      const statusField =
-                        f.name in FILE_NAME_TO_STATUS_FIELD
-                          ? FILE_NAME_TO_STATUS_FIELD[
-                              f.name as keyof typeof FILE_NAME_TO_STATUS_FIELD
-                            ]
-                          : undefined
-                      return statusField
-                        ? (mergedValues[statusField] as DocumentStatus | undefined)
-                        : undefined
-                    })(),
-                  )}
-                  interaction="upload"
-                  onChange={(fileName) => {
-                    field.onChange(fileName)
-                    // Оптимистично пробрасываем имя файла в flow.records, чтобы
-                    // вкладка «Документы» сразу видела свежий файл, не ожидая рефетча.
-                    onPatchValues?.({ [f.name]: fileName } as Partial<StageFormData>)
-                  }}
-                  disabled={!fieldEditable}
-                />
+                renderDocumentUploadControl(f, fieldEditable, field)
               ) : f.type === 'textarea' ? (
                 <Textarea
                   {...field}
@@ -233,40 +299,93 @@ export function StageSectionCurrent({
                   className="native-os-scrollbar h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
                 />
               ) : f.type === 'select' ? (
-                <Select
-                  value={(field.value as string) ?? ''}
-                  onValueChange={(value) => {
-                    field.onChange(value)
-                    const isDocStatus =
-                      value === 'present' || value === 're_requested' || value === 'not_required'
-                    // Аудит (*ConfirmedAt/*ConfirmedBy) — только с бэка после PATCH, не локальный stub.
-                    const patch: Partial<StageFormData> = {
-                      [f.name]: isDocStatus ? (value as DocumentStatus) : undefined,
-                    }
-                    onPatchValues?.(patch)
+                stage === 'documents_confirmed' &&
+                role === 'accountant' &&
+                isDocumentStatusField(f.name) ? (
+                  <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
+                    <div className="min-w-0 flex-1">
+                      <Select
+                        value={(field.value as string) ?? ''}
+                        onValueChange={(value) => {
+                          field.onChange(value)
+                          const isDocStatus =
+                            value === 'present' ||
+                            value === 're_requested' ||
+                            value === 'not_required'
+                          const patch: Partial<StageFormData> = {
+                            [f.name]: isDocStatus ? (value as DocumentStatus) : undefined,
+                          }
+                          onPatchValues?.(patch)
 
-                    const docPair =
-                      DOC_PAIR_BY_STATUS_FIELD[f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD]
-                    if (docPair && isDocStatus) {
-                      updateDocumentStatus({
-                        projectId: project.id,
-                        documentType: docPair.documentType,
-                        status: value as DocumentStatus,
-                      })
-                    }
-                  }}
-                >
-                  <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
-                    <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {f.options?.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                          const docPair =
+                            DOC_PAIR_BY_STATUS_FIELD[
+                              f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD
+                            ]
+                          if (docPair && isDocStatus) {
+                            if (value !== 're_requested') {
+                              clearReupload(docPair.documentType)
+                            }
+                            updateDocumentStatus({
+                              projectId: project.id,
+                              documentType: docPair.documentType,
+                              status: value as DocumentStatus,
+                            })
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
+                          <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {f.options?.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>
+                              {o.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="min-w-0 flex-1">{renderAccountantDocumentUpload(f.name)}</div>
+                  </div>
+                ) : (
+                  <Select
+                    value={(field.value as string) ?? ''}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      const isDocStatus =
+                        value === 'present' || value === 're_requested' || value === 'not_required'
+                      // Аудит (*ConfirmedAt/*ConfirmedBy) — только с бэка после PATCH, не локальный stub.
+                      const patch: Partial<StageFormData> = {
+                        [f.name]: isDocStatus ? (value as DocumentStatus) : undefined,
+                      }
+                      onPatchValues?.(patch)
+
+                      const docPair =
+                        DOC_PAIR_BY_STATUS_FIELD[f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD]
+                      if (docPair && isDocStatus) {
+                        if (value !== 're_requested') {
+                          clearReupload(docPair.documentType)
+                        }
+                        updateDocumentStatus({
+                          projectId: project.id,
+                          documentType: docPair.documentType,
+                          status: value as DocumentStatus,
+                        })
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
+                      <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {f.options?.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )
               ) : f.type === 'date' ? (
                 <DateField
                   value={(field.value as string) ?? ''}
@@ -357,7 +476,7 @@ export function StageSectionCurrent({
       <Form {...form}>
         <form className="flex flex-col gap-4" noValidate>
           <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-            {renderNarrowPairs(visibleFields, renderField)}
+            {renderNarrowPairs(gridFields, renderField)}
           </div>
         </form>
       </Form>

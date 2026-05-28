@@ -17,6 +17,12 @@ import {
 } from '@/entities/project'
 import type { ProjectArticles } from '@/entities/project-articles'
 import { stageBlockBorderClass } from '@/entities/stage-draft'
+import {
+  STATUS_CONFIRM_META_BY_STATUS,
+  DOC_PAIR_BY_STATUS_FIELD,
+  resolveDocumentVariantMeta,
+  useDocumentReuploadMarks,
+} from '@/entities/project-documents'
 
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
@@ -27,6 +33,10 @@ import {
   FILE_NAME_TO_STATUS_FIELD,
   getStageDocumentFieldVariant,
 } from '../lib/document-status-fields'
+import {
+  filterDocumentsConfirmedGridFields,
+  isDocumentStatusField,
+} from '../lib/documents-confirmed-layout'
 import {
   filterStageFields,
   PASSED_EXTRAS,
@@ -136,11 +146,16 @@ export function StageSectionPassed({
     () => filterStageFields(allFields, role, 'passed'),
     [allFields, role],
   )
+  const gridFields = useMemo(
+    () => filterDocumentsConfirmedGridFields(visibleFields, stage, role),
+    [visibleFields, stage, role],
+  )
   const extras = PASSED_EXTRAS[stage]
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const canEdit = canEditStage(stage, role)
   const canAdvance = canAdvanceStage(stage, role)
+  const { marks: reuploadMarks } = useDocumentReuploadMarks(project.id)
   const [editing, setEditing] = useState(false)
 
   if (editing && onEditPassed) {
@@ -180,7 +195,17 @@ export function StageSectionPassed({
             projectId={project.id}
             documentType={f.documentType}
             value={fileName}
-            variant={getStageDocumentFieldVariant(fileName || undefined, status)}
+            variant={getStageDocumentFieldVariant(fileName || undefined, status, {
+              ...resolveDocumentVariantMeta(project.id, f.documentType, {
+                uploadedAt: project.documentFiles?.[f.documentType]?.uploadedAt,
+                confirmedAt: statusField
+                  ? (values?.[STATUS_CONFIRM_META_BY_STATUS[statusField]?.atField] as
+                      | string
+                      | undefined)
+                  : undefined,
+                reuploadedAt: reuploadMarks[f.documentType],
+              }),
+            })}
             interaction="download"
           />
         </div>
@@ -206,6 +231,61 @@ export function StageSectionPassed({
             f.label,
           )
         : f.label
+
+    if (
+      stage === 'documents_confirmed' &&
+      role === 'accountant' &&
+      f.type === 'select' &&
+      isDocumentStatusField(f.name)
+    ) {
+      const docPair = DOC_PAIR_BY_STATUS_FIELD[f.name as keyof typeof DOC_PAIR_BY_STATUS_FIELD]
+      const fileName = docPair ? ((values?.[docPair.fileName] as string | undefined) ?? '') : ''
+      const status = values?.[f.name] as DocumentStatus | undefined
+      const confirmedAtField =
+        STATUS_CONFIRM_META_BY_STATUS[f.name as keyof typeof STATUS_CONFIRM_META_BY_STATUS]?.atField
+
+      return (
+        <div
+          key={f.name}
+          className={cn(
+            'flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch',
+            spanClass(f.span, false),
+          )}
+        >
+          <div className="min-w-0 flex-1">
+            <StageFieldReadonly
+              label={readonlyLabel}
+              value={readField(ctx, values, f)}
+              source={getReadonlyFieldSource(f, {
+                fieldEditable,
+                isCurrent,
+                canEditStage: canEdit,
+              })}
+              isSelect
+            />
+          </div>
+          {docPair ? (
+            <div className="min-w-0 flex-1">
+              <StageDocumentField
+                projectId={project.id}
+                documentType={docPair.documentType}
+                value={fileName}
+                variant={getStageDocumentFieldVariant(fileName || undefined, status, {
+                  ...resolveDocumentVariantMeta(project.id, docPair.documentType, {
+                    uploadedAt: project.documentFiles?.[docPair.documentType]?.uploadedAt,
+                    confirmedAt: confirmedAtField
+                      ? (values?.[confirmedAtField] as string | undefined)
+                      : undefined,
+                    reuploadedAt: reuploadMarks[docPair.documentType],
+                  }),
+                })}
+                interaction="download"
+              />
+            </div>
+          ) : null}
+        </div>
+      )
+    }
 
     return (
       <StageFieldReadonly
@@ -269,7 +349,7 @@ export function StageSectionPassed({
             </p>
           ) : (
             <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {renderNarrowPairs(visibleFields, renderField)}
+              {renderNarrowPairs(gridFields, renderField)}
               {extras.map((extra) =>
                 extra.source === 'manager' ? (
                   <StageFieldReadonly

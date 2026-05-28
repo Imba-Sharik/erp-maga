@@ -333,15 +333,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
   ],
   documents_confirmed: [
     {
-      name: 'projectDocsFileName',
-      label: 'Закрывающие по проекту',
-      type: 'document',
-      source: 'manager',
-      roles: ['manager'],
-      editRoles: ['manager'],
-      documentType: 'project_closing',
-    },
-    {
       name: 'projectDocsStatus',
       label: 'Закрывающие по проекту',
       type: 'select',
@@ -351,6 +342,15 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       roles: ['accountant', 'director'],
       editRoles: ['accountant'],
       options: docStatusOptions,
+    },
+    {
+      name: 'projectDocsFileName',
+      label: 'Закрывающие по проекту',
+      type: 'document',
+      source: 'manager',
+      roles: ['manager'],
+      editRoles: ['manager', 'accountant'],
+      documentType: 'project_closing',
     },
     {
       name: 'projectDocsConfirmedAt',
@@ -365,15 +365,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'system',
     },
     {
-      name: 'subleaseDocsFileName',
-      label: 'Закрывающие по субаренде',
-      type: 'document',
-      source: 'manager',
-      roles: ['manager'],
-      editRoles: ['manager'],
-      documentType: 'subrent_closing',
-    },
-    {
       name: 'subleaseDocsStatus',
       label: 'Закрывающие по субаренде',
       type: 'select',
@@ -383,6 +374,15 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       roles: ['accountant', 'director'],
       editRoles: ['accountant'],
       options: docStatusOptions,
+    },
+    {
+      name: 'subleaseDocsFileName',
+      label: 'Закрывающие по субаренде',
+      type: 'document',
+      source: 'manager',
+      roles: ['manager'],
+      editRoles: ['manager', 'accountant'],
+      documentType: 'subrent_closing',
     },
     {
       name: 'subleaseDocsConfirmedAt',
@@ -397,15 +397,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       source: 'system',
     },
     {
-      name: 'staffReceiptsFileName',
-      label: 'Расписки по персоналу',
-      type: 'document',
-      source: 'manager',
-      roles: ['manager'],
-      editRoles: ['manager'],
-      documentType: 'staff_receipts',
-    },
-    {
       name: 'staffReceiptsStatus',
       label: 'Расписки по персоналу',
       type: 'select',
@@ -415,6 +406,15 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       roles: ['accountant', 'director'],
       editRoles: ['accountant'],
       options: docStatusOptions,
+    },
+    {
+      name: 'staffReceiptsFileName',
+      label: 'Расписки по персоналу',
+      type: 'document',
+      source: 'manager',
+      roles: ['manager'],
+      editRoles: ['manager', 'accountant'],
+      documentType: 'staff_receipts',
     },
     {
       name: 'staffReceiptsConfirmedAt',
