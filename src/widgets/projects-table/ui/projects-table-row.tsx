@@ -12,7 +12,7 @@ import {
   resolveSalesTotal,
   resolveTotalBonus,
 } from '../lib/economics-columns'
-import { getTableGridTemplate } from '../lib/table-columns'
+import { getTableGridTemplate, resolveTableWithActions } from '../lib/table-columns'
 import { ProjectManagerCell, type ProjectManagerCellProps } from './project-manager-cell'
 import {
   formatTableDate,
@@ -83,8 +83,7 @@ export function ProjectsTableRow({
   assignDisabled,
 }: ProjectsTableRowProps) {
   const navigate = useNavigate()
-  const withActions =
-    renderRowAction !== undefined && (columnView === 'general' || columnView === 'economics')
+  const withActions = resolveTableWithActions(columnView, renderRowAction)
   const gridTemplate = getTableGridTemplate(columnView, { withActions })
   // ЛК бухгалтера ведёт на свою деталь /requests/:id, остальные — на /projects/:id.
   const detailBase =
@@ -165,6 +164,9 @@ export function ProjectsTableRow({
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>
           <ProjectArchivedAtCell project={project} />
         </div>
+        {renderRowAction ? (
+          <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
+        ) : null}
       </ProjectTableNavRow>
     )
   }
@@ -182,6 +184,9 @@ export function ProjectsTableRow({
           <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
           <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>
         </div>
+        {renderRowAction ? (
+          <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
+        ) : null}
       </ProjectTableNavRow>
     )
   }

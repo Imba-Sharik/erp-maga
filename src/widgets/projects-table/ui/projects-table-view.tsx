@@ -13,7 +13,12 @@ import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ManagerSelectOption } from '@/entities/manager'
 import { useChangeProjectManager } from '@/features/change-project-manager'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
-import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
+import {
+  getTableGridTemplate,
+  getTableMinWidth,
+  resolveTableWithActions,
+  TABLE_COLUMN_COUNT,
+} from '../lib/table-columns'
 import {
   HEADER_FILTER_TRIGGER,
   TableHeaderHallFilter,
@@ -67,8 +72,7 @@ export function ProjectsTableView({
   renderRowAction,
   managerEditable = true,
 }: ProjectsTableViewProps) {
-  const withActions =
-    renderRowAction !== undefined && (columnView === 'general' || columnView === 'economics')
+  const withActions = resolveTableWithActions(columnView, renderRowAction)
   const gridTemplate = getTableGridTemplate(columnView, { withActions })
   const minWidth = getTableMinWidth(columnView, { withActions })
   const skeletonColumnCount = TABLE_COLUMN_COUNT[columnView] + (withActions ? 1 : 0)
@@ -123,6 +127,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        withActions={withActions}
       />
     ) : columnView === 'closing-economics' ? (
       <ClosingEconomicsTableHeader
@@ -131,6 +136,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        withActions={withActions}
       />
     ) : (
       <OutsideMagTableHeader
@@ -328,6 +334,7 @@ function ClosingGeneralTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  withActions,
 }: ManagerHeaderProps) {
   return (
     <>
@@ -357,6 +364,7 @@ function ClosingGeneralTableHeader({
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата архивации</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }
@@ -367,6 +375,7 @@ function ClosingEconomicsTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  withActions,
 }: ManagerHeaderProps) {
   return (
     <>
@@ -384,6 +393,7 @@ function ClosingEconomicsTableHeader({
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
       <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
       <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }
