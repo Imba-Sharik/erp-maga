@@ -47,15 +47,6 @@ export function ProjectsBoardToolbar({
       }
     >
       <div className="flex items-center gap-2 @4xl:w-75">
-        {onAddProject && (
-          <Button
-            type="button"
-            onClick={onAddProject}
-            className="h-10 shrink-0 rounded-[10px] bg-black px-2 text-xs text-white hover:bg-black/90 @4xl:hidden"
-          >
-            Добавить проект
-          </Button>
-        )}
         <div className="relative min-w-0 flex-1">
           <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @4xl:left-3 @4xl:size-4" />
           <Input
@@ -66,6 +57,16 @@ export function ProjectsBoardToolbar({
             className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-7 pr-1.5 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @4xl:pl-9 @4xl:pr-3 @4xl:text-sm @4xl:placeholder:text-sm"
           />
         </div>
+        {onAddProject && (
+          <Button
+            type="button"
+            onClick={onAddProject}
+            aria-label="Добавить проект"
+            className="size-10 shrink-0 rounded-[10px] bg-black p-0 text-lg leading-none text-white hover:bg-black/90 @4xl:hidden"
+          >
+            +
+          </Button>
+        )}
       </div>
 
       <div
