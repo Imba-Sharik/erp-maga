@@ -13,6 +13,7 @@ const CLOSED_PROJECTS_BACK = {
 
 export function ClosedProjectsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
+  const [archiveMode, setArchiveMode] = useState(false)
 
   const listDateParams = useMemo(
     () => ({
@@ -26,9 +27,13 @@ export function ClosedProjectsPage() {
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
       <header className="flex shrink-0 flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="font-heading font-bold text-[#1B1A17]">Закрытые проекты</h1>
+          <h1 className="font-heading font-bold text-[#1B1A17]">
+            {archiveMode ? 'Архив проектов' : 'Закрытие'}
+          </h1>
           <p className="max-w-[640px] text-sm text-[#ACACAC]">
-            Архив завершённых проектов без возможности смены ответственного менеджера.
+            {archiveMode
+              ? 'Архив завершённых проектов без возможности смены ответственного менеджера.'
+              : 'Проекты на этапах закрытия после проведения мероприятия.'}
           </p>
         </div>
       </header>
@@ -38,6 +43,7 @@ export function ClosedProjectsPage() {
         backOrigin={CLOSED_PROJECTS_BACK}
         canChangeManager={false}
         onDeleteProject={setDeleteTarget}
+        onArchiveModeChange={setArchiveMode}
       />
 
       <ConfirmDeleteProjectDialog
