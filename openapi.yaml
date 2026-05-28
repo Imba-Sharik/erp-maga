@@ -2926,6 +2926,9 @@ components:
         event_date:
           type: string
           format: date
+        idempotency_key:
+          type: string
+          maxLength: 255
       required:
       - event_type
     ProjectDetail:
