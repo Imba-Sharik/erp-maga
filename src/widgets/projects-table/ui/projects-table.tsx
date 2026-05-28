@@ -17,29 +17,19 @@ import { ProjectsTableView } from './projects-table-view'
 
 interface ProjectsTableProps {
   onAddProject?: () => void
-  defaultPendingOnly?: boolean
-  defaultColumnView?: ProjectsTableColumnView
-  stageInOverride?: string
-  showPendingToggle?: boolean
-  columnViewOptions?: readonly { value: ProjectsTableColumnView; label: string }[]
   managerEditable?: boolean
   renderRowAction?: (project: Project) => ReactNode
 }
 
 export function ProjectsTable({
   onAddProject,
-  defaultPendingOnly = false,
-  defaultColumnView = 'general',
-  stageInOverride,
-  showPendingToggle = true,
-  columnViewOptions,
   managerEditable = true,
   renderRowAction,
 }: ProjectsTableProps = {}) {
   const [search, setSearch] = useState('')
-  const [pendingOnly, setPendingOnly] = useState(defaultPendingOnly)
+  const [pendingOnly, setPendingOnly] = useState(false)
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
-  const [columnView, setColumnView] = useState<ProjectsTableColumnView>(defaultColumnView)
+  const [columnView, setColumnView] = useState<ProjectsTableColumnView>('general')
 
   const {
     selectOptions,
@@ -53,7 +43,6 @@ export function ProjectsTable({
       pendingOnly,
       stage: columnFilters.stage,
       magManagerId: columnFilters.manager,
-      stageInOverride,
     })
 
   const filtered = useMemo(
@@ -75,8 +64,6 @@ export function ProjectsTable({
         onTogglePending={setPendingOnly}
         onColumnViewChange={setColumnView}
         onAddProject={onAddProject}
-        showPendingToggle={showPendingToggle}
-        columnViewOptions={columnViewOptions}
       />
       <ProjectsTableView
         projects={filtered}
