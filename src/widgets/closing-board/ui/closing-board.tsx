@@ -63,7 +63,7 @@ export function ClosingBoard({
   const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
   const filter = useMemo(() => ({ search, city, hall, loft }), [search, city, hall, loft])
 
-  const archiveQuery = useClosingArchiveQuery()
+  const archiveQuery = useClosingArchiveQuery({ enabled: archiveMode })
 
   const archiveManagerFilterName = useMemo(
     () => resolveManagerFilterName(columnFilters.manager, selectOptions),

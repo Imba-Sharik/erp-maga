@@ -30,7 +30,7 @@ export function AdminAllProjectsPage() {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null)
         }}
-        projectName={deleteTarget?.title ?? ''}
+        project={deleteTarget}
       />
     </div>
   )

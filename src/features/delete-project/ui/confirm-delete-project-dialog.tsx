@@ -1,3 +1,4 @@
+import type { Project } from '@/entities/project'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -8,39 +9,62 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog'
 
+import { useDeleteProject } from '../model/use-delete-project'
+
 export interface ConfirmDeleteProjectDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  projectName: string
+  project: Project | null
 }
 
 export function ConfirmDeleteProjectDialog({
   open,
   onOpenChange,
-  projectName,
+  project,
 }: ConfirmDeleteProjectDialogProps) {
+  const { submit, isPending, isError, errorMessage, reset } = useDeleteProject({
+    onSuccess: () => onOpenChange(false),
+  })
+
+  const handleOpenChange = (next: boolean) => {
+    onOpenChange(next)
+    if (!next) reset()
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle className="font-heading text-[#1B1A17]">Удалить проект?</DialogTitle>
           <DialogDescription>
-            Для удаления проекта бэкенд должен добавить endpoint `DELETE /api/v1/projects/{'{id}'}
-            /`. Сейчас действие недоступно.
+            Проект будет помечен удалённым и пропадёт из списков. Действие доступно только
+            администратору.
           </DialogDescription>
-          <p className="text-sm text-[#454545]">Проект: {projectName}</p>
+          {project?.title ? (
+            <p className="text-sm text-[#454545]">Проект: {project.title}</p>
+          ) : null}
         </DialogHeader>
+        {isError && errorMessage ? (
+          <p className="text-destructive text-sm">{errorMessage}</p>
+        ) : null}
         <DialogFooter className="gap-2 sm:gap-2">
           <Button
             type="button"
             variant="outline"
             className="rounded-[10px]"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
+            disabled={isPending}
           >
-            Закрыть
+            Отмена
           </Button>
-          <Button type="button" variant="destructive" className="rounded-[10px]" disabled>
-            Удалить (скоро)
+          <Button
+            type="button"
+            variant="destructive"
+            className="rounded-[10px]"
+            onClick={() => project && submit(project)}
+            disabled={isPending || !project}
+          >
+            {isPending ? 'Удаление…' : 'Удалить'}
           </Button>
         </DialogFooter>
       </DialogContent>
