@@ -461,6 +461,11 @@ paths:
           type: string
         description: Несколько статусов Plum через запятую
       - in: query
+        name: search
+        schema:
+          type: string
+        description: Поиск по названию проекта (event_name, icontains)
+      - in: query
         name: stage
         schema:
           type: string
@@ -616,6 +621,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+    delete:
+      operationId: projects_destroy
+      description: Помечает проект удалённым (`is_deleted=true`) без физического удаления.
+      summary: Soft-delete проекта (только admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Проект помечен удалённым
         '403':
           content:
             application/json:
@@ -841,9 +869,9 @@ paths:
           description: Файл не найден
     post:
       operationId: projects_document_file_create
-      description: Менеджер MAG (или руководитель) прикрепляет файл на любом этапе
-        закрытия. При повторной загрузке после запроса бухгалтера уходит отдельное
-        уведомление.
+      description: Менеджер MAG, бухгалтерия или руководитель прикрепляет файл на
+        любом этапе закрытия. При повторной загрузке после запроса бухгалтера уходит
+        отдельное уведомление.
       summary: Загрузить или заменить файл закрывающего документа
       parameters:
       - in: path
@@ -1507,6 +1535,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: search
+        schema:
+          type: string
+      - in: query
         name: stage
         schema:
           type: string
@@ -1591,6 +1623,11 @@ paths:
           - admin
           - lead
           - manager_mag
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Поиск по email, first_name, last_name
       tags:
       - users
       security:
@@ -4201,7 +4238,12 @@ components:
           title: Активный
           description: Отметьте, если пользователь должен считаться активным. Уберите
             эту отметку вместо удаления учётной записи.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
       required:
+      - created_at
       - email
       - full_name
       - id

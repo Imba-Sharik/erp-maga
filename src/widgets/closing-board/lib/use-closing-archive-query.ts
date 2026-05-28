@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
 
 import type { Project } from '@/entities/project'
-import { env } from '@/shared/config/env'
+import { mapBackendProjects } from '@/entities/project'
+import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
 
-import { CLOSING_ARCHIVE_MOCK_PROJECTS } from '../model/closing-archive-mock-projects'
-
-/** Всегда включены моки, пока бэкенд не поддерживает stage=archived. */
-const isArchiveMocksEnabled = import.meta.env.DEV || env.USE_MOCKS
+const PAGE_SIZE = 50
 
 export interface UseClosingArchiveQueryResult {
   projects: Project[]
@@ -17,15 +17,47 @@ export interface UseClosingArchiveQueryResult {
   fetchNextPage: () => void
 }
 
-export function useClosingArchiveQuery(): UseClosingArchiveQueryResult {
-  const projects = useMemo(() => (isArchiveMocksEnabled ? CLOSING_ARCHIVE_MOCK_PROJECTS : []), [])
+/**
+ * Архив завершённых проектов — `stage=archived`. Ключ начинается с
+ * `['projects-table', …]` (как admin-таблица), поэтому оптимистичное удаление
+ * из `useDeleteProject` (setQueriesData по префиксу `['projects-table']`)
+ * автоматически убирает строку и отсюда.
+ */
+export function useClosingArchiveQuery({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseClosingArchiveQueryResult {
+  const query = useInfiniteQuery({
+    queryKey: [
+      'projects-table',
+      { stage: 'archived', ordering: PROJECTS_LIST_DEFAULT_ORDERING },
+    ] as const,
+    enabled,
+    initialPageParam: 0,
+    queryFn: ({ pageParam, signal }) =>
+      projectsList(
+        {
+          stage: 'archived',
+          ordering: PROJECTS_LIST_DEFAULT_ORDERING,
+          limit: PAGE_SIZE,
+          offset: pageParam,
+        },
+        { signal },
+      ),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.next ? allPages.length * PAGE_SIZE : undefined,
+  })
+
+  const projects = useMemo(
+    () => mapBackendProjects(query.data?.pages.flatMap((p) => p.results) ?? []),
+    [query.data],
+  )
 
   return {
     projects,
-    isLoading: false,
-    isError: false,
-    hasNextPage: false,
-    isFetchingNextPage: false,
-    fetchNextPage: () => {},
+    isLoading: query.isLoading,
+    isError: query.isError,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    fetchNextPage: () => query.fetchNextPage(),
   }
 }
