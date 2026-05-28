@@ -4,6 +4,7 @@ import type { Project, ProjectBackOrigin } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { useUserRole } from '@/entities/user-role'
 import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
+import { DeleteProjectButton } from '@/features/delete-project'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -133,6 +134,14 @@ export function ClosingBoard({
             isFetchingNextPage={archiveQuery.isFetchingNextPage}
             onLoadMore={archiveQuery.fetchNextPage}
             backOrigin={backOrigin}
+            managerEditable={canChangeManager}
+            renderRowAction={
+              onDeleteProject
+                ? (project) => (
+                    <DeleteProjectButton onRequestDelete={() => onDeleteProject(project)} />
+                  )
+                : undefined
+            }
           />
         </div>
       ) : (
