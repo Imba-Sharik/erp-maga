@@ -26,6 +26,12 @@ const STUB_USERS: Record<UserRole, Omit<CurrentUser, 'role' | 'id'>> = {
     initials: 'СС',
     email: 's.sidorov@mag.example',
   },
+  admin: {
+    fullName: 'Администратор Системы',
+    displayName: 'Администратор',
+    initials: 'АС',
+    email: 'admin@mag.example',
+  },
 }
 
 function firstChar(value: string): string {

@@ -12,7 +12,7 @@ import {
   resolveSalesTotal,
   resolveTotalBonus,
 } from '../lib/economics-columns'
-import { getTableGridTemplate } from '../lib/table-columns'
+import { getTableGridTemplate, resolveTableWithActions } from '../lib/table-columns'
 import { ProjectManagerCell, type ProjectManagerCellProps } from './project-manager-cell'
 import {
   formatTableDate,
@@ -54,6 +54,7 @@ function ProjectTableNavRow({ gridTemplate, goToDetail, children }: ProjectTable
 
 export interface ProjectsTableRowManagerProps {
   directoryOptions: ManagerSelectOption[]
+  managerEditable?: boolean
   isEditingManager: boolean
   onStartEditManager: () => void
   onAssignManager: (managerId: string) => void
@@ -74,6 +75,7 @@ export function ProjectsTableRow({
   backOrigin,
   renderRowAction,
   directoryOptions,
+  managerEditable = true,
   isEditingManager,
   onStartEditManager,
   onAssignManager,
@@ -81,7 +83,8 @@ export function ProjectsTableRow({
   assignDisabled,
 }: ProjectsTableRowProps) {
   const navigate = useNavigate()
-  const gridTemplate = getTableGridTemplate(columnView)
+  const withActions = resolveTableWithActions(columnView, renderRowAction)
+  const gridTemplate = getTableGridTemplate(columnView, { withActions })
   // ЛК бухгалтера ведёт на свою деталь /requests/:id, остальные — на /projects/:id.
   const detailBase =
     columnView === 'requests' || columnView === 'closed-requests' ? '/requests' : '/projects'
@@ -90,6 +93,7 @@ export function ProjectsTableRow({
   const managerCellProps: ProjectManagerCellProps = {
     manager: project.manager,
     directoryOptions,
+    editable: managerEditable,
     isEditing: isEditingManager,
     onStartEdit: onStartEditManager,
     onAssign: onAssignManager,
@@ -138,6 +142,9 @@ export function ProjectsTableRow({
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>
           <GridTableCell muted>{formatTableDate(project.createdAt)}</GridTableCell>
         </div>
+        {renderRowAction ? (
+          <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
+        ) : null}
       </ProjectTableNavRow>
     )
   }
@@ -157,6 +164,9 @@ export function ProjectsTableRow({
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>
           <ProjectArchivedAtCell project={project} />
         </div>
+        {renderRowAction ? (
+          <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
+        ) : null}
       </ProjectTableNavRow>
     )
   }
@@ -174,6 +184,9 @@ export function ProjectsTableRow({
           <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
           <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>
         </div>
+        {renderRowAction ? (
+          <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
+        ) : null}
       </ProjectTableNavRow>
     )
   }
@@ -227,6 +240,9 @@ export function ProjectsTableRow({
         <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
         <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>
       </div>
+      {renderRowAction ? (
+        <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
+      ) : null}
     </ProjectTableNavRow>
   )
 }

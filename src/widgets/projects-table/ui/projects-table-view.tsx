@@ -13,7 +13,12 @@ import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ManagerSelectOption } from '@/entities/manager'
 import { useChangeProjectManager } from '@/features/change-project-manager'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
-import { getTableGridTemplate, getTableMinWidth, TABLE_COLUMN_COUNT } from '../lib/table-columns'
+import {
+  getTableGridTemplate,
+  getTableMinWidth,
+  resolveTableWithActions,
+  TABLE_COLUMN_COUNT,
+} from '../lib/table-columns'
 import {
   HEADER_FILTER_TRIGGER,
   TableHeaderHallFilter,
@@ -46,6 +51,7 @@ interface ProjectsTableViewProps {
   onLoadMore: () => void
   backOrigin?: ProjectBackOrigin
   renderRowAction?: (project: Project) => ReactNode
+  managerEditable?: boolean
 }
 
 export function ProjectsTableView({
@@ -64,9 +70,12 @@ export function ProjectsTableView({
   onLoadMore,
   backOrigin = DEFAULT_BACK_ORIGIN,
   renderRowAction,
+  managerEditable = true,
 }: ProjectsTableViewProps) {
-  const gridTemplate = getTableGridTemplate(columnView)
-  const minWidth = getTableMinWidth(columnView)
+  const withActions = resolveTableWithActions(columnView, renderRowAction)
+  const gridTemplate = getTableGridTemplate(columnView, { withActions })
+  const minWidth = getTableMinWidth(columnView, { withActions })
+  const skeletonColumnCount = TABLE_COLUMN_COUNT[columnView] + (withActions ? 1 : 0)
   const [editingManagerProjectId, setEditingManagerProjectId] = useState<string | null>(null)
 
   const { submit: assignManager, isPending: isAssigningManager } = useChangeProjectManager({
@@ -100,6 +109,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        withActions={withActions}
       />
     ) : columnView === 'economics' ? (
       <EconomicsTableHeader
@@ -108,6 +118,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        withActions={withActions}
       />
     ) : columnView === 'closing-general' ? (
       <ClosingGeneralTableHeader
@@ -116,6 +127,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        withActions={withActions}
       />
     ) : columnView === 'closing-economics' ? (
       <ClosingEconomicsTableHeader
@@ -124,6 +136,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        withActions={withActions}
       />
     ) : (
       <OutsideMagTableHeader
@@ -145,7 +158,7 @@ export function ProjectsTableView({
       errorMessage="Не удалось загрузить проекты."
       isEmpty={!isLoading && !isError && projects.length === 0}
       emptyMessage="Проекты не найдены."
-      skeletonColumnCount={TABLE_COLUMN_COUNT[columnView]}
+      skeletonColumnCount={skeletonColumnCount}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       onLoadMore={onLoadMore}
@@ -158,6 +171,7 @@ export function ProjectsTableView({
           backOrigin={backOrigin}
           renderRowAction={renderRowAction}
           directoryOptions={directoryOptions}
+          managerEditable={managerEditable}
           isEditingManager={editingManagerProjectId === project.id}
           onStartEditManager={() => handleStartEditManager(project.id)}
           onAssignManager={(managerId) => handleAssignManager(project.id, managerId)}
@@ -175,12 +189,14 @@ function GeneralTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  withActions,
 }: {
   columnFilters: ColumnFilters
   managerFilterOptions: SelectOption[]
   managersSelectLoading?: boolean
   managersSelectError?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+  withActions: boolean
 }) {
   return (
     <>
@@ -219,6 +235,7 @@ function GeneralTableHeader({
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
       <GridTableHeaderLabel>Появление в системе</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }
@@ -229,6 +246,7 @@ type ManagerHeaderProps = {
   managersSelectLoading?: boolean
   managersSelectError?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+  withActions?: boolean
 }
 
 function OutsideMagTableHeader({
@@ -278,6 +296,7 @@ function EconomicsTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  withActions,
 }: ManagerHeaderProps) {
   return (
     <>
@@ -304,6 +323,7 @@ function EconomicsTableHeader({
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
       <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
       <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }
@@ -314,6 +334,7 @@ function ClosingGeneralTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  withActions,
 }: ManagerHeaderProps) {
   return (
     <>
@@ -343,6 +364,7 @@ function ClosingGeneralTableHeader({
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата архивации</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }
@@ -353,6 +375,7 @@ function ClosingEconomicsTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  withActions,
 }: ManagerHeaderProps) {
   return (
     <>
@@ -370,6 +393,7 @@ function ClosingEconomicsTableHeader({
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
       <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
       <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }

@@ -1,12 +1,17 @@
 import {
+  filterAdminNotifications,
   NotificationItem,
   useMarkNotificationRead,
   useNotifications,
 } from '@/entities/notification'
+import { useUserRole } from '@/entities/user-role'
 
 export function NotificationsPage() {
+  const role = useUserRole()
   const { notifications, isLoading, isError, refetch } = useNotifications()
   const { markRead } = useMarkNotificationRead()
+  const visibleNotifications =
+    role === 'admin' ? notifications.filter(filterAdminNotifications) : notifications
 
   return (
     <div className="flex w-full max-w-4xl flex-col gap-6">
@@ -35,16 +40,16 @@ export function NotificationsPage() {
         </div>
       )}
 
-      {!isLoading && !isError && notifications.length === 0 && (
+      {!isLoading && !isError && visibleNotifications.length === 0 && (
         <p className="text-sm text-[#ACACAC]">
-          Пока нет уведомлений. Они появятся, когда по вашим проектам произойдут события, на
-          которые вы подписаны.
+          Пока нет уведомлений. Они появятся, когда по вашим проектам произойдут события, на которые
+          вы подписаны.
         </p>
       )}
 
-      {!isLoading && !isError && notifications.length > 0 && (
+      {!isLoading && !isError && visibleNotifications.length > 0 && (
         <div className="divide-y divide-[#F0F0F0] overflow-hidden rounded-[14px] border border-[#E9E6DD] bg-white">
-          {notifications.map((n) => (
+          {visibleNotifications.map((n) => (
             <NotificationItem key={n.id} notification={n} onRead={markRead} />
           ))}
         </div>

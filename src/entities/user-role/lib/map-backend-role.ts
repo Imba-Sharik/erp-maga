@@ -4,6 +4,6 @@ import type { UserRole } from '../model/types'
 
 export function mapBackendRole(role: UserMeSchemaRoleEnumKey | undefined): UserRole | undefined {
   if (!role) return undefined
-  if (role === 'admin') return 'director'
+  // /users/me/ уже возвращает UI-роли (manager, director, accountant, admin).
   return role
 }

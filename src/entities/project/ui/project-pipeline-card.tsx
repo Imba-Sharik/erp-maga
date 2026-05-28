@@ -20,6 +20,7 @@ interface ProjectPipelineCardProps {
   hasDraft?: boolean
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
+  onDeleteProject?: (project: Project) => void
 }
 
 /**
@@ -37,11 +38,12 @@ export function ProjectPipelineCard({
   hasDraft,
   onMoveOutsideMag,
   onChangeManager,
+  onDeleteProject,
 }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
   const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
-  const hasMenu = Boolean(onMoveOutsideMag ?? onChangeManager)
+  const hasMenu = Boolean(onMoveOutsideMag ?? onChangeManager ?? onDeleteProject)
 
   const handleBodyKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -90,6 +92,11 @@ export function ProjectPipelineCard({
               {onMoveOutsideMag ? (
                 <DropdownMenuItem variant="destructive" onSelect={() => onMoveOutsideMag(project)}>
                   Вне контура MAG
+                </DropdownMenuItem>
+              ) : null}
+              {onDeleteProject ? (
+                <DropdownMenuItem variant="destructive" onSelect={() => onDeleteProject(project)}>
+                  Удалить
                 </DropdownMenuItem>
               ) : null}
             </DropdownMenuContent>

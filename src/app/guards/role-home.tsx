@@ -4,6 +4,7 @@ import { useUserRole, type UserRole } from '@/entities/user-role'
 
 /** Стартовый раздел роли. Бухгалтер не имеет доступа к `/projects`. */
 export function roleHomePath(role: UserRole): string {
+  if (role === 'admin') return '/dashboard'
   return role === 'accountant' ? '/requests' : '/projects'
 }
 

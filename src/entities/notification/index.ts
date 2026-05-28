@@ -1,5 +1,6 @@
 export type { NotificationView } from './model/types'
 export { fromNotification } from './lib/from-notification'
+export { filterAdminNotifications } from './lib/filter-admin-notifications'
 export { notificationsQueryOptions, notificationsListQueryKey } from './lib/notifications-query'
 export { useNotifications, useUnreadNotificationCount } from './model/use-notifications'
 export { useMarkNotificationRead } from './model/use-mark-notification-read'

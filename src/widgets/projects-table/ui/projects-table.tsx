@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import { useManagersDirectory } from '@/entities/manager'
+import type { Project } from '@/entities/project'
 
 import {
   EMPTY_COLUMN_FILTERS,
@@ -15,9 +17,15 @@ import { ProjectsTableView } from './projects-table-view'
 
 interface ProjectsTableProps {
   onAddProject?: () => void
+  managerEditable?: boolean
+  renderRowAction?: (project: Project) => ReactNode
 }
 
-export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
+export function ProjectsTable({
+  onAddProject,
+  managerEditable = true,
+  renderRowAction,
+}: ProjectsTableProps = {}) {
   const [search, setSearch] = useState('')
   const [pendingOnly, setPendingOnly] = useState(false)
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
@@ -71,6 +79,8 @@ export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
+        managerEditable={managerEditable}
+        renderRowAction={renderRowAction}
       />
     </div>
   )

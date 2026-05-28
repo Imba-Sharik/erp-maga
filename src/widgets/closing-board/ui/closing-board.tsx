@@ -4,6 +4,7 @@ import type { Project, ProjectBackOrigin } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { useUserRole } from '@/entities/user-role'
 import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
+import { DeleteProjectButton } from '@/features/delete-project'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -25,9 +26,18 @@ const CLOSING_BACK: ProjectBackOrigin = {
 interface ClosingBoardProps {
   listDateParams: BoardListParams
   onArchiveModeChange?: (archiveMode: boolean) => void
+  backOrigin?: ProjectBackOrigin
+  onDeleteProject?: (project: Project) => void
+  canChangeManager?: boolean
 }
 
-export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoardProps) {
+export function ClosingBoard({
+  listDateParams,
+  onArchiveModeChange,
+  backOrigin = CLOSING_BACK,
+  onDeleteProject,
+  canChangeManager = true,
+}: ClosingBoardProps) {
   const role = useUserRole()
   const [archiveMode, setArchiveMode] = useState(false)
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
@@ -123,7 +133,15 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
             hasNextPage={archiveQuery.hasNextPage}
             isFetchingNextPage={archiveQuery.isFetchingNextPage}
             onLoadMore={archiveQuery.fetchNextPage}
-            backOrigin={CLOSING_BACK}
+            backOrigin={backOrigin}
+            managerEditable={canChangeManager}
+            renderRowAction={
+              onDeleteProject
+                ? (project) => (
+                    <DeleteProjectButton onRequestDelete={() => onDeleteProject(project)} />
+                  )
+                : undefined
+            }
           />
         </div>
       ) : (
@@ -132,7 +150,11 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
             listParams={listDateParams}
             filter={filter}
             filtersActive={filtersActive}
-            onChangeManager={role === 'director' ? setChangeManagerTarget : undefined}
+            backOrigin={backOrigin}
+            onChangeManager={
+              canChangeManager && role === 'director' ? setChangeManagerTarget : undefined
+            }
+            onDeleteProject={onDeleteProject}
           />
         </div>
       )}
