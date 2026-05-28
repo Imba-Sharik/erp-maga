@@ -42,7 +42,7 @@ export function ProjectsTableToolbar({
     <div className="@container flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4">
       <div className="flex w-full flex-col gap-2.5 @3xl:flex-row @3xl:items-center @3xl:gap-3">
         <div className="flex items-center gap-2 @3xl:w-75">
-          <div className="relative max-w-50 min-w-0 flex-1 @3xl:max-w-none">
+          <div className="relative min-w-0 flex-1">
             <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @3xl:left-3 @3xl:size-4" />
             <Input
               type="search"
