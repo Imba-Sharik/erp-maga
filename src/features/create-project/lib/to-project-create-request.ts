@@ -10,6 +10,7 @@ export function toProjectCreateRequest(
   return {
     title: values.title.trim(),
     event_type: Number(values.eventType),
+    event_date: values.eventDate,
     hall_id: hall.id,
   }
 }
