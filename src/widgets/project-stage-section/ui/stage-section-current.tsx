@@ -197,6 +197,7 @@ export function StageSectionCurrent({
         })}
         interaction="upload"
         addButtonLabel={role === 'manager' ? 'Добавить документ' : 'Добавить'}
+        notifyReuploadToAccountant={role === 'manager' && status === 're_requested'}
         onChange={(fileName) => {
           rhfField.onChange(fileName)
           if (status === 're_requested') {

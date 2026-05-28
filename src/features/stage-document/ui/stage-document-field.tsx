@@ -27,6 +27,8 @@ function isAllowedFile(file: File): boolean {
   return true
 }
 
+const REUPLOAD_SUCCESS_MESSAGE = 'Обновлённые документы направлены бухгалтеру'
+
 export interface StageDocumentFieldProps {
   projectId: string | number
   documentType: StageDocumentType
@@ -36,6 +38,8 @@ export interface StageDocumentFieldProps {
   onChange?: (fileName: string) => void
   disabled?: boolean
   addButtonLabel?: string
+  /** После успешной замены документа в статусе `re_requested` — зелёная подпись под полем. */
+  notifyReuploadToAccountant?: boolean
 }
 
 export function StageDocumentField({
@@ -47,6 +51,7 @@ export function StageDocumentField({
   onChange,
   disabled,
   addButtonLabel = 'Добавить документ',
+  notifyReuploadToAccountant = false,
 }: StageDocumentFieldProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -54,6 +59,7 @@ export function StageDocumentField({
   const download = useDownloadStageDocument()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
 
   const isUpload = interaction === 'upload'
   const busy = upload.isPending || download.isPending
@@ -63,6 +69,7 @@ export function StageDocumentField({
   const openPicker = () => {
     if (!isUpload || uploadDisabled || variant === 'confirmed') return
     setUploadError(null)
+    setUploadSuccess(null)
     inputRef.current?.click()
   }
 
@@ -86,22 +93,30 @@ export function StageDocumentField({
   const handleFile = (file: File | undefined) => {
     if (!file || !onChange) return
     if (!isAllowedFile(file)) {
+      setUploadSuccess(null)
       setUploadError('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
       return
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
+      setUploadSuccess(null)
       setUploadError('Файл слишком большой. Максимальный размер — 20 МБ.')
       return
     }
     setUploadError(null)
+    setUploadSuccess(null)
+    const shouldNotifyReupload = notifyReuploadToAccountant
     upload.upload(
       { projectId, documentType, file },
       {
         onSuccess: () => {
           setUploadError(null)
+          if (shouldNotifyReupload) {
+            setUploadSuccess(REUPLOAD_SUCCESS_MESSAGE)
+          }
           onChange(file.name)
         },
         onError: (message) => {
+          setUploadSuccess(null)
           setUploadError(message)
         },
       },
@@ -200,6 +215,10 @@ export function StageDocumentField({
       {uploadError ? (
         <p className="text-destructive text-sm" role="alert">
           {uploadError}
+        </p>
+      ) : uploadSuccess ? (
+        <p className="text-sm text-[#2E7D32]" role="status">
+          {uploadSuccess}
         </p>
       ) : null}
       {canDownload ? (
