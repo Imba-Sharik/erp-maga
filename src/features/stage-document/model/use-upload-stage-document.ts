@@ -8,6 +8,7 @@ import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generat
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 
 import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
+import { markDocumentReuploaded } from '@/entities/project-documents/lib/document-reupload-tracker'
 
 interface UploadStageDocumentArgs {
   projectId: string | number
@@ -33,7 +34,20 @@ export function useUploadStageDocument() {
         { document_type: documentType, id, data: { file } },
         {
           onSuccess: (detail) => {
-            queryClient.setQueryData(projectsRetrieveQueryKey(id), unwrapProjectDetail(detail))
+            const unwrapped = unwrapProjectDetail(detail)
+            queryClient.setQueryData(projectsRetrieveQueryKey(id), unwrapped)
+
+            const docEntry = unwrapped.documents?.find(
+              (item) => item.document_type === documentType,
+            )
+            if (docEntry?.status === 're_requested') {
+              markDocumentReuploaded(
+                id,
+                documentType,
+                docEntry.file?.uploaded_at ?? new Date().toISOString(),
+              )
+            }
+
             invalidateProjectAfterTransition(queryClient, id)
           },
         },

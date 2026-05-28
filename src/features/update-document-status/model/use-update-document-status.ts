@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react'
 
 import type { DocumentStatus } from '@/entities/project'
 import type { StageDocumentType } from '@/entities/stage-document-files'
+import { clearDocumentReupload } from '@/entities/project-documents/lib/document-reupload-tracker'
 import { useProjectsDocumentsPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsDocumentsPartialUpdate'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 
@@ -34,6 +35,9 @@ export function useUpdateDocumentStatus() {
         },
         {
           onSuccess: () => {
+            if (status !== 're_requested') {
+              clearDocumentReupload(id, documentType)
+            }
             queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(id) })
           },
         },

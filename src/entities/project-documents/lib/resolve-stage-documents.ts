@@ -2,6 +2,7 @@ import type { DocumentStatus, StageFormData } from '@/entities/project'
 import type { StageDocumentType } from '@/entities/stage-document-files'
 
 import type { StageDocumentFile } from '../model/document-file'
+import { resolveDocumentVariantMeta } from './resolve-document-variant-meta'
 import { STAGE_DOCUMENTS } from './stage-document-registry'
 import {
   getStageDocumentFieldVariant,
@@ -25,6 +26,7 @@ export interface ResolveStageDocumentsOptions {
 }
 
 interface ResolveSource {
+  id?: string | number
   documentFiles?: Partial<Record<StageDocumentType, StageDocumentFile>>
 }
 
@@ -35,21 +37,28 @@ export function resolveStageDocuments(
 ): ProjectStageDocumentItem[] {
   const includeEmpty = options?.includeEmpty ?? false
 
-  const items = STAGE_DOCUMENTS.map(({ documentType, label, fileNameKey, statusKey }) => {
-    const meta = source?.documentFiles?.[documentType]
-    const fileName = values?.[fileNameKey] || meta?.fileName
-    const status = values?.[statusKey] as DocumentStatus | undefined
-    return {
-      documentType,
-      label,
-      fileName: fileName ?? '',
-      status,
-      variant: getStageDocumentFieldVariant(fileName, status),
-      ...(meta?.fileUrl ? { fileUrl: meta.fileUrl } : {}),
-      ...(meta?.uploadedAt ? { uploadedAt: meta.uploadedAt } : {}),
-      ...(meta?.uploadedBy ? { uploadedBy: meta.uploadedBy } : {}),
-    } satisfies ProjectStageDocumentItem
-  })
+  const items = STAGE_DOCUMENTS.map(
+    ({ documentType, label, fileNameKey, statusKey, confirmedAtKey }) => {
+      const meta = source?.documentFiles?.[documentType]
+      const fileName = values?.[fileNameKey] || meta?.fileName
+      const status = values?.[statusKey] as DocumentStatus | undefined
+      return {
+        documentType,
+        label,
+        fileName: fileName ?? '',
+        status,
+        variant: getStageDocumentFieldVariant(fileName, status, {
+          ...resolveDocumentVariantMeta(source?.id ?? '', documentType, {
+            uploadedAt: meta?.uploadedAt,
+            confirmedAt: values?.[confirmedAtKey] as string | undefined,
+          }),
+        }),
+        ...(meta?.fileUrl ? { fileUrl: meta.fileUrl } : {}),
+        ...(meta?.uploadedAt ? { uploadedAt: meta.uploadedAt } : {}),
+        ...(meta?.uploadedBy ? { uploadedBy: meta.uploadedBy } : {}),
+      } satisfies ProjectStageDocumentItem
+    },
+  )
 
   if (includeEmpty) return items
   return items.filter((item) => Boolean(item.fileName))
