@@ -111,28 +111,47 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="eventType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Тип мероприятия</FormLabel>
-                  <FormControl>
-                    <ClearableSelect
-                      placeholder="Выберите тип"
-                      value={field.value || null}
-                      options={EVENT_TYPE_OPTIONS.map((o) => ({
-                        value: String(o.id),
-                        label: o.label,
-                      }))}
-                      onChange={(v) => field.onChange(v ?? '')}
-                      triggerClassName={TRIGGER_CLASS}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="eventType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Тип мероприятия</FormLabel>
+                    <FormControl>
+                      <ClearableSelect
+                        placeholder="Выберите тип"
+                        value={field.value || null}
+                        options={EVENT_TYPE_OPTIONS.map((o) => ({
+                          value: String(o.id),
+                          label: o.label,
+                        }))}
+                        onChange={(v) => field.onChange(v ?? '')}
+                        triggerClassName={TRIGGER_CLASS}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="eventDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Дата мероприятия</FormLabel>
+                    <FormControl>
+                      <DateField
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="h-10 rounded-[10px] border-[#B1B1B1] bg-white px-3 text-sm"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="loft"
@@ -147,23 +166,6 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                       onChange={(v) => field.onChange(v ?? '')}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="eventDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Дата мероприятия</FormLabel>
-                  <FormControl>
-                    <DateField
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="h-10 rounded-[10px] border-[#B1B1B1] bg-white px-3 text-sm"
                     />
                   </FormControl>
                   <FormMessage />
