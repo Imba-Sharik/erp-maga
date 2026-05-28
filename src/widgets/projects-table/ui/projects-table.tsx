@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import { useManagersDirectory } from '@/entities/manager'
+import type { Project } from '@/entities/project'
 
 import {
   EMPTY_COLUMN_FILTERS,
@@ -15,13 +17,29 @@ import { ProjectsTableView } from './projects-table-view'
 
 interface ProjectsTableProps {
   onAddProject?: () => void
+  defaultPendingOnly?: boolean
+  defaultColumnView?: ProjectsTableColumnView
+  stageInOverride?: string
+  showPendingToggle?: boolean
+  columnViewOptions?: readonly { value: ProjectsTableColumnView; label: string }[]
+  managerEditable?: boolean
+  renderRowAction?: (project: Project) => ReactNode
 }
 
-export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
+export function ProjectsTable({
+  onAddProject,
+  defaultPendingOnly = false,
+  defaultColumnView = 'general',
+  stageInOverride,
+  showPendingToggle = true,
+  columnViewOptions,
+  managerEditable = true,
+  renderRowAction,
+}: ProjectsTableProps = {}) {
   const [search, setSearch] = useState('')
-  const [pendingOnly, setPendingOnly] = useState(false)
+  const [pendingOnly, setPendingOnly] = useState(defaultPendingOnly)
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
-  const [columnView, setColumnView] = useState<ProjectsTableColumnView>('general')
+  const [columnView, setColumnView] = useState<ProjectsTableColumnView>(defaultColumnView)
 
   const {
     selectOptions,
@@ -35,6 +53,7 @@ export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
       pendingOnly,
       stage: columnFilters.stage,
       magManagerId: columnFilters.manager,
+      stageInOverride,
     })
 
   const filtered = useMemo(
@@ -56,6 +75,8 @@ export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
         onTogglePending={setPendingOnly}
         onColumnViewChange={setColumnView}
         onAddProject={onAddProject}
+        showPendingToggle={showPendingToggle}
+        columnViewOptions={columnViewOptions}
       />
       <ProjectsTableView
         projects={filtered}
@@ -71,6 +92,8 @@ export function ProjectsTable({ onAddProject }: ProjectsTableProps = {}) {
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
+        managerEditable={managerEditable}
+        renderRowAction={renderRowAction}
       />
     </div>
   )
