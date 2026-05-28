@@ -3,6 +3,7 @@ import { RequireRole } from './guards/require-role'
 import { RoleHomeRedirect } from './guards/role-home'
 import { AppLayout } from './layouts/app-layout'
 import { CalendarPage } from '@/pages/calendar'
+import { ClosedProjectsPage } from '@/pages/closed-projects'
 import { ClosedRequestsPage } from '@/pages/closed-requests'
 import { ClosingPage } from '@/pages/closing'
 import { DashboardPage } from '@/pages/dashboard'
@@ -17,6 +18,7 @@ import { ProjectsPage } from '@/pages/projects'
 import { RequestDetailPage } from '@/pages/request-detail'
 import { RequestsPage } from '@/pages/requests'
 import { SettingsPage } from '@/pages/settings'
+import { UsersPage } from '@/pages/users'
 
 const router = createBrowserRouter([
   {
@@ -33,7 +35,7 @@ const router = createBrowserRouter([
       {
         path: 'calendar',
         element: (
-          <RequireRole roles={['manager', 'director']}>
+          <RequireRole roles={['manager', 'director', 'admin']}>
             <CalendarPage />
           </RequireRole>
         ),
@@ -41,7 +43,7 @@ const router = createBrowserRouter([
       {
         path: 'projects',
         element: (
-          <RequireRole roles={['manager', 'director']}>
+          <RequireRole roles={['manager', 'director', 'admin']}>
             <ProjectsPage />
           </RequireRole>
         ),
@@ -80,10 +82,26 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'closed-projects',
+        element: (
+          <RequireRole roles={['admin']}>
+            <ClosedProjectsPage />
+          </RequireRole>
+        ),
+      },
+      {
         path: 'outside-mag',
         element: (
           <RequireRole roles={['director']}>
             <OutsideMagPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'users',
+        element: (
+          <RequireRole roles={['admin']}>
+            <UsersPage />
           </RequireRole>
         ),
       },
