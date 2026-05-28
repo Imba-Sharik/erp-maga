@@ -35,6 +35,7 @@ export interface StageDocumentFieldProps {
   interaction: StageDocumentInteraction
   onChange?: (fileName: string) => void
   disabled?: boolean
+  addButtonLabel?: string
 }
 
 export function StageDocumentField({
@@ -45,6 +46,7 @@ export function StageDocumentField({
   interaction,
   onChange,
   disabled,
+  addButtonLabel = 'Добавить документ',
 }: StageDocumentFieldProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -54,15 +56,16 @@ export function StageDocumentField({
 
   const isUpload = interaction === 'upload'
   const busy = upload.isPending || download.isPending
-  const interactionDisabled = disabled || busy
+  const uploadDisabled = disabled || busy
+  const downloadDisabled = busy
 
   const openPicker = () => {
-    if (!isUpload || interactionDisabled || variant === 'confirmed') return
+    if (!isUpload || uploadDisabled || variant === 'confirmed') return
     inputRef.current?.click()
   }
 
   const requestDownload = () => {
-    if (!value || interactionDisabled) return
+    if (!value || downloadDisabled) return
     setConfirmOpen(true)
   }
 
@@ -103,7 +106,7 @@ export function StageDocumentField({
     variant === 'rejected' && 'text-[#D25252]',
     variant === 'uploaded' && 'text-[#B0B0B0]',
     canDownload && 'cursor-pointer underline-offset-2 hover:underline',
-    interactionDisabled && 'cursor-not-allowed opacity-70',
+    downloadDisabled && 'cursor-not-allowed opacity-70',
   )
 
   return (
@@ -115,7 +118,7 @@ export function StageDocumentField({
           type="file"
           accept={FILE_ACCEPT}
           className="sr-only"
-          disabled={interactionDisabled || variant === 'confirmed'}
+          disabled={uploadDisabled || variant === 'confirmed'}
           onChange={(e) => {
             handleFile(e.target.files?.[0])
             e.target.value = ''
@@ -146,7 +149,7 @@ export function StageDocumentField({
                 type="button"
                 className={fileNameClassName}
                 title={value}
-                disabled={interactionDisabled}
+                disabled={downloadDisabled}
                 onClick={requestDownload}
               >
                 {value}
@@ -163,7 +166,7 @@ export function StageDocumentField({
               variant="outline"
               size="icon"
               className="size-9 shrink-0 cursor-pointer rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
-              disabled={interactionDisabled}
+              disabled={uploadDisabled}
               aria-label="Выбрать другой файл"
               onClick={openPicker}
             >
@@ -175,10 +178,10 @@ export function StageDocumentField({
         <Button
           type="button"
           className="h-9 w-full cursor-pointer justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
-          disabled={interactionDisabled}
+          disabled={uploadDisabled}
           onClick={openPicker}
         >
-          {upload.isPending ? 'Загрузка…' : 'Добавить документ'}
+          {upload.isPending ? 'Загрузка…' : addButtonLabel}
         </Button>
       ) : null}
       {canDownload ? (
