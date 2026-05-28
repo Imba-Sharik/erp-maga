@@ -12,20 +12,22 @@ import type { ProjectsFilter } from '@/widgets/projects-board/lib/filter-project
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import { KanbanColumnWithQuery } from '@/widgets/projects-board/ui/kanban-column-with-query'
 
-const CLOSING_BACK = { to: '/closing', label: 'Закрытие' } as const
-
 interface ClosingKanbanProps {
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  backOrigin: { to: string; label: string }
   onChangeManager?: (project: Project) => void
+  onDeleteProject?: (project: Project) => void
 }
 
 export function ClosingKanban({
   listParams,
   filter,
   filtersActive,
+  backOrigin,
   onChangeManager,
+  onDeleteProject,
 }: ClosingKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
@@ -48,7 +50,9 @@ export function ClosingKanban({
               listParams={listParams}
               filter={filter}
               filtersActive={filtersActive}
+              backOrigin={backOrigin}
               onChangeManager={onChangeManager}
+              onDeleteProject={onDeleteProject}
             />
           ))}
         </div>
@@ -62,13 +66,17 @@ function ClosingKanbanColumnItem({
   listParams,
   filter,
   filtersActive,
+  backOrigin,
   onChangeManager,
+  onDeleteProject,
 }: {
   stage: ClosingStage
   listParams: BoardListParams
   filter: ProjectsFilter
   filtersActive: boolean
+  backOrigin: { to: string; label: string }
   onChangeManager?: (project: Project) => void
+  onDeleteProject?: (project: Project) => void
 }) {
   return (
     <KanbanColumnWithQuery
@@ -79,8 +87,9 @@ function ClosingKanbanColumnItem({
       listParams={listParams}
       filter={filter}
       filtersActive={filtersActive}
-      backOrigin={CLOSING_BACK}
+      backOrigin={backOrigin}
       onChangeManager={onChangeManager}
+      onDeleteProject={onDeleteProject}
     />
   )
 }

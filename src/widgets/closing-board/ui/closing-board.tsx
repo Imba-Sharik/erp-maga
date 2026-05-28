@@ -25,9 +25,18 @@ const CLOSING_BACK: ProjectBackOrigin = {
 interface ClosingBoardProps {
   listDateParams: BoardListParams
   onArchiveModeChange?: (archiveMode: boolean) => void
+  backOrigin?: ProjectBackOrigin
+  onDeleteProject?: (project: Project) => void
+  canChangeManager?: boolean
 }
 
-export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoardProps) {
+export function ClosingBoard({
+  listDateParams,
+  onArchiveModeChange,
+  backOrigin = CLOSING_BACK,
+  onDeleteProject,
+  canChangeManager = true,
+}: ClosingBoardProps) {
   const role = useUserRole()
   const [archiveMode, setArchiveMode] = useState(false)
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
@@ -123,7 +132,7 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
             hasNextPage={archiveQuery.hasNextPage}
             isFetchingNextPage={archiveQuery.isFetchingNextPage}
             onLoadMore={archiveQuery.fetchNextPage}
-            backOrigin={CLOSING_BACK}
+            backOrigin={backOrigin}
           />
         </div>
       ) : (
@@ -132,7 +141,11 @@ export function ClosingBoard({ listDateParams, onArchiveModeChange }: ClosingBoa
             listParams={listDateParams}
             filter={filter}
             filtersActive={filtersActive}
-            onChangeManager={role === 'director' ? setChangeManagerTarget : undefined}
+            backOrigin={backOrigin}
+            onChangeManager={
+              canChangeManager && role === 'director' ? setChangeManagerTarget : undefined
+            }
+            onDeleteProject={onDeleteProject}
           />
         </div>
       )}
