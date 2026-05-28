@@ -3,7 +3,10 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { CollapsibleTrigger } from '@/shared/ui/collapsible'
 
-const rowClass = 'flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden text-sm'
+const textBlockClass =
+  'flex min-w-0 max-w-full flex-col items-start gap-1.5 overflow-hidden sm:flex-row sm:items-center'
+
+const headerRowClass = 'flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden text-sm'
 
 interface StageStatusHeaderProps {
   statusLabel: string
@@ -24,23 +27,28 @@ export function StageStatusHeader({
     <span className={cn('shrink-0 whitespace-nowrap', statusClassName)}>{statusLabel}</span>
   )
   const titleEl = (
-    <span className={cn('min-w-0 truncate font-semibold', titleClassName)}>{title}</span>
+    <span
+      className={cn('w-full min-w-0 truncate font-semibold sm:w-auto sm:flex-1', titleClassName)}
+    >
+      {title}
+    </span>
+  )
+
+  const textBlock = (
+    <div className={textBlockClass}>
+      {status}
+      {titleEl}
+    </div>
   )
 
   if (collapsible) {
     return (
-      <CollapsibleTrigger className={cn('group', rowClass)}>
-        {status}
-        {titleEl}
+      <CollapsibleTrigger className={cn('group', headerRowClass)}>
+        {textBlock}
         <ChevronDown className="text-muted-foreground size-3.5 shrink-0 transition-transform group-data-[state=closed]:-rotate-90" />
       </CollapsibleTrigger>
     )
   }
 
-  return (
-    <div className={rowClass}>
-      {status}
-      {titleEl}
-    </div>
-  )
+  return <div className={headerRowClass}>{textBlock}</div>
 }
