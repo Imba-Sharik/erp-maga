@@ -17,9 +17,11 @@ export type RoleNavItemId =
   | 'dashboard'
   | 'calendar'
   | 'projects'
+  | 'closed-projects'
   | 'closing'
   | 'outside-mag'
   | 'managers'
+  | 'users'
   | 'requests'
   | 'closed-requests'
   | 'notifications'
@@ -45,15 +47,22 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
     title: 'Календарь',
     url: '/calendar',
     icon: CalendarIcon,
-    roles: ['manager', 'director'],
+    roles: ['manager', 'director', 'admin'],
   },
   {
     id: 'projects',
     title: 'Проекты',
     url: '/projects',
     icon: FolderIcon,
-    roles: ['manager', 'director'],
-    titleByRole: { director: 'Все проекты' },
+    roles: ['manager', 'director', 'admin'],
+    titleByRole: { director: 'Все проекты', admin: 'Все проекты' },
+  },
+  {
+    id: 'closed-projects',
+    title: 'Закрытые проекты',
+    url: '/closed-projects',
+    icon: FolderIcon,
+    roles: ['admin'],
   },
   {
     id: 'closing',
@@ -75,6 +84,13 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
     url: '/managers',
     icon: ManagersControlIcon,
     roles: ['director'],
+  },
+  {
+    id: 'users',
+    title: 'Пользователи',
+    url: '/users',
+    icon: ManagersControlIcon,
+    roles: ['admin'],
   },
   {
     id: 'requests',

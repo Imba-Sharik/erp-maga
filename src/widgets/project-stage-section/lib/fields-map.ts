@@ -5,7 +5,7 @@ import type { UserRole } from '@/entities/user-role'
 
 export type StageFieldType = 'text' | 'textarea' | 'date' | 'select' | 'phone' | 'document'
 export type StageFieldSource = 'manager' | 'system'
-export type StageFieldRole = 'manager' | 'accountant' | 'director'
+export type StageFieldRole = 'manager' | 'accountant' | 'director' | 'admin'
 export type { StageDocumentType }
 
 export interface StageFieldConfig {

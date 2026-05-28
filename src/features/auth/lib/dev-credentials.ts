@@ -20,6 +20,10 @@ const RAW: Record<DevRole, DevCredentials> = {
     email: import.meta.env.VITE_DEV_EMAIL_ACCOUNTANT ?? '',
     password: import.meta.env.VITE_DEV_PASSWORD_ACCOUNTANT ?? '',
   },
+  admin: {
+    email: import.meta.env.VITE_DEV_EMAIL_ADMIN ?? '',
+    password: import.meta.env.VITE_DEV_PASSWORD_ADMIN ?? '',
+  },
 }
 
 /** Возвращает креды для роли, если они заданы в env, иначе `null`. */
@@ -31,5 +35,5 @@ export function getDevCredentials(role: DevRole): DevCredentials | null {
 
 /** Список ролей, для которых заданы валидные dev-креды (для кнопок на `/login`). */
 export const DEV_ROLES_WITH_CREDS: DevRole[] = (
-  ['manager', 'director', 'accountant'] as const
+  ['manager', 'director', 'accountant', 'admin'] as const
 ).filter((r) => getDevCredentials(r) !== null)
