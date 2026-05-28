@@ -1,7 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
-import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
@@ -11,14 +8,15 @@ import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
 import { useVenueCatalog } from '@/entities/venue'
 import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
+import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
+import { DateField } from '@/shared/ui/date-field'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
 import { Input } from '@/shared/ui/input'
@@ -32,9 +30,14 @@ const TRIGGER_CLASS =
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
   eventType: z.string().min(1, 'Выберите тип мероприятия'),
+  eventDate: z.string().min(1, 'Выберите дату мероприятия'),
   loft: z.string().min(1, 'Выберите лофт'),
   hall: z.string().min(1, 'Выберите зал'),
 }) satisfies z.ZodType<CreateProjectFormValues>
+
+function getDefaultValues(): CreateProjectFormValues {
+  return { title: '', eventType: '', eventDate: toIsoLocalDay(new Date()), loft: '', hall: '' }
+}
 
 export interface CreateProjectDialogProps {
   open: boolean
@@ -54,7 +57,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
 
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { title: '', eventType: '', loft: '', hall: '' },
+    defaultValues: getDefaultValues(),
   })
 
   const {
@@ -67,15 +70,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     magManager: currentUser.fullName,
     onCreated: (project) => {
       onOpenChange(false)
-      form.reset()
+      form.reset(getDefaultValues())
       navigate(`/projects/${project.id}`, { state: DEFAULT_PROJECTS_BACK_ORIGIN })
     },
   })
-
-  const previewDateLabel = useMemo(() => {
-    if (!open) return ''
-    return format(new Date(), 'd MMMM yyyy', { locale: ru })
-  }, [open])
 
   return (
     <Dialog
@@ -83,7 +81,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       onOpenChange={(next) => {
         onOpenChange(next)
         if (!next) {
-          form.reset()
+          form.reset(getDefaultValues())
           resetMutation()
         }
       }}
@@ -91,9 +89,6 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader className="text-left">
           <DialogTitle className="font-heading text-[#1B1A17]">Новый проект</DialogTitle>
-          <DialogDescription>
-            {previewDateLabel ? `Дата мероприятия будет назначена: ${previewDateLabel}.` : null}
-          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -116,28 +111,47 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="eventType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Тип мероприятия</FormLabel>
-                  <FormControl>
-                    <ClearableSelect
-                      placeholder="Выберите тип"
-                      value={field.value || null}
-                      options={EVENT_TYPE_OPTIONS.map((o) => ({
-                        value: String(o.id),
-                        label: o.label,
-                      }))}
-                      onChange={(v) => field.onChange(v ?? '')}
-                      triggerClassName={TRIGGER_CLASS}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="eventType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Тип мероприятия</FormLabel>
+                    <FormControl>
+                      <ClearableSelect
+                        placeholder="Выберите тип"
+                        value={field.value || null}
+                        options={EVENT_TYPE_OPTIONS.map((o) => ({
+                          value: String(o.id),
+                          label: o.label,
+                        }))}
+                        onChange={(v) => field.onChange(v ?? '')}
+                        triggerClassName={TRIGGER_CLASS}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="eventDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Дата мероприятия</FormLabel>
+                    <FormControl>
+                      <DateField
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="h-10 rounded-[10px] border-[#B1B1B1] bg-white px-3 text-sm"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="loft"

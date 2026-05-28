@@ -8,20 +8,15 @@ import { Button } from '@/shared/ui/button'
 import { Calendar } from '@/shared/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
 
-interface StageDateFieldProps {
+interface DateFieldProps {
   value: string | undefined
   onChange: (value: string) => void
   placeholder?: string
   className?: string
 }
 
-/** Поповер-датапикер для manager-полей `type: 'date'`. Хранит ISO `yyyy-MM-dd`. */
-export function StageDateField({
-  value,
-  onChange,
-  placeholder = 'дд.мм.гггг',
-  className,
-}: StageDateFieldProps) {
+/** Поповер-датапикер. Хранит ISO `yyyy-MM-dd`. */
+export function DateField({ value, onChange, placeholder = 'дд.мм.гггг', className }: DateFieldProps) {
   const [open, setOpen] = useState(false)
   const parsed = value ? parseISO(value) : undefined
   const selected = parsed && isValid(parsed) ? parsed : undefined
