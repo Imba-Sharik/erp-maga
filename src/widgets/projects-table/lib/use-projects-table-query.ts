@@ -32,6 +32,8 @@ interface UseProjectsTableQueryParams {
   stage: string | null
   /** ID менеджера MAG для `mag_manager` (или `null`). */
   magManagerId: string | null
+  /** Принудительный набор стадий через `stage__in` (для спец-страниц). */
+  stageInOverride?: string
 }
 
 /**
@@ -49,10 +51,11 @@ export function useProjectsTableQuery({
   pendingOnly,
   stage,
   magManagerId,
+  stageInOverride,
 }: UseProjectsTableQueryParams) {
   const stageParams: StageParams = stage
     ? { stage: stage as ProjectsListQueryParamsStageEnumKey }
-    : { stage__in: pendingOnly ? PENDING_STAGE_IN : PREPROJECT_STAGE_IN }
+    : { stage__in: stageInOverride ?? (pendingOnly ? PENDING_STAGE_IN : PREPROJECT_STAGE_IN) }
 
   const mag_manager = parseMagManagerId(magManagerId)
 
