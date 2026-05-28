@@ -10,10 +10,17 @@ import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsC
 import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
 import { markDocumentReuploaded } from '@/entities/project-documents/lib/document-reupload-tracker'
 
+import { getDocumentUploadErrorMessage } from '../lib/get-document-upload-error-message'
+
 interface UploadStageDocumentArgs {
   projectId: string | number
   documentType: StageDocumentType
   file: File
+}
+
+interface UploadStageDocumentCallbacks {
+  onSuccess?: () => void
+  onError?: (message: string) => void
 }
 
 function unwrapProjectDetail(
@@ -28,7 +35,10 @@ export function useUploadStageDocument() {
   const mutation = useProjectsDocumentFileCreate()
 
   const upload = useCallback(
-    ({ projectId, documentType, file }: UploadStageDocumentArgs) => {
+    (
+      { projectId, documentType, file }: UploadStageDocumentArgs,
+      callbacks?: UploadStageDocumentCallbacks,
+    ) => {
       const id = Number(projectId)
       mutation.mutate(
         { document_type: documentType, id, data: { file } },
@@ -49,6 +59,10 @@ export function useUploadStageDocument() {
             }
 
             invalidateProjectAfterTransition(queryClient, id)
+            callbacks?.onSuccess?.()
+          },
+          onError: (error) => {
+            callbacks?.onError?.(getDocumentUploadErrorMessage(error))
           },
         },
       )

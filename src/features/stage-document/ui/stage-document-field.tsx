@@ -53,6 +53,7 @@ export function StageDocumentField({
   const upload = useUploadStageDocument()
   const download = useDownloadStageDocument()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const isUpload = interaction === 'upload'
   const busy = upload.isPending || download.isPending
@@ -61,6 +62,7 @@ export function StageDocumentField({
 
   const openPicker = () => {
     if (!isUpload || uploadDisabled || variant === 'confirmed') return
+    setUploadError(null)
     inputRef.current?.click()
   }
 
@@ -84,15 +86,26 @@ export function StageDocumentField({
   const handleFile = (file: File | undefined) => {
     if (!file || !onChange) return
     if (!isAllowedFile(file)) {
-      window.alert('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
+      setUploadError('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
       return
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      window.alert('Файл слишком большой. Максимальный размер — 20 МБ.')
+      setUploadError('Файл слишком большой. Максимальный размер — 20 МБ.')
       return
     }
-    upload.upload({ projectId, documentType, file })
-    onChange(file.name)
+    setUploadError(null)
+    upload.upload(
+      { projectId, documentType, file },
+      {
+        onSuccess: () => {
+          setUploadError(null)
+          onChange(file.name)
+        },
+        onError: (message) => {
+          setUploadError(message)
+        },
+      },
+    )
   }
 
   const showFileRow =
@@ -183,6 +196,11 @@ export function StageDocumentField({
         >
           {upload.isPending ? 'Загрузка…' : addButtonLabel}
         </Button>
+      ) : null}
+      {uploadError ? (
+        <p className="text-destructive text-sm" role="alert">
+          {uploadError}
+        </p>
       ) : null}
       {canDownload ? (
         <ConfirmDownloadDialog
