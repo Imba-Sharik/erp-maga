@@ -1,4 +1,5 @@
 import { useUsersList } from '@/shared/api/generated/hooks/usersController/useUsersList'
+import { formatDateTime } from '@/shared/lib/date/format-date-time'
 import {
   GridTableCell,
   GridTableHeaderLabel,
@@ -31,8 +32,7 @@ export function UsersPage() {
         <div className="flex flex-col gap-1.5">
           <h1 className="font-heading font-bold text-[#1B1A17]">Пользователи</h1>
           <p className="max-w-[700px] text-sm text-[#ACACAC]">
-            Поле «Появление в системе» временно недоступно: API списка пользователей пока не
-            возвращает дату регистрации.
+            Список пользователей системы с ролями и датой регистрации.
           </p>
         </div>
       </header>
@@ -60,7 +60,7 @@ export function UsersPage() {
             <GridTableCell muted>{user.full_name || TABLE_EMPTY}</GridTableCell>
             <GridTableCell muted>{getRoleLabel(user.role)}</GridTableCell>
             <GridTableCell muted>{user.email || TABLE_EMPTY}</GridTableCell>
-            <GridTableCell muted>{TABLE_EMPTY}</GridTableCell>
+            <GridTableCell muted>{formatDateTime(user.created_at) || TABLE_EMPTY}</GridTableCell>
           </GridTableRow>
         ))}
       </GridTableView>
