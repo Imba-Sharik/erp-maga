@@ -37,7 +37,7 @@ import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
-import { StageDateField } from './stage-date-field'
+import { DateField } from '@/shared/ui/date-field'
 import { StageDocumentField } from '@/features/stage-document'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
@@ -268,7 +268,7 @@ export function StageSectionCurrent({
                   </SelectContent>
                 </Select>
               ) : f.type === 'date' ? (
-                <StageDateField
+                <DateField
                   value={(field.value as string) ?? ''}
                   onChange={field.onChange}
                   placeholder={f.placeholder}
