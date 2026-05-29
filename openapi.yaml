@@ -1074,10 +1074,11 @@ paths:
     post:
       operationId: projects_transition_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. На стадии `contract_signed` данные
-        договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH
-        /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля
-        в transition тоже необязательны.'
+        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` сразу закрывает
+        проект (`stage=closed`, `closed_at`) — отдельный переход в `closed` не нужен.
+        На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
+        и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
+        в `ready_to_event` те же поля в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -1190,10 +1191,12 @@ paths:
                     kind: equipment
                     bonus_amount: 70000
                 summary: bonus_calculated → bonus_approved
-              BonusApproved→Closed:
+              BonusCalculated→BonusApproved(ручнаяСумма):
                 value:
-                  to_stage: closed
-                summary: bonus_approved → closed
+                  to_stage: bonus_approved
+                  approved_bonus: '87500.00'
+                  adjustment_reason: Корректировка по согласованию с руководителем
+                summary: bonus_calculated → bonus_approved (ручная сумма)
               RejectData(откатДанных):
                 value:
                   to_stage: reject_data
@@ -1230,10 +1233,11 @@ paths:
     post:
       operationId: projects_transitions_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. На стадии `contract_signed` данные
-        договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH
-        /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля
-        в transition тоже необязательны.'
+        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` сразу закрывает
+        проект (`stage=closed`, `closed_at`) — отдельный переход в `closed` не нужен.
+        На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
+        и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
+        в `ready_to_event` те же поля в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -1346,10 +1350,12 @@ paths:
                     kind: equipment
                     bonus_amount: 70000
                 summary: bonus_calculated → bonus_approved
-              BonusApproved→Closed:
+              BonusCalculated→BonusApproved(ручнаяСумма):
                 value:
-                  to_stage: closed
-                summary: bonus_approved → closed
+                  to_stage: bonus_approved
+                  approved_bonus: '87500.00'
+                  adjustment_reason: Корректировка по согласованию с руководителем
+                summary: bonus_calculated → bonus_approved (ручная сумма)
               RejectData(откатДанных):
                 value:
                   to_stage: reject_data
@@ -3994,6 +4000,19 @@ components:
             * `confirmed` - confirmed
             * `rejected` - rejected
           x-spec-enum-id: c1eb6617a9413969
+        approved_bonus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: Итоговый бонус; если отличается от расчёта — нужна adjustment_reason
+        adjustment_reason:
+          type: string
+          minLength: 1
+          description: Обязательна при ручной корректировке approved_bonus
+        bonus_adjustment_reason:
+          type: string
+          minLength: 1
+          description: Alias для adjustment_reason
         reason:
           enum:
           - event_cancelled
