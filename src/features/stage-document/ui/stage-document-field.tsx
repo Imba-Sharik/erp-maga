@@ -67,7 +67,7 @@ export function StageDocumentField({
   const downloadDisabled = busy
 
   const openPicker = () => {
-    if (!isUpload || uploadDisabled || variant === 'confirmed') return
+    if (!isUpload || uploadDisabled) return
     setUploadError(null)
     setUploadSuccess(null)
     inputRef.current?.click()
@@ -125,7 +125,9 @@ export function StageDocumentField({
 
   const showFileRow =
     variant === 'uploaded' || variant === 'confirmed' || (variant === 'rejected' && Boolean(value))
-  const canReplace = isUpload && (variant === 'uploaded' || variant === 'rejected')
+  // Замену показываем для любого файла (включая `confirmed`); право решает `disabled`,
+  // который проставляет вызывающий код по роли/статусу.
+  const canReplace = isUpload && Boolean(value) && !uploadDisabled
   const canDownload = Boolean(value)
 
   const fileNameClassName = cn(
@@ -146,7 +148,7 @@ export function StageDocumentField({
           type="file"
           accept={FILE_ACCEPT}
           className="sr-only"
-          disabled={uploadDisabled || variant === 'confirmed'}
+          disabled={uploadDisabled}
           onChange={(e) => {
             handleFile(e.target.files?.[0])
             e.target.value = ''
