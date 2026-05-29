@@ -393,11 +393,19 @@ paths:
       operationId: projects_list
       description: 'Фильтры: event_date_after, event_date_before, stage, stage__in,
         plum_status, plum_status__in, mag_manager, hall_id, loft_id, hall (подстрока
-        в названии зала), loft (подстрока в названии лофта). Пагинация: limit, offset
-        (LimitOffset, по умолчанию limit=10). В элементе списка: halls[] (внутренние
-        hall_id/loft_id MAG), sync_error — предупреждение синка (напр. зал не в каталоге).'
+        в названии зала), loft (подстрока в названии лофта), archived_only (true —
+        только архив). По умолчанию проекты в стадии archived не возвращаются. Пагинация:
+        limit, offset (LimitOffset, по умолчанию limit=10). В элементе списка: halls[]
+        (внутренние hall_id/loft_id MAG), sync_error — предупреждение синка (напр.
+        зал не в каталоге).'
       summary: Список проектов
       parameters:
+      - in: query
+        name: archived_only
+        schema:
+          type: boolean
+        description: true — только проекты в стадии archived; по умолчанию archived
+          скрыты
       - in: query
         name: event_date_after
         schema:
@@ -1494,6 +1502,10 @@ paths:
         (зал + лофт, как в основном списке).'
       summary: Список проектов «Вне контура MAG»
       parameters:
+      - in: query
+        name: archived_only
+        schema:
+          type: boolean
       - in: query
         name: event_date_after
         schema:
