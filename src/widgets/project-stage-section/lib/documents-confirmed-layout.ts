@@ -1,0 +1,36 @@
+import type { ProjectStage, StageFormData } from '@/entities/project'
+import type { UserRole } from '@/entities/user-role'
+import { DOC_PAIR_BY_STATUS_FIELD } from '@/entities/project-documents'
+
+import type { StageFieldConfig } from './fields-map'
+
+export function isDocumentStatusField(name: keyof StageFormData): boolean {
+  return name in DOC_PAIR_BY_STATUS_FIELD
+}
+
+/** У бухгалтера upload рендерится в одной ячейке со статусом — отдельные document-поля в сетке скрываем. */
+export function filterDocumentsConfirmedGridFields(
+  fields: StageFieldConfig[],
+  stage: ProjectStage,
+  role: UserRole,
+): StageFieldConfig[] {
+  if (stage === 'documents_confirmed' && role === 'accountant') {
+    return fields.filter((f) => f.type !== 'document')
+  }
+  return fields
+}
+
+/** Поля формы бухгалтера: статусы + скрытые fileName для RHF. */
+export function getDocumentsConfirmedFormFields(
+  allFields: StageFieldConfig[],
+  visibleFields: StageFieldConfig[],
+  stage: ProjectStage,
+  role: UserRole,
+): StageFieldConfig[] {
+  const editable = visibleFields.filter((f) => f.source !== 'system')
+  if (stage !== 'documents_confirmed' || role !== 'accountant') return editable
+
+  const names = new Set(editable.map((f) => f.name))
+  const hiddenFileFields = allFields.filter((f) => f.type === 'document' && !names.has(f.name))
+  return [...editable, ...hiddenFileFields]
+}

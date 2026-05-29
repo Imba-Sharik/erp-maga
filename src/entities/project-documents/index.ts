@@ -18,7 +18,10 @@ export type {
   StageDocumentStatusField,
   StageDocumentFileNameField,
 } from './lib/stage-document-registry'
-export type { StageDocumentFieldVariant } from './lib/stage-document-variant'
+export type {
+  StageDocumentFieldVariant,
+  StageDocumentVariantMeta,
+} from './lib/stage-document-variant'
 export { getStageDocumentFieldVariant } from './lib/stage-document-variant'
 export { resolveStageDocuments } from './lib/resolve-stage-documents'
 export type {

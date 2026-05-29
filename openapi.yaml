@@ -870,8 +870,10 @@ paths:
     post:
       operationId: projects_document_file_create
       description: Менеджер MAG, бухгалтерия или руководитель прикрепляет файл на
-        любом этапе закрытия. При повторной загрузке после запроса бухгалтера уходит
-        отдельное уведомление.
+        любом этапе закрытия. При замене файла обновляется `file.uploaded_at`. После
+        PATCH `re_requested` повторная загрузка менеджером оставляет статус `re_requested`,
+        выставляет `reuploaded_at` и уведомляет бухгалтерию; загрузка бухгалтером
+        переводит в `present`.
       summary: Загрузить или заменить файл закрывающего документа
       parameters:
       - in: path
@@ -3708,6 +3710,11 @@ components:
           type: string
           format: date-time
           nullable: true
+        reuploaded_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время повторной загрузки файла менеджером после re_requested
         confirmed_by:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
@@ -3725,6 +3732,7 @@ components:
       - document_type
       - file
       - file_name
+      - reuploaded_at
       - status
     ProjectDocumentUploadRequestRequest:
       type: object

@@ -9,10 +9,17 @@ import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsC
 
 import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
 
+import { getDocumentUploadErrorMessage } from '../lib/get-document-upload-error-message'
+
 interface UploadStageDocumentArgs {
   projectId: string | number
   documentType: StageDocumentType
   file: File
+}
+
+interface UploadStageDocumentCallbacks {
+  onSuccess?: () => void
+  onError?: (message: string) => void
 }
 
 function unwrapProjectDetail(
@@ -27,14 +34,25 @@ export function useUploadStageDocument() {
   const mutation = useProjectsDocumentFileCreate()
 
   const upload = useCallback(
-    ({ projectId, documentType, file }: UploadStageDocumentArgs) => {
+    (
+      { projectId, documentType, file }: UploadStageDocumentArgs,
+      callbacks?: UploadStageDocumentCallbacks,
+    ) => {
       const id = Number(projectId)
       mutation.mutate(
         { document_type: documentType, id, data: { file } },
         {
           onSuccess: (detail) => {
-            queryClient.setQueryData(projectsRetrieveQueryKey(id), unwrapProjectDetail(detail))
+            const unwrapped = unwrapProjectDetail(detail)
+            // Свежий `documents[]` (с `reuploaded_at` / `file.uploaded_at`) сразу в кэш —
+            // подсветка поля пересчитывается оптимистично, без ожидания рефетча.
+            queryClient.setQueryData(projectsRetrieveQueryKey(id), unwrapped)
+
             invalidateProjectAfterTransition(queryClient, id)
+            callbacks?.onSuccess?.()
+          },
+          onError: (error) => {
+            callbacks?.onError?.(getDocumentUploadErrorMessage(error))
           },
         },
       )

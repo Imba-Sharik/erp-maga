@@ -27,6 +27,8 @@ function isAllowedFile(file: File): boolean {
   return true
 }
 
+const REUPLOAD_SUCCESS_MESSAGE = 'Обновлённые документы направлены бухгалтеру'
+
 export interface StageDocumentFieldProps {
   projectId: string | number
   documentType: StageDocumentType
@@ -35,6 +37,9 @@ export interface StageDocumentFieldProps {
   interaction: StageDocumentInteraction
   onChange?: (fileName: string) => void
   disabled?: boolean
+  addButtonLabel?: string
+  /** После успешной замены документа в статусе `re_requested` — зелёная подпись под полем. */
+  notifyReuploadToAccountant?: boolean
 }
 
 export function StageDocumentField({
@@ -45,24 +50,31 @@ export function StageDocumentField({
   interaction,
   onChange,
   disabled,
+  addButtonLabel = 'Добавить документ',
+  notifyReuploadToAccountant = false,
 }: StageDocumentFieldProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const upload = useUploadStageDocument()
   const download = useDownloadStageDocument()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
 
   const isUpload = interaction === 'upload'
   const busy = upload.isPending || download.isPending
-  const interactionDisabled = disabled || busy
+  const uploadDisabled = disabled || busy
+  const downloadDisabled = busy
 
   const openPicker = () => {
-    if (!isUpload || interactionDisabled || variant === 'confirmed') return
+    if (!isUpload || uploadDisabled) return
+    setUploadError(null)
+    setUploadSuccess(null)
     inputRef.current?.click()
   }
 
   const requestDownload = () => {
-    if (!value || interactionDisabled) return
+    if (!value || downloadDisabled) return
     setConfirmOpen(true)
   }
 
@@ -81,20 +93,41 @@ export function StageDocumentField({
   const handleFile = (file: File | undefined) => {
     if (!file || !onChange) return
     if (!isAllowedFile(file)) {
-      window.alert('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
+      setUploadSuccess(null)
+      setUploadError('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
       return
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      window.alert('Файл слишком большой. Максимальный размер — 20 МБ.')
+      setUploadSuccess(null)
+      setUploadError('Файл слишком большой. Максимальный размер — 20 МБ.')
       return
     }
-    upload.upload({ projectId, documentType, file })
-    onChange(file.name)
+    setUploadError(null)
+    setUploadSuccess(null)
+    const shouldNotifyReupload = notifyReuploadToAccountant
+    upload.upload(
+      { projectId, documentType, file },
+      {
+        onSuccess: () => {
+          setUploadError(null)
+          if (shouldNotifyReupload) {
+            setUploadSuccess(REUPLOAD_SUCCESS_MESSAGE)
+          }
+          onChange(file.name)
+        },
+        onError: (message) => {
+          setUploadSuccess(null)
+          setUploadError(message)
+        },
+      },
+    )
   }
 
   const showFileRow =
     variant === 'uploaded' || variant === 'confirmed' || (variant === 'rejected' && Boolean(value))
-  const canReplace = isUpload && (variant === 'uploaded' || variant === 'rejected')
+  // Замену показываем для любого файла (включая `confirmed`); право решает `disabled`,
+  // который проставляет вызывающий код по роли/статусу.
+  const canReplace = isUpload && Boolean(value) && !uploadDisabled
   const canDownload = Boolean(value)
 
   const fileNameClassName = cn(
@@ -103,7 +136,7 @@ export function StageDocumentField({
     variant === 'rejected' && 'text-[#D25252]',
     variant === 'uploaded' && 'text-[#B0B0B0]',
     canDownload && 'cursor-pointer underline-offset-2 hover:underline',
-    interactionDisabled && 'cursor-not-allowed opacity-70',
+    downloadDisabled && 'cursor-not-allowed opacity-70',
   )
 
   return (
@@ -115,7 +148,7 @@ export function StageDocumentField({
           type="file"
           accept={FILE_ACCEPT}
           className="sr-only"
-          disabled={interactionDisabled || variant === 'confirmed'}
+          disabled={uploadDisabled}
           onChange={(e) => {
             handleFile(e.target.files?.[0])
             e.target.value = ''
@@ -146,7 +179,7 @@ export function StageDocumentField({
                 type="button"
                 className={fileNameClassName}
                 title={value}
-                disabled={interactionDisabled}
+                disabled={downloadDisabled}
                 onClick={requestDownload}
               >
                 {value}
@@ -163,7 +196,7 @@ export function StageDocumentField({
               variant="outline"
               size="icon"
               className="size-9 shrink-0 cursor-pointer rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
-              disabled={interactionDisabled}
+              disabled={uploadDisabled}
               aria-label="Выбрать другой файл"
               onClick={openPicker}
             >
@@ -175,11 +208,20 @@ export function StageDocumentField({
         <Button
           type="button"
           className="h-9 w-full cursor-pointer justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
-          disabled={interactionDisabled}
+          disabled={uploadDisabled}
           onClick={openPicker}
         >
-          {upload.isPending ? 'Загрузка…' : 'Добавить документ'}
+          {upload.isPending ? 'Загрузка…' : addButtonLabel}
         </Button>
+      ) : null}
+      {uploadError ? (
+        <p className="text-destructive text-sm" role="alert">
+          {uploadError}
+        </p>
+      ) : uploadSuccess ? (
+        <p className="text-sm text-[#2E7D32]" role="status">
+          {uploadSuccess}
+        </p>
       ) : null}
       {canDownload ? (
         <ConfirmDownloadDialog

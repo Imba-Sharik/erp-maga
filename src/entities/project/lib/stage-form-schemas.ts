@@ -53,13 +53,13 @@ export const stageFormSchemas = {
   archived: z.object({}),
 } satisfies Record<ProjectStage, z.ZodTypeAny>
 
-const docStatusField = z.union([
-  z.literal(''),
-  z.enum(['present', 're_requested', 'not_required']),
-])
+const docStatusField = z.union([z.literal(''), z.enum(['present', 're_requested', 'not_required'])])
 
 const documentsConfirmedAccountantSchema = z
   .object({
+    projectDocsFileName: z.string().optional(),
+    subleaseDocsFileName: z.string().optional(),
+    staffReceiptsFileName: z.string().optional(),
     projectDocsStatus: docStatusField.optional(),
     subleaseDocsStatus: docStatusField.optional(),
     staffReceiptsStatus: docStatusField.optional(),
