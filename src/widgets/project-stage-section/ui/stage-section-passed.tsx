@@ -20,8 +20,6 @@ import { stageBlockBorderClass } from '@/entities/stage-draft'
 import {
   STATUS_CONFIRM_META_BY_STATUS,
   DOC_PAIR_BY_STATUS_FIELD,
-  resolveDocumentVariantMeta,
-  useDocumentReuploadMarks,
 } from '@/entities/project-documents'
 
 import { useUserRole } from '@/entities/user-role'
@@ -155,7 +153,6 @@ export function StageSectionPassed({
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const canEdit = canEditStage(stage, role)
   const canAdvance = canAdvanceStage(stage, role)
-  const { marks: reuploadMarks } = useDocumentReuploadMarks(project.id)
   const [editing, setEditing] = useState(false)
 
   if (editing && onEditPassed) {
@@ -196,15 +193,13 @@ export function StageSectionPassed({
             documentType={f.documentType}
             value={fileName}
             variant={getStageDocumentFieldVariant(fileName || undefined, status, {
-              ...resolveDocumentVariantMeta(project.id, f.documentType, {
-                uploadedAt: project.documentFiles?.[f.documentType]?.uploadedAt,
-                confirmedAt: statusField
-                  ? (values?.[STATUS_CONFIRM_META_BY_STATUS[statusField]?.atField] as
-                      | string
-                      | undefined)
-                  : undefined,
-                reuploadedAt: reuploadMarks[f.documentType],
-              }),
+              uploadedAt: project.documentFiles?.[f.documentType]?.uploadedAt,
+              confirmedAt: statusField
+                ? (values?.[STATUS_CONFIRM_META_BY_STATUS[statusField]?.atField] as
+                    | string
+                    | undefined)
+                : undefined,
+              reuploadedAt: project.documentFiles?.[f.documentType]?.reuploadedAt,
             })}
             interaction="download"
           />
@@ -271,13 +266,11 @@ export function StageSectionPassed({
                 documentType={docPair.documentType}
                 value={fileName}
                 variant={getStageDocumentFieldVariant(fileName || undefined, status, {
-                  ...resolveDocumentVariantMeta(project.id, docPair.documentType, {
-                    uploadedAt: project.documentFiles?.[docPair.documentType]?.uploadedAt,
-                    confirmedAt: confirmedAtField
-                      ? (values?.[confirmedAtField] as string | undefined)
-                      : undefined,
-                    reuploadedAt: reuploadMarks[docPair.documentType],
-                  }),
+                  uploadedAt: project.documentFiles?.[docPair.documentType]?.uploadedAt,
+                  confirmedAt: confirmedAtField
+                    ? (values?.[confirmedAtField] as string | undefined)
+                    : undefined,
+                  reuploadedAt: project.documentFiles?.[docPair.documentType]?.reuploadedAt,
                 })}
                 interaction="download"
               />
