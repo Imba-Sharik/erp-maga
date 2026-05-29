@@ -8,7 +8,6 @@ import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generat
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 
 import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
-import { markDocumentReuploaded } from '@/entities/project-documents/lib/document-reupload-tracker'
 
 import { getDocumentUploadErrorMessage } from '../lib/get-document-upload-error-message'
 
@@ -45,18 +44,9 @@ export function useUploadStageDocument() {
         {
           onSuccess: (detail) => {
             const unwrapped = unwrapProjectDetail(detail)
+            // Свежий `documents[]` (с `reuploaded_at` / `file.uploaded_at`) сразу в кэш —
+            // подсветка поля пересчитывается оптимистично, без ожидания рефетча.
             queryClient.setQueryData(projectsRetrieveQueryKey(id), unwrapped)
-
-            const docEntry = unwrapped.documents?.find(
-              (item) => item.document_type === documentType,
-            )
-            if (docEntry?.status === 're_requested') {
-              markDocumentReuploaded(
-                id,
-                documentType,
-                docEntry.file?.uploaded_at ?? new Date().toISOString(),
-              )
-            }
 
             invalidateProjectAfterTransition(queryClient, id)
             callbacks?.onSuccess?.()
