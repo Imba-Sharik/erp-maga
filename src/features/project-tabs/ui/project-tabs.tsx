@@ -41,7 +41,7 @@ export function ProjectTabs() {
       <Select value={tab} onValueChange={(v) => setTab(v as ProjectTabKey)}>
         <SelectTrigger
           aria-label="Раздел проекта"
-          className="h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white text-sm font-normal text-[#454545] lg:hidden"
+          className="h-10! w-full rounded-[10px] border-[#B1B1B1] bg-white text-sm font-normal text-[#454545] lg:hidden"
         >
           <SelectValue />
         </SelectTrigger>
