@@ -18,10 +18,10 @@ export interface UseClosingArchiveQueryResult {
 }
 
 /**
- * Архив завершённых проектов — `stage=archived`. Ключ начинается с
- * `['projects-table', …]` (как admin-таблица), поэтому оптимистичное удаление
- * из `useDeleteProject` (setQueriesData по префиксу `['projects-table']`)
- * автоматически убирает строку и отсюда.
+ * Архив завершённых проектов — `archived_only=true` (по умолчанию archived
+ * скрыты в `/projects/`). Ключ начинается с `['projects-table', …]` (как
+ * admin-таблица), поэтому оптимистичное удаление из `useDeleteProject`
+ * (setQueriesData по префиксу `['projects-table']`) автоматически убирает строку.
  */
 export function useClosingArchiveQuery({
   enabled = true,
@@ -32,14 +32,18 @@ export function useClosingArchiveQuery({
   const query = useInfiniteQuery({
     queryKey: [
       'projects-table',
-      { stage: 'archived', ordering: PROJECTS_LIST_DEFAULT_ORDERING, search: trimmedSearch },
+      {
+        archived_only: true,
+        ordering: PROJECTS_LIST_DEFAULT_ORDERING,
+        search: trimmedSearch,
+      },
     ] as const,
     enabled,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
       projectsList(
         {
-          stage: 'archived',
+          archived_only: true,
           ordering: PROJECTS_LIST_DEFAULT_ORDERING,
           limit: PAGE_SIZE,
           offset: pageParam,
