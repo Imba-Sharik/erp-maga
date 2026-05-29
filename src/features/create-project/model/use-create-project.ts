@@ -68,9 +68,11 @@ export function useCreateProject({ magManager, onCreated }: UseCreateProjectOpti
   const mutation = useProjectsCreate<CreateProjectMutationContext>({
     mutation: {
       onMutate: async ({ data }) => {
-        const hallId = data.hall_id ?? data.hall_ids?.[0]
-        const catalogHall = hallId != null ? venueHalls.find((h) => h.id === hallId) : undefined
-        const halls = catalogHall ? [hallItemFromCatalog(catalogHall)] : []
+        const hallIds = data.hall_ids ?? (data.hall_id != null ? [data.hall_id] : [])
+        const halls = hallIds
+          .map((id) => venueHalls.find((h) => h.id === id))
+          .filter((h): h is (typeof venueHalls)[number] => h != null)
+          .map(hallItemFromCatalog)
 
         const optimistic = buildOptimisticFromRequest(data, magManager, halls)
         prependCreatedProjectToQueries(queryClient, optimistic)
@@ -96,10 +98,12 @@ export function useCreateProject({ magManager, onCreated }: UseCreateProjectOpti
 
   const create = useCallback(
     (values: CreateProjectFormValues) => {
-      const hall = venueHalls.find((h) => h.name === values.hall)
-      if (!hall) return
+      const halls = values.halls
+        .map((name) => venueHalls.find((h) => h.name === name))
+        .filter((h): h is (typeof venueHalls)[number] => h != null)
+      if (halls.length === 0) return
 
-      mutation.mutate({ data: toProjectCreateRequest(values, hall) })
+      mutation.mutate({ data: toProjectCreateRequest(values, halls) })
     },
     [mutation, venueHalls],
   )

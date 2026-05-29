@@ -19,6 +19,7 @@ import { Button } from '@/shared/ui/button'
 import { DateField } from '@/shared/ui/date-field'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
+import { MultiSelect } from '@/shared/ui/multi-select'
 import { Input } from '@/shared/ui/input'
 
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'
@@ -31,12 +32,12 @@ const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
   eventType: z.string().min(1, 'Выберите тип мероприятия'),
   eventDate: z.string().min(1, 'Выберите дату мероприятия'),
-  loft: z.string().min(1, 'Выберите лофт'),
-  hall: z.string().min(1, 'Выберите зал'),
+  lofts: z.array(z.string()).min(1, 'Выберите хотя бы один лофт'),
+  halls: z.array(z.string()).min(1, 'Выберите хотя бы один зал'),
 }) satisfies z.ZodType<CreateProjectFormValues>
 
 function getDefaultValues(): CreateProjectFormValues {
-  return { title: '', eventType: '', eventDate: toIsoLocalDay(new Date()), loft: '', hall: '' }
+  return { title: '', eventType: '', eventDate: toIsoLocalDay(new Date()), lofts: [], halls: [] }
 }
 
 export interface CreateProjectDialogProps {
@@ -154,16 +155,16 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
             </div>
             <FormField
               control={form.control}
-              name="loft"
+              name="lofts"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Лофт</FormLabel>
+                  <FormLabel>Лофты</FormLabel>
                   <FormControl>
-                    <ClearableSelect
-                      placeholder="Выберите LOFT"
-                      value={field.value || null}
+                    <MultiSelect
+                      placeholder="Выберите лофты"
+                      values={field.value}
                       options={loftOptions}
-                      onChange={(v) => field.onChange(v ?? '')}
+                      onChange={field.onChange}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}
                     />
@@ -174,16 +175,16 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
             />
             <FormField
               control={form.control}
-              name="hall"
+              name="halls"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Зал</FormLabel>
+                  <FormLabel>Залы</FormLabel>
                   <FormControl>
-                    <ClearableSelect
-                      placeholder="Выберите зал"
-                      value={field.value || null}
+                    <MultiSelect
+                      placeholder="Выберите залы"
+                      values={field.value}
                       options={hallOptions}
-                      onChange={(v) => field.onChange(v ?? '')}
+                      onChange={field.onChange}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}
                     />
