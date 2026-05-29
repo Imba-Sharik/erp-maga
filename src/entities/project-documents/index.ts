@@ -18,16 +18,11 @@ export type {
   StageDocumentStatusField,
   StageDocumentFileNameField,
 } from './lib/stage-document-registry'
-export type { StageDocumentFieldVariant } from './lib/stage-document-variant'
+export type {
+  StageDocumentFieldVariant,
+  StageDocumentVariantMeta,
+} from './lib/stage-document-variant'
 export { getStageDocumentFieldVariant } from './lib/stage-document-variant'
-export { resolveDocumentVariantMeta } from './lib/resolve-document-variant-meta'
-export type { StageDocumentVariantMeta } from './lib/resolve-document-variant-meta'
-export {
-  markDocumentReuploaded,
-  getDocumentReuploadedAt,
-  clearDocumentReupload,
-} from './lib/document-reupload-tracker'
-export { useDocumentReuploadMarks } from './model/use-document-reupload-marks'
 export { resolveStageDocuments } from './lib/resolve-stage-documents'
 export type {
   ProjectStageDocumentItem,

@@ -2,7 +2,7 @@ import type { DocumentStatus } from '@/entities/project'
 
 export type StageDocumentFieldVariant = 'empty' | 'uploaded' | 'rejected' | 'confirmed'
 
-interface StageDocumentVariantMeta {
+export interface StageDocumentVariantMeta {
   uploadedAt?: string
   confirmedAt?: string
   reuploadedAt?: string

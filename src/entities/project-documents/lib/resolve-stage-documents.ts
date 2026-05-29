@@ -2,7 +2,6 @@ import type { DocumentStatus, StageFormData } from '@/entities/project'
 import type { StageDocumentType } from '@/entities/stage-document-files'
 
 import type { StageDocumentFile } from '../model/document-file'
-import { resolveDocumentVariantMeta } from './resolve-document-variant-meta'
 import { STAGE_DOCUMENTS } from './stage-document-registry'
 import {
   getStageDocumentFieldVariant,
@@ -48,10 +47,9 @@ export function resolveStageDocuments(
         fileName: fileName ?? '',
         status,
         variant: getStageDocumentFieldVariant(fileName, status, {
-          ...resolveDocumentVariantMeta(source?.id ?? '', documentType, {
-            uploadedAt: meta?.uploadedAt,
-            confirmedAt: values?.[confirmedAtKey] as string | undefined,
-          }),
+          uploadedAt: meta?.uploadedAt,
+          confirmedAt: values?.[confirmedAtKey] as string | undefined,
+          reuploadedAt: meta?.reuploadedAt,
         }),
         ...(meta?.fileUrl ? { fileUrl: meta.fileUrl } : {}),
         ...(meta?.uploadedAt ? { uploadedAt: meta.uploadedAt } : {}),

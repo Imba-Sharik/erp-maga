@@ -2,6 +2,7 @@ import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProje
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { ProjectCalendarItemSchema } from '@/shared/api/generated/types/ProjectCalendarItemSchema'
 import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
+import type { ProjectDocumentFile } from '@/shared/api/generated/types/ProjectDocumentFile'
 import type { ProjectDocumentStatus } from '@/shared/api/generated/types/ProjectDocumentStatus'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
@@ -380,12 +381,18 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
 
   const docs = indexDocumentsByType(b.documents)
   const documentFiles: Partial<Record<StageDocumentType, StageDocumentFile>> = {}
-  const projectClosing = mapBackendDocumentFile(docs.project_closing?.file ?? b.project_docs_file)
-  if (projectClosing) documentFiles.project_closing = projectClosing
-  const subrentClosing = mapBackendDocumentFile(docs.subrent_closing?.file ?? b.sublease_docs_file)
-  if (subrentClosing) documentFiles.subrent_closing = subrentClosing
-  const staffReceipts = mapBackendDocumentFile(docs.staff_receipts?.file ?? b.staff_receipts_file)
-  if (staffReceipts) documentFiles.staff_receipts = staffReceipts
+  const fileFallbackByType: Record<StageDocumentType, ProjectDocumentFile | null | undefined> = {
+    project_closing: b.project_docs_file,
+    subrent_closing: b.sublease_docs_file,
+    staff_receipts: b.staff_receipts_file,
+  }
+  for (const documentType of Object.keys(fileFallbackByType) as StageDocumentType[]) {
+    const doc = docs[documentType]
+    const mapped = mapBackendDocumentFile(doc?.file ?? fileFallbackByType[documentType])
+    if (!mapped) continue
+    if (doc?.reuploaded_at) mapped.reuploadedAt = doc.reuploaded_at
+    documentFiles[documentType] = mapped
+  }
 
   return {
     ...base,
