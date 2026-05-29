@@ -5,12 +5,12 @@ import type { CreateProjectFormValues } from './create-project-form-values'
 
 export function toProjectCreateRequest(
   values: CreateProjectFormValues,
-  hall: VenueHall,
+  halls: VenueHall[],
 ): ProjectCreateRequest {
   return {
     title: values.title.trim(),
     event_type: Number(values.eventType),
     event_date: values.eventDate,
-    hall_id: hall.id,
+    hall_ids: halls.map((hall) => hall.id),
   }
 }
