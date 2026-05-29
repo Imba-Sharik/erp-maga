@@ -132,6 +132,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     plumCardUrl: b.plum_card_url,
     updatedAt: b.updated_at,
     createdAt: b.created_at,
+    ...(b.archived_at ? { archivedAt: b.archived_at } : {}),
     // documents_confirmed_at пока есть только в ProjectDetailSchema, не в списке.
     ...('documents_confirmed_at' in b && b.documents_confirmed_at
       ? { documentsConfirmedAt: b.documents_confirmed_at }
