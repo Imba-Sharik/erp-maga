@@ -77,10 +77,12 @@ export function MoveProjectOutsideMagDialog({
     >
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">
+          <DialogTitle className="font-heading text-left text-[#1B1A17]">
             Перевести во «Вне контура MAG»?
           </DialogTitle>
-          {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}
+          {project?.title ? (
+            <DialogDescription className="text-left">Проект: {project.title}</DialogDescription>
+          ) : null}
         </DialogHeader>
 
         <Form {...form}>
