@@ -2,19 +2,27 @@ import axios from 'axios'
 
 import type { ResponseErrorConfig } from '@/shared/api/client'
 
+/** Поля DRF в порядке релевантности для загрузки файла. */
+const PREFERRED_ERROR_FIELDS = ['detail', 'file', 'non_field_errors'] as const
+
+function asString(value: unknown): string | null {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value) && typeof value[0] === 'string') return value[0]
+  return null
+}
+
 function messageFromPayload(payload: unknown): string | null {
-  if (typeof payload === 'object' && payload !== null) {
-    if ('detail' in payload && typeof payload.detail === 'string') {
-      return payload.detail
-    }
-    const firstFieldMessage = Object.values(payload).find(
-      (value) =>
-        typeof value === 'string' || (Array.isArray(value) && typeof value[0] === 'string'),
-    )
-    if (typeof firstFieldMessage === 'string') return firstFieldMessage
-    if (Array.isArray(firstFieldMessage) && typeof firstFieldMessage[0] === 'string') {
-      return firstFieldMessage[0]
-    }
+  if (typeof payload !== 'object' || payload === null) return null
+  const record = payload as Record<string, unknown>
+
+  for (const field of PREFERRED_ERROR_FIELDS) {
+    const message = asString(record[field])
+    if (message) return message
+  }
+
+  for (const value of Object.values(record)) {
+    const message = asString(value)
+    if (message) return message
   }
   return null
 }
