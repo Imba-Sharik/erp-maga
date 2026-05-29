@@ -51,7 +51,7 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
             onOutsideMagClick={() => setOutsideMagOpen(true)}
           />
           {tab === 'actions' ? (
-            <ProjectActivityLog project={project} records={flow.records} />
+            <ProjectActivityLog projectId={Number(project.id)} />
           ) : tab === 'documents' ? (
             <ProjectDocuments project={project} getRecord={flow.getRecord} />
           ) : (

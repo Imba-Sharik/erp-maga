@@ -393,11 +393,19 @@ paths:
       operationId: projects_list
       description: 'Фильтры: event_date_after, event_date_before, stage, stage__in,
         plum_status, plum_status__in, mag_manager, hall_id, loft_id, hall (подстрока
-        в названии зала), loft (подстрока в названии лофта). Пагинация: limit, offset
-        (LimitOffset, по умолчанию limit=10). В элементе списка: halls[] (внутренние
-        hall_id/loft_id MAG), sync_error — предупреждение синка (напр. зал не в каталоге).'
+        в названии зала), loft (подстрока в названии лофта), archived_only (true —
+        только архив). По умолчанию проекты в стадии archived не возвращаются. Пагинация:
+        limit, offset (LimitOffset, по умолчанию limit=10). В элементе списка: halls[]
+        (внутренние hall_id/loft_id MAG), sync_error — предупреждение синка (напр.
+        зал не в каталоге).'
       summary: Список проектов
       parameters:
+      - in: query
+        name: archived_only
+        schema:
+          type: boolean
+        description: true — только проекты в стадии archived; по умолчанию archived
+          скрыты
       - in: query
         name: event_date_after
         schema:
@@ -644,6 +652,51 @@ paths:
       responses:
         '204':
           description: Проект помечен удалённым
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/projects/{id}/audit-log/:
+    get:
+      operationId: projects_audit_log_list
+      description: |-
+        Полный audit-log (§28 ТЗ) для блока «Лог действий» в карточке проекта.
+
+        Каждая запись: кто (user), когда (created_at), действие (action_type / action_label), поле (field_name), старое/новое (old_value / new_value), источник (source: user | system | plum), доп. данные (metadata).
+
+        Типы action_type: stage_change, field_change, plum_sync, project_created, out_of_mag, out_of_mag_return, bonus_manual_change, data_rejected, data_confirmed, project_deleted, other.
+
+        Пагинация: limit, offset (ответ: count, next, previous, results).
+      summary: Лог действий по проекту
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Размер страницы (по умолчанию 10, макс. 200)
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Смещение для пагинации
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectAuditLogList'
+          description: ''
         '403':
           content:
             application/json:
@@ -1066,10 +1119,11 @@ paths:
     post:
       operationId: projects_transition_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. На стадии `contract_signed` данные
-        договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH
-        /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля
-        в transition тоже необязательны.'
+        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` сразу закрывает
+        проект (`stage=closed`, `closed_at`) — отдельный переход в `closed` не нужен.
+        На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
+        и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
+        в `ready_to_event` те же поля в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -1182,10 +1236,12 @@ paths:
                     kind: equipment
                     bonus_amount: 70000
                 summary: bonus_calculated → bonus_approved
-              BonusApproved→Closed:
+              BonusCalculated→BonusApproved(ручнаяСумма):
                 value:
-                  to_stage: closed
-                summary: bonus_approved → closed
+                  to_stage: bonus_approved
+                  approved_bonus: '87500.00'
+                  adjustment_reason: Корректировка по согласованию с руководителем
+                summary: bonus_calculated → bonus_approved (ручная сумма)
               RejectData(откатДанных):
                 value:
                   to_stage: reject_data
@@ -1222,10 +1278,11 @@ paths:
     post:
       operationId: projects_transitions_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. На стадии `contract_signed` данные
-        договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH
-        /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля
-        в transition тоже необязательны.'
+        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` сразу закрывает
+        проект (`stage=closed`, `closed_at`) — отдельный переход в `closed` не нужен.
+        На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
+        и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
+        в `ready_to_event` те же поля в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -1338,10 +1395,12 @@ paths:
                     kind: equipment
                     bonus_amount: 70000
                 summary: bonus_calculated → bonus_approved
-              BonusApproved→Closed:
+              BonusCalculated→BonusApproved(ручнаяСумма):
                 value:
-                  to_stage: closed
-                summary: bonus_approved → closed
+                  to_stage: bonus_approved
+                  approved_bonus: '87500.00'
+                  adjustment_reason: Корректировка по согласованию с руководителем
+                summary: bonus_calculated → bonus_approved (ручная сумма)
               RejectData(откатДанных):
                 value:
                   to_stage: reject_data
@@ -1494,6 +1553,10 @@ paths:
         (зал + лофт, как в основном списке).'
       summary: Список проектов «Вне контура MAG»
       parameters:
+      - in: query
+        name: archived_only
+        schema:
+          type: boolean
       - in: query
         name: event_date_after
         schema:
@@ -2209,6 +2272,29 @@ components:
       - out_of_mag_transferred_at
       - out_of_mag_transferred_by
       - stage_from
+    PaginatedProjectAuditLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectAuditLog'
     PaginatedProjectList:
       type: object
       required:
@@ -2832,6 +2918,104 @@ components:
       - kind
       - percent
       - sales
+    ProjectAuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Когда
+        action_type:
+          enum:
+          - stage_change
+          - field_change
+          - plum_sync
+          - project_created
+          - out_of_mag
+          - out_of_mag_return
+          - bonus_manual_change
+          - data_rejected
+          - data_confirmed
+          - project_deleted
+          - other
+          type: string
+          description: |-
+            * `stage_change` - Смена стадии
+            * `field_change` - Изменение поля
+            * `plum_sync` - Синхронизация Plum
+            * `project_created` - Создание проекта
+            * `out_of_mag` - Вне контура MAG
+            * `out_of_mag_return` - Возврат из вне контура MAG
+            * `bonus_manual_change` - Ручная корректировка бонуса
+            * `data_rejected` - Данные не приняты
+            * `data_confirmed` - Данные подтверждены
+            * `project_deleted` - Удаление проекта
+            * `other` - Прочее
+          x-spec-enum-id: 9a482cfa3154e2b4
+          readOnly: true
+          title: Тип действия
+        action_label:
+          type: string
+          readOnly: true
+        field_name:
+          type: string
+          readOnly: true
+          title: Поле
+        old_value:
+          type: string
+          readOnly: true
+          title: Старое значение
+        new_value:
+          type: string
+          readOnly: true
+          title: Новое значение
+        source:
+          enum:
+          - user
+          - system
+          - plum
+          type: string
+          description: |-
+            * `user` - Пользователь
+            * `system` - Система
+            * `plum` - Plum
+          x-spec-enum-id: 85291c4eb9edf872
+          readOnly: true
+          title: Источник
+        metadata:
+          readOnly: true
+          nullable: true
+          title: Метаданные
+        user:
+          allOf:
+          - $ref: '#/components/schemas/ProjectAuditLogUser'
+          nullable: true
+          readOnly: true
+      required:
+      - action_label
+      - action_type
+      - created_at
+      - field_name
+      - id
+      - metadata
+      - new_value
+      - old_value
+      - source
+      - user
+    ProjectAuditLogUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        full_name:
+          type: string
+      required:
+      - full_name
+      - id
     ProjectCalendarItemSchema:
       type: object
       properties:
@@ -3982,6 +4166,19 @@ components:
             * `confirmed` - confirmed
             * `rejected` - rejected
           x-spec-enum-id: c1eb6617a9413969
+        approved_bonus:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          description: Итоговый бонус; если отличается от расчёта — нужна adjustment_reason
+        adjustment_reason:
+          type: string
+          minLength: 1
+          description: Обязательна при ручной корректировке approved_bonus
+        bonus_adjustment_reason:
+          type: string
+          minLength: 1
+          description: Alias для adjustment_reason
         reason:
           enum:
           - event_cancelled

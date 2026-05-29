@@ -47,7 +47,7 @@ export function EmptyTableCell() {
 }
 
 export function ProjectArchivedAtCell({ project }: { project: Project }) {
-  return <GridTableCell muted>{formatTableDate(project.archivedAt ?? '')}</GridTableCell>
+  return <GridTableCell muted>{formatTableDateTime(project.archivedAt ?? '')}</GridTableCell>
 }
 
 /** Этап в ячейке таблицы: не вылезает за колонку, полный текст в `title`. */

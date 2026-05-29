@@ -1,0 +1,102 @@
+import { describe, expect, it } from 'vitest'
+
+import type { ProjectAuditLog } from '@/shared/api/generated/types/ProjectAuditLog'
+
+import { formatAuditLogAction } from './format-action'
+
+function makeEntry(overrides: Partial<ProjectAuditLog>): ProjectAuditLog {
+  return {
+    id: 1,
+    created_at: '2026-05-27T15:46:55.336763+03:00',
+    action_type: 'other',
+    action_label: 'Прочее',
+    field_name: '',
+    old_value: '',
+    new_value: '',
+    source: 'user',
+    metadata: null,
+    user: null,
+    ...overrides,
+  }
+}
+
+const managerContext = {
+  managerNameById: new Map([
+    [2, 'Игорь Менеджеров'],
+    [5, 'Анна Бухгалтерова'],
+  ]),
+}
+
+describe('formatAuditLogAction', () => {
+  it('форматирует смену стадии с человекочитаемыми названиями', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'stage_change',
+        action_label: 'Смена стадии',
+        field_name: 'stage',
+        old_value: 'plum_request',
+        new_value: 'primary_contact_done',
+      }),
+    )
+
+    expect(action).toBe('перевёл статус из «Заявка из PLUM» в «Первич. контакт выполнен»')
+  })
+
+  it('форматирует статус закрывающего документа', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'document.staff_receipts',
+        old_value: 'yes',
+        new_value: 'not_required',
+      }),
+    )
+
+    expect(action).toBe('изменил статус «Расписки по персоналу»: «Есть» → «Не требуется»')
+  })
+
+  it('форматирует назначение менеджера по id', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'mag_manager',
+        old_value: '',
+        new_value: '2',
+      }),
+      managerContext,
+    )
+
+    expect(action).toBe('назначил менеджера «Игорь Менеджеров»')
+  })
+
+  it('форматирует смену менеджера по id', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'mag_manager',
+        old_value: '2',
+        new_value: '5',
+      }),
+      managerContext,
+    )
+
+    expect(action).toBe('изменил менеджера проекта: «Игорь Менеджеров» → «Анна Бухгалтерова»')
+  })
+
+  it('форматирует неизвестное поле через generic-лейбл', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'contract_number',
+        old_value: '001',
+        new_value: '002',
+      }),
+    )
+
+    expect(action).toBe('изменил «номер договора»: «001» → «002»')
+  })
+})

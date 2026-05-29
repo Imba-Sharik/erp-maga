@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 
+import { projectsAuditLogListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsAuditLogList'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsOutOfMagListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsOutOfMagList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
@@ -19,6 +20,7 @@ export function invalidateProjectAfterTransition(
   projectId: number,
 ): void {
   queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
+  queryClient.invalidateQueries({ queryKey: projectsAuditLogListQueryKey(projectId) })
   invalidateProjectsListQueries(queryClient)
   invalidateOutsideMagQueries(queryClient)
   invalidateKanbanBoardQueries(queryClient)
