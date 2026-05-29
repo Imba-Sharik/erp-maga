@@ -25,11 +25,14 @@ export interface UseClosingArchiveQueryResult {
  */
 export function useClosingArchiveQuery({
   enabled = true,
-}: { enabled?: boolean } = {}): UseClosingArchiveQueryResult {
+  search,
+}: { enabled?: boolean; search?: string } = {}): UseClosingArchiveQueryResult {
+  const trimmedSearch = search?.trim() || undefined
+
   const query = useInfiniteQuery({
     queryKey: [
       'projects-table',
-      { stage: 'archived', ordering: PROJECTS_LIST_DEFAULT_ORDERING },
+      { stage: 'archived', ordering: PROJECTS_LIST_DEFAULT_ORDERING, search: trimmedSearch },
     ] as const,
     enabled,
     initialPageParam: 0,
@@ -40,6 +43,7 @@ export function useClosingArchiveQuery({
           ordering: PROJECTS_LIST_DEFAULT_ORDERING,
           limit: PAGE_SIZE,
           offset: pageParam,
+          ...(trimmedSearch ? { search: trimmedSearch } : {}),
         },
         { signal },
       ),

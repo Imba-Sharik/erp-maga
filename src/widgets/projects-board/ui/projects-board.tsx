@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import type { Project } from '@/entities/project'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 
 import type { BoardListParams } from '../lib/kanban-board-query'
 import { ProjectsBoardToolbar } from './projects-board-toolbar'
@@ -18,10 +19,16 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
   const [outsideMagTarget, setOutsideMagTarget] = useState<Project | null>(null)
+  const debouncedSearch = useDebouncedValue(search)
 
   const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
 
-  const filter = useMemo(() => ({ search, city, hall, loft }), [search, city, hall, loft])
+  // Поиск канбана уходит на сервер через listParams; клиентский filter только по фасетам.
+  const filter = useMemo(() => ({ search: '', city, hall, loft }), [city, hall, loft])
+  const listParams = useMemo(
+    () => ({ ...listDateParams, search: debouncedSearch.trim() || undefined }),
+    [listDateParams, debouncedSearch],
+  )
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
@@ -38,7 +45,7 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
         <ProjectsKanban
-          listParams={listDateParams}
+          listParams={listParams}
           filter={filter}
           filtersActive={filtersActive}
           onMoveOutsideMag={setOutsideMagTarget}

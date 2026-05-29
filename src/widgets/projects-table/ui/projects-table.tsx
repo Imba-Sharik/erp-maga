@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 
 import { useManagersDirectory } from '@/entities/manager'
 import type { Project } from '@/entities/project'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 
 import {
   EMPTY_COLUMN_FILTERS,
@@ -30,6 +31,7 @@ export function ProjectsTable({
   const [pendingOnly, setPendingOnly] = useState(false)
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
   const [columnView, setColumnView] = useState<ProjectsTableColumnView>('general')
+  const debouncedSearch = useDebouncedValue(search)
 
   const {
     selectOptions,
@@ -43,11 +45,12 @@ export function ProjectsTable({
       pendingOnly,
       stage: columnFilters.stage,
       magManagerId: columnFilters.manager,
+      search: debouncedSearch,
     })
 
   const filtered = useMemo(
-    () => filterProjectsTable(projects, { search, columns: columnFilters, columnView }),
-    [projects, search, columnFilters, columnView],
+    () => filterProjectsTable(projects, { columns: columnFilters, columnView }),
+    [projects, columnFilters, columnView],
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {

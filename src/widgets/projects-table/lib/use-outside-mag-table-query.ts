@@ -7,7 +7,7 @@ import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list
 
 export type OutsideMagTableListParams = Pick<
   ProjectsOutOfMagListQueryParams,
-  'event_date_after' | 'event_date_before' | 'ordering'
+  'event_date_after' | 'event_date_before' | 'ordering' | 'search'
 >
 
 interface UseOutsideMagTableQueryOptions {

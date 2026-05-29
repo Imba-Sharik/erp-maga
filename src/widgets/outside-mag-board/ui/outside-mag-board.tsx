@@ -13,6 +13,7 @@ import {
 } from '@/widgets/projects-table'
 
 import { env } from '@/shared/config/env'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import { OUTSIDE_MAG_MOCK_PROJECTS } from '../model/outside-mag-mock-projects'
 import { OutsideMagSearchToolbar } from './outside-mag-search-toolbar'
@@ -34,6 +35,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const [search, setSearch] = useState('')
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
   const [returnTarget, setReturnTarget] = useState<Project | null>(null)
+  const debouncedSearch = useDebouncedValue(search)
 
   const {
     selectOptions,
@@ -42,7 +44,12 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
     isError: isManagersError,
   } = useManagersDirectory()
 
-  const query = useOutsideMagTableQuery(listDateParams, columnFilters.manager, {
+  const listParams = useMemo(
+    () => ({ ...listDateParams, search: debouncedSearch.trim() || undefined }),
+    [listDateParams, debouncedSearch],
+  )
+
+  const query = useOutsideMagTableQuery(listParams, columnFilters.manager, {
     enabled: !isOutsideMagMocksEnabled,
   })
 
@@ -58,16 +65,20 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
     [columnFilters.manager, selectOptions],
   )
 
-  const filtered = useMemo(
-    () =>
-      filterProjectsTable(projects, {
-        search,
-        columns: columnFilters,
-        columnView: 'outside-mag',
-        ...(isOutsideMagMocksEnabled ? { managerName: managerFilterName } : {}),
-      }),
-    [projects, search, columnFilters, isOutsideMagMocksEnabled, managerFilterName],
-  )
+  const filtered = useMemo(() => {
+    // Поиск серверный; для dev-моков (бэк не вызывается) фильтруем по названию на клиенте.
+    const source =
+      isOutsideMagMocksEnabled && debouncedSearch.trim()
+        ? projects.filter((p) =>
+            p.title.toLowerCase().includes(debouncedSearch.trim().toLowerCase()),
+          )
+        : projects
+    return filterProjectsTable(source, {
+      columns: columnFilters,
+      columnView: 'outside-mag',
+      ...(isOutsideMagMocksEnabled ? { managerName: managerFilterName } : {}),
+    })
+  }, [projects, debouncedSearch, columnFilters, managerFilterName])
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
     setColumnFilters((prev) => ({ ...prev, [key]: value }))

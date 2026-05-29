@@ -1,4 +1,7 @@
+import { useState } from 'react'
+
 import { useUsersList } from '@/shared/api/generated/hooks/usersController/useUsersList'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { formatDateTime } from '@/shared/lib/date/format-date-time'
 import {
   GridTableCell,
@@ -7,6 +10,7 @@ import {
   GridTableView,
   TABLE_EMPTY,
 } from '@/shared/ui/grid-table'
+import { SearchBar } from '@/shared/ui/search-bar'
 
 const USERS_TABLE_GRID_TEMPLATE =
   'minmax(240px, 2fr) minmax(140px, 1fr) minmax(220px, 1.4fr) minmax(170px, 1fr)'
@@ -23,7 +27,11 @@ function getRoleLabel(role: string): string {
 }
 
 export function UsersPage() {
-  const query = useUsersList()
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebouncedValue(search)
+  const trimmedSearch = debouncedSearch.trim()
+
+  const query = useUsersList(trimmedSearch ? { search: trimmedSearch } : undefined)
   const users = query.data ?? []
 
   return (
@@ -35,6 +43,12 @@ export function UsersPage() {
             Список пользователей системы с ролями и датой регистрации.
           </p>
         </div>
+        <SearchBar
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Поиск по имени или почте"
+          groupClassName="w-full md:w-75"
+        />
       </header>
 
       <GridTableView

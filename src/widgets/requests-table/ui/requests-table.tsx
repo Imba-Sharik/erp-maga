@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 
 import type { ProjectBackOrigin } from '@/entities/project'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { Input } from '@/shared/ui/input'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -33,13 +34,14 @@ interface RequestsTableProps {
 export function RequestsTable({ variant }: RequestsTableProps) {
   const [search, setSearch] = useState('')
   const config = VARIANT_CONFIG[variant]
+  const debouncedSearch = useDebouncedValue(search)
 
   const { projects, hasNextPage, isLoading, isError, isFetchingNextPage, fetchNextPage } =
-    useRequestsTableQuery(variant)
+    useRequestsTableQuery(variant, debouncedSearch)
 
   const filtered = useMemo(
-    () => filterProjectsTable(projects, { search, columns: EMPTY_COLUMN_FILTERS }),
-    [projects, search],
+    () => filterProjectsTable(projects, { columns: EMPTY_COLUMN_FILTERS }),
+    [projects],
   )
 
   return (

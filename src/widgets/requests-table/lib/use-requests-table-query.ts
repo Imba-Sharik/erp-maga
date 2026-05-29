@@ -28,12 +28,14 @@ const CLOSED_STAGE_IN = [
  * - `open` → `buildOpenRequestsQueryParams()` (ждут подтверждения);
  * - `closed` → `stage__in=<этапы после подтверждения>`.
  */
-export function useRequestsTableQuery(variant: RequestsTableVariant) {
+export function useRequestsTableQuery(variant: RequestsTableVariant, search?: string) {
   const stageParams: AccountantRequestsStageParams =
     variant === 'open' ? buildOpenRequestsQueryParams() : { stage__in: CLOSED_STAGE_IN }
 
+  const trimmedSearch = search?.trim() || undefined
+
   const query = useInfiniteQuery({
-    queryKey: ['requests-table', { variant, ...stageParams }] as const,
+    queryKey: ['requests-table', { variant, ...stageParams, search: trimmedSearch }] as const,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
       projectsList(
@@ -42,6 +44,7 @@ export function useRequestsTableQuery(variant: RequestsTableVariant) {
           ordering: PROJECTS_LIST_DEFAULT_ORDERING,
           limit: PAGE_SIZE,
           offset: pageParam,
+          ...(trimmedSearch ? { search: trimmedSearch } : {}),
         },
         { signal },
       ),
