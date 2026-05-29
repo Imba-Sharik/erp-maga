@@ -4,7 +4,6 @@ import {
   differenceInMinutes,
   format,
   isValid,
-  isYesterday,
   parseISO,
 } from 'date-fns'
 
@@ -22,9 +21,8 @@ export function formatRelativeUpdateLabel(iso: string, now: Date = new Date()): 
   if (!isValid(value)) return ''
   if (value.getTime() > now.getTime()) return ''
 
-  if (isYesterday(value)) return `Вчера в ${format(value, 'HH:mm')}`
-
   const days = differenceInCalendarDays(now, value)
+  if (days === 1) return `Вчера в ${format(value, 'HH:mm')}`
   if (days >= 2) return `${days}д назад`
 
   const minutes = differenceInMinutes(now, value)
