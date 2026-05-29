@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import type { Project, ProjectBackOrigin } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { useUserRole } from '@/entities/user-role'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
@@ -60,10 +61,21 @@ export function ClosingBoard({
   const [columnView, setColumnView] = useState<ClosingColumnView>('closing-general')
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
 
-  const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
-  const filter = useMemo(() => ({ search, city, hall, loft }), [search, city, hall, loft])
+  const debouncedSearch = useDebouncedValue(search)
+  const debouncedArchiveSearch = useDebouncedValue(archiveSearch)
 
-  const archiveQuery = useClosingArchiveQuery({ enabled: archiveMode })
+  const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
+  // Поиск канбана уходит на сервер через listParams; клиентский filter только по фасетам.
+  const filter = useMemo(() => ({ search: '', city, hall, loft }), [city, hall, loft])
+  const kanbanListParams = useMemo(
+    () => ({ ...listDateParams, search: debouncedSearch.trim() || undefined }),
+    [listDateParams, debouncedSearch],
+  )
+
+  const archiveQuery = useClosingArchiveQuery({
+    enabled: archiveMode,
+    search: debouncedArchiveSearch,
+  })
 
   const archiveManagerFilterName = useMemo(
     () => resolveManagerFilterName(columnFilters.manager, selectOptions),
@@ -73,12 +85,11 @@ export function ClosingBoard({
   const filteredArchive = useMemo(
     () =>
       filterProjectsTable(archiveQuery.projects, {
-        search: archiveSearch,
         columns: columnFilters,
         columnView,
         managerName: archiveManagerFilterName,
       }),
-    [archiveQuery.projects, archiveSearch, columnFilters, columnView, archiveManagerFilterName],
+    [archiveQuery.projects, columnFilters, columnView, archiveManagerFilterName],
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
@@ -147,7 +158,7 @@ export function ClosingBoard({
       ) : (
         <div className="flex h-full min-h-0 flex-1 flex-col">
           <ClosingKanban
-            listParams={listDateParams}
+            listParams={kanbanListParams}
             filter={filter}
             filtersActive={filtersActive}
             backOrigin={backOrigin}

@@ -32,6 +32,8 @@ interface UseProjectsTableQueryParams {
   stage: string | null
   /** ID менеджера MAG для `mag_manager` (или `null`). */
   magManagerId: string | null
+  /** Серверный поиск по названию проекта (`event_name`). */
+  search?: string
 }
 
 /**
@@ -49,17 +51,24 @@ export function useProjectsTableQuery({
   pendingOnly,
   stage,
   magManagerId,
+  search,
 }: UseProjectsTableQueryParams) {
   const stageParams: StageParams = stage
     ? { stage: stage as ProjectsListQueryParamsStageEnumKey }
     : { stage__in: pendingOnly ? PENDING_STAGE_IN : PREPROJECT_STAGE_IN }
 
   const mag_manager = parseMagManagerId(magManagerId)
+  const trimmedSearch = search?.trim() || undefined
 
   const query = useInfiniteQuery({
     queryKey: [
       'projects-table',
-      { ...stageParams, ordering: PROJECTS_LIST_DEFAULT_ORDERING, mag_manager },
+      {
+        ...stageParams,
+        ordering: PROJECTS_LIST_DEFAULT_ORDERING,
+        mag_manager,
+        search: trimmedSearch,
+      },
     ] as const,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
@@ -70,6 +79,7 @@ export function useProjectsTableQuery({
           limit: PAGE_SIZE,
           offset: pageParam,
           ...(mag_manager !== undefined ? { mag_manager } : {}),
+          ...(trimmedSearch ? { search: trimmedSearch } : {}),
         },
         { signal },
       ),
