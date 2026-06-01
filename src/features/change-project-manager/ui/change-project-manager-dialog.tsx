@@ -131,7 +131,7 @@ export function ChangeProjectManagerDialog({
             {isManagersError ? (
               <p className="text-destructive text-sm">Не удалось загрузить список менеджеров</p>
             ) : null}
-            <DialogFooter className="gap-2 sm:gap-2">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"

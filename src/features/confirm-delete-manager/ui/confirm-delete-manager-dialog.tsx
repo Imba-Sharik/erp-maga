@@ -47,7 +47,7 @@ export function ConfirmDeleteManagerDialog({
             Заблокировать менеджера {managerName}? Он исчезнет из списка активных менеджеров MAG.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-2">
+        <DialogFooter>
           <Button
             type="button"
             variant="outline"

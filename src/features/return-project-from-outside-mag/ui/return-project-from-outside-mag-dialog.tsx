@@ -116,7 +116,7 @@ export function ReturnProjectFromOutsideMagDialog({
             {isError && errorMessage ? (
               <p className="text-destructive text-sm">{errorMessage}</p>
             ) : null}
-            <DialogFooter className="gap-2 sm:gap-2">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
