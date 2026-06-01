@@ -198,7 +198,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 {errorMessage}
               </p>
             ) : null}
-            <DialogFooter className="flex-row gap-2 sm:justify-end [&>button]:flex-1 sm:[&>button]:flex-none">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"

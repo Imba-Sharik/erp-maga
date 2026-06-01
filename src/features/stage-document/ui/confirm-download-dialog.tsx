@@ -30,7 +30,7 @@ export function ConfirmDownloadDialog({
           <DialogTitle className="font-heading text-[#1B1A17]">Скачать файл?</DialogTitle>
           <DialogDescription className="break-all">{fileName}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-2">
+        <DialogFooter>
           <Button
             type="button"
             variant="outline"
