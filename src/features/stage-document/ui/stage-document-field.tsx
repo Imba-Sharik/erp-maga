@@ -7,6 +7,7 @@ import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 
 import type { StageDocumentInteraction } from '../lib/document-interaction'
+import { resolveStageDocumentFieldDisplay } from '../lib/resolve-document-field-display'
 import { useDownloadStageDocument } from '../model/use-download-stage-document'
 import { useUploadStageDocument } from '../model/use-upload-stage-document'
 import { ConfirmDownloadDialog } from './confirm-download-dialog'
@@ -123,8 +124,8 @@ export function StageDocumentField({
     )
   }
 
-  const showFileRow =
-    variant === 'uploaded' || variant === 'confirmed' || (variant === 'rejected' && Boolean(value))
+  const display = resolveStageDocumentFieldDisplay(variant, value, interaction)
+  const showFileRow = display === 'file-row'
   // Замену показываем для любого файла (включая `confirmed`); право решает `disabled`,
   // который проставляет вызывающий код по роли/статусу.
   const canReplace = isUpload && Boolean(value) && !uploadDisabled
@@ -204,7 +205,7 @@ export function StageDocumentField({
             </Button>
           ) : null}
         </div>
-      ) : isUpload ? (
+      ) : display === 'upload-button' ? (
         <Button
           type="button"
           className="h-9 w-full cursor-pointer justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
@@ -213,6 +214,14 @@ export function StageDocumentField({
         >
           {upload.isPending ? 'Загрузка…' : addButtonLabel}
         </Button>
+      ) : display === 'placeholder-empty' ? (
+        <div className="flex h-9 w-full items-center rounded-[10px] border border-[#B1B1B1] bg-[#FAFAFA] px-3 py-2 text-sm">
+          <span className="text-muted-foreground">—</span>
+        </div>
+      ) : display === 'placeholder-rejected' ? (
+        <div className="flex h-9 w-full items-center rounded-[10px] bg-[#FDEDED] px-3 py-2 text-sm">
+          <span className="text-[#D25252]">—</span>
+        </div>
       ) : null}
       {uploadError ? (
         <p className="text-destructive text-sm" role="alert">
