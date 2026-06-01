@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
 import {
-  DEFAULT_PROJECTS_BACK_ORIGIN,
   mapBackendProjectDetail,
+  resolveProjectBackFromPathname,
   type ProjectBackOrigin,
 } from '@/entities/project'
 import { useProjectsRetrieve } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
@@ -22,7 +22,9 @@ function isBackOrigin(state: unknown): state is ProjectBackOrigin {
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
-  const back = isBackOrigin(location.state) ? location.state : DEFAULT_PROJECTS_BACK_ORIGIN
+  const back = isBackOrigin(location.state)
+    ? location.state
+    : resolveProjectBackFromPathname(location.pathname)
 
   const numericId = id ? Number(id) : undefined
   const { data, isLoading, isError } = useProjectsRetrieve(numericId)

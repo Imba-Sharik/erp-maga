@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react'
 
+import type { Project } from '@/entities/project'
+import { useUserRole } from '@/entities/user-role'
+import { ConfirmDeleteProjectDialog } from '@/features/delete-project'
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { ClosingBoard } from '@/widgets/closing-board'
 
 export function ClosingPage() {
+  const role = useUserRole()
+  const isAdmin = role === 'admin'
+  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
   const [archiveMode, setArchiveMode] = useState(false)
 
   const listDateParams = useMemo(
@@ -24,13 +30,30 @@ export function ClosingPage() {
           </h1>
           <p className="max-w-[640px] text-sm text-[#ACACAC]">
             {archiveMode
-              ? 'Завершённые и архивированные проекты.'
+              ? isAdmin
+                ? 'Архив завершённых проектов без возможности смены ответственного менеджера.'
+                : 'Завершённые и архивированные проекты.'
               : 'Проекты на этапах закрытия после проведения мероприятия.'}
           </p>
         </div>
       </header>
 
-      <ClosingBoard listDateParams={listDateParams} onArchiveModeChange={setArchiveMode} />
+      <ClosingBoard
+        listDateParams={listDateParams}
+        canChangeManager={!isAdmin}
+        onDeleteProject={isAdmin ? setDeleteTarget : undefined}
+        onArchiveModeChange={setArchiveMode}
+      />
+
+      {isAdmin && (
+        <ConfirmDeleteProjectDialog
+          open={deleteTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null)
+          }}
+          project={deleteTarget}
+        />
+      )}
     </div>
   )
 }

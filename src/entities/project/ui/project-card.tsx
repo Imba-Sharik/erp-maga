@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/shared/ui/card'
+import { projectDetailPath } from '../lib/project-detail-path'
 import type { Project, ProjectBackOrigin } from '../model/types'
 import { ProjectStageBadge } from './project-stage-badge'
 import { ProjectTelegramLink } from './project-telegram-link'
@@ -11,7 +12,8 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
   const navigate = useNavigate()
-  const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
+  const goToDetail = () =>
+    navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
 
   // Лёгкие карточки из /projects/calendar/ приходят со слитой строкой hallLoft и
