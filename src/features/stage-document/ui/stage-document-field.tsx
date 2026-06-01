@@ -195,7 +195,7 @@ export function StageDocumentField({
               type="button"
               variant="outline"
               size="icon"
-              className="size-9 shrink-0 cursor-pointer rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
+              className="size-9 shrink-0 rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
               disabled={uploadDisabled}
               aria-label="Выбрать другой файл"
               onClick={openPicker}
@@ -207,7 +207,7 @@ export function StageDocumentField({
       ) : isUpload ? (
         <Button
           type="button"
-          className="h-9 w-full cursor-pointer justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
+          className="h-9 w-full justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
           disabled={uploadDisabled}
           onClick={openPicker}
         >

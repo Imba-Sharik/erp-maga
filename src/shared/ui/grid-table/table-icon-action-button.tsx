@@ -28,7 +28,7 @@ export function TableIconActionButton({
       aria-label={ariaLabel}
       onClick={onClick}
       className={cn(
-        'size-8 shrink-0 cursor-pointer rounded-[8px] border-none bg-[#f8f8f8] p-0 text-[#ACACAC]',
+        'size-8 shrink-0 rounded-[8px] border-none bg-[#f8f8f8] p-0 text-[#ACACAC]',
         'focus-visible:ring-ring/50 shadow-none focus-visible:ring-2',
       )}
     >

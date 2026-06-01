@@ -28,7 +28,7 @@ export const ScheduleDaySection = memo(function ScheduleDaySection({
           type="button"
           variant="ghost"
           size="icon-sm"
-          className="shrink-0 cursor-pointer text-[#ACACAC] hover:text-[#1B1A17]"
+          className="shrink-0 text-[#ACACAC] hover:text-[#1B1A17]"
           aria-label="Снять выделение с этого дня"
           onClick={() => onRemoveSelectedDay(date)}
         >
