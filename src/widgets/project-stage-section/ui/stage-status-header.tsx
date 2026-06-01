@@ -8,6 +8,9 @@ const textBlockClass =
 
 const headerRowClass = 'flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden text-sm'
 
+const titleRowClass =
+  'flex min-w-0 w-full items-center gap-1.5 overflow-hidden sm:w-auto sm:flex-1'
+
 interface StageStatusHeaderProps {
   statusLabel: string
   title: string
@@ -34,10 +37,17 @@ export function StageStatusHeader({
     </span>
   )
 
+  const titleWithChevron = (
+    <div className={titleRowClass}>
+      <span className={cn('min-w-0 flex-1 truncate font-semibold', titleClassName)}>{title}</span>
+      <ChevronDown className="text-muted-foreground size-3.5 shrink-0 transition-transform group-data-[state=closed]:-rotate-90" />
+    </div>
+  )
+
   const textBlock = (
     <div className={textBlockClass}>
       {status}
-      {titleEl}
+      {collapsible ? titleWithChevron : titleEl}
     </div>
   )
 
@@ -45,7 +55,6 @@ export function StageStatusHeader({
     return (
       <CollapsibleTrigger className={cn('group', headerRowClass)}>
         {textBlock}
-        <ChevronDown className="text-muted-foreground size-3.5 shrink-0 transition-transform group-data-[state=closed]:-rotate-90" />
       </CollapsibleTrigger>
     )
   }
