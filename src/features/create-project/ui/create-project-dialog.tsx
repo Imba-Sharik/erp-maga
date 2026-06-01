@@ -26,7 +26,7 @@ import type { CreateProjectFormValues } from '../lib/create-project-form-values'
 import { useCreateProject } from '../model/use-create-project'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'h-10! w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
@@ -104,7 +104,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <Input
                       {...field}
                       placeholder="Например, Корпоратив Acme"
-                      className="h-10 rounded-[10px] border-[#B1B1B1] bg-white placeholder:text-[#BCBCBC]"
+                      className="h-10! rounded-[10px] border-[#B1B1B1] bg-white placeholder:text-[#BCBCBC]"
                       autoComplete="off"
                     />
                   </FormControl>
@@ -112,12 +112,12 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="eventType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Тип мероприятия</FormLabel>
                     <FormControl>
                       <ClearableSelect
@@ -139,13 +139,12 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 control={form.control}
                 name="eventDate"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Дата мероприятия</FormLabel>
                     <FormControl>
                       <DateField
                         value={field.value}
                         onChange={field.onChange}
-                        className="h-10 rounded-[10px] border-[#B1B1B1] bg-white px-3 text-sm"
                       />
                     </FormControl>
                     <FormMessage />
