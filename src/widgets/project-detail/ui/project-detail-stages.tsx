@@ -1,6 +1,7 @@
 import {
   FUNNEL_LABELS,
   STAGE_FUNNEL,
+  STAGE_LABELS,
   type ProjectDetail,
   type ProjectStage,
   type StageFunnel,
@@ -55,6 +56,14 @@ export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps)
     onTaxRateChange: flow.setTaxRate,
     onToggleBackline: flow.toggleBackline,
     getRecord: flow.getRecord,
+  }
+
+  if (economicsOnly && closing.length === 0 && preproject.length === 0) {
+    return (
+      <p className="text-sm text-[#ACACAC]">
+        Финансовые данные появятся, когда проект дойдёт до этапа «{STAGE_LABELS.ready_to_event}».
+      </p>
+    )
   }
 
   return (
