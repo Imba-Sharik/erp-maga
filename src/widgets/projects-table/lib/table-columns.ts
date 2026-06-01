@@ -19,6 +19,13 @@ export const TABLE_GRID_TEMPLATE_OUTSIDE_MAG =
   'minmax(170px,1.5fr) minmax(96px,0.8fr) minmax(96px,0.8fr) minmax(170px,1.45fr) minmax(165px,1.35fr) minmax(120px,1fr) minmax(120px,1fr) minmax(140px,1.1fr) minmax(140px,1.1fr) minmax(56px,72px)'
 
 /**
+ * Активное закрытие (табличный вид канбана) — read-only, без фильтров в шапке:
+ * Название · Зал · LOFT · Дата мероп. · Менеджер · Тип мероприятия · Компания · Телефон
+ */
+export const TABLE_GRID_TEMPLATE_CLOSING_ACTIVE =
+  'minmax(170px,1.5fr) minmax(96px,0.8fr) minmax(96px,0.8fr) minmax(130px,1.05fr) minmax(150px,1.3fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1.05fr)'
+
+/**
  * Архив закрытия — «Общие данные»:
  * Название · Лофт · Зал · Менеджер · Дата мероп. · Компания · Телефон · Дата архивации
  */
@@ -53,6 +60,7 @@ export const TABLE_MIN_WIDTH_GENERAL_WITH_ACTIONS = '1250px'
 export const TABLE_MIN_WIDTH_ECONOMICS = '900px'
 export const TABLE_MIN_WIDTH_ECONOMICS_WITH_ACTIONS = '970px'
 export const TABLE_MIN_WIDTH_OUTSIDE_MAG = '1315px'
+export const TABLE_MIN_WIDTH_CLOSING_ACTIVE = '1100px'
 export const TABLE_MIN_WIDTH_CLOSING_GENERAL = '1050px'
 export const TABLE_MIN_WIDTH_CLOSING_ECONOMICS = '850px'
 export const TABLE_MIN_WIDTH_CLOSING_GENERAL_WITH_ACTIONS = '1120px'
@@ -77,6 +85,7 @@ export const TABLE_COLUMN_COUNT: Record<ProjectsTableColumnView, number> = {
   general: 9,
   economics: 7,
   'outside-mag': 10,
+  'closing-active': 8,
   'closing-general': 8,
   'closing-economics': 6,
   requests: 7,
@@ -92,6 +101,7 @@ export function getTableGridTemplate(
     return withActions ? TABLE_GRID_TEMPLATE_ECONOMICS_WITH_ACTIONS : TABLE_GRID_TEMPLATE_ECONOMICS
   }
   if (view === 'outside-mag') return TABLE_GRID_TEMPLATE_OUTSIDE_MAG
+  if (view === 'closing-active') return TABLE_GRID_TEMPLATE_CLOSING_ACTIVE
   if (view === 'closing-general') {
     return withActions
       ? TABLE_GRID_TEMPLATE_CLOSING_GENERAL_WITH_ACTIONS
@@ -116,6 +126,7 @@ export function getTableMinWidth(
     return withActions ? TABLE_MIN_WIDTH_ECONOMICS_WITH_ACTIONS : TABLE_MIN_WIDTH_ECONOMICS
   }
   if (view === 'outside-mag') return TABLE_MIN_WIDTH_OUTSIDE_MAG
+  if (view === 'closing-active') return TABLE_MIN_WIDTH_CLOSING_ACTIVE
   if (view === 'closing-general') {
     return withActions
       ? TABLE_MIN_WIDTH_CLOSING_GENERAL_WITH_ACTIONS

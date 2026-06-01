@@ -6,6 +6,7 @@ export type ProjectsTableColumnView =
   | 'general'
   | 'economics'
   | 'outside-mag'
+  | 'closing-active'
   | 'closing-general'
   | 'closing-economics'
   | 'requests'

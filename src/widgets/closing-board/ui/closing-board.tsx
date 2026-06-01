@@ -6,6 +6,7 @@ import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
+import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -15,8 +16,10 @@ import {
   type ColumnFilters,
 } from '@/widgets/projects-table'
 
+import { useClosingActiveTableQuery } from '../lib/use-closing-active-table-query'
 import { useClosingArchiveQuery } from '../lib/use-closing-archive-query'
 import { ClosingBoardToolbar, type ClosingColumnView } from './closing-board-toolbar'
+import type { ClosingViewMode } from './closing-view-toggle'
 import { ClosingKanban } from './closing-kanban'
 
 const CLOSING_BACK: ProjectBackOrigin = {
@@ -55,6 +58,7 @@ export function ClosingBoard({
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ClosingViewMode>('kanban')
 
   // Archive table filters
   const [archiveSearch, setArchiveSearch] = useState('')
@@ -70,6 +74,17 @@ export function ClosingBoard({
   const kanbanListParams = useMemo(
     () => ({ ...listDateParams, search: debouncedSearch.trim() || undefined }),
     [listDateParams, debouncedSearch],
+  )
+
+  // Табличный вид активного закрытия: один запрос на все closing-этапы,
+  // фасетные фильтры (город/зал/LOFT) — на клиенте, как в канбане.
+  const activeTableQuery = useClosingActiveTableQuery({
+    listParams: kanbanListParams,
+    enabled: !archiveMode && viewMode === 'table',
+  })
+  const filteredActiveTable = useMemo(
+    () => filterProjects(activeTableQuery.projects, filter),
+    [activeTableQuery.projects, filter],
   )
 
   const archiveQuery = useClosingArchiveQuery({
@@ -120,10 +135,12 @@ export function ClosingBoard({
           city={city}
           hall={hall}
           loft={loft}
+          viewMode={viewMode}
           onChangeSearch={setSearch}
           onChangeCity={setCity}
           onChangeHall={setHall}
           onChangeLoft={setLoft}
+          onViewModeChange={setViewMode}
           onToggleArchive={handleToggleArchive}
         />
       )}
@@ -153,6 +170,26 @@ export function ClosingBoard({
                   )
                 : undefined
             }
+          />
+        </div>
+      ) : viewMode === 'table' ? (
+        <div className="flex h-full min-h-0 flex-1 flex-col">
+          <ProjectsTableView
+            projects={filteredActiveTable}
+            columnView="closing-active"
+            columnFilters={EMPTY_COLUMN_FILTERS}
+            managerFilterOptions={filterOptions}
+            directoryOptions={selectOptions}
+            managersSelectLoading={isManagersLoading}
+            managersSelectError={isManagersError}
+            onColumnFilterChange={() => {}}
+            isLoading={activeTableQuery.isLoading}
+            isError={activeTableQuery.isError}
+            hasNextPage={activeTableQuery.hasNextPage}
+            isFetchingNextPage={activeTableQuery.isFetchingNextPage}
+            onLoadMore={activeTableQuery.fetchNextPage}
+            backOrigin={backOrigin}
+            managerEditable={false}
           />
         </div>
       ) : (
