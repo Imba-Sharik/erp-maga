@@ -1,9 +1,12 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { RequireRole } from './guards/require-role'
 import { RoleHomeRedirect } from './guards/role-home'
+import {
+  RedirectClosedProjectDetail,
+  RedirectClosedProjectsList,
+} from './redirects/closed-projects-redirect'
 import { AppLayout } from './layouts/app-layout'
 import { CalendarPage } from '@/pages/calendar'
-import { ClosedProjectsPage } from '@/pages/closed-projects'
 import { ClosedRequestsPage } from '@/pages/closed-requests'
 import { ClosingPage } from '@/pages/closing'
 import { DashboardPage } from '@/pages/dashboard'
@@ -52,8 +55,16 @@ const router = createBrowserRouter([
       {
         path: 'closing',
         element: (
-          <RequireRole roles={['manager', 'director']}>
+          <RequireRole roles={['manager', 'director', 'admin']}>
             <ClosingPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'closing/:id',
+        element: (
+          <RequireRole roles={['manager', 'director', 'admin']}>
+            <ProjectDetailPage />
           </RequireRole>
         ),
       },
@@ -82,13 +93,15 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'closed-projects',
+        path: 'closed-requests/:id',
         element: (
-          <RequireRole roles={['admin']}>
-            <ClosedProjectsPage />
+          <RequireRole roles={['accountant']}>
+            <RequestDetailPage />
           </RequireRole>
         ),
       },
+      { path: 'closed-projects', element: <RedirectClosedProjectsList /> },
+      { path: 'closed-projects/:id', element: <RedirectClosedProjectDetail /> },
       {
         path: 'outside-mag',
         element: (
