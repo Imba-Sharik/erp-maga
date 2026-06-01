@@ -28,7 +28,7 @@ export function ClosingPage() {
           <h1 className="font-heading font-bold text-[#1B1A17]">
             {archiveMode ? 'Архив проектов' : 'Закрытие'}
           </h1>
-          <p className="max-w-[640px] text-sm text-[#ACACAC]">
+          <p className="hidden max-w-[640px] text-sm text-[#ACACAC] md:block">
             {archiveMode
               ? isAdmin
                 ? 'Архив завершённых проектов без возможности смены ответственного менеджера.'

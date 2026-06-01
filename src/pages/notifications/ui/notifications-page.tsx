@@ -18,7 +18,7 @@ export function NotificationsPage() {
       <header className="flex shrink-0 flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <h1 className="font-heading font-bold text-[#1B1A17]">Уведомления</h1>
-          <p className="max-w-[640px] text-sm text-[#ACACAC]">
+          <p className="hidden max-w-[640px] text-sm text-[#ACACAC] md:block">
             События по проектам из вашего inbox. Новые записи создаёт сервер при действиях в
             воронке.
           </p>
