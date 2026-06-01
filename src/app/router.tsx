@@ -111,6 +111,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'outside-mag/:id',
+        element: (
+          <RequireRole roles={['director']}>
+            <ProjectDetailPage />
+          </RequireRole>
+        ),
+      },
+      {
         path: 'users',
         element: (
           <RequireRole roles={['admin']}>

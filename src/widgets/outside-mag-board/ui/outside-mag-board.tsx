@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { OUTSIDE_MAG_BACK_ORIGIN, type Project } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
@@ -21,11 +21,6 @@ import { ReturnFromOutsideMagButton } from './return-from-outside-mag-button'
 
 /** Только явный флаг; в dev без VITE_USE_MOCKS=true — реальный GET /projects/out-of-mag/. */
 const isOutsideMagMocksEnabled = env.USE_MOCKS
-
-const OUTSIDE_MAG_BACK: ProjectBackOrigin = {
-  to: '/outside-mag',
-  label: 'Вне контура MAG',
-}
 
 interface OutsideMagBoardProps {
   listDateParams: BoardListParams
@@ -102,7 +97,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           onLoadMore={fetchNextPage}
-          backOrigin={OUTSIDE_MAG_BACK}
+          backOrigin={OUTSIDE_MAG_BACK_ORIGIN}
           renderRowAction={(project) => (
             <ReturnFromOutsideMagButton onClick={() => setReturnTarget(project)} />
           )}

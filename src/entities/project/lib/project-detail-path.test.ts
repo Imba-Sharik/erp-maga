@@ -4,6 +4,7 @@ import {
   CLOSED_REQUESTS_BACK_ORIGIN,
   CLOSING_BACK_ORIGIN,
   DEFAULT_PROJECTS_BACK_ORIGIN,
+  OUTSIDE_MAG_BACK_ORIGIN,
   REQUESTS_BACK_ORIGIN,
 } from '../model/project-back-origins'
 import { projectDetailPath } from './project-detail-path'
@@ -28,6 +29,10 @@ describe('projectDetailPath', () => {
     expect(projectDetailPath(10, DEFAULT_PROJECTS_BACK_ORIGIN)).toBe('/projects/10')
     expect(projectDetailPath(11, REQUESTS_BACK_ORIGIN)).toBe('/requests/11')
     expect(projectDetailPath(12, CLOSED_REQUESTS_BACK_ORIGIN)).toBe('/closed-requests/12')
+  })
+
+  it('маппит «Вне контура MAG» на /outside-mag/:id', () => {
+    expect(projectDetailPath(8, OUTSIDE_MAG_BACK_ORIGIN)).toBe('/outside-mag/8')
   })
 
   it('для неизвестного listRoute fallback на /projects', () => {

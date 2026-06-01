@@ -20,8 +20,14 @@ export const CLOSED_REQUESTS_BACK_ORIGIN: ProjectBackOrigin = {
   label: 'Закрытые запросы',
 }
 
+export const OUTSIDE_MAG_BACK_ORIGIN: ProjectBackOrigin = {
+  to: '/outside-mag',
+  label: 'Вне контура MAG',
+}
+
 export function resolveProjectBackFromPathname(pathname: string): ProjectBackOrigin {
   if (pathname.startsWith('/closing/')) return CLOSING_BACK_ORIGIN
+  if (pathname.startsWith('/outside-mag/')) return OUTSIDE_MAG_BACK_ORIGIN
   return DEFAULT_PROJECTS_BACK_ORIGIN
 }
 

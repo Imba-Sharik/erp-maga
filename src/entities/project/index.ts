@@ -2,6 +2,7 @@ export {
   CLOSED_REQUESTS_BACK_ORIGIN,
   CLOSING_BACK_ORIGIN,
   DEFAULT_PROJECTS_BACK_ORIGIN,
+  OUTSIDE_MAG_BACK_ORIGIN,
   REQUESTS_BACK_ORIGIN,
   resolveProjectBackFromPathname,
   resolveRequestBackFromPathname,

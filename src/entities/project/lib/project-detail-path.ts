@@ -4,6 +4,7 @@ import type { ProjectBackOrigin } from '../model/types'
 const DETAIL_PREFIX_BY_LIST: Record<string, string> = {
   '/closing': '/closing',
   '/closed-projects': '/closing',
+  '/outside-mag': '/outside-mag',
   '/projects': '/projects',
   '/requests': '/requests',
   '/closed-requests': '/closed-requests',
