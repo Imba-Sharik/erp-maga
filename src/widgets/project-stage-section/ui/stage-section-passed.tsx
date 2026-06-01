@@ -242,40 +242,41 @@ export function StageSectionPassed({
       return (
         <div
           key={f.name}
-          className={cn(
-            'flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch',
-            spanClass(f.span, false),
-          )}
+          className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}
         >
-          <div className="min-w-0 flex-1">
-            <StageFieldReadonly
-              label={readonlyLabel}
-              value={readField(ctx, values, f)}
-              source={getReadonlyFieldSource(f, {
-                fieldEditable,
-                isCurrent,
-                canEditStage: canEdit,
-              })}
-              isSelect
-            />
-          </div>
-          {docPair ? (
+          <StageFieldLabel label={readonlyLabel} />
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
             <div className="min-w-0 flex-1">
-              <StageDocumentField
-                projectId={project.id}
-                documentType={docPair.documentType}
-                value={fileName}
-                variant={getStageDocumentFieldVariant(fileName || undefined, status, {
-                  uploadedAt: project.documentFiles?.[docPair.documentType]?.uploadedAt,
-                  confirmedAt: confirmedAtField
-                    ? (values?.[confirmedAtField] as string | undefined)
-                    : undefined,
-                  reuploadedAt: project.documentFiles?.[docPair.documentType]?.reuploadedAt,
+              <StageFieldReadonly
+                hideLabel
+                label={readonlyLabel}
+                value={readField(ctx, values, f)}
+                source={getReadonlyFieldSource(f, {
+                  fieldEditable,
+                  isCurrent,
+                  canEditStage: canEdit,
                 })}
-                interaction="download"
+                isSelect
               />
             </div>
-          ) : null}
+            {docPair ? (
+              <div className="min-w-0 flex-1">
+                <StageDocumentField
+                  projectId={project.id}
+                  documentType={docPair.documentType}
+                  value={fileName}
+                  variant={getStageDocumentFieldVariant(fileName || undefined, status, {
+                    uploadedAt: project.documentFiles?.[docPair.documentType]?.uploadedAt,
+                    confirmedAt: confirmedAtField
+                      ? (values?.[confirmedAtField] as string | undefined)
+                      : undefined,
+                    reuploadedAt: project.documentFiles?.[docPair.documentType]?.reuploadedAt,
+                  })}
+                  interaction="download"
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       )
     }
