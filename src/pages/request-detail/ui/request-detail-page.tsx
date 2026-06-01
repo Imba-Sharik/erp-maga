@@ -1,12 +1,14 @@
 import { useMemo } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
-import { mapBackendProjectDetail, type ProjectBackOrigin } from '@/entities/project'
+import {
+  mapBackendProjectDetail,
+  resolveRequestBackFromPathname,
+  type ProjectBackOrigin,
+} from '@/entities/project'
 import { useProjectsRetrieve } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { useBreadcrumb } from '@/shared/hooks/use-breadcrumb'
 import { RequestDetail } from '@/widgets/request-detail'
-
-const DEFAULT_BACK: ProjectBackOrigin = { to: '/requests', label: 'Запросы' }
 
 function isBackOrigin(state: unknown): state is ProjectBackOrigin {
   return (
@@ -20,7 +22,9 @@ function isBackOrigin(state: unknown): state is ProjectBackOrigin {
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
-  const back = isBackOrigin(location.state) ? location.state : DEFAULT_BACK
+  const back = isBackOrigin(location.state)
+    ? location.state
+    : resolveRequestBackFromPathname(location.pathname)
 
   const numericId = id ? Number(id) : undefined
   const { data, isLoading, isError } = useProjectsRetrieve(numericId)

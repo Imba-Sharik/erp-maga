@@ -2,7 +2,12 @@ import type { KeyboardEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import type { ManagerSelectOption } from '@/entities/manager'
-import { getOutsideMagReasonLabel, type Project, type ProjectBackOrigin } from '@/entities/project'
+import {
+  getOutsideMagReasonLabel,
+  projectDetailPath,
+  type Project,
+  type ProjectBackOrigin,
+} from '@/entities/project'
 import { GridTableCell, GridTableRow, GridTableRowActionCell } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
@@ -85,10 +90,8 @@ export function ProjectsTableRow({
   const navigate = useNavigate()
   const withActions = resolveTableWithActions(columnView, renderRowAction)
   const gridTemplate = getTableGridTemplate(columnView, { withActions })
-  // ЛК бухгалтера ведёт на свою деталь /requests/:id, остальные — на /projects/:id.
-  const detailBase =
-    columnView === 'requests' || columnView === 'closed-requests' ? '/requests' : '/projects'
-  const goToDetail = () => navigate(`${detailBase}/${project.id}`, { state: backOrigin })
+  const goToDetail = () =>
+    navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
 
   const managerCellProps: ProjectManagerCellProps = {
     manager: project.manager,

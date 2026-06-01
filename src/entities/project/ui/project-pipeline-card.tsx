@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
+import { projectDetailPath } from '../lib/project-detail-path'
 import type { Project, ProjectBackOrigin } from '../model/types'
 import { ProjectTelegramLink } from './project-telegram-link'
 
@@ -41,7 +42,8 @@ export function ProjectPipelineCard({
   onDeleteProject,
 }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
-  const goToDetail = () => navigate(`/projects/${project.id}`, { state: backOrigin })
+  const goToDetail = () =>
+    navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
   const hasMenu = Boolean(onMoveOutsideMag ?? onChangeManager ?? onDeleteProject)
 

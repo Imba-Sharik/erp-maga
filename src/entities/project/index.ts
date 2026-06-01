@@ -1,4 +1,12 @@
-export { DEFAULT_PROJECTS_BACK_ORIGIN } from './model/project-back-origins'
+export {
+  CLOSED_REQUESTS_BACK_ORIGIN,
+  CLOSING_BACK_ORIGIN,
+  DEFAULT_PROJECTS_BACK_ORIGIN,
+  REQUESTS_BACK_ORIGIN,
+  resolveProjectBackFromPathname,
+  resolveRequestBackFromPathname,
+} from './model/project-back-origins'
+export { projectDetailPath } from './lib/project-detail-path'
 export type { StageDocumentFieldVariant } from '@/entities/project-documents'
 export { getStageDocumentFieldVariant } from '@/entities/project-documents'
 export type {
