@@ -390,7 +390,12 @@ export function StageSectionCurrent({
     edit: 'Редактирование этапа:',
   }
   const headerLabel = editingMode ? EDITING_HEADER_LABEL[editingMode] : 'Текущий этап:'
-  const advanceLabel = stage === 'contract_signed' ? 'Готов к проведению' : 'Следующий этап'
+  const advanceLabel =
+    stage === 'contract_signed'
+      ? 'Готов к проведению'
+      : stage === 'documents_confirmed'
+        ? 'Подтвердить документы'
+        : 'Следующий этап'
 
   return (
     <div
