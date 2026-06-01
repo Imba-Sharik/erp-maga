@@ -63,7 +63,7 @@ export function ProjectManagerCell({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="shrink-0 cursor-pointer text-[#BCBCBC] hover:text-[#454545] data-[state=open]:text-[#454545]"
+                  className="shrink-0 text-[#BCBCBC] hover:text-[#454545] data-[state=open]:text-[#454545]"
                   aria-label="Сменить ответственного менеджера"
                   onClick={stopRowNavigation}
                   disabled={assignDisabled}
