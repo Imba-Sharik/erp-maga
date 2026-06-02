@@ -280,6 +280,8 @@ paths:
       description: |-
         Единый список для UI матрицы: профиль, привязки зал/лофт (`assignments` с `label`), счётчики активных/закрытых проектов, суммы продаж и бонусов (all-time).
 
+        **Доступ:** lead, admin, manager_mag.
+
         **Кто в списке:** только `role=manager_mag` и `is_active=true` (заблокированные / снятые с роли не возвращаются).
 
         **Счётчики:** активные — все стадии кроме `closed`, `archived`, `out_of_mag_scope`; закрытые — `closed` + `archived`.
@@ -1666,6 +1668,37 @@ paths:
                 items:
                   $ref: '#/components/schemas/OutOfMagProject'
           description: ''
+  /api/v1/telegram/link/:
+    get:
+      operationId: telegram_link_retrieve
+      description: Возвращает deep link для кнопки «Привязать Telegram» в ЛК. Каждый
+        запрос генерирует **новую** ссылку; предыдущая перестаёт работать. Срок жизни
+        — `TELEGRAM_LINK_TOKEN_TTL_SECONDS` (по умолчанию 900 сек / 15 мин). После
+        успешной привязки через `/start {uuid}` токен одноразовый и больше не принимается.
+      summary: Получить ссылку для привязки Telegram
+      tags:
+      - telegram
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramLinkResponse'
+          description: ''
+    delete:
+      operationId: telegram_link_destroy
+      description: Очищает telegram_id, telegram_username и telegram_chat_id у текущего
+        пользователя.
+      summary: Отвязать Telegram
+      tags:
+      - telegram
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Telegram отвязан
   /api/v1/users/:
     get:
       operationId: users_list
@@ -4243,6 +4276,20 @@ components:
       - tax_amount
       - total
       - total_with_tax
+    TelegramLinkResponse:
+      type: object
+      properties:
+        link:
+          type: string
+          format: uri
+          description: 'Deep link для привязки Telegram: https://t.me/{bot}?start={uuid}'
+        expires_at:
+          type: string
+          format: date-time
+          description: Ссылка одноразовая и действует до этого времени (UTC).
+      required:
+      - expires_at
+      - link
     TokenObtainRequestRequest:
       type: object
       properties:
@@ -4488,6 +4535,12 @@ components:
             * `director` - director
             * `accountant` - accountant
             * `admin` - admin
+        telegram_linked:
+          type: boolean
+          readOnly: true
+        telegram_username:
+          type: string
+          readOnly: true
         is_staff:
           type: boolean
           readOnly: true
@@ -4516,6 +4569,8 @@ components:
       - is_staff
       - last_name
       - role
+      - telegram_linked
+      - telegram_username
       - updated_at
       - username
     WsNotificationPayload:
@@ -4644,6 +4699,8 @@ tags:
   description: Залы, лофты, матрица менеджеров
 - name: notifications
   description: Уведомления (REST)
+- name: telegram
+  description: Привязка Telegram и webhook бота
 - name: websocket
   description: WebSocket-протокол (см. x-mag-websocket)
 x-mag-websocket:
