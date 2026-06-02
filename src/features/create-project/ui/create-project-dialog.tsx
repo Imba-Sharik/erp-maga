@@ -26,7 +26,7 @@ import type { CreateProjectFormValues } from '../lib/create-project-form-values'
 import { useCreateProject } from '../model/use-create-project'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
@@ -104,7 +104,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <Input
                       {...field}
                       placeholder="Например, Корпоратив Acme"
-                      className="h-10 rounded-[10px] border-[#B1B1B1] bg-white placeholder:text-[#BCBCBC]"
+                      className="h-10! rounded-[10px] border-[#B1B1B1] bg-white placeholder:text-[#BCBCBC]"
                       autoComplete="off"
                     />
                   </FormControl>
@@ -112,24 +112,26 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
               <FormField
                 control={form.control}
                 name="eventType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Тип мероприятия</FormLabel>
                     <FormControl>
-                      <ClearableSelect
-                        placeholder="Выберите тип"
-                        value={field.value || null}
-                        options={EVENT_TYPE_OPTIONS.map((o) => ({
-                          value: String(o.id),
-                          label: o.label,
-                        }))}
-                        onChange={(v) => field.onChange(v ?? '')}
-                        triggerClassName={TRIGGER_CLASS}
-                      />
+                      <div className="min-w-0 w-full self-end">
+                        <ClearableSelect
+                          placeholder="Выберите тип"
+                          value={field.value || null}
+                          options={EVENT_TYPE_OPTIONS.map((o) => ({
+                            value: String(o.id),
+                            label: o.label,
+                          }))}
+                          onChange={(v) => field.onChange(v ?? '')}
+                          triggerClassName={TRIGGER_CLASS}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,14 +141,12 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 control={form.control}
                 name="eventDate"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Дата мероприятия</FormLabel>
                     <FormControl>
-                      <DateField
-                        value={field.value}
-                        onChange={field.onChange}
-                        className="h-10 rounded-[10px] border-[#B1B1B1] bg-white px-3 text-sm"
-                      />
+                      <div className="min-w-0 w-full self-end">
+                        <DateField value={field.value} onChange={field.onChange} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

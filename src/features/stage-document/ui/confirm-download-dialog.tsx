@@ -25,7 +25,7 @@ export function ConfirmDownloadDialog({
 }: ConfirmDownloadDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" showCloseButton>
+      <DialogContent className="p-4 sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle className="font-heading text-[#1B1A17]">Скачать файл?</DialogTitle>
           <DialogDescription className="break-all">{fileName}</DialogDescription>

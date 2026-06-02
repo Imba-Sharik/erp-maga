@@ -29,7 +29,7 @@ export function DateField({ value, onChange, placeholder = 'дд.мм.гггг',
           type="button"
           variant="outline"
           className={cn(
-            'h-9 w-full justify-between rounded-[10px] border-[#B1B1B1] bg-white px-3 text-left text-sm font-normal',
+            'min-w-0 h-10! w-full justify-between rounded-[10px] border-[#B1B1B1] bg-white px-3 text-left text-sm font-normal',
             !selected && 'text-muted-foreground',
             className,
           )}
