@@ -398,6 +398,7 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
   return {
     ...base,
     enteredSystemAt: b.created_at,
+    isFromPlum: b.is_from_plum ?? false,
     plumId: b.plum_event_id,
     plumStatus: 'confirmed',
     plumComment: b.plum_comment,
