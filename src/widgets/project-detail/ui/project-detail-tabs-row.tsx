@@ -15,7 +15,7 @@ export function ProjectDetailTabsRow({
         <Button
           type="button"
           variant="outline"
-          className="h-9 w-auto shrink-0 rounded-[10px] border-[#D25252] bg-[#FFF3F3] px-4 text-xs text-[#D25252] hover:bg-[#FFE5E5] hover:text-[#D25252] md:h-10 md:text-sm"
+          className="h-10 w-auto shrink-0 rounded-[10px] border-[#D25252] bg-[#FFF3F3] px-4 text-sm text-[#D25252] hover:bg-[#FFE5E5] hover:text-[#D25252]"
           onClick={onOutsideMagClick}
         >
           <span className="md:hidden">Вне контура</span>
