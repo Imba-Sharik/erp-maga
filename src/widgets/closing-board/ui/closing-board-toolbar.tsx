@@ -6,6 +6,7 @@ import { ToggleSwitch } from '@/shared/ui/toggle-switch'
 import { ProjectsBoardToolbar } from '@/widgets/projects-board/ui/projects-board-toolbar'
 
 import type { ProjectsTableColumnView } from '@/widgets/projects-table/lib/economics-columns'
+import { ClosingViewToggle, type ClosingViewMode } from './closing-view-toggle'
 
 export type ClosingColumnView = Extract<
   ProjectsTableColumnView,
@@ -26,10 +27,12 @@ interface ClosingBoardToolbarKanbanProps {
   city: string | null
   hall: string | null
   loft: string | null
+  viewMode: ClosingViewMode
   onChangeSearch: (value: string) => void
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
+  onViewModeChange: (value: ClosingViewMode) => void
   onToggleArchive: (value: boolean) => void
 }
 
@@ -47,23 +50,37 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="@container flex shrink-0 flex-col gap-2.5 @[1000px]:flex-row @[1000px]:items-center @[1000px]:justify-between @[1000px]:gap-4">
-        <ProjectsBoardToolbar
-          filtersAlign="start"
-          search={props.search}
-          city={props.city}
-          hall={props.hall}
-          loft={props.loft}
-          onChangeSearch={props.onChangeSearch}
-          onChangeCity={props.onChangeCity}
-          onChangeHall={props.onChangeHall}
-          onChangeLoft={props.onChangeLoft}
-        />
+      <div className="@container flex shrink-0 flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:justify-between @[1300px]:gap-4">
+        <div className="flex flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:gap-3">
+          <ProjectsBoardToolbar
+            filtersAlign="start"
+            search={props.search}
+            city={props.city}
+            hall={props.hall}
+            loft={props.loft}
+            onChangeSearch={props.onChangeSearch}
+            onChangeCity={props.onChangeCity}
+            onChangeHall={props.onChangeHall}
+            onChangeLoft={props.onChangeLoft}
+          />
+          {/* Мобила: тогл слева + свитч архива справа в одной строке.
+              Десктоп: обёртка растворяется (contents) — тогл встаёт к фильтрам,
+              свитч архива уходит в правый край тулбара. */}
+          <div className="flex items-center justify-between gap-3 @[1300px]:contents">
+            <ClosingViewToggle value={props.viewMode} onChange={props.onViewModeChange} />
+            <ToggleSwitch
+              label="Архивные проекты"
+              checked={false}
+              onChange={props.onToggleArchive}
+              className="text-xs @[1300px]:hidden"
+            />
+          </div>
+        </div>
         <ToggleSwitch
           label="Архивные проекты"
           checked={false}
           onChange={props.onToggleArchive}
-          className="self-end text-xs @[1000px]:self-auto @[1000px]:text-sm"
+          className="hidden text-sm @[1300px]:flex"
         />
       </div>
     )

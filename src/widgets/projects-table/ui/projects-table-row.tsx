@@ -152,6 +152,23 @@ export function ProjectsTableRow({
     )
   }
 
+  if (columnView === 'closing-active') {
+    return (
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+        <div className="contents">
+          <ProjectTitleCell project={project} />
+          <ProjectHallCell project={project} />
+          <ProjectLoftCell project={project} />
+          <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
+          <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+          <GridTableCell muted>{project.type || '—'}</GridTableCell>
+          <GridTableCell muted>{project.company || '—'}</GridTableCell>
+          <GridTableCell muted>{project.phone || '—'}</GridTableCell>
+        </div>
+      </ProjectTableNavRow>
+    )
+  }
+
   if (columnView === 'closing-general') {
     return (
       <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
