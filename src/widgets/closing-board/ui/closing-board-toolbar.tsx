@@ -50,8 +50,8 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="@container flex shrink-0 flex-col gap-2.5 @[1000px]:flex-row @[1000px]:items-center @[1000px]:justify-between @[1000px]:gap-4">
-        <div className="flex flex-col gap-2.5 @[1000px]:flex-row @[1000px]:items-center @[1000px]:gap-3">
+      <div className="@container flex shrink-0 flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:justify-between @[1300px]:gap-4">
+        <div className="flex flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:gap-3">
           <ProjectsBoardToolbar
             filtersAlign="start"
             search={props.search}
@@ -66,13 +66,13 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
           {/* Мобила: тогл слева + свитч архива справа в одной строке.
               Десктоп: обёртка растворяется (contents) — тогл встаёт к фильтрам,
               свитч архива уходит в правый край тулбара. */}
-          <div className="flex items-center justify-between gap-3 @[1000px]:contents">
+          <div className="flex items-center justify-between gap-3 @[1300px]:contents">
             <ClosingViewToggle value={props.viewMode} onChange={props.onViewModeChange} />
             <ToggleSwitch
               label="Архивные проекты"
               checked={false}
               onChange={props.onToggleArchive}
-              className="text-xs @[1000px]:hidden"
+              className="text-xs @[1300px]:hidden"
             />
           </div>
         </div>
@@ -80,7 +80,7 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
           label="Архивные проекты"
           checked={false}
           onChange={props.onToggleArchive}
-          className="hidden text-sm @[1000px]:flex"
+          className="hidden text-sm @[1300px]:flex"
         />
       </div>
     )
