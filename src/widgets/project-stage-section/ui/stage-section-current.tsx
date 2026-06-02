@@ -44,6 +44,7 @@ import {
 } from '../lib/documents-confirmed-layout'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
+import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { DateField } from '@/shared/ui/date-field'
@@ -449,7 +450,9 @@ export function StageSectionCurrent({
       <Form {...form}>
         <form className="flex flex-col gap-4" noValidate>
           <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-            {renderNarrowPairs(gridFields, renderField)}
+            {stage === 'documents_confirmed'
+              ? renderDocumentsConfirmedGrid(gridFields, renderField)
+              : renderNarrowPairs(gridFields, renderField)}
           </div>
         </form>
       </Form>
