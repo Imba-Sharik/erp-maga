@@ -189,6 +189,8 @@ export interface StageSnapshot {
 export interface ProjectDetail extends Project {
   enteredSystemAt: string
   history: StageHistoryEntry[]
+  /** Проект синхронизирован из Plum (`is_from_plum` в API). */
+  isFromPlum: boolean
   plumId: string
   plumStatus: PlumStatus
   plumComment?: string

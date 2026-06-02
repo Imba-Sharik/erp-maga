@@ -77,6 +77,7 @@ export {
   groupByClosingStage,
   isClosingStage,
 } from './lib/closing-stages'
+export { hasReachedFinanceStages, isStageAtLeast } from './lib/stage-order'
 export type { ProjectsByClosingStage } from './lib/closing-stages'
 export type { OutsideMagReason } from './lib/outside-mag-reason'
 export { OUTSIDE_MAG_REASON_OPTIONS } from './lib/outside-mag-reason'

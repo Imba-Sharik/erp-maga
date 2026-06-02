@@ -1,4 +1,4 @@
-import { ALL_STAGE_ORDER, type Project, type ProjectStage } from '@/entities/project'
+import { isStageAtLeast, type Project } from '@/entities/project'
 
 export { formatTableMoney } from '@/shared/lib/format-table-money'
 
@@ -11,17 +11,6 @@ export type ProjectsTableColumnView =
   | 'closing-economics'
   | 'requests'
   | 'closed-requests'
-
-const STAGE_INDEX = new Map<ProjectStage, number>(
-  ALL_STAGE_ORDER.map((stage, index) => [stage, index]),
-)
-
-function isStageAtLeast(stage: ProjectStage, threshold: ProjectStage): boolean {
-  const current = STAGE_INDEX.get(stage)
-  const min = STAGE_INDEX.get(threshold)
-  if (current === undefined || min === undefined) return false
-  return current >= min
-}
 
 export function resolveSalesTotal(project: Project): number | null {
   if (!isStageAtLeast(project.stage, 'ready_to_event')) return null

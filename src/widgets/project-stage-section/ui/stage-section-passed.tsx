@@ -43,6 +43,7 @@ import {
 } from '../lib/fields-map'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
+import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { StageDocumentField } from '@/features/stage-document'
@@ -343,7 +344,9 @@ export function StageSectionPassed({
             </p>
           ) : (
             <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {renderNarrowPairs(gridFields, renderField)}
+              {stage === 'documents_confirmed'
+                ? renderDocumentsConfirmedGrid(gridFields, renderField)
+                : renderNarrowPairs(gridFields, renderField)}
               {extras.map((extra) =>
                 extra.source === 'manager' ? (
                   <StageFieldReadonly
