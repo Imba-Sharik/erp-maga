@@ -1,5 +1,4 @@
 import { ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
-import type { ComponentType, SVGProps } from 'react'
 
 import { useUserRole } from '@/entities/user-role'
 import type { StageFormData } from '@/entities/project'
@@ -17,16 +16,13 @@ import {
 import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
-import { cn } from '@/shared/lib/utils'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
 import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
 import { StageMobileDashDivider } from './stage-mobile-dash-divider'
-
-type Source = 'manager' | 'system'
-type Icon = ComponentType<SVGProps<SVGSVGElement>>
+import { StageReadonlyBox } from './stage-readonly-box'
 
 interface BonusRow {
   block: ArticleBlock
@@ -55,38 +51,6 @@ function calcRow(values: ArticleValues) {
   return { netProfit, bonusAmount }
 }
 
-function ReadonlyBox({
-  value,
-  source,
-  className,
-  align = 'left',
-  icon: IconCmp,
-}: {
-  value: string
-  source: Source
-  className?: string
-  align?: 'left' | 'center'
-  icon?: Icon
-}) {
-  const isSystem = source === 'system'
-  return (
-    <div
-      title={isSystem ? 'Заполнено системой' : undefined}
-      className={cn(
-        'flex h-9 items-center gap-2 rounded-[10px] border px-3 text-sm',
-        align === 'center' ? 'justify-center' : 'justify-start',
-        isSystem
-          ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
-          : 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]',
-        className,
-      )}
-    >
-      {IconCmp ? <IconCmp className="size-4 shrink-0 text-[#6B6B6B]" /> : null}
-      <span className="min-w-0 flex-1 truncate">{value}</span>
-    </div>
-  )
-}
-
 function Operator({ children }: { children: string }) {
   return <span className="px-1 text-sm font-medium text-[#6B6B6B]">{children}</span>
 }
@@ -104,26 +68,30 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
       <div className="flex min-w-0 flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">{ARTICLE_LABELS[row.kind]}</span>
         <div className="flex min-w-0 items-center gap-1.5">
-          <ReadonlyBox
+          <StageReadonlyBox
             value={formatMoney(row.values.sales)}
             source="system"
             icon={CircleDollarSign}
             className="min-w-0 flex-1"
           />
           <Operator>−</Operator>
-          <ReadonlyBox
+          <StageReadonlyBox
             value={formatMoney(row.values.expense)}
             source="system"
             icon={TrendingDown}
             className="min-w-0 flex-1"
           />
           <Operator>=</Operator>
-          <ReadonlyBox value={formatMoney(netProfit)} source="system" className="min-w-0 flex-1" />
+          <StageReadonlyBox
+            value={formatMoney(netProfit)}
+            source="system"
+            className="min-w-0 flex-1"
+          />
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-[#454545]">% Бонуса</span>
-        <ReadonlyBox
+        <StageReadonlyBox
           value={formatPercent(row.values.bonusPercent)}
           source="system"
           align="center"
@@ -137,7 +105,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
             onCommit={(next) => onBonusChange(row.block, row.kind, next)}
           />
         ) : (
-          <ReadonlyBox value={formatMoney(bonusAmount)} source="system" />
+          <StageReadonlyBox value={formatMoney(bonusAmount)} source="system" />
         )}
       </div>
     </div>
@@ -233,10 +201,10 @@ export function StagePassedBonus({
             </div>
             <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
               <StageField label="Данные подтверждены руководителем">
-                <ReadonlyBox value={dataConfirmedBy} source="system" />
+                <StageReadonlyBox value={dataConfirmedBy} source="system" />
               </StageField>
               <StageField label="Итоговый бонус">
-                <ReadonlyBox value={formatMoney(totalBonus)} source="system" />
+                <StageReadonlyBox value={formatMoney(totalBonus)} source="system" />
               </StageField>
             </div>
           </div>

@@ -18,16 +18,16 @@ import type { ProjectStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
-import { cn } from '@/shared/lib/utils'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { Input } from '@/shared/ui/input'
 
 import { canEditStage } from '../lib/stage-permissions'
+import { FinanceArticlesGrid } from './finance-articles-grid'
 import { MoneyInput } from './money-input'
 import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
+import { StageReadonlyBox, type StageReadonlySource } from './stage-readonly-box'
 
-type Source = 'manager' | 'system'
 type Aspect = 'sales' | 'expense'
 
 const MAIN_LEFT: ArticleKind[] = ['equipment', 'personnel', 'sublease', 'transport']
@@ -46,33 +46,6 @@ function formatRecordDate(iso: string | undefined): string | undefined {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return iso
   return DATE_FORMAT.format(d)
-}
-
-/** Readonly-бокс: дашед-бежевый для system, плотный — для manager. */
-function ReadonlyBox({
-  value,
-  source,
-  align = 'left',
-}: {
-  value: string
-  source: Source
-  align?: 'left' | 'center'
-}) {
-  const isSystem = source === 'system'
-  return (
-    <div
-      title={isSystem ? 'Заполнено системой' : undefined}
-      className={cn(
-        'flex h-9 items-center rounded-[10px] border px-3 text-sm',
-        align === 'center' ? 'justify-center' : 'justify-start',
-        isSystem
-          ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
-          : 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]',
-      )}
-    >
-      {value}
-    </div>
-  )
 }
 
 function PercentInput({ value, onCommit }: { value: number; onCommit: (next: number) => void }) {
@@ -109,9 +82,9 @@ function ArticleRow({ kind, values, percent, aspect, editable, onChange }: Artic
             onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
           />
         ) : (
-          <ReadonlyBox value={formatMoney(values[aspect])} source="system" />
+          <StageReadonlyBox value={formatMoney(values[aspect])} source="system" />
         )}
-        <ReadonlyBox value={formatPercent(percent)} source="system" align="center" />
+        <StageReadonlyBox value={formatPercent(percent)} source="system" align="center" />
       </div>
     </StageField>
   )
@@ -126,13 +99,13 @@ function SimpleField({
 }: {
   label: string
   value?: string
-  source?: Source
+  source?: StageReadonlySource
   required?: boolean
   children?: ReactNode
 }) {
   return (
     <StageField label={label} required={required}>
-      {children ?? <ReadonlyBox value={value ?? ''} source={source} />}
+      {children ?? <StageReadonlyBox value={value ?? ''} source={source} />}
     </StageField>
   )
 }
@@ -246,64 +219,61 @@ export function FinanceBlockWithBackline({
         <Collapsible defaultOpen className="flex flex-col">
           <SubsectionHeader title={`${subsectionTitlePrefix}Продажная часть (основной блок)`} />
           <CollapsibleContent className="pt-4">
-            <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-              {[0, 1, 2, 3].flatMap((rowIdx) => {
-                const left = MAIN_LEFT[rowIdx]
-                const right = MAIN_RIGHT[rowIdx]
-                const slot =
-                  rowIdx === 0 ? (
-                    <StageField key="tax-rate" label="Единый % налога" required>
-                      {editable ? (
-                        <PercentInput value={taxRate} onCommit={onTaxRateChange} />
-                      ) : (
-                        <ReadonlyBox
-                          value={taxRate > 0 ? formatPercent(taxRate) : '—'}
-                          source="manager"
-                        />
-                      )}
-                    </StageField>
-                  ) : rowIdx === 1 ? (
-                    <SimpleField
-                      key="tax-amount"
-                      label="Сумма налога"
-                      value={formatMoney(tax)}
-                      source="system"
+            <FinanceArticlesGrid
+              idPrefix="main"
+              left={MAIN_LEFT}
+              right={MAIN_RIGHT}
+              renderArticle={(kind) => renderArticleRow('main', kind)}
+              summary={[
+                <StageField key="tax-rate" label="Единый % налога" required>
+                  {editable ? (
+                    <PercentInput value={taxRate} onCommit={onTaxRateChange} />
+                  ) : (
+                    <StageReadonlyBox
+                      value={taxRate > 0 ? formatPercent(taxRate) : '—'}
+                      source="manager"
                     />
-                  ) : rowIdx === 2 ? (
-                    <DualField
-                      key="totals"
-                      a={{ label: 'Итого', value: formatMoney(mainTotal) }}
-                      b={{
-                        label: 'Итого с налогом',
-                        value: formatMoney(mainTotal + tax),
-                      }}
-                    />
-                  ) : editable ? (
-                    <ActionField key="action">
-                      {backlineAdded ? (
-                        <button
-                          type="button"
-                          disabled
-                          className="text-funnel-closing border-funnel-closing/40 bg-funnel-closing/10 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
-                        >
-                          <Plus className="size-3.5 rotate-45" />
-                          Бэклайн добавлен
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={onToggleBackline}
-                          className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-sm font-medium"
-                        >
-                          <Plus className="size-3.5" />
-                          Добавить бэклайн
-                        </button>
-                      )}
-                    </ActionField>
-                  ) : null
-                return [renderArticleRow('main', left), renderArticleRow('main', right), slot]
-              })}
-            </div>
+                  )}
+                </StageField>,
+                <SimpleField
+                  key="tax-amount"
+                  label="Сумма налога"
+                  value={formatMoney(tax)}
+                  source="system"
+                />,
+                <DualField
+                  key="totals"
+                  a={{ label: 'Итого', value: formatMoney(mainTotal) }}
+                  b={{
+                    label: 'Итого с налогом',
+                    value: formatMoney(mainTotal + tax),
+                  }}
+                />,
+                editable ? (
+                  <ActionField key="action">
+                    {backlineAdded ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="text-funnel-closing border-funnel-closing/40 bg-funnel-closing/10 inline-flex h-9 w-fit cursor-not-allowed items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
+                      >
+                        <Plus className="size-3.5 rotate-45" />
+                        Бэклайн добавлен
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={onToggleBackline}
+                        className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-sm font-medium"
+                      >
+                        <Plus className="size-3.5" />
+                        Добавить бэклайн
+                      </button>
+                    )}
+                  </ActionField>
+                ) : null,
+              ]}
+            />
           </CollapsibleContent>
         </Collapsible>
 
@@ -311,37 +281,32 @@ export function FinanceBlockWithBackline({
           <Collapsible defaultOpen className="flex flex-col">
             <SubsectionHeader title={`${subsectionTitlePrefix}Бэклайн (дополнительный блок)`} />
             <CollapsibleContent className="pt-4">
-              <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
-                {[0, 1, 2].flatMap((rowIdx) => {
-                  const left = BACKLINE_LEFT[rowIdx]
-                  const right = BACKLINE_RIGHT[rowIdx]
-                  const slot =
-                    rowIdx === 0 ? (
-                      <SimpleField
-                        key="bl-total"
-                        label="Итого бэклайн"
-                        value={formatMoney(backlineTotal)}
-                        source="system"
-                      />
-                    ) : rowIdx === 1 && editable ? (
-                      <ActionField key="bl-action">
-                        <button
-                          type="button"
-                          onClick={onToggleBackline}
-                          className="inline-flex h-9 w-fit items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                        >
-                          <Trash2 className="size-3.5" />
-                          Удалить бэклайн
-                        </button>
-                      </ActionField>
-                    ) : null
-                  return [
-                    renderArticleRow('backline', left),
-                    renderArticleRow('backline', right),
-                    slot,
-                  ]
-                })}
-              </div>
+              <FinanceArticlesGrid
+                idPrefix="backline"
+                left={BACKLINE_LEFT}
+                right={BACKLINE_RIGHT}
+                renderArticle={(kind) => renderArticleRow('backline', kind)}
+                summary={[
+                  <SimpleField
+                    key="bl-total"
+                    label="Итого бэклайн"
+                    value={formatMoney(backlineTotal)}
+                    source="system"
+                  />,
+                  editable ? (
+                    <ActionField key="bl-action">
+                      <button
+                        type="button"
+                        onClick={onToggleBackline}
+                        className="inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Удалить бэклайн
+                      </button>
+                    </ActionField>
+                  ) : null,
+                ]}
+              />
             </CollapsibleContent>
           </Collapsible>
         )}
@@ -379,7 +344,7 @@ export function ExpensesCommentField({ canEdit }: { canEdit: boolean }) {
           className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
         />
       ) : (
-        <ReadonlyBox value={comment || '—'} source="system" />
+        <StageReadonlyBox value={comment || '—'} source="system" />
       )}
     </StageField>
   )
