@@ -1,4 +1,4 @@
-import type { ProjectDetail } from '@/entities/project'
+import { hasReachedFinanceStages, type ProjectDetail } from '@/entities/project'
 
 import { ClientDataCard } from './client-data-card'
 import { FinanceSummaryCard } from './finance-summary-card'
@@ -15,7 +15,7 @@ export function ProjectDetailAside({ project }: { project: ProjectDetail }) {
         </>
       ) : null}
       <ClientDataCard project={project} />
-      <FinanceSummaryCard project={project} />
+      {hasReachedFinanceStages(project) ? <FinanceSummaryCard project={project} /> : null}
     </aside>
   )
 }
