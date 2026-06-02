@@ -23,6 +23,7 @@ import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
 import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
+import { StageMobileDashDivider } from './stage-mobile-dash-divider'
 
 type Source = 'manager' | 'system'
 type Icon = ComponentType<SVGProps<SVGSVGElement>>
@@ -200,23 +201,35 @@ export function StagePassedBonus({
         <CollapsibleContent className="pt-4">
           <div className="grid grid-cols-1 gap-5 @[900px]:grid-cols-[minmax(0,1fr)_280px]">
             <div className="flex min-w-0 flex-col gap-4">
-              {mainRows.map((row) => (
-                <ArticleRow
-                  key={`${row.block}-${row.kind}`}
-                  row={row}
-                  editable={editable}
-                  onBonusChange={handleBonusChange}
-                />
-              ))}
-              {backlineRows.length > 0 ? <div className="h-px w-full bg-[#F0F0F0]" /> : null}
-              {backlineRows.map((row) => (
-                <ArticleRow
-                  key={`${row.block}-${row.kind}`}
-                  row={row}
-                  editable={editable}
-                  onBonusChange={handleBonusChange}
-                />
-              ))}
+              {mainRows.flatMap((row, idx) => {
+                const showDivider = idx < mainRows.length - 1 || backlineRows.length > 0
+                return [
+                  <ArticleRow
+                    key={`${row.block}-${row.kind}`}
+                    row={row}
+                    editable={editable}
+                    onBonusChange={handleBonusChange}
+                  />,
+                  showDivider ? (
+                    <StageMobileDashDivider key={`div-main-${idx}`} hideFrom="900" />
+                  ) : null,
+                ]
+              })}
+              {backlineRows.flatMap((row, idx) => {
+                const showDivider = idx < backlineRows.length - 1
+                return [
+                  <ArticleRow
+                    key={`${row.block}-${row.kind}`}
+                    row={row}
+                    editable={editable}
+                    onBonusChange={handleBonusChange}
+                  />,
+                  showDivider ? (
+                    <StageMobileDashDivider key={`div-backline-${idx}`} hideFrom="900" />
+                  ) : null,
+                ]
+              })}
+              <StageMobileDashDivider hideFrom="900" />
             </div>
             <div className="flex flex-col justify-between gap-4 @[900px]:pl-5">
               <StageField label="Данные подтверждены руководителем">
