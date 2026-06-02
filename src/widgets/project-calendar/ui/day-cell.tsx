@@ -54,7 +54,7 @@ export function DayCell({
           isSelected && 'bg-linear-to-br from-white to-[#D9D9D9]',
         )}
       >
-        <span className="relative inline-flex shrink-0 items-center justify-center">
+        <span className="relative inline-flex shrink-0 items-center justify-center max-sm:ml-0.5">
           {isToday && (
             <span
               className="pointer-events-none absolute top-1/2 left-1/2 h-5.5 w-5.5 min-w-5.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#424242] @max-[560px]/calendar:h-4 @max-[560px]/calendar:w-4 @max-[560px]/calendar:min-w-4 @max-[400px]/calendar:h-3.5 @max-[400px]/calendar:w-3.5 @max-[400px]/calendar:min-w-3.5"
