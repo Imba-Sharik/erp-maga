@@ -29,6 +29,8 @@ export interface StageFieldConfig {
   span?: 1 | 2 | 3
   /** Два подряд `narrow: true` поля рендерятся внутри одной ячейки сетки. */
   narrow?: boolean
+  /** Доп. класс на сам инпут (например, ограничение ширины date-пикера). */
+  inputClassName?: string
 }
 
 /** Поле видно для роли; `roles` не задан — системное поле, видно всем. */
@@ -181,6 +183,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       placeholder: 'дд-мм-гггг',
       mockValue: '2026-05-11',
       narrow: true,
+      inputClassName: 'max-w-[170px]',
     },
     {
       name: 'leadManager',
