@@ -360,6 +360,7 @@ export function StageSectionCurrent({
                   value={(field.value as string) ?? ''}
                   onChange={field.onChange}
                   placeholder={f.placeholder}
+                  className={f.inputClassName}
                 />
               ) : f.type === 'phone' ? (
                 <PhoneInput
