@@ -330,7 +330,7 @@ function EconomicsTableHeader({
   )
 }
 
-/** Активное закрытие (табличный вид) — read-only, шапка без фильтров. */
+/** Активное закрытие (табличный вид) — шапка без фильтров. */
 function ClosingActiveTableHeader() {
   return (
     <>

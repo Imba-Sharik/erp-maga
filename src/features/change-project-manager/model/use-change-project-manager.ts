@@ -30,6 +30,7 @@ export function useChangeProjectManager({ onSuccess }: UseChangeProjectManagerOp
         invalidateProjectAfterTransition(queryClient, variables.id)
         invalidateManagersDirectory(queryClient)
         queryClient.invalidateQueries({ queryKey: ['projects-table'] })
+        queryClient.invalidateQueries({ queryKey: ['projects-closing-active-table'] })
         onSuccess?.()
       },
     },
