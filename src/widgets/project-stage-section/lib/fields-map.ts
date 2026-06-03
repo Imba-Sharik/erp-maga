@@ -183,7 +183,7 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       placeholder: 'дд-мм-гггг',
       mockValue: '2026-05-11',
       narrow: true,
-      inputClassName: 'max-w-[130px]',
+      inputClassName: 'h-9! max-w-[130px]',
     },
     {
       name: 'leadManager',
