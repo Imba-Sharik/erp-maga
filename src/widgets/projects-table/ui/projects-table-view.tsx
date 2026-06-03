@@ -121,7 +121,7 @@ export function ProjectsTableView({
         withActions={withActions}
       />
     ) : columnView === 'closing-active' ? (
-      <ClosingActiveTableHeader />
+      <ClosingActiveTableHeader withActions={withActions} />
     ) : columnView === 'closing-general' ? (
       <ClosingGeneralTableHeader
         columnFilters={columnFilters}
@@ -330,8 +330,8 @@ function EconomicsTableHeader({
   )
 }
 
-/** Активное закрытие (табличный вид) — read-only, шапка без фильтров. */
-function ClosingActiveTableHeader() {
+/** Активное закрытие (табличный вид) — шапка без фильтров. */
+function ClosingActiveTableHeader({ withActions }: { withActions: boolean }) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -342,6 +342,7 @@ function ClosingActiveTableHeader() {
       <GridTableHeaderLabel>Тип мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
+      {withActions ? <GridTableHeaderCell aria-hidden /> : null}
     </>
   )
 }

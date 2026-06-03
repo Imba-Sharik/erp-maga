@@ -4,7 +4,7 @@ import type { Project, ProjectBackOrigin } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
 import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
-import { ChangeProjectManagerDialog } from '@/features/change-project-manager'
+import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
 import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
@@ -189,7 +189,14 @@ export function ClosingBoard({
             isFetchingNextPage={activeTableQuery.isFetchingNextPage}
             onLoadMore={activeTableQuery.fetchNextPage}
             backOrigin={backOrigin}
-            managerEditable={canChangeManager && role === 'director'}
+            managerEditable={false}
+            renderRowAction={
+              canChangeManager && role === 'director'
+                ? (project) => (
+                    <ChangeManagerButton onRequestChange={() => setChangeManagerTarget(project)} />
+                  )
+                : undefined
+            }
           />
         </div>
       ) : (
