@@ -15,7 +15,7 @@ const STAGE_EDIT_ROLES: Record<ProjectStage, readonly UserRole[]> = {
   ready_to_event: ['manager', 'director'],
   event_held: ['manager', 'director'],
   expenses_entered: ['manager', 'director'],
-  documents_confirmed: ['manager', 'director', 'accountant'],
+  documents_confirmed: ['manager', 'accountant'],
   data_confirmed: ['director'],
   bonus_calculated: ['director'],
   bonus_approved: ['director'],
@@ -42,7 +42,10 @@ export function canEditField(
 
 /** Кнопка «Следующий этап» — не у всех, кто может редактировать поля этапа. */
 export function canAdvanceStage(stage: ProjectStage, role: UserRole): boolean {
-  if (!canEditStage(stage, role)) return false
+  // «Документы подтверждены»: бухгалтер подтверждает документы, руководитель —
+  // вправе пропустить этап (по ТЗ он опционален), даже не имея прав на
+  // редактирование его полей. Поэтому проверка идёт до `canEditStage`.
   if (stage === 'documents_confirmed') return role === 'accountant' || role === 'director'
+  if (!canEditStage(stage, role)) return false
   return true
 }
