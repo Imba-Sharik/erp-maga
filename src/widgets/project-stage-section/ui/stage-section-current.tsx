@@ -394,7 +394,9 @@ export function StageSectionCurrent({
     stage === 'contract_signed'
       ? 'Готов к проведению'
       : stage === 'documents_confirmed'
-        ? 'Подтвердить документы'
+        ? canEdit
+          ? 'Подтвердить документы'
+          : 'Пропустить этап'
         : 'Следующий этап'
 
   return (

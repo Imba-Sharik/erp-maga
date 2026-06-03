@@ -42,7 +42,10 @@ export function canEditField(
 
 /** Кнопка «Следующий этап» — не у всех, кто может редактировать поля этапа. */
 export function canAdvanceStage(stage: ProjectStage, role: UserRole): boolean {
+  // «Документы подтверждены»: бухгалтер подтверждает документы, руководитель —
+  // вправе пропустить этап (по ТЗ он опционален), даже не имея прав на
+  // редактирование его полей. Поэтому проверка идёт до `canEditStage`.
+  if (stage === 'documents_confirmed') return role === 'accountant' || role === 'director'
   if (!canEditStage(stage, role)) return false
-  if (stage === 'documents_confirmed') return role === 'accountant'
   return true
 }
