@@ -1,6 +1,5 @@
-import { UserRoundPen } from 'lucide-react'
-
-import { TableIconActionButton } from '@/shared/ui/grid-table'
+import { PenIcon } from '@/shared/assets'
+import { Button } from '@/shared/ui/button'
 
 interface ChangeManagerButtonProps {
   onRequestChange: () => void
@@ -8,11 +7,16 @@ interface ChangeManagerButtonProps {
 
 export function ChangeManagerButton({ onRequestChange }: ChangeManagerButtonProps) {
   return (
-    <TableIconActionButton
-      icon={<UserRoundPen className="size-4 shrink-0" />}
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      className="shrink-0 text-[#BCBCBC] hover:text-[#454545]"
       aria-label="Сменить менеджера"
       title="Сменить менеджера"
       onClick={onRequestChange}
-    />
+    >
+      <PenIcon className="size-3 shrink-0 [&_path]:fill-current" />
+    </Button>
   )
 }
