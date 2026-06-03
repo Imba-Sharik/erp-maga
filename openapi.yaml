@@ -398,8 +398,9 @@ paths:
         в названии зала), loft (подстрока в названии лофта), archived_only (true —
         только архив). По умолчанию проекты в стадии archived не возвращаются. Пагинация:
         limit, offset (LimitOffset, по умолчанию limit=10). В элементе списка: halls[]
-        (внутренние hall_id/loft_id MAG), sync_error — предупреждение синка (напр.
-        зал не в каталоге).'
+        (внутренние hall_id/loft_id MAG), `mag_manager` / `mag_manager_id` — назначенный
+        в MAG; `plum_mag_manager` — текст из Plum (справочно). sync_error — предупреждение
+        синка (напр. зал не в каталоге).'
       summary: Список проектов
       parameters:
       - in: query
@@ -575,6 +576,8 @@ paths:
   /api/v1/projects/{id}/:
     get:
       operationId: projects_retrieve
+      description: Полная карточка. `mag_manager` — ФИО менеджера MAG; `mag_manager_id`
+        — его User.id; `plum_mag_manager` — менеджеры из Plum (не меняется PATCH).
       summary: Карточка проекта
       parameters:
       - in: path
@@ -595,7 +598,8 @@ paths:
           description: ''
     patch:
       operationId: projects_partial_update
-      description: 'Тело: `{ "mag_manager_id": <user_id> | null }`.'
+      description: 'Тело: `{ "mag_manager_id": <user_id> | null }`. В ответе `mag_manager`
+        — ФИО назначенного в MAG; `plum_mag_manager` не меняется.'
       summary: Переназначить менеджера MAG (lead/admin)
       parameters:
       - in: path
@@ -1121,8 +1125,9 @@ paths:
     post:
       operationId: projects_transition_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` сразу закрывает
-        проект (`stage=closed`, `closed_at`) — отдельный переход в `closed` не нужен.
+        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` возвращает
+        стадию `bonus_approved`; автоматическое закрытие (`closed`, `closed_at`) выполняется
+        сразу после commit (фоновая задача). Отдельный переход в `closed` недоступен.
         На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
         и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
         в `ready_to_event` те же поля в transition тоже необязательны.'
@@ -1280,8 +1285,9 @@ paths:
     post:
       operationId: projects_transitions_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` сразу закрывает
-        проект (`stage=closed`, `closed_at`) — отдельный переход в `closed` не нужен.
+        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` возвращает
+        стадию `bonus_approved`; автоматическое закрытие (`closed`, `closed_at`) выполняется
+        сразу после commit (фоновая задача). Отдельный переход в `closed` недоступен.
         На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
         и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
         в `ready_to_event` те же поля в transition тоже необязательны.'
@@ -2743,6 +2749,9 @@ components:
         mag_manager:
           type: string
           readOnly: true
+        mag_manager_id:
+          type: integer
+          readOnly: true
         mag_manager_email:
           type: string
           format: email
@@ -2876,6 +2885,7 @@ components:
       - last_active_stage
       - mag_manager
       - mag_manager_email
+      - mag_manager_id
       - net_profit_ex_tax
       - plum_card_url
       - plum_client_company
@@ -3117,9 +3127,12 @@ components:
           type: string
         mag_manager:
           type: string
+          description: ФИО менеджера MAG (FK). Снимок из Plum — plum_mag_manager в
+            полном Project.
         mag_manager_id:
           type: integer
           nullable: true
+          description: ID пользователя MAG (User).
       required:
       - client_company
       - event_date
@@ -3304,6 +3317,9 @@ components:
           title: Email (редактируемый)
         mag_manager:
           type: string
+          readOnly: true
+        mag_manager_id:
+          type: integer
           readOnly: true
         mag_manager_email:
           type: string
@@ -3820,6 +3836,7 @@ components:
       - legal_entity
       - mag_manager
       - mag_manager_email
+      - mag_manager_id
       - net_profit_ex_tax
       - net_profit_total
       - phone

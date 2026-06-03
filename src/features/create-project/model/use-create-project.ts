@@ -25,6 +25,7 @@ type CreateProjectMutationContext = {
 
 export interface UseCreateProjectOptions {
   magManager: string
+  magManagerId: number
   onCreated?: (project: Project) => void
 }
 
@@ -45,6 +46,7 @@ function hallItemFromCatalog(hall: {
 function buildOptimisticFromRequest(
   data: ProjectCreateRequest,
   magManager: string,
+  magManagerId: number,
   halls: ProjectHallItem[],
 ): Project {
   const event_date = data.event_date ?? toIsoLocalDay(new Date())
@@ -58,10 +60,11 @@ function buildOptimisticFromRequest(
     halls,
     event_date,
     mag_manager: magManager,
+    mag_manager_id: magManagerId,
   })
 }
 
-export function useCreateProject({ magManager, onCreated }: UseCreateProjectOptions) {
+export function useCreateProject({ magManager, magManagerId, onCreated }: UseCreateProjectOptions) {
   const queryClient = useQueryClient()
   const { halls: venueHalls } = useVenueCatalog()
 
@@ -74,7 +77,7 @@ export function useCreateProject({ magManager, onCreated }: UseCreateProjectOpti
           .filter((h): h is (typeof venueHalls)[number] => h != null)
           .map(hallItemFromCatalog)
 
-        const optimistic = buildOptimisticFromRequest(data, magManager, halls)
+        const optimistic = buildOptimisticFromRequest(data, magManager, magManagerId, halls)
         prependCreatedProjectToQueries(queryClient, optimistic)
         return { optimistic }
       },

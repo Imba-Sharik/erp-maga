@@ -10,6 +10,7 @@ export function buildOptimisticProject(params: {
   halls: ProjectHallItem[]
   event_date: string
   mag_manager: string
+  mag_manager_id: number
 }): Project {
   const nowIso = new Date().toISOString()
   const id = optimisticIdSeq--
@@ -40,6 +41,7 @@ export function buildOptimisticProject(params: {
     plum_lofthall_manager: '',
     plum_mag_manager: '',
     mag_manager: params.mag_manager,
+    mag_manager_id: params.mag_manager_id,
     mag_manager_email: null,
     sales_total: 0,
     net_profit_ex_tax: 0,
