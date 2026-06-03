@@ -29,6 +29,10 @@ import {
   ProjectTitleCell,
 } from './table-row-cells'
 
+function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
+  e.stopPropagation()
+}
+
 function handleRowKeyDown(e: KeyboardEvent<HTMLDivElement>, goToDetail: () => void) {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
@@ -160,14 +164,26 @@ export function ProjectsTableRow({
           <ProjectHallCell project={project} />
           <ProjectLoftCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
-          <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+          <GridTableCell muted>
+            <span className="flex w-full min-w-0 items-center gap-1.5">
+              {renderRowAction ? (
+                <span
+                  className="shrink-0"
+                  onClick={stopRowNavigation}
+                  onPointerDown={stopRowNavigation}
+                >
+                  {renderRowAction(project)}
+                </span>
+              ) : null}
+              <span className="min-w-0 truncate" title={project.manager || '—'}>
+                {project.manager || '—'}
+              </span>
+            </span>
+          </GridTableCell>
           <GridTableCell muted>{project.type || '—'}</GridTableCell>
           <GridTableCell muted>{project.company || '—'}</GridTableCell>
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>
         </div>
-        {renderRowAction ? (
-          <GridTableRowActionCell>{renderRowAction(project)}</GridTableRowActionCell>
-        ) : null}
       </ProjectTableNavRow>
     )
   }

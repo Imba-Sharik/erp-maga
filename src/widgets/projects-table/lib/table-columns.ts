@@ -24,7 +24,6 @@ export const TABLE_GRID_TEMPLATE_OUTSIDE_MAG =
  */
 export const TABLE_GRID_TEMPLATE_CLOSING_ACTIVE =
   'minmax(170px,1.5fr) minmax(96px,0.8fr) minmax(96px,0.8fr) minmax(130px,1.05fr) minmax(150px,1.3fr) minmax(120px,1fr) minmax(120px,1fr) minmax(130px,1.05fr)'
-export const TABLE_GRID_TEMPLATE_CLOSING_ACTIVE_WITH_ACTIONS = `${TABLE_GRID_TEMPLATE_CLOSING_ACTIVE} minmax(56px,72px)`
 
 /**
  * Архив закрытия — «Общие данные»:
@@ -62,7 +61,6 @@ export const TABLE_MIN_WIDTH_ECONOMICS = '900px'
 export const TABLE_MIN_WIDTH_ECONOMICS_WITH_ACTIONS = '970px'
 export const TABLE_MIN_WIDTH_OUTSIDE_MAG = '1315px'
 export const TABLE_MIN_WIDTH_CLOSING_ACTIVE = '1100px'
-export const TABLE_MIN_WIDTH_CLOSING_ACTIVE_WITH_ACTIONS = '1170px'
 export const TABLE_MIN_WIDTH_CLOSING_GENERAL = '1050px'
 export const TABLE_MIN_WIDTH_CLOSING_ECONOMICS = '850px'
 export const TABLE_MIN_WIDTH_CLOSING_GENERAL_WITH_ACTIONS = '1120px'
@@ -78,7 +76,6 @@ export function resolveTableWithActions(
   return (
     view === 'general' ||
     view === 'economics' ||
-    view === 'closing-active' ||
     view === 'closing-general' ||
     view === 'closing-economics'
   )
@@ -104,11 +101,7 @@ export function getTableGridTemplate(
     return withActions ? TABLE_GRID_TEMPLATE_ECONOMICS_WITH_ACTIONS : TABLE_GRID_TEMPLATE_ECONOMICS
   }
   if (view === 'outside-mag') return TABLE_GRID_TEMPLATE_OUTSIDE_MAG
-  if (view === 'closing-active') {
-    return withActions
-      ? TABLE_GRID_TEMPLATE_CLOSING_ACTIVE_WITH_ACTIONS
-      : TABLE_GRID_TEMPLATE_CLOSING_ACTIVE
-  }
+  if (view === 'closing-active') return TABLE_GRID_TEMPLATE_CLOSING_ACTIVE
   if (view === 'closing-general') {
     return withActions
       ? TABLE_GRID_TEMPLATE_CLOSING_GENERAL_WITH_ACTIONS
@@ -133,11 +126,7 @@ export function getTableMinWidth(
     return withActions ? TABLE_MIN_WIDTH_ECONOMICS_WITH_ACTIONS : TABLE_MIN_WIDTH_ECONOMICS
   }
   if (view === 'outside-mag') return TABLE_MIN_WIDTH_OUTSIDE_MAG
-  if (view === 'closing-active') {
-    return withActions
-      ? TABLE_MIN_WIDTH_CLOSING_ACTIVE_WITH_ACTIONS
-      : TABLE_MIN_WIDTH_CLOSING_ACTIVE
-  }
+  if (view === 'closing-active') return TABLE_MIN_WIDTH_CLOSING_ACTIVE
   if (view === 'closing-general') {
     return withActions
       ? TABLE_MIN_WIDTH_CLOSING_GENERAL_WITH_ACTIONS
