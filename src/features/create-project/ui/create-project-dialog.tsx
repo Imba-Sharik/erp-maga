@@ -69,6 +69,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     reset: resetMutation,
   } = useCreateProject({
     magManager: currentUser.fullName,
+    magManagerId: Number(currentUser.id) || 0,
     onCreated: (project) => {
       onOpenChange(false)
       form.reset(getDefaultValues())
