@@ -189,7 +189,7 @@ export function ClosingBoard({
             isFetchingNextPage={activeTableQuery.isFetchingNextPage}
             onLoadMore={activeTableQuery.fetchNextPage}
             backOrigin={backOrigin}
-            managerEditable={false}
+            managerEditable={canChangeManager && role === 'director'}
           />
         </div>
       ) : (

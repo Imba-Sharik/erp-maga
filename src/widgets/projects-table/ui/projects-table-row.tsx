@@ -160,7 +160,9 @@ export function ProjectsTableRow({
           <ProjectHallCell project={project} />
           <ProjectLoftCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
-          <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+        </div>
+        <ProjectManagerCell {...managerCellProps} />
+        <div className="contents">
           <GridTableCell muted>{project.type || '—'}</GridTableCell>
           <GridTableCell muted>{project.company || '—'}</GridTableCell>
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>
