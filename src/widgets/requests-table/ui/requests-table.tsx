@@ -8,6 +8,7 @@ import {
   EMPTY_COLUMN_FILTERS,
   filterProjectsTable,
   ProjectsTableView,
+  type ColumnFilterKey,
 } from '@/widgets/projects-table'
 
 import { useRequestsTableQuery, type RequestsTableVariant } from '../lib/use-requests-table-query'
@@ -33,16 +34,21 @@ interface RequestsTableProps {
 /** Таблица запросов бухгалтера: `open` — ждут подтверждения, `closed` — уже закрыты. */
 export function RequestsTable({ variant }: RequestsTableProps) {
   const [search, setSearch] = useState('')
+  const [columnFilters, setColumnFilters] = useState(EMPTY_COLUMN_FILTERS)
   const config = VARIANT_CONFIG[variant]
   const debouncedSearch = useDebouncedValue(search)
 
   const { projects, hasNextPage, isLoading, isError, isFetchingNextPage, fetchNextPage } =
-    useRequestsTableQuery(variant, debouncedSearch)
+    useRequestsTableQuery(variant, debouncedSearch, columnFilters.plumEventStatus)
 
   const filtered = useMemo(
-    () => filterProjectsTable(projects, { columns: EMPTY_COLUMN_FILTERS }),
-    [projects],
+    () => filterProjectsTable(projects, { columns: columnFilters }),
+    [projects, columnFilters],
   )
+
+  const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
+    setColumnFilters((prev) => ({ ...prev, [key]: value }))
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-5">
@@ -59,10 +65,10 @@ export function RequestsTable({ variant }: RequestsTableProps) {
       <ProjectsTableView
         projects={filtered}
         columnView={config.columnView}
-        columnFilters={EMPTY_COLUMN_FILTERS}
+        columnFilters={columnFilters}
         managerFilterOptions={[]}
         directoryOptions={[]}
-        onColumnFilterChange={() => {}}
+        onColumnFilterChange={handleColumnFilterChange}
         isLoading={isLoading}
         isError={isError}
         hasNextPage={hasNextPage}
