@@ -233,6 +233,7 @@ function GeneralTableHeader({
           triggerClassName={HEADER_FILTER_TRIGGER}
         />
       </GridTableHeaderCell>
+      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
@@ -283,6 +284,7 @@ function OutsideMagTableHeader({
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Крайний этап</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата перевода</GridTableHeaderLabel>
       <GridTableHeaderLabel>Кто перевёл</GridTableHeaderLabel>
       <GridTableHeaderLabel>Причина перевода</GridTableHeaderLabel>
@@ -322,6 +324,7 @@ function EconomicsTableHeader({
           triggerClassName={HEADER_FILTER_TRIGGER}
         />
       </GridTableHeaderCell>
+      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
       <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
       <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
@@ -337,6 +340,7 @@ function ClosingActiveTableHeader() {
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Менеджер</GridTableHeaderLabel>
       <GridTableHeaderLabel>Тип мероприятия</GridTableHeaderLabel>
@@ -424,6 +428,7 @@ function RequestsTableHeader() {
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
       <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
       <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Появление в системе</GridTableHeaderLabel>
@@ -439,6 +444,7 @@ function ClosedRequestsTableHeader() {
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
       <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
       <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
+      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата подтверждения</GridTableHeaderLabel>
