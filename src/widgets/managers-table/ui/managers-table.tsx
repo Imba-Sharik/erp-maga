@@ -1,6 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { useManagersDirectory, type Manager, type ManagerAssignmentMode } from '@/entities/manager'
+import {
+  buildAssignmentOccupancy,
+  useManagersDirectory,
+  type Manager,
+  type ManagerAssignmentMode,
+} from '@/entities/manager'
 import { useVenueCatalog } from '@/entities/venue'
 import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
 import { useUpdateManagerAssignments } from '@/features/update-manager-assignments'
@@ -9,6 +14,7 @@ import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shar
 import {
   buildHallAssignmentOptions,
   buildLoftAssignmentOptions,
+  enrichAssignmentOptions,
 } from '../lib/build-assignment-options'
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
@@ -48,10 +54,21 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
 
   const { managers: allManagers, isLoading, isError } = useManagersDirectory()
   const { halls, isLoading: isCatalogLoading, isError: isCatalogError } = useVenueCatalog()
-  const { apply, isPendingFor } = useUpdateManagerAssignments()
+  const { apply, isPendingFor, getErrorFor, clearErrorFor } = useUpdateManagerAssignments()
 
-  const hallOptions = useMemo(() => buildHallAssignmentOptions(halls), [halls])
-  const loftOptions = useMemo(() => buildLoftAssignmentOptions(halls), [halls])
+  const hallOptionsBase = useMemo(() => buildHallAssignmentOptions(halls), [halls])
+  const loftOptionsBase = useMemo(() => buildLoftAssignmentOptions(halls), [halls])
+
+  const loftIdToName = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const hallItem of halls) {
+      if (hallItem.loft?.id != null && hallItem.loft.name) {
+        map.set(hallItem.loft.id, hallItem.loft.name)
+      }
+    }
+    return map
+  }, [halls])
+
   const catalogDisabled = isCatalogLoading || isCatalogError
 
   const managers = useMemo(
@@ -61,17 +78,27 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
 
   const handleEditOpenChange = useCallback(
     (managerId: string, mode: ManagerAssignmentMode, open: boolean) => {
-      if (open) setEditing({ managerId, mode })
-      else setEditing((prev) => (prev?.managerId === managerId && prev.mode === mode ? null : prev))
+      if (open) {
+        clearErrorFor(managerId, mode)
+        setEditing({ managerId, mode })
+      } else {
+        clearErrorFor(managerId, mode)
+        setEditing((prev) => (prev?.managerId === managerId && prev.mode === mode ? null : prev))
+      }
     },
-    [],
+    [clearErrorFor],
   )
 
   const handleApplyAssignments = useCallback(
-    (manager: Manager, mode: ManagerAssignmentMode, selectedKeys: string[]) => {
-      void apply({ manager, mode, selectedKeys })
+    async (
+      manager: Manager,
+      mode: ManagerAssignmentMode,
+      selectedKeys: string[],
+    ): Promise<{ ok: true } | { ok: false }> => {
+      const result = await apply({ manager, mode, selectedKeys, loftIdToName })
+      return result.ok ? { ok: true } : { ok: false }
     },
-    [apply],
+    [apply, loftIdToName],
   )
 
   const emptyMessage = isError ? 'Не удалось загрузить список менеджеров.' : 'Менеджеры не найдены.'
@@ -87,20 +114,29 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
         emptyMessage={emptyMessage}
         skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
       >
-        {managers.map((manager) => (
-          <ManagersTableRow
-            key={manager.id}
-            manager={manager}
-            hallOptions={hallOptions}
-            loftOptions={loftOptions}
-            editing={editing}
-            catalogDisabled={catalogDisabled}
-            isPendingFor={isPendingFor}
-            onEditOpenChange={handleEditOpenChange}
-            onApplyAssignments={handleApplyAssignments}
-            onRequestDelete={setDeleteTarget}
-          />
-        ))}
+        {managers.map((manager) => {
+          const loftOccupancy = buildAssignmentOccupancy(allManagers, manager.id, 'lofts')
+          const hallOccupancy = buildAssignmentOccupancy(allManagers, manager.id, 'halls')
+          const loftOptions = enrichAssignmentOptions(loftOptionsBase, loftOccupancy)
+          const hallOptions = enrichAssignmentOptions(hallOptionsBase, hallOccupancy)
+
+          return (
+            <ManagersTableRow
+              key={manager.id}
+              manager={manager}
+              hallOptions={hallOptions}
+              loftOptions={loftOptions}
+              editing={editing}
+              catalogDisabled={catalogDisabled}
+              isPendingFor={isPendingFor}
+              getErrorFor={getErrorFor}
+              onClearError={clearErrorFor}
+              onEditOpenChange={handleEditOpenChange}
+              onApplyAssignments={handleApplyAssignments}
+              onRequestDelete={setDeleteTarget}
+            />
+          )
+        })}
       </GridTableView>
 
       <ConfirmDeleteManagerDialog
