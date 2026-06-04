@@ -140,6 +140,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentConflictError'
+          description: ''
   /api/v1/halls/hall-manager-assignments/{id}/:
     get:
       operationId: halls_manager_assignments_retrieve
@@ -193,6 +199,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentConflictError'
+          description: ''
     patch:
       operationId: halls_manager_assignments_partial_update
       summary: Изменить назначение
@@ -223,6 +235,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentConflictError'
           description: ''
     delete:
       operationId: halls_manager_assignments_destroy
@@ -1894,6 +1912,23 @@ components:
       required:
         - code
         - label
+    AssignmentConflictError:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+          description: assignment_conflict — дубликат в матрице (та же связка hall+loft)
+        invalid_loft_ids:
+          type: array
+          items:
+            type: integer
+          description: ID лофтов из запроса; пустой список, если в запросе loft=null
+      required:
+        - code
+        - detail
+        - invalid_loft_ids
     BacklineCreatedSchema:
       type: object
       properties:
