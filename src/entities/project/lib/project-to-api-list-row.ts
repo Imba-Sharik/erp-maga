@@ -53,7 +53,9 @@ export function projectToApiListRow(project: Project): ApiProject {
     phone: project.phone,
     email: project.email,
     plum_card_url: project.plumCardUrl,
+    plum_event_status_label: project.plumEventStatusLabel ?? '',
     updated_at: project.updatedAt,
     created_at: project.createdAt,
-  } as ApiProject
+    is_from_plum: project.isFromPlum,
+  } as ApiProject & { is_from_plum?: boolean }
 }

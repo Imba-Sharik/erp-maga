@@ -52,5 +52,6 @@ export function buildOptimisticProject(params: {
     sync_error: '',
     created_at: nowIso,
     updated_at: nowIso,
-  }
+    is_from_plum: false,
+  } as Project & { is_from_plum?: boolean }
 }

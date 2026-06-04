@@ -65,6 +65,10 @@ export interface Project {
   phone: string
   email: string
   plumCardUrl: string
+  /** Проект синхронизирован из Plum (`is_from_plum` в API). */
+  isFromPlum: boolean
+  /** Человекочитаемый статус мероприятия в Plum (`plum_event_status_label`). */
+  plumEventStatusLabel: string | null
   /** ISO-datetime последнего обновления проекта. */
   updatedAt: string
   /** ISO-datetime создания проекта в системе («появление в системе»). */
