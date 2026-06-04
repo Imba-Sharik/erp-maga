@@ -26,8 +26,10 @@ export interface ManagerAssignmentsEditCellProps {
   isOpen: boolean
   isDisabled?: boolean
   isPending?: boolean
+  errorMessage?: string | null
   onOpenChange: (open: boolean) => void
-  onApply: (selectedKeys: string[]) => void
+  onApply: (selectedKeys: string[]) => Promise<{ ok: true } | { ok: false }>
+  onClearError?: () => void
 }
 
 export function ManagerAssignmentsEditCell({
@@ -38,8 +40,10 @@ export function ManagerAssignmentsEditCell({
   isOpen,
   isDisabled = false,
   isPending = false,
+  errorMessage = null,
   onOpenChange,
   onApply,
+  onClearError,
 }: ManagerAssignmentsEditCellProps) {
   const [draft, setDraft] = useState<Set<string>>(() => new Set(selectedKeys))
 
@@ -47,16 +51,28 @@ export function ManagerAssignmentsEditCell({
     if (isOpen) setDraft(new Set(selectedKeys))
   }, [isOpen, selectedKeys])
 
-  const handleApply = () => {
-    onApply([...draft])
-    onOpenChange(false)
+  useEffect(() => {
+    if (errorMessage) setDraft(new Set(selectedKeys))
+  }, [errorMessage, selectedKeys])
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) onClearError?.()
+    onOpenChange(open)
+  }
+
+  const handleApply = async () => {
+    const result = await onApply([...draft])
+    if (result.ok) {
+      onClearError?.()
+      onOpenChange(false)
+    }
   }
 
   return (
     <div className="min-w-0" onClick={stopRowNavigation} onPointerDown={stopRowNavigation}>
       <GridTableCell muted>
         <span className="flex w-full min-w-0 items-center gap-1.5">
-          <DropdownMenu open={isOpen} onOpenChange={onOpenChange}>
+          <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
@@ -79,30 +95,49 @@ export function ManagerAssignmentsEditCell({
                 {options.length === 0 ? (
                   <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
                 ) : (
-                  options.map((option) => (
-                    <DropdownMenuCheckboxItem
-                      key={option.key}
-                      checked={draft.has(option.key)}
-                      disabled={isPending}
-                      onCheckedChange={(checked) => {
-                        setDraft((prev) => {
-                          const next = new Set(prev)
-                          if (checked === true) next.add(option.key)
-                          else next.delete(option.key)
-                          return next
-                        })
-                      }}
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      <span className="min-w-0 truncate">{option.label}</span>
-                    </DropdownMenuCheckboxItem>
-                  ))
+                  options.map((option) => {
+                    const isOccupied = Boolean(option.occupiedBy)
+                    const optionTitle = isOccupied
+                      ? `${option.label} — занято: ${option.occupiedBy}`
+                      : option.label
+
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={option.key}
+                        checked={draft.has(option.key)}
+                        disabled={isPending || isOccupied}
+                        title={optionTitle}
+                        onCheckedChange={(checked) => {
+                          onClearError?.()
+                          setDraft((prev) => {
+                            const next = new Set(prev)
+                            if (checked === true) next.add(option.key)
+                            else next.delete(option.key)
+                            return next
+                          })
+                        }}
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        <span className="flex min-w-0 flex-col gap-0.5">
+                          <span className="min-w-0 truncate">{option.label}</span>
+                          {isOccupied ? (
+                            <span className="truncate text-xs text-[#ACACAC]">
+                              занято: {option.occupiedBy}
+                            </span>
+                          ) : null}
+                        </span>
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })
                 )}
               </div>
               {options.length > 0 ? (
                 <>
                   <DropdownMenuSeparator />
-                  <div className="p-1.5">
+                  <div className="flex flex-col gap-1.5 p-1.5">
+                    {errorMessage ? (
+                      <p className="text-destructive px-0.5 text-sm">{errorMessage}</p>
+                    ) : null}
                     <Button
                       type="button"
                       size="sm"
@@ -110,7 +145,7 @@ export function ManagerAssignmentsEditCell({
                       disabled={isPending}
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleApply()
+                        void handleApply()
                       }}
                     >
                       {isPending ? 'Сохранение…' : 'Готово'}

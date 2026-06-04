@@ -25,12 +25,14 @@ interface ManagersTableRowProps {
   editing: { managerId: string; mode: ManagerAssignmentMode } | null
   catalogDisabled: boolean
   isPendingFor: (managerId: string, mode: ManagerAssignmentMode) => boolean
+  getErrorFor: (managerId: string, mode: ManagerAssignmentMode) => string | null
+  onClearError: (managerId: string, mode: ManagerAssignmentMode) => void
   onEditOpenChange: (managerId: string, mode: ManagerAssignmentMode, open: boolean) => void
   onApplyAssignments: (
     manager: Manager,
     mode: ManagerAssignmentMode,
     selectedKeys: string[],
-  ) => void
+  ) => Promise<{ ok: true } | { ok: false }>
   onRequestDelete: (manager: Manager) => void
 }
 
@@ -41,6 +43,8 @@ export function ManagersTableRow({
   editing,
   catalogDisabled,
   isPendingFor,
+  getErrorFor,
+  onClearError,
   onEditOpenChange,
   onApplyAssignments,
   onRequestDelete,
@@ -71,7 +75,9 @@ export function ManagersTableRow({
         isOpen={editing?.managerId === manager.id && editing.mode === 'lofts'}
         isDisabled={catalogDisabled}
         isPending={isPendingFor(manager.id, 'lofts')}
+        errorMessage={getErrorFor(manager.id, 'lofts')}
         onOpenChange={(open) => onEditOpenChange(manager.id, 'lofts', open)}
+        onClearError={() => onClearError(manager.id, 'lofts')}
         onApply={(keys) => onApplyAssignments(manager, 'lofts', keys)}
       />
 
@@ -83,7 +89,9 @@ export function ManagersTableRow({
         isOpen={editing?.managerId === manager.id && editing.mode === 'halls'}
         isDisabled={catalogDisabled}
         isPending={isPendingFor(manager.id, 'halls')}
+        errorMessage={getErrorFor(manager.id, 'halls')}
         onOpenChange={(open) => onEditOpenChange(manager.id, 'halls', open)}
+        onClearError={() => onClearError(manager.id, 'halls')}
         onApply={(keys) => onApplyAssignments(manager, 'halls', keys)}
       />
 
