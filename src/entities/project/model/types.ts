@@ -67,6 +67,8 @@ export interface Project {
   plumCardUrl: string
   /** Проект синхронизирован из Plum (`is_from_plum` в API). */
   isFromPlum: boolean
+  /** Числовой код статуса мероприятия в Plum (`plum_event_status`). */
+  plumEventStatus: number | null
   /** Человекочитаемый статус мероприятия в Plum (`plum_event_status_label`). */
   plumEventStatusLabel: string | null
   /** ISO-datetime последнего обновления проекта. */
