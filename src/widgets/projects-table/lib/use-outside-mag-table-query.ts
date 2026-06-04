@@ -1,9 +1,12 @@
 import { useMemo } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { mapBackendOutOfMagProjects } from '@/entities/project'
-import { useProjectsOutOfMagList } from '@/shared/api/generated/hooks/projectsController/useProjectsOutOfMagList'
+import { mapBackendOutOfMagProjects, plumEventStatusFilterParam } from '@/entities/project'
+import { projectsOutOfMagList } from '@/shared/api/generated/clients/projectsController/projectsOutOfMagList'
 import type { ProjectsOutOfMagListQueryParams } from '@/shared/api/generated/types/projectsController/ProjectsOutOfMagList'
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+
+const PAGE_SIZE = 50
 
 export type OutsideMagTableListParams = Pick<
   ProjectsOutOfMagListQueryParams,
@@ -23,35 +26,52 @@ function parseMagManagerId(magManagerId: string | null): number | undefined {
 export function useOutsideMagTableQuery(
   listParams: OutsideMagTableListParams,
   magManagerId: string | null,
+  plumEventStatus: string | null = null,
   { enabled = true }: UseOutsideMagTableQueryOptions = {},
 ) {
   const mag_manager = parseMagManagerId(magManagerId)
+  const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
 
-  const params = useMemo(
-    (): ProjectsOutOfMagListQueryParams => ({
-      ...listParams,
-      ordering: listParams.ordering ?? PROJECTS_LIST_DEFAULT_ORDERING,
-      ...(mag_manager !== undefined ? { mag_manager } : {}),
-    }),
-    [listParams, mag_manager],
-  )
-
-  const query = useProjectsOutOfMagList(params, {
-    query: { enabled },
+  const query = useInfiniteQuery({
+    queryKey: [
+      'projects-out-of-mag-table',
+      {
+        ...listParams,
+        ordering: listParams.ordering ?? PROJECTS_LIST_DEFAULT_ORDERING,
+        mag_manager,
+        plum_event_status,
+      },
+    ] as const,
+    enabled,
+    initialPageParam: 0,
+    queryFn: ({ pageParam, signal }) =>
+      projectsOutOfMagList(
+        {
+          ...listParams,
+          ordering: listParams.ordering ?? PROJECTS_LIST_DEFAULT_ORDERING,
+          limit: PAGE_SIZE,
+          offset: pageParam,
+          ...(mag_manager !== undefined ? { mag_manager } : {}),
+          ...(plum_event_status !== undefined ? { plum_event_status } : {}),
+        },
+        { signal },
+      ),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.next ? allPages.length * PAGE_SIZE : undefined,
   })
 
-  const projects = useMemo(
-    () => (query.data ? mapBackendOutOfMagProjects(query.data) : []),
-    [query.data],
-  )
+  const projects = useMemo(() => {
+    const raw = query.data?.pages.flatMap((page) => page.results) ?? []
+    return mapBackendOutOfMagProjects(raw)
+  }, [query.data])
 
   return {
     projects,
-    totalCount: projects.length,
-    fetchNextPage: () => {},
-    hasNextPage: false,
+    totalCount: query.data?.pages[0]?.count,
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
     isLoading: query.isLoading,
     isError: query.isError,
-    isFetchingNextPage: false,
+    isFetchingNextPage: query.isFetchingNextPage,
   }
 }

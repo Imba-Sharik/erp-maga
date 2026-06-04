@@ -83,9 +83,17 @@ export type { OutsideMagReason } from './lib/outside-mag-reason'
 export { OUTSIDE_MAG_REASON_OPTIONS } from './lib/outside-mag-reason'
 export { pluralProjects } from './lib/plural'
 export { buildTelegramPhoneUrl } from './lib/build-telegram-phone-url'
+export { shouldShowPlumStatusLine, formatPlumStatusTableValue } from './lib/plum-status'
+export {
+  PLUM_EVENT_STATUS_LABELS,
+  PLUM_EVENT_STATUS_OPTIONS,
+  plumEventStatusFilterParam,
+} from './lib/plum-event-status-catalog'
 export { ProjectCard } from './ui/project-card'
 export { ProjectCountBadge } from './ui/project-count-badge'
 export { ProjectPipelineCard } from './ui/project-pipeline-card'
+export { ProjectPlumStatusLine } from './ui/project-plum-status-line'
+export { ProjectPlumStatusTableCell } from './ui/project-plum-status-table-cell'
 export { ProjectTelegramLink } from './ui/project-telegram-link'
 export { ProjectStageBadge } from './ui/project-stage-badge'
 export { ProjectHeader } from './ui/project-header'

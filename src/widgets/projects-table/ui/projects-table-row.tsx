@@ -5,6 +5,7 @@ import type { ManagerSelectOption } from '@/entities/manager'
 import {
   getOutsideMagReasonLabel,
   projectDetailPath,
+  ProjectPlumStatusTableCell,
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
@@ -119,6 +120,7 @@ export function ProjectsTableRow({
         <ProjectManagerCell {...managerCellProps} />
         <div className="contents">
           <ProjectStageTableCell stage={project.lastActiveStage} />
+          <ProjectPlumStatusTableCell project={project} />
           <GridTableCell muted>
             {formatTableDate(project.outsideMag?.transferredAt ?? '')}
           </GridTableCell>
@@ -144,6 +146,7 @@ export function ProjectsTableRow({
         <ProjectManagerCell {...managerCellProps} />
         <div className="contents">
           <ProjectStageTableCell stage={project.stage} />
+          <ProjectPlumStatusTableCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
           <GridTableCell muted>{project.company || '—'}</GridTableCell>
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>
@@ -163,6 +166,7 @@ export function ProjectsTableRow({
           <ProjectTitleCell project={project} />
           <ProjectHallCell project={project} />
           <ProjectLoftCell project={project} />
+          <ProjectPlumStatusTableCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
           <GridTableCell muted>
             <span className="flex w-full min-w-0 items-center gap-1.5">
@@ -239,6 +243,7 @@ export function ProjectsTableRow({
           <ProjectLoftCell project={project} />
           <ProjectHallCell project={project} />
           <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+          <ProjectPlumStatusTableCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
           <GridTableCell muted>{project.company || '—'}</GridTableCell>
           <GridTableCell muted>{formatTableDate(project.createdAt)}</GridTableCell>
@@ -255,6 +260,7 @@ export function ProjectsTableRow({
           <ProjectLoftCell project={project} />
           <ProjectHallCell project={project} />
           <GridTableCell muted>{project.manager || '—'}</GridTableCell>
+          <ProjectPlumStatusTableCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
           <GridTableCell muted>{project.company || '—'}</GridTableCell>
           <GridTableCell muted>
@@ -275,6 +281,7 @@ export function ProjectsTableRow({
       <div className="contents">
         <GridTableCell muted>{project.company || '—'}</GridTableCell>
         <ProjectStageTableCell stage={project.stage} />
+        <ProjectPlumStatusTableCell project={project} />
         <GridTableCell muted>{formatTableMoney(resolveSalesTotal(project))}</GridTableCell>
         <GridTableCell muted>{formatTableMoney(resolveNetProfitTotal(project))}</GridTableCell>
         <GridTableCell muted>{formatTableMoney(resolveTotalBonus(project))}</GridTableCell>

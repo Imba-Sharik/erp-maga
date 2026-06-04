@@ -80,6 +80,7 @@ export function ClosingBoard({
   // фасетные фильтры (город/зал/LOFT) — на клиенте, как в канбане.
   const activeTableQuery = useClosingActiveTableQuery({
     listParams: kanbanListParams,
+    plumEventStatus: columnFilters.plumEventStatus,
     enabled: !archiveMode && viewMode === 'table',
   })
   const filteredActiveTable = useMemo(

@@ -44,9 +44,12 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
     [listDateParams, debouncedSearch],
   )
 
-  const query = useOutsideMagTableQuery(listParams, columnFilters.manager, {
-    enabled: !isOutsideMagMocksEnabled,
-  })
+  const query = useOutsideMagTableQuery(
+    listParams,
+    columnFilters.manager,
+    columnFilters.plumEventStatus,
+    { enabled: !isOutsideMagMocksEnabled },
+  )
 
   const projects = isOutsideMagMocksEnabled ? OUTSIDE_MAG_MOCK_PROJECTS : query.projects
   const hasNextPage = isOutsideMagMocksEnabled ? false : query.hasNextPage

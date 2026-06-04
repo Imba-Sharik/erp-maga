@@ -394,12 +394,13 @@ paths:
     get:
       operationId: projects_list
       description: 'Фильтры: event_date_after, event_date_before, stage, stage__in,
-        plum_status, plum_status__in, mag_manager, hall_id, loft_id, hall (подстрока
-        в названии зала), loft (подстрока в названии лофта), archived_only (true —
-        только архив). По умолчанию проекты в стадии archived не возвращаются. Пагинация:
-        limit, offset (LimitOffset, по умолчанию limit=10). В элементе списка: halls[]
-        (внутренние hall_id/loft_id MAG), `mag_manager` / `mag_manager_id` — назначенный
-        в MAG; `plum_mag_manager` — текст из Plum (справочно). sync_error — предупреждение
+        plum_event_status, plum_event_status__in, ordering (напр. plum_event_status,
+        -event_date), mag_manager, hall_id, loft_id, hall (подстрока в названии зала),
+        loft (подстрока в названии лофта), archived_only (true — только архив). По
+        умолчанию проекты в стадии archived не возвращаются. Пагинация: limit, offset
+        (LimitOffset, по умолчанию limit=10). В элементе списка: halls[] (внутренние
+        hall_id/loft_id MAG), `mag_manager` / `mag_manager_id` — назначенный в MAG;
+        `plum_mag_manager` — текст из Plum (справочно). sync_error — предупреждение
         синка (напр. зал не в каталоге).'
       summary: Список проектов
       parameters:
@@ -457,20 +458,23 @@ paths:
         name: ordering
         schema:
           type: string
+        description: 'Сортировка: поля модели, напр. -event_date, plum_event_status,
+          -plum_event_status (по числовому коду статуса)'
       - in: query
         name: out_of_mag_reason
         schema:
           type: string
       - in: query
-        name: plum_status
+        name: plum_event_status
         schema:
           type: integer
-        description: Статус мероприятия в Plum (число)
+        description: Статус мероприятия в Plum (число, как в поле plum_event_status
+          ответа)
       - in: query
-        name: plum_status__in
+        name: plum_event_status__in
         schema:
           type: string
-        description: Несколько статусов Plum через запятую
+        description: Несколько статусов Plum через запятую (напр. 4,6,10)
       - in: query
         name: search
         schema:
@@ -1125,11 +1129,10 @@ paths:
     post:
       operationId: projects_transition_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` возвращает
-        стадию `bonus_approved`; автоматическое закрытие (`closed`, `closed_at`) выполняется
-        сразу после commit (фоновая задача). Отдельный переход в `closed` недоступен.
-        На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
-        и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
+        Тело плоское: `{ to_stage, ...поля }`. После `bonus_approved` закрытие — отдельный
+        переход `to_stage=closed` (кнопка на фронте, только руководитель). На стадии
+        `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны и
+        редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
         в `ready_to_event` те же поля в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
@@ -1249,6 +1252,10 @@ paths:
                   approved_bonus: '87500.00'
                   adjustment_reason: Корректировка по согласованию с руководителем
                 summary: bonus_calculated → bonus_approved (ручная сумма)
+              BonusApproved→Closed:
+                value:
+                  to_stage: closed
+                summary: bonus_approved → closed
               RejectData(откатДанных):
                 value:
                   to_stage: reject_data
@@ -1285,11 +1292,10 @@ paths:
     post:
       operationId: projects_transitions_create
       description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. Переход в `bonus_approved` возвращает
-        стадию `bonus_approved`; автоматическое закрытие (`closed`, `closed_at`) выполняется
-        сразу после commit (фоновая задача). Отдельный переход в `closed` недоступен.
-        На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны
-        и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
+        Тело плоское: `{ to_stage, ...поля }`. После `bonus_approved` закрытие — отдельный
+        переход `to_stage=closed` (кнопка на фронте, только руководитель). На стадии
+        `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны и
+        редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
         в `ready_to_event` те же поля в transition тоже необязательны.'
       summary: Переход на следующий этап
       parameters:
@@ -1409,6 +1415,10 @@ paths:
                   approved_bonus: '87500.00'
                   adjustment_reason: Корректировка по согласованию с руководителем
                 summary: bonus_calculated → bonus_approved (ручная сумма)
+              BonusApproved→Closed:
+                value:
+                  to_stage: closed
+                summary: bonus_approved → closed
               RejectData(откатДанных):
                 value:
                   to_stage: reject_data
@@ -1557,8 +1567,9 @@ paths:
   /api/v1/projects/out-of-mag/:
     get:
       operationId: projects_out_of_mag_list
-      description: 'Доступ: lead, admin. Без пагинации. В каждом элементе: halls[]
-        (зал + лофт, как в основном списке).'
+      description: 'Доступ: lead, admin. Пагинация: limit, offset (LimitOffset, по
+        умолчанию limit=10). Элемент списка — `OutOfMagProjectSerializer` (все поля
+        `Project` + stage_from, out_of_mag_reason, out_of_mag_transferred_at, out_of_mag_transferred_by).'
       summary: Список проектов «Вне контура MAG»
       parameters:
       - in: query
@@ -1586,6 +1597,10 @@ paths:
           type: integer
         description: Фильтр по id зала в halls[]
       - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
         name: loft
         schema:
           type: string
@@ -1600,11 +1615,23 @@ paths:
         schema:
           type: integer
       - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
         name: ordering
         schema:
           type: string
       - in: query
         name: out_of_mag_reason
+        schema:
+          type: string
+      - in: query
+        name: plum_event_status
+        schema:
+          type: number
+      - in: query
+        name: plum_event_status__in
         schema:
           type: string
       - in: query
@@ -1670,9 +1697,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/OutOfMagProject'
+                $ref: '#/components/schemas/PaginatedOutOfMagProjectList'
           description: ''
   /api/v1/telegram/link/:
     get:
@@ -2259,31 +2284,245 @@ components:
           description: Пусто — отметить все непрочитанные
     OutOfMagProject:
       type: object
-      description: Все залы мероприятия (из Plum или ручного hall_ids).
+      description: Project + данные последнего перевода во «Вне контура MAG».
       properties:
         id:
           type: integer
           readOnly: true
+        plum_event_id:
+          type: string
+          readOnly: true
+          title: ID мероприятия Plum
+        plum_card_url:
+          type: string
+          format: uri
+          readOnly: true
+          title: Ссылка на карточку Plum
+        plum_last_synced_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата последней синхронизации
+        plum_event_payload_hash:
+          type: string
+          readOnly: true
+          title: SHA-256 нормализованного JSON мероприятия Plum
         event_name:
           type: string
+          readOnly: true
           title: Название мероприятия
-          maxLength: 500
         event_date:
           type: string
           format: date
+          readOnly: true
           title: Дата мероприятия
         halls:
           type: array
           items:
             $ref: '#/components/schemas/ProjectHallItem'
           readOnly: true
+        city:
+          type: string
+          readOnly: true
+          title: Город
+        city_label:
+          type: string
+          readOnly: true
+        event_type:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Тип мероприятия Plum (код)
+        event_type_label:
+          type: string
+          readOnly: true
+        event_format:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Формат мероприятия Plum (код)
+        event_format_label:
+          type: string
+          readOnly: true
+        plum_event_status:
+          type: string
+          readOnly: true
+          title: Статус мероприятия в Plum
+        plum_event_status_label:
+          type: string
+          readOnly: true
+        is_from_plum:
+          type: boolean
+          readOnly: true
+        plum_comment:
+          type: string
+          readOnly: true
+          title: Комментарий из Plum
+        plum_client_company:
+          type: string
+          readOnly: true
+          title: Клиент / название компании
+        plum_contact_person:
+          type: string
+          readOnly: true
+          title: Контактное лицо
+        plum_phone:
+          type: string
+          readOnly: true
+          title: Телефон
+        plum_email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email
+        plum_lofthall_manager:
+          type: string
+          readOnly: true
+          title: Менеджер LOFT HALL
+        plum_mag_manager:
+          type: string
+          readOnly: true
+          title: Менеджер MAG (Plum)
+        client_company:
+          type: string
+          title: Клиент / название компании (редактируемое)
+          maxLength: 500
+        contact_person:
+          type: string
+          title: Контактное лицо (редактируемое)
+          maxLength: 500
+        phone:
+          type: string
+          title: Телефон (редактируемый)
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          title: Email (редактируемый)
+          maxLength: 254
         mag_manager:
           type: string
           readOnly: true
-        plum_lofthall_manager:
+        mag_manager_id:
+          type: integer
+          readOnly: true
+        mag_manager_email:
           type: string
-          title: Менеджер LOFT HALL
-          maxLength: 1000
+          format: email
+          readOnly: true
+          nullable: true
+        sales_total:
+          type: number
+          format: double
+          readOnly: true
+        net_profit_ex_tax:
+          type: number
+          format: double
+          readOnly: true
+        final_bonus:
+          type: number
+          format: double
+          readOnly: true
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Дата переноса в архив
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Дата закрытия проекта
+        stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+          readOnly: true
+          title: Стадия проекта
+        last_active_stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+          readOnly: true
+          title: Последняя активная стадия
+        source_payload:
+          readOnly: true
+          title: Последний payload Plum
+        sync_error:
+          type: string
+          readOnly: true
+          title: Ошибка последней синхронизации
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата создания проекта в ERP
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
         stage_from:
           type: string
           nullable: true
@@ -2302,15 +2541,69 @@ components:
           nullable: true
           readOnly: true
       required:
+      - city
+      - city_label
+      - created_at
       - event_date
+      - event_format
+      - event_format_label
       - event_name
+      - event_type
+      - event_type_label
+      - final_bonus
       - halls
       - id
+      - is_from_plum
+      - last_active_stage
       - mag_manager
+      - mag_manager_email
+      - mag_manager_id
+      - net_profit_ex_tax
       - out_of_mag_reason
       - out_of_mag_transferred_at
       - out_of_mag_transferred_by
+      - plum_card_url
+      - plum_client_company
+      - plum_comment
+      - plum_contact_person
+      - plum_email
+      - plum_event_id
+      - plum_event_payload_hash
+      - plum_event_status
+      - plum_event_status_label
+      - plum_last_synced_at
+      - plum_lofthall_manager
+      - plum_mag_manager
+      - plum_phone
+      - sales_total
+      - source_payload
+      - stage
       - stage_from
+      - sync_error
+      - updated_at
+    PaginatedOutOfMagProjectList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutOfMagProject'
     PaginatedProjectAuditLogList:
       type: object
       required:
@@ -2700,6 +2993,9 @@ components:
         plum_event_status_label:
           type: string
           readOnly: true
+        is_from_plum:
+          type: boolean
+          readOnly: true
         plum_comment:
           type: string
           readOnly: true
@@ -2882,6 +3178,7 @@ components:
       - final_bonus
       - halls
       - id
+      - is_from_plum
       - last_active_stage
       - mag_manager
       - mag_manager_email
@@ -3269,6 +3566,9 @@ components:
         plum_event_status_label:
           type: string
           readOnly: true
+        is_from_plum:
+          type: boolean
+          readOnly: true
         plum_comment:
           type: string
           readOnly: true
@@ -3437,9 +3737,6 @@ components:
         updated_at:
           type: string
           format: date-time
-          readOnly: true
-        is_from_plum:
-          type: boolean
           readOnly: true
         contact_comment:
           type: string

@@ -11,6 +11,10 @@ import { mapBackendDocumentFile, type StageDocumentFile } from '@/entities/proje
 import type { StageDocumentType } from '@/entities/stage-document-files'
 
 import { projectVenueFieldsFromHalls } from './map-project-halls'
+import {
+  parsePlumEventStatusCode,
+  plumEventStatusLabel as labelByPlumStatusCode,
+} from './plum-event-status-catalog'
 import type {
   Project,
   ProjectDetail,
@@ -21,12 +25,33 @@ import type {
   StageSnapshot,
 } from '../model/types'
 
-/** Поля итогов, которые бэк может отдавать в списке, но их нет в сгенерированном Project. */
+/** Поля, которые бэк может отдавать в списке, но их нет в сгенерированном Project. */
 type BackendProjectListExtras = {
   sales_project_total?: number
   net_profit_total?: number
   bonus_calculated_total?: number
   bonus_approved_total?: number
+  is_from_plum?: boolean
+}
+
+function mapPlumEventStatusLabel(raw: string | undefined): string | null {
+  const label = raw?.trim()
+  return label ? label : null
+}
+
+function inferIsFromPlum(b: BackendProjectListable): boolean {
+  const plumEventId = b.plum_event_id?.trim() ?? ''
+  if (!plumEventId) return false
+  if (plumEventId.startsWith('ui-') || plumEventId.startsWith('optimistic-')) return false
+  return Boolean(b.plum_card_url?.trim())
+}
+
+function mapIsFromPlum(b: BackendProjectListable): boolean {
+  const raw = b as BackendProject & BackendProjectListExtras
+  if ('is_from_plum' in raw && raw.is_from_plum !== undefined) {
+    return Boolean(raw.is_from_plum)
+  }
+  return inferIsFromPlum(b)
 }
 
 function parseOptionalNumber(value: unknown): number | null {
@@ -130,6 +155,11 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     phone: b.phone ?? '',
     email: b.email ?? '',
     plumCardUrl: b.plum_card_url,
+    isFromPlum: mapIsFromPlum(b),
+    plumEventStatus: parsePlumEventStatusCode(b.plum_event_status),
+    plumEventStatusLabel:
+      mapPlumEventStatusLabel(b.plum_event_status_label) ??
+      labelByPlumStatusCode(parsePlumEventStatusCode(b.plum_event_status)),
     updatedAt: b.updated_at,
     createdAt: b.created_at,
     ...(b.archived_at ? { archivedAt: b.archived_at } : {}),
@@ -142,27 +172,18 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
 }
 
 export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
-  const lastActiveStage = b.stage_from ? STAGE_MAP[b.stage_from as ProjectStageEnumKey] : undefined
-  const venue = projectVenueFieldsFromHalls(b.halls)
+  const base = mapBackendProject(b as BackendProjectListable)
+  if (!base) return null
+
+  const lastActiveStage = b.stage_from
+    ? STAGE_MAP[b.stage_from as ProjectStageEnumKey]
+    : base.lastActiveStage
 
   return {
-    id: String(b.id),
-    title: b.event_name,
-    date: b.event_date,
+    ...base,
     stage: 'out_of_mag_scope',
     ...(lastActiveStage ? { lastActiveStage } : {}),
-    city: '',
-    loft: venue.loft,
-    hall: venue.hall,
-    ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
-    manager: takeFirstManager(b.mag_manager),
-    type: '',
-    company: '',
-    phone: '',
-    email: '',
-    plumCardUrl: '',
-    updatedAt: b.out_of_mag_transferred_at ?? '',
-    createdAt: b.out_of_mag_transferred_at ?? '',
+    updatedAt: b.out_of_mag_transferred_at ?? b.updated_at,
     outsideMag: {
       reason: b.out_of_mag_reason,
       transferredAt: b.out_of_mag_transferred_at,
@@ -214,6 +235,9 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     phone: b.phone ?? '',
     email: '',
     plumCardUrl: '',
+    isFromPlum: false,
+    plumEventStatus: null,
+    plumEventStatusLabel: null,
     updatedAt: '',
     createdAt: '',
   }
@@ -398,7 +422,7 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
   return {
     ...base,
     enteredSystemAt: b.created_at,
-    isFromPlum: b.is_from_plum ?? false,
+    isFromPlum: base.isFromPlum,
     plumId: b.plum_event_id,
     plumStatus: 'confirmed',
     plumComment: b.plum_comment,

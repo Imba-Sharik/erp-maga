@@ -12,6 +12,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { projectDetailPath } from '../lib/project-detail-path'
 import type { Project, ProjectBackOrigin } from '../model/types'
+import { ProjectPlumStatusLine } from './project-plum-status-line'
 import { ProjectTelegramLink } from './project-telegram-link'
 
 interface ProjectPipelineCardProps {
@@ -124,6 +125,7 @@ export function ProjectPipelineCard({
           Телефон: <span className="text-funnel-preproject">{project.phone}</span>
         </p>
         <ProjectTelegramLink phone={project.phone} onClick={stop} />
+        <ProjectPlumStatusLine project={project} />
 
         <div className="mt-1 flex items-center justify-between gap-2">
           <a
