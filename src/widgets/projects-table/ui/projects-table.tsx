@@ -45,6 +45,7 @@ export function ProjectsTable({
       pendingOnly,
       stage: columnFilters.stage,
       magManagerId: columnFilters.manager,
+      plumEventStatus: columnFilters.plumEventStatus,
       search: debouncedSearch,
     })
 

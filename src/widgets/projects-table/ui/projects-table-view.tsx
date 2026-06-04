@@ -24,6 +24,7 @@ import {
   TableHeaderHallFilter,
   TableHeaderLoftFilter,
   TableHeaderManagerFilter,
+  TableHeaderPlumStatusFilter,
 } from './table-header-filters'
 import { ProjectsTableRow } from './projects-table-row'
 
@@ -99,9 +100,15 @@ export function ProjectsTableView({
 
   const header =
     columnView === 'requests' ? (
-      <RequestsTableHeader />
+      <RequestsTableHeader
+        columnFilters={columnFilters}
+        onColumnFilterChange={onColumnFilterChange}
+      />
     ) : columnView === 'closed-requests' ? (
-      <ClosedRequestsTableHeader />
+      <ClosedRequestsTableHeader
+        columnFilters={columnFilters}
+        onColumnFilterChange={onColumnFilterChange}
+      />
     ) : columnView === 'general' ? (
       <GeneralTableHeader
         columnFilters={columnFilters}
@@ -121,7 +128,10 @@ export function ProjectsTableView({
         withActions={withActions}
       />
     ) : columnView === 'closing-active' ? (
-      <ClosingActiveTableHeader />
+      <ClosingActiveTableHeader
+        columnFilters={columnFilters}
+        onColumnFilterChange={onColumnFilterChange}
+      />
     ) : columnView === 'closing-general' ? (
       <ClosingGeneralTableHeader
         columnFilters={columnFilters}
@@ -233,7 +243,12 @@ function GeneralTableHeader({
           triggerClassName={HEADER_FILTER_TRIGGER}
         />
       </GridTableHeaderCell>
-      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
+      <GridTableHeaderCell>
+        <TableHeaderPlumStatusFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Телефон</GridTableHeaderLabel>
@@ -251,6 +266,8 @@ type ManagerHeaderProps = {
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
   withActions?: boolean
 }
+
+type PlumStatusHeaderProps = Pick<ManagerHeaderProps, 'columnFilters' | 'onColumnFilterChange'>
 
 function OutsideMagTableHeader({
   columnFilters,
@@ -284,7 +301,12 @@ function OutsideMagTableHeader({
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Крайний этап</GridTableHeaderLabel>
-      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
+      <GridTableHeaderCell>
+        <TableHeaderPlumStatusFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата перевода</GridTableHeaderLabel>
       <GridTableHeaderLabel>Кто перевёл</GridTableHeaderLabel>
       <GridTableHeaderLabel>Причина перевода</GridTableHeaderLabel>
@@ -324,7 +346,12 @@ function EconomicsTableHeader({
           triggerClassName={HEADER_FILTER_TRIGGER}
         />
       </GridTableHeaderCell>
-      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
+      <GridTableHeaderCell>
+        <TableHeaderPlumStatusFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </GridTableHeaderCell>
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
       <GridTableHeaderLabel>Чистая прибыль</GridTableHeaderLabel>
       <GridTableHeaderLabel>Итоговый бонус</GridTableHeaderLabel>
@@ -333,14 +360,19 @@ function EconomicsTableHeader({
   )
 }
 
-/** Активное закрытие (табличный вид) — шапка без фильтров. */
-function ClosingActiveTableHeader() {
+/** Активное закрытие (табличный вид) — фильтр по статусу Plum в шапке. */
+function ClosingActiveTableHeader({ columnFilters, onColumnFilterChange }: PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
-      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
+      <GridTableHeaderCell>
+        <TableHeaderPlumStatusFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Менеджер</GridTableHeaderLabel>
       <GridTableHeaderLabel>Тип мероприятия</GridTableHeaderLabel>
@@ -420,15 +452,20 @@ function ClosingEconomicsTableHeader({
   )
 }
 
-/** Запросы бухгалтера — фиксированные колонки без фильтров. */
-function RequestsTableHeader() {
+/** Запросы бухгалтера — фильтр по статусу Plum в шапке. */
+function RequestsTableHeader({ columnFilters, onColumnFilterChange }: PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
       <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
       <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
-      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
+      <GridTableHeaderCell>
+        <TableHeaderPlumStatusFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Появление в системе</GridTableHeaderLabel>
@@ -437,14 +474,19 @@ function RequestsTableHeader() {
 }
 
 /** Закрытые запросы бухгалтера — то же + «Дата подтверждения». */
-function ClosedRequestsTableHeader() {
+function ClosedRequestsTableHeader({ columnFilters, onColumnFilterChange }: PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
       <GridTableHeaderLabel>Зал</GridTableHeaderLabel>
       <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
-      <GridTableHeaderLabel>Статус в PLUM</GridTableHeaderLabel>
+      <GridTableHeaderCell>
+        <TableHeaderPlumStatusFilter
+          columnFilters={columnFilters}
+          onColumnFilterChange={onColumnFilterChange}
+        />
+      </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
       <GridTableHeaderLabel>Компания</GridTableHeaderLabel>
       <GridTableHeaderLabel>Дата подтверждения</GridTableHeaderLabel>
