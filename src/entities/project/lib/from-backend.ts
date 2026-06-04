@@ -95,12 +95,6 @@ const STAGE_MAP: Partial<Record<ProjectStageEnumKey, ProjectStage>> = {
   out_of_mag_scope: 'out_of_mag_scope',
 }
 
-function takeFirstManager(raw: string | undefined): string {
-  if (!raw) return ''
-  const first = raw.split(',')[0]?.trim()
-  return first ?? ''
-}
-
 type BackendProjectListable = BackendProject | BackendProjectDetail
 
 const DOCUMENT_STATUSES: ReadonlySet<DocumentStatus> = new Set([
@@ -147,9 +141,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     loft: venue.loft,
     hall: venue.hall,
     ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
-    // Бэк иногда отдаёт `mag_manager` как «Имя1, Имя2, Имя3» — берём первого
-    // как «ведущего менеджера» проекта, остальных пока игнорируем.
-    manager: takeFirstManager(b.mag_manager),
+    manager: b.mag_manager?.full_name ?? '',
     type: b.event_type_label ?? '',
     company: b.client_company ?? '',
     phone: b.phone ?? '',
@@ -187,7 +179,7 @@ export function mapBackendOutOfMagProject(b: OutOfMagProject): Project | null {
     outsideMag: {
       reason: b.out_of_mag_reason,
       transferredAt: b.out_of_mag_transferred_at,
-      transferredBy: b.out_of_mag_transferred_by,
+      transferredBy: userBriefName(b.out_of_mag_transferred_by) ?? null,
     },
   }
 }
@@ -229,7 +221,7 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     loft: venue.loft,
     hall: venue.hall,
     ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
-    manager: takeFirstManager(b.mag_manager),
+    manager: b.mag_manager?.full_name ?? '',
     type: b.event_type_label ?? '',
     company: b.client_company ?? '',
     phone: b.phone ?? '',

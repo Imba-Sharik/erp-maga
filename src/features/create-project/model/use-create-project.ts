@@ -32,14 +32,13 @@ export interface UseCreateProjectOptions {
 function hallItemFromCatalog(hall: {
   id: number
   name: string
-  loft_id: number | null
-  loft_name: string | null
+  loft: { id: number; name: string } | null
 }): ProjectHallItem {
   return {
     hall_id: hall.id,
     hall_name: hall.name,
-    loft_id: hall.loft_id,
-    loft_name: hall.loft_name ?? '',
+    loft_id: hall.loft?.id ?? null,
+    loft_name: hall.loft?.name ?? '',
   }
 }
 
