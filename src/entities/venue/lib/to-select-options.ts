@@ -22,10 +22,11 @@ export function loftsToSelectOptions(lofts: readonly VenueLoft[]): VenueSelectOp
 export function hallsByLoftId(halls: readonly VenueHall[]): Map<number, VenueHall[]> {
   const map = new Map<number, VenueHall[]>()
   for (const hall of halls) {
-    if (hall.loft_id == null) continue
-    const list = map.get(hall.loft_id) ?? []
+    const loftId = hall.loft?.id
+    if (loftId == null) continue
+    const list = map.get(loftId) ?? []
     list.push(hall)
-    map.set(hall.loft_id, list)
+    map.set(loftId, list)
   }
   for (const [loftId, list] of map) {
     map.set(loftId, sortByNameRu(list))

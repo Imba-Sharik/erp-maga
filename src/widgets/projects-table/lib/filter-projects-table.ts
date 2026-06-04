@@ -35,7 +35,7 @@ export interface ProjectsTableFilter {
  * Фильтр «Отв. менеджер» на основных таблицах — через `mag_manager` в API.
  *
  * Фильтры «Этап проекта» и «Статус в PLUM» здесь НЕ участвуют — они в параметрах
- * запроса (см. хуки списков), как и тумблер «Ожидают обработки».
+ * запроса (`useProjectsTableQuery`), как и тумблер «Ожидают обработки» (`stage__in`).
  */
 export function filterProjectsTable(projects: Project[], filter: ProjectsTableFilter): Project[] {
   const { columns, columnView = 'general' } = filter

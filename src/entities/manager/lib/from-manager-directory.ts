@@ -10,10 +10,10 @@ function parseDecimal(value: string): number {
 function mapAssignment(dto: ManagerDirectory['assignments'][number]): ManagerAssignment {
   return {
     id: dto.id,
-    hallId: dto.hall_id,
-    hallName: dto.hall_name,
-    loftId: dto.loft_id,
-    loftName: dto.loft_name,
+    hallId: dto.hall.id,
+    hallName: dto.hall.name,
+    loftId: dto.loft?.id ?? null,
+    loftName: dto.loft?.name ?? null,
     label: dto.label,
   }
 }

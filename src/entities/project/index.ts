@@ -43,6 +43,11 @@ export { projectToApiListRow } from './lib/project-to-api-list-row'
 export { getOutsideMagReasonLabel } from './lib/outside-mag-reason'
 export { PREPROJECT_STAGE_TO_API, preprojectStageToApi } from './lib/preproject-stage-api'
 export { CLOSING_STAGE_TO_API, closingStageToApi } from './lib/closing-stage-api'
+export {
+  PROJECTS_TABLE_DEFAULT_STAGE_IN,
+  PROJECTS_TABLE_PENDING_STAGE_IN,
+  PROJECTS_TABLE_PENDING_STAGE_IN_PARAM,
+} from './lib/projects-table-stage-in'
 export { projectStageToApi } from './lib/project-stage-api'
 export {
   stageFormSchemas,
