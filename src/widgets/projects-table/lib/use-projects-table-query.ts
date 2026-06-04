@@ -1,27 +1,17 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { mapBackendProjects, plumEventStatusFilterParam } from '@/entities/project'
+import {
+  mapBackendProjects,
+  plumEventStatusFilterParam,
+  PROJECTS_TABLE_DEFAULT_STAGE_IN,
+  PROJECTS_TABLE_PENDING_STAGE_IN_PARAM,
+} from '@/entities/project'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
 import type { ProjectsListQueryParamsStageEnumKey } from '@/shared/api/generated/types/projectsController/ProjectsList'
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
 
 const PAGE_SIZE = 50
-
-/**
- * Обычный режим — вся предпроектная воронка, одним запросом через `stage__in`.
- * (В отличие от канбана: там 5 запросов по одному `stage` на колонку.)
- */
-const PREPROJECT_STAGE_IN = [
-  'plum_request',
-  'primary_contact_done',
-  'calculation_prepared',
-  'contract_signed',
-  'ready_to_event',
-].join(',')
-
-/** «Ожидают обработки» — поздние этапы закрытия, ждущие финальной обработки. */
-const PENDING_STAGE_IN = ['data_confirmed', 'bonus_approved'].join(',')
 
 type StageParams = { stage: ProjectsListQueryParamsStageEnumKey } | { stage__in: string }
 
@@ -39,9 +29,10 @@ interface UseProjectsTableQueryParams {
 }
 
 /**
- * Этап — это всегда параметр запроса, не клиентский фильтр:
- * - выбран конкретный этап в фильтре → точный `stage=<этап>` (новый запрос);
- * - иначе → группа этапов через `stage__in` (зависит от тумблера).
+ * Этап — всегда параметр запроса, не клиентский фильтр:
+ * - выбран этап в шапке → `stage=<этап>`;
+ * - иначе `stage__in`: все активные воронки (без вне контура и архива) или
+ *   подмножество при тумблере «Ожидают обработки».
  */
 function parseMagManagerId(magManagerId: string | null): number | undefined {
   if (!magManagerId) return undefined
@@ -58,7 +49,11 @@ export function useProjectsTableQuery({
 }: UseProjectsTableQueryParams) {
   const stageParams: StageParams = stage
     ? { stage: stage as ProjectsListQueryParamsStageEnumKey }
-    : { stage__in: pendingOnly ? PENDING_STAGE_IN : PREPROJECT_STAGE_IN }
+    : {
+        stage__in: pendingOnly
+          ? PROJECTS_TABLE_PENDING_STAGE_IN_PARAM
+          : PROJECTS_TABLE_DEFAULT_STAGE_IN,
+      }
 
   const mag_manager = parseMagManagerId(magManagerId)
   const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
