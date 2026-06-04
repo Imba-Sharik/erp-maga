@@ -22,12 +22,12 @@ export function buildHallAssignmentOptions(halls: readonly VenueHall[]): Manager
 export function buildLoftAssignmentOptions(halls: readonly VenueHall[]): ManagerAssignmentOption[] {
   return halls
     .filter(
-      (hall): hall is VenueHall & { loft_id: number; loft_name: string } =>
-        hall.loft_id != null && Boolean(hall.loft_name),
+      (hall): hall is VenueHall & { loft: { id: number; name: string } } =>
+        hall.loft != null && Boolean(hall.loft.name),
     )
     .map((hall) => ({
-      key: loftAssignmentKey(hall.id, hall.loft_id),
-      label: `${hall.loft_name} — ${hall.name}`,
+      key: loftAssignmentKey(hall.id, hall.loft.id),
+      label: `${hall.loft.name} — ${hall.name}`,
     }))
     .sort(sortByLabelRu)
 }
