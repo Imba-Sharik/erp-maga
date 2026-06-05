@@ -15,7 +15,6 @@ export {
   type UnfilledFinanceArticle,
 } from './lib/validation'
 export { mapBackendArticles } from './lib/from-backend'
-export { DEFAULT_BONUS_PERCENT } from './lib/defaults'
 export {
   blockTotal,
   projectTotal,
