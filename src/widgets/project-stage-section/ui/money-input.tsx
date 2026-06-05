@@ -18,7 +18,7 @@ export function MoneyInput({
     <Input
       inputMode="numeric"
       value={display}
-      placeholder="0 ₽"
+      placeholder="Введите сумму"
       onChange={(e) => onCommit(parseMoney(e.target.value))}
       className={className}
     />
