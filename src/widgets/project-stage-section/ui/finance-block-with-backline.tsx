@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 
 import {
   ARTICLE_LABELS,
+  areFinanceAspectFieldsFilled,
   blockTotal,
   formatMoney,
   formatPercent,
@@ -82,7 +83,10 @@ function ArticleRow({ kind, values, percent, aspect, editable, onChange }: Artic
             onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
           />
         ) : (
-          <StageReadonlyBox value={formatMoney(values[aspect])} source="system" />
+          <StageReadonlyBox
+            value={values[aspect] === null ? '—' : formatMoney(values[aspect])}
+            source="system"
+          />
         )}
         <StageReadonlyBox value={formatPercent(percent)} source="system" align="center" />
       </div>
@@ -186,8 +190,10 @@ export function FinanceBlockWithBackline({
   const mainTotal = blockTotal(articles, 'main', aspect)
   const backlineTotal = blockTotal(articles, 'backline', aspect)
 
+  const financeComplete = areFinanceAspectFieldsFilled(articles, aspect)
+
   const renderArticleRow = (block: ArticleBlock, kind: ArticleKind) => {
-    const values = articles[block]?.[kind] ?? { sales: 0, expense: 0, bonusPercent: 0 }
+    const values = articles[block]?.[kind] ?? { sales: null, expense: null, bonusPercent: 0 }
     return (
       <ArticleRow
         key={`${block}-${kind}`}
@@ -209,7 +215,7 @@ export function FinanceBlockWithBackline({
         showAdvanceButton: presentation.showAdvanceButton,
       }}
       isCurrent={isCurrent}
-      canShowAdvance={canEdit}
+      canShowAdvance={canEdit && financeComplete}
       headerTitle={headerTitle}
       headerColorClass={headerColorClass}
       hasDraftHighlight={hasDraftHighlight}
