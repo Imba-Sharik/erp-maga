@@ -27,7 +27,7 @@ function isBackendArticle(value: unknown): value is BackendProjectArticle {
 
 /**
  * Статьи проекта с бэка (`ProjectDetail.articles`) → UI-модель `ProjectArticles`.
- * Стартуем с дефолтного набора (все статьи нулями) и накладываем пришедшие значения.
+ * Стартуем с пустого набора (`null` в суммах) и накладываем пришедшие значения.
  * Блок `backline` создаётся только если в ответе есть хотя бы одна backline-статья.
  */
 export function mapBackendArticles(

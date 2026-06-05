@@ -44,7 +44,7 @@ function buildBonusRows(articles: ProjectArticles): BonusRow[] {
 }
 
 function calcRow(values: ArticleValues) {
-  const netProfit = values.sales - values.expense
+  const netProfit = (values.sales ?? 0) - (values.expense ?? 0)
   const formulaBonus = (netProfit * values.bonusPercent) / 100
   // Если руководитель скорректировал — берём override, иначе формулу.
   const bonusAmount = values.bonusAmount ?? formulaBonus
@@ -102,7 +102,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
         {editable ? (
           <MoneyInput
             value={bonusAmount}
-            onCommit={(next) => onBonusChange(row.block, row.kind, next)}
+            onCommit={(next) => onBonusChange(row.block, row.kind, next ?? 0)}
           />
         ) : (
           <StageReadonlyBox value={formatMoney(bonusAmount)} source="system" />
