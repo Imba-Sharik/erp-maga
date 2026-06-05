@@ -30,6 +30,10 @@ function CollapsibleContent({
       data-slot="collapsible-content"
       className={cn(
         "overflow-hidden",
+        // overflow-hidden нужен для анимации высоты, но он же режет focus-ring
+        // (3px) у крайних инпутов. Даём кольцу место по бокам и снизу через
+        // padding и компенсируем отрицательным margin, чтобы раскладка не съехала.
+        "px-1 pb-1 -mx-1 -mb-1",
         "data-[state=open]:animate-collapsible-down",
         // fill-mode-forwards только на закрытии: иначе после анимации высота
         // вернётся к auto (полной) на кадр перед unmount — контент моргнёт.
