@@ -124,28 +124,36 @@ export function ProjectPipelineCard({
         <p className="text-xs text-[#ACACAC]">
           Телефон: <span className="text-funnel-preproject">{project.phone}</span>
         </p>
-        <ProjectTelegramLink phone={project.phone} onClick={stop} />
-        <ProjectPlumStatusLine project={project} />
-
-        <div className="mt-1 flex items-center justify-between gap-2">
-          {project.isFromPlum ? (
-            <a
-              href={project.plumCardUrl}
-              target="_blank"
-              rel="noreferrer"
-              onClick={stop}
-              className="text-funnel-preproject inline-flex items-center gap-1.5 text-xs underline-offset-2 hover:underline"
-            >
-              <span className="bg-funnel-preproject inline-flex size-4 items-center justify-center rounded-[5px] text-white">
-                <Link2 className="size-3" />
+        {project.isFromPlum ? (
+          <>
+            <ProjectTelegramLink phone={project.phone} onClick={stop} />
+            <ProjectPlumStatusLine project={project} />
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <a
+                href={project.plumCardUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={stop}
+                className="text-funnel-preproject inline-flex items-center gap-1.5 text-xs underline-offset-2 hover:underline"
+              >
+                <span className="bg-funnel-preproject inline-flex size-4 items-center justify-center rounded-[5px] text-white">
+                  <Link2 className="size-3" />
+                </span>
+                Карточка в PLUM
+              </a>
+              <span className="text-2xs text-[#ACACAC]">
+                {formatRelativeUpdateLabel(project.updatedAt)}
               </span>
-              Карточка в PLUM
-            </a>
-          ) : null}
-          <span className="text-2xs ml-auto text-[#ACACAC]">
-            {formatRelativeUpdateLabel(project.updatedAt)}
-          </span>
-        </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-between gap-2">
+            <ProjectTelegramLink phone={project.phone} onClick={stop} />
+            <span className="text-2xs ml-auto text-[#ACACAC]">
+              {formatRelativeUpdateLabel(project.updatedAt)}
+            </span>
+          </div>
+        )}
       </div>
     </Card>
   )
