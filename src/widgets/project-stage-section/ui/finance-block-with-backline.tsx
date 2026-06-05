@@ -1,17 +1,18 @@
 import { ChevronDown, Plus, Trash2 } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 
 import {
   ARTICLE_LABELS,
+  areFinanceAspectFieldsFilled,
   blockTotal,
   formatMoney,
   formatPercent,
-  parsePercent,
   projectTotal,
   taxAmount,
   type ArticleBlock,
   type ArticleKind,
   type ArticleValues,
+  type FinanceAspect,
   type ProjectArticles,
 } from '@/entities/project-articles'
 import type { ProjectStage } from '@/entities/project'
@@ -28,7 +29,9 @@ import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
 import { StageReadonlyBox, type StageReadonlySource } from './stage-readonly-box'
 
-type Aspect = 'sales' | 'expense'
+type Aspect = FinanceAspect
+
+const REQUIRED_FIELD_MESSAGE = 'Обязательное поле'
 
 const MAIN_LEFT: ArticleKind[] = ['equipment', 'personnel', 'sublease', 'transport']
 const MAIN_RIGHT: ArticleKind[] = ['internet', 'consumables', 'screen', 'tm']
@@ -48,15 +51,56 @@ function formatRecordDate(iso: string | undefined): string | undefined {
   return DATE_FORMAT.format(d)
 }
 
-function PercentInput({ value, onCommit }: { value: number; onCommit: (next: number) => void }) {
-  // Незаполненное значение — это явный «0%» в поле, чтобы было видно, что налог будет 0.
-  const display = formatPercent(value)
+function percentToDraft(value: number | null): string {
+  if (value === null) return ''
+  return String(value).replace('.', ',')
+}
+
+function sanitizePercentInput(input: string): string {
+  return input.replace(/[^\d.,]/g, '')
+}
+
+function parsePercentDraft(draft: string): number | null {
+  const cleaned = sanitizePercentInput(draft).replace(',', '.')
+  if (!cleaned) return null
+  const n = Number(cleaned)
+  if (!Number.isFinite(n)) return null
+  return Math.min(100, n)
+}
+
+function PercentInput({
+  value,
+  onCommit,
+  invalid = false,
+}: {
+  value: number | null
+  onCommit: (next: number | null) => void
+  invalid?: boolean
+}) {
+  const [focused, setFocused] = useState(false)
+  const [draft, setDraft] = useState(() => percentToDraft(value))
+
+  useEffect(() => {
+    if (!focused) setDraft(percentToDraft(value))
+  }, [value, focused])
+
+  const display = focused ? draft : value === null ? '' : formatPercent(value)
+
   return (
     <Input
       inputMode="decimal"
       value={display}
-      placeholder="0%"
-      onChange={(e) => onCommit(Math.min(100, parsePercent(e.target.value)))}
+      placeholder="Введите %"
+      aria-invalid={invalid}
+      onFocus={() => {
+        setFocused(true)
+        setDraft(percentToDraft(value))
+      }}
+      onBlur={() => {
+        setFocused(false)
+        onCommit(parsePercentDraft(draft))
+      }}
+      onChange={(e) => setDraft(sanitizePercentInput(e.target.value))}
       className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
     />
   )
@@ -68,21 +112,36 @@ interface ArticleRowProps {
   percent: number
   aspect: Aspect
   editable: boolean
+  showValidation: boolean
   onChange: (patch: Partial<ArticleValues>) => void
 }
 
-function ArticleRow({ kind, values, percent, aspect, editable, onChange }: ArticleRowProps) {
-  const required = true
+function ArticleRow({
+  kind,
+  values,
+  percent,
+  aspect,
+  editable,
+  showValidation,
+  onChange,
+}: ArticleRowProps) {
+  const isEmpty = values[aspect] === null
+  const fieldError = showValidation && isEmpty ? REQUIRED_FIELD_MESSAGE : undefined
+
   return (
-    <StageField label={ARTICLE_LABELS[kind]} required={required}>
+    <StageField label={ARTICLE_LABELS[kind]} required error={fieldError}>
       <div className="grid grid-cols-[1fr_56px] gap-1.5">
         {editable ? (
           <MoneyInput
             value={values[aspect]}
+            invalid={Boolean(fieldError)}
             onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
           />
         ) : (
-          <StageReadonlyBox value={formatMoney(values[aspect])} source="system" />
+          <StageReadonlyBox
+            value={values[aspect] === null ? '—' : formatMoney(values[aspect])}
+            source="system"
+          />
         )}
         <StageReadonlyBox value={formatPercent(percent)} source="system" align="center" />
       </div>
@@ -148,9 +207,9 @@ interface FinanceBlockWithBacklineProps {
   isCurrent?: boolean
   record?: StageRecord
   articles: ProjectArticles
-  taxRate: number
+  taxRate: number | null
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
-  onTaxRateChange: (rate: number) => void
+  onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
   onAdvance?: () => void
   hasDraftHighlight?: boolean
@@ -182,12 +241,30 @@ export function FinanceBlockWithBackline({
   const backlineAdded = articles.backline !== null
 
   const totalSales = projectTotal(articles, 'sales')
-  const tax = taxAmount(totalSales, taxRate)
+  const tax = taxAmount(totalSales, taxRate ?? 0)
   const mainTotal = blockTotal(articles, 'main', aspect)
   const backlineTotal = blockTotal(articles, 'backline', aspect)
 
+  // Процент налога вводится вручную только на ready_to_event (продажная воронка).
+  const taxRequired = aspect === 'sales'
+  const taxValid = !taxRequired || taxRate !== null
+
+  const [showValidation, setShowValidation] = useState(false)
+
+  const taxError =
+    showValidation && taxRequired && taxRate === null ? REQUIRED_FIELD_MESSAGE : undefined
+
+  const handleAdvance = useCallback(() => {
+    if (areFinanceAspectFieldsFilled(articles, aspect) && taxValid) {
+      setShowValidation(false)
+      onAdvance?.()
+      return
+    }
+    setShowValidation(true)
+  }, [articles, aspect, taxValid, onAdvance])
+
   const renderArticleRow = (block: ArticleBlock, kind: ArticleKind) => {
-    const values = articles[block]?.[kind] ?? { sales: 0, expense: 0, bonusPercent: 0 }
+    const values = articles[block]?.[kind] ?? { sales: null, expense: null, bonusPercent: 0 }
     return (
       <ArticleRow
         key={`${block}-${kind}`}
@@ -196,6 +273,7 @@ export function FinanceBlockWithBackline({
         percent={values.bonusPercent}
         aspect={aspect}
         editable={editable}
+        showValidation={showValidation}
         onChange={(patch) => onArticleChange(block, kind, patch)}
       />
     )
@@ -213,7 +291,7 @@ export function FinanceBlockWithBackline({
       headerTitle={headerTitle}
       headerColorClass={headerColorClass}
       hasDraftHighlight={hasDraftHighlight}
-      onAdvance={onAdvance}
+      onAdvance={handleAdvance}
     >
       <div className="flex flex-col gap-5">
         <Collapsible defaultOpen className="flex flex-col">
@@ -225,12 +303,16 @@ export function FinanceBlockWithBackline({
               right={MAIN_RIGHT}
               renderArticle={(kind) => renderArticleRow('main', kind)}
               summary={[
-                <StageField key="tax-rate" label="Единый % налога" required>
+                <StageField key="tax-rate" label="Единый % налога" required error={taxError}>
                   {editable ? (
-                    <PercentInput value={taxRate} onCommit={onTaxRateChange} />
+                    <PercentInput
+                      value={taxRate}
+                      invalid={Boolean(taxError)}
+                      onCommit={onTaxRateChange}
+                    />
                   ) : (
                     <StageReadonlyBox
-                      value={taxRate > 0 ? formatPercent(taxRate) : '—'}
+                      value={taxRate === null ? '—' : formatPercent(taxRate)}
                       source="manager"
                     />
                   )}

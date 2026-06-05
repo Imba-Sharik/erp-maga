@@ -17,9 +17,9 @@ interface StagePassedExpensesProps {
   record?: StageRecord
   hasDraftHighlight?: boolean
   articles: ProjectArticles
-  taxRate: number
+  taxRate: number | null
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
-  onTaxRateChange: (rate: number) => void
+  onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
   onAdvance?: () => void
 }

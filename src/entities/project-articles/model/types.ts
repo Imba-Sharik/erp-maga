@@ -10,6 +10,9 @@ export type ArticleKind =
 
 export type ArticleBlock = 'main' | 'backline'
 
+/** Поле суммы в финансовой статье: продажи или расходы. */
+export type FinanceAspect = 'sales' | 'expense'
+
 export const ARTICLE_LABELS: Record<ArticleKind, string> = {
   equipment: 'Оборудование',
   internet: 'Интернет',
@@ -42,8 +45,9 @@ export const BACKLINE_ARTICLE_KINDS: readonly ArticleKind[] = [
 ] as const
 
 export interface ArticleValues {
-  sales: number
-  expense: number
+  /** `null` — менеджер ещё не вводил сумму вручную. */
+  sales: number | null
+  expense: number | null
   bonusPercent: number
   /**
    * Override итогового «Бонус по статье». Если не задан — считается формулой

@@ -20,6 +20,7 @@ import { useProjectsContractPartialUpdate } from '@/shared/api/generated/hooks/p
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
 
 import { buildContractPatchBody, mapContractBlockToFormData } from '../lib/to-contract-patch-body'
+import { prepareArticlesForStage, prepareTaxRateForStage } from '../lib/prepare-articles-for-stage'
 import { buildTransitionBody } from '../lib/to-transition-body'
 
 export interface StageRecord {
@@ -50,9 +51,10 @@ export interface StageFlow {
 
   // Финансовые статьи (используются на этапах ready/expenses/bonus_calculated).
   articles: ProjectArticles
-  taxRate: number
+  /** `null` — менеджер ещё не вводил процент налога вручную. */
+  taxRate: number | null
   updateArticle: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
-  setTaxRate: (rate: number) => void
+  setTaxRate: (rate: number | null) => void
   toggleBackline: () => void
 }
 
@@ -146,12 +148,17 @@ export function useStageFlow({
     }
     return seeded
   })
-  const [articles, setArticles] = useState<ProjectArticles>(
-    () => initialDraft?.articles ?? initialArticles ?? createInitialArticles(),
-  )
-  const [taxRate, setTaxRateState] = useState<number>(
-    () => initialDraft?.taxRate ?? initialTaxRate ?? 0,
-  )
+  const [articles, setArticles] = useState<ProjectArticles>(() => {
+    const base = initialDraft?.articles ?? initialArticles ?? createInitialArticles()
+    return prepareArticlesForStage(base, initialStage)
+  })
+  const [taxRate, setTaxRateState] = useState<number | null>(() => {
+    // Черновик — это точное состояние ввода пользователя (включая явный `null`),
+    // поэтому при его наличии не нормализуем. Бэковое значение приводим к `null`,
+    // если это незаполненный `0` на этапе ready_to_event.
+    if (initialDraft) return initialDraft.taxRate ?? null
+    return prepareTaxRateForStage(initialTaxRate ?? null, initialStage)
+  })
 
   // Финансы трогали в этой сессии — гейт для сохранения черновика (не на маунте).
   const financeDirtyRef = useRef(false)
@@ -184,6 +191,10 @@ export function useStageFlow({
         },
       }))
       setCurrentStage(next)
+      // Вход в финансовый этап внутри SPA (без перезагрузки): прежние/бэковые нули
+      // в редактируемом аспекте трактуем как «ещё не вводили» — так же, как при маунте.
+      setArticles((prev) => prepareArticlesForStage(prev, next))
+      setTaxRateState((prev) => prepareTaxRateForStage(prev, next))
       // Этап отправлен — черновик больше не нужен.
       financeDirtyRef.current = false
       if (projectId !== undefined) stageDraftActions.clear(projectId, currentUser.id)
@@ -311,9 +322,9 @@ export function useStageFlow({
     [],
   )
 
-  const setTaxRate = useCallback((rate: number) => {
+  const setTaxRate = useCallback((rate: number | null) => {
     financeDirtyRef.current = true
-    setTaxRateState(Number.isFinite(rate) ? rate : 0)
+    setTaxRateState(rate === null || Number.isFinite(rate) ? rate : null)
   }, [])
 
   const toggleBackline = useCallback(() => {

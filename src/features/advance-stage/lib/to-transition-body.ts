@@ -21,8 +21,8 @@ function toStage(stage: ProjectStage): ProjectTransitionRequestToStageEnumKey {
   return stage as ProjectTransitionRequestToStageEnumKey
 }
 
-function toDecimalString(value: number | undefined): string | undefined {
-  if (value === undefined || !Number.isFinite(value)) return undefined
+function toDecimalString(value: number | null | undefined): string | undefined {
+  if (value === null || value === undefined || !Number.isFinite(value)) return undefined
   return value.toFixed(2)
 }
 
@@ -71,7 +71,7 @@ interface BuildTransitionBodyArgs {
   nextStage: ProjectStage
   values?: Partial<StageFormData>
   articles: ProjectArticles
-  taxRate: number
+  taxRate: number | null
 }
 
 /**
@@ -112,9 +112,9 @@ export function buildTransitionBody({
   }
 
   // tax_rate обязателен для перехода ready_to_event → event_held.
-  // Бэк не принимает отсутствие поля — если менеджер не заполнил процент, шлём 0.
+  // UI не даёт перейти с пустым процентом; null здесь — лишь страховка → шлём 0.
   if (currentStage === 'ready_to_event') {
-    body.tax_rate = taxRate.toFixed(2)
+    body.tax_rate = (taxRate ?? 0).toFixed(2)
   }
 
   const articleList = buildArticles(currentStage, articles)

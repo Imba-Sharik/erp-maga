@@ -7,6 +7,7 @@ import { FieldLabelText } from './field-label-text'
 interface StageFieldLabelProps {
   label: string
   required?: boolean
+  error?: boolean
   className?: string
   form?: boolean
 }
@@ -47,18 +48,27 @@ function StageFieldLabelForm({
 function StageFieldLabelStatic({
   label,
   required,
+  error,
   className,
-}: Pick<StageFieldLabelProps, 'label' | 'required' | 'className'>) {
+}: Pick<StageFieldLabelProps, 'label' | 'required' | 'error' | 'className'>) {
   return (
-    <span className={cn('text-xs font-medium text-[#454545]', className)}>
+    <span
+      data-error={error || undefined}
+      className={cn(
+        'data-[error=true]:text-destructive text-xs font-medium text-[#454545]',
+        className,
+      )}
+    >
       <StageFieldLabelContent label={label} required={required} />
     </span>
   )
 }
 
-export function StageFieldLabel({ label, required, className, form }: StageFieldLabelProps) {
+export function StageFieldLabel({ label, required, error, className, form }: StageFieldLabelProps) {
   if (form) {
     return <StageFieldLabelForm label={label} required={required} className={className} />
   }
-  return <StageFieldLabelStatic label={label} required={required} className={className} />
+  return (
+    <StageFieldLabelStatic label={label} required={required} error={error} className={className} />
+  )
 }

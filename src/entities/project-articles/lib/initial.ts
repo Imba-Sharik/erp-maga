@@ -12,8 +12,8 @@ function buildBlock(block: ArticleBlock): ArticlesBlockMap {
   return Object.keys(ARTICLE_LABELS).reduce((acc, key) => {
     const kind = key as ArticleKind
     acc[kind] = {
-      sales: 0,
-      expense: 0,
+      sales: null,
+      expense: null,
       bonusPercent: DEFAULT_BONUS_PERCENT[block][kind] ?? 0,
     }
     return acc
