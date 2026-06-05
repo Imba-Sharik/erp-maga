@@ -69,14 +69,14 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
         <span className="text-xs font-medium text-[#454545]">{ARTICLE_LABELS[row.kind]}</span>
         <div className="flex min-w-0 items-center gap-1.5">
           <StageReadonlyBox
-            value={formatMoney(row.values.sales)}
+            value={row.values.sales === null ? '—' : formatMoney(row.values.sales)}
             source="system"
             icon={CircleDollarSign}
             className="min-w-0 flex-1"
           />
           <Operator>−</Operator>
           <StageReadonlyBox
-            value={formatMoney(row.values.expense)}
+            value={row.values.expense === null ? '—' : formatMoney(row.values.expense)}
             source="system"
             icon={TrendingDown}
             className="min-w-0 flex-1"
