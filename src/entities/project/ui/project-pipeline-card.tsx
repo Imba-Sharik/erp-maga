@@ -127,8 +127,8 @@ export function ProjectPipelineCard({
         <ProjectTelegramLink phone={project.phone} onClick={stop} />
         <ProjectPlumStatusLine project={project} />
 
-        <div className="mt-1 flex items-center justify-between gap-2">
-          {project.isFromPlum ? (
+        {project.isFromPlum ? (
+          <div className="mt-1 flex items-center justify-between gap-2">
             <a
               href={project.plumCardUrl}
               target="_blank"
@@ -141,11 +141,15 @@ export function ProjectPipelineCard({
               </span>
               Карточка в PLUM
             </a>
-          ) : null}
-          <span className="text-2xs ml-auto text-[#ACACAC]">
+            <span className="text-2xs text-[#ACACAC]">
+              {formatRelativeUpdateLabel(project.updatedAt)}
+            </span>
+          </div>
+        ) : (
+          <span className="text-2xs self-end text-[#ACACAC]">
             {formatRelativeUpdateLabel(project.updatedAt)}
           </span>
-        </div>
+        )}
       </div>
     </Card>
   )
