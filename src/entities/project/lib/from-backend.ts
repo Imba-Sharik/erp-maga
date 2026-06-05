@@ -381,9 +381,13 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
   put(
     'data_confirmed',
     buildSnapshot({
-      enteredAt: b.data_confirmation_at,
-      enteredBy: userBriefName(b.data_confirmation_by),
-      values: { dataConfirmedStatus: b.data_confirmed_status },
+      enteredAt: b.data_confirmed_at ?? b.data_confirmation_at,
+      enteredBy: userBriefName(b.data_confirmed_set_by),
+      values: {
+        dataConfirmedStatus: b.data_confirmed_status,
+        dataConfirmedAt: b.data_confirmation_at ?? undefined,
+        dataConfirmedBy: userBriefName(b.data_confirmation_by),
+      },
     }),
   )
 

@@ -1,9 +1,5 @@
 import type { ProjectDetail, ProjectStage, StageFormData } from '@/entities/project'
-import {
-  bonusTotal,
-  formatMoney,
-  type ProjectArticles,
-} from '@/entities/project-articles'
+import { bonusTotal, formatMoney, type ProjectArticles } from '@/entities/project-articles'
 import type { StageRecord } from '@/features/advance-stage'
 
 interface ResolveContext {
@@ -63,8 +59,13 @@ export function resolveSystemValue(
     case 'projectDocsConfirmedBy':
     case 'subleaseDocsConfirmedBy':
     case 'staffReceiptsConfirmedBy':
-    case 'dataConfirmedBy':
       return record?.values?.[fieldName] ?? undefined
+
+    case 'dataConfirmedBy':
+      // Per-row штамп с бэка (`data_confirmation_by`); fallback — старый маппинг и локальный flow.
+      return (
+        record?.values?.dataConfirmedBy ?? record?.completedBy ?? record?.enteredBy ?? undefined
+      )
 
     case 'contactedAt':
     case 'closingFunnelEnteredAt':

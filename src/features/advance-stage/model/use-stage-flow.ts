@@ -174,22 +174,33 @@ export function useStageFlow({
   const applyAdvanceLocally = useCallback(
     (next: ProjectStage, values?: Partial<StageFormData>) => {
       const now = new Date().toISOString()
-      setRecords((prev) => ({
-        ...prev,
-        [currentStage]: {
-          ...prev[currentStage],
-          // Мержим, а не заменяем: per-row штампы (`patchCurrentStageValues`) и
-          // form-values на submit должны соблюдаться оба, не затирая друг друга.
-          values: { ...prev[currentStage]?.values, ...values },
-          completedAt: now,
-          completedBy: currentUser.fullName,
-        },
-        [next]: {
-          ...prev[next],
-          enteredAt: now,
-          enteredBy: currentUser.fullName,
-        },
-      }))
+      setRecords((prev) => {
+        const completedValues: Partial<StageFormData> = {
+          ...prev[currentStage]?.values,
+          ...values,
+        }
+        if (currentStage === 'data_confirmed' && values?.dataConfirmedStatus) {
+          completedValues.dataConfirmedBy = currentUser.fullName
+          completedValues.dataConfirmedAt = now
+        }
+
+        return {
+          ...prev,
+          [currentStage]: {
+            ...prev[currentStage],
+            // Мержим, а не заменяем: per-row штампы (`patchCurrentStageValues`) и
+            // form-values на submit должны соблюдаться оба, не затирая друг друга.
+            values: completedValues,
+            completedAt: now,
+            completedBy: currentUser.fullName,
+          },
+          [next]: {
+            ...prev[next],
+            enteredAt: now,
+            enteredBy: currentUser.fullName,
+          },
+        }
+      })
       setCurrentStage(next)
       // Вход в финансовый этап внутри SPA (без перезагрузки): прежние/бэковые нули
       // в редактируемом аспекте трактуем как «ещё не вводили» — так же, как при маунте.
