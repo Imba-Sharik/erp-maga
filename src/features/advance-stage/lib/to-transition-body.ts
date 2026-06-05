@@ -21,8 +21,8 @@ function toStage(stage: ProjectStage): ProjectTransitionRequestToStageEnumKey {
   return stage as ProjectTransitionRequestToStageEnumKey
 }
 
-function toDecimalString(value: number | undefined): string | undefined {
-  if (value === undefined || !Number.isFinite(value)) return undefined
+function toDecimalString(value: number | null | undefined): string | undefined {
+  if (value === null || value === undefined || !Number.isFinite(value)) return undefined
   return value.toFixed(2)
 }
 
