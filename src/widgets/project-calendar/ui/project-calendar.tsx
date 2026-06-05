@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { pluralProjects, toDayKey, type ProjectsByDay } from '@/entities/project'
+import type { SelectOption } from '@/shared/ui/clearable-select'
 import type { PaintMode } from '../lib/use-calendar-paint-select'
 import { CalendarGrid } from './calendar-grid'
 import { CalendarToolbar } from './calendar-toolbar'
@@ -18,6 +19,12 @@ interface ProjectCalendarProps {
   onPaintDates: (keys: string[], mode: PaintMode) => void
   onChangeLoft: (loft: string | null) => void
   onChangeHall: (hall: string | null) => void
+  showManagerFilter?: boolean
+  magManagerId?: string | null
+  onChangeMagManager?: (value: string | null) => void
+  managerFilterOptions?: readonly SelectOption[]
+  managersSelectLoading?: boolean
+  managersSelectError?: boolean
   totalThisMonth: number
   isLoading?: boolean
   isFetching?: boolean
@@ -37,6 +44,12 @@ export function ProjectCalendar({
   onPaintDates,
   onChangeLoft,
   onChangeHall,
+  showManagerFilter = false,
+  magManagerId = null,
+  onChangeMagManager,
+  managerFilterOptions = [],
+  managersSelectLoading = false,
+  managersSelectError = false,
   totalThisMonth,
   isLoading = false,
   isFetching = false,
@@ -47,7 +60,7 @@ export function ProjectCalendar({
   )
 
   return (
-    <div className="@container/calendar flex flex-col gap-4">
+    <div className="@container/calendar flex min-w-0 flex-col gap-4 overflow-x-hidden">
       <CalendarToolbar
         projectSearch={projectSearch}
         onChangeProjectSearch={onChangeProjectSearch}
@@ -57,6 +70,12 @@ export function ProjectCalendar({
         onChangeLoft={onChangeLoft}
         hall={hall}
         onChangeHall={onChangeHall}
+        showManagerFilter={showManagerFilter}
+        magManagerId={magManagerId}
+        onChangeMagManager={onChangeMagManager}
+        managerFilterOptions={managerFilterOptions}
+        managersSelectLoading={managersSelectLoading}
+        managersSelectError={managersSelectError}
         isFetching={isFetching}
       />
       <div>
