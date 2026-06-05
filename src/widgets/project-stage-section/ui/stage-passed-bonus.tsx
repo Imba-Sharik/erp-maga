@@ -141,7 +141,10 @@ export function StagePassedBonus({
   const backlineRows = rows.filter((row) => row.block === 'backline')
   const totalBonus = rows.reduce((acc, row) => acc + calcRow(row.values).bonusAmount, 0)
   const dataConfirmedBy =
-    (dataConfirmedRecord?.values?.dataConfirmedBy as string | undefined) ?? '—'
+    (dataConfirmedRecord?.values?.dataConfirmedBy as string | undefined) ??
+    dataConfirmedRecord?.completedBy ??
+    dataConfirmedRecord?.enteredBy ??
+    '—'
 
   const handleBonusChange = (block: ArticleBlock, kind: ArticleKind, amount: number) => {
     onArticleChange(block, kind, { bonusAmount: amount })
