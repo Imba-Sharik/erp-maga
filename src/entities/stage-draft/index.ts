@@ -3,6 +3,7 @@ export {
   STAGE_DRAFT_HIGHLIGHT_CLASS,
   stageBlockBorderClass,
   stageCardBorderClass,
+  stageRowHighlightClass,
 } from './lib/stage-draft-highlight'
 export {
   useStageDraftStore,

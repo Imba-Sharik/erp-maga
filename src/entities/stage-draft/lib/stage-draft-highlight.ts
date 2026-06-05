@@ -13,3 +13,10 @@ export function stageCardBorderClass(
 ): string {
   return cn(hasDraft ? `${STAGE_DRAFT_HIGHLIGHT_CLASS} bg-draft-highlight/10` : defaultBorder)
 }
+
+/** Жёлтая подсветка строки таблицы с незавершённым черновиком (перебивает hover). */
+export function stageRowHighlightClass(hasDraft?: boolean): string {
+  return hasDraft
+    ? 'bg-draft-highlight/20 hover:bg-draft-highlight/30 shadow-[inset_3px_0_0_0_var(--draft-highlight)]'
+    : ''
+}
