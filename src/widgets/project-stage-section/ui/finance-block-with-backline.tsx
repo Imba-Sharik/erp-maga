@@ -1,5 +1,5 @@
 import { ChevronDown, Plus, Trash2 } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 
 import {
   ARTICLE_LABELS,
@@ -13,6 +13,7 @@ import {
   type ArticleBlock,
   type ArticleKind,
   type ArticleValues,
+  type FinanceAspect,
   type ProjectArticles,
 } from '@/entities/project-articles'
 import type { ProjectStage } from '@/entities/project'
@@ -29,7 +30,9 @@ import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
 import { StageReadonlyBox, type StageReadonlySource } from './stage-readonly-box'
 
-type Aspect = 'sales' | 'expense'
+type Aspect = FinanceAspect
+
+const REQUIRED_FIELD_MESSAGE = 'Обязательное поле'
 
 const MAIN_LEFT: ArticleKind[] = ['equipment', 'personnel', 'sublease', 'transport']
 const MAIN_RIGHT: ArticleKind[] = ['internet', 'consumables', 'screen', 'tm']
@@ -69,17 +72,29 @@ interface ArticleRowProps {
   percent: number
   aspect: Aspect
   editable: boolean
+  showValidation: boolean
   onChange: (patch: Partial<ArticleValues>) => void
 }
 
-function ArticleRow({ kind, values, percent, aspect, editable, onChange }: ArticleRowProps) {
-  const required = true
+function ArticleRow({
+  kind,
+  values,
+  percent,
+  aspect,
+  editable,
+  showValidation,
+  onChange,
+}: ArticleRowProps) {
+  const isEmpty = values[aspect] === null
+  const fieldError = showValidation && isEmpty ? REQUIRED_FIELD_MESSAGE : undefined
+
   return (
-    <StageField label={ARTICLE_LABELS[kind]} required={required}>
+    <StageField label={ARTICLE_LABELS[kind]} required error={fieldError}>
       <div className="grid grid-cols-[1fr_56px] gap-1.5">
         {editable ? (
           <MoneyInput
             value={values[aspect]}
+            invalid={Boolean(fieldError)}
             onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
           />
         ) : (
@@ -190,7 +205,16 @@ export function FinanceBlockWithBackline({
   const mainTotal = blockTotal(articles, 'main', aspect)
   const backlineTotal = blockTotal(articles, 'backline', aspect)
 
-  const financeComplete = areFinanceAspectFieldsFilled(articles, aspect)
+  const [showValidation, setShowValidation] = useState(false)
+
+  const handleAdvance = useCallback(() => {
+    if (areFinanceAspectFieldsFilled(articles, aspect)) {
+      setShowValidation(false)
+      onAdvance?.()
+      return
+    }
+    setShowValidation(true)
+  }, [articles, aspect, onAdvance])
 
   const renderArticleRow = (block: ArticleBlock, kind: ArticleKind) => {
     const values = articles[block]?.[kind] ?? { sales: null, expense: null, bonusPercent: 0 }
@@ -202,6 +226,7 @@ export function FinanceBlockWithBackline({
         percent={values.bonusPercent}
         aspect={aspect}
         editable={editable}
+        showValidation={showValidation}
         onChange={(patch) => onArticleChange(block, kind, patch)}
       />
     )
@@ -215,11 +240,11 @@ export function FinanceBlockWithBackline({
         showAdvanceButton: presentation.showAdvanceButton,
       }}
       isCurrent={isCurrent}
-      canShowAdvance={canEdit && financeComplete}
+      canShowAdvance={canEdit}
       headerTitle={headerTitle}
       headerColorClass={headerColorClass}
       hasDraftHighlight={hasDraftHighlight}
-      onAdvance={onAdvance}
+      onAdvance={handleAdvance}
     >
       <div className="flex flex-col gap-5">
         <Collapsible defaultOpen className="flex flex-col">

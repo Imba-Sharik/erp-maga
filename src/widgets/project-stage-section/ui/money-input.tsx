@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 
 import { formatMoney } from '@/entities/project-articles'
+import { cn } from '@/shared/lib/utils'
 import { Input } from '@/shared/ui/input'
 
 interface MoneyInputProps {
   value: number | null
   onCommit: (next: number | null) => void
   placeholder?: string
+  invalid?: boolean
   className?: string
 }
 
@@ -24,8 +26,10 @@ export function MoneyInput({
   value,
   onCommit,
   placeholder = 'Введите сумму',
-  className = 'h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm',
+  invalid = false,
+  className,
 }: MoneyInputProps) {
+  const inputClassName = cn('h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm', className)
   const [focused, setFocused] = useState(false)
   const [draft, setDraft] = useState(() => valueToDraft(value))
 
@@ -50,7 +54,8 @@ export function MoneyInput({
         onCommit(digits ? Number(digits) : null)
       }}
       onChange={(e) => setDraft(digitsOnly(e.target.value))}
-      className={className}
+      aria-invalid={invalid}
+      className={inputClassName}
     />
   )
 }

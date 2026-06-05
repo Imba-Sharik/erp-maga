@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { BACKLINE_ARTICLE_KINDS, MAIN_ARTICLE_KINDS } from '../model/types'
 import { createEmptyBacklineBlock, createInitialArticles } from './initial'
-import { areFinanceAspectFieldsFilled } from './validation'
+import { areFinanceAspectFieldsFilled, listUnfilledFinanceAspectFields } from './validation'
 
 function fillMainAspect(
   articles: ReturnType<typeof createInitialArticles>,
@@ -58,5 +58,37 @@ describe('areFinanceAspectFieldsFilled', () => {
 
     expect(areFinanceAspectFieldsFilled(articles, 'sales')).toBe(true)
     expect(articles.backline).toBeNull()
+  })
+})
+
+describe('listUnfilledFinanceAspectFields', () => {
+  it('возвращает все main-статьи с null по sales', () => {
+    const articles = createInitialArticles()
+
+    const missing = listUnfilledFinanceAspectFields(articles, 'sales')
+
+    expect(missing).toHaveLength(MAIN_ARTICLE_KINDS.length)
+    expect(missing.every((item) => item.block === 'main')).toBe(true)
+  })
+
+  it('не включает заполненные статьи', () => {
+    const articles = createInitialArticles()
+    articles.main.equipment = { ...articles.main.equipment, sales: 1000 }
+    articles.main.personnel = { ...articles.main.personnel, sales: 0 }
+
+    const missing = listUnfilledFinanceAspectFields(articles, 'sales')
+
+    expect(missing.map((item) => item.kind)).not.toContain('equipment')
+    expect(missing.map((item) => item.kind)).not.toContain('personnel')
+  })
+
+  it('включает backline-статьи, если блок добавлен', () => {
+    const articles = createInitialArticles()
+    fillMainAspect(articles, 'expense', 100)
+    articles.backline = createEmptyBacklineBlock()
+
+    const missing = listUnfilledFinanceAspectFields(articles, 'expense')
+
+    expect(missing.some((item) => item.block === 'backline')).toBe(true)
   })
 })

@@ -7,7 +7,6 @@ import { ALL_STAGE_ORDER, type ProjectStage, type StageFormData } from '@/entiti
 import {
   createEmptyBacklineBlock,
   createInitialArticles,
-  areFinanceAspectFieldsFilled,
   type ArticleBlock,
   type ArticleKind,
   type ArticleValues,
@@ -199,16 +198,6 @@ export function useStageFlow({
       const nextIndex = currentIndex + 1
       const next = ALL_STAGE_ORDER[nextIndex]
       if (!next) return
-
-      if (currentStage === 'ready_to_event' && !areFinanceAspectFieldsFilled(articles, 'sales')) {
-        return
-      }
-      if (
-        currentStage === 'expenses_entered' &&
-        !areFinanceAspectFieldsFilled(articles, 'expense')
-      ) {
-        return
-      }
 
       if (projectId === undefined) {
         applyAdvanceLocally(next, values)
