@@ -9,6 +9,7 @@ import {
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
+import { stageRowHighlightClass, useProjectDraftHighlight } from '@/entities/stage-draft'
 import { GridTableCell, GridTableRow, GridTableRowActionCell } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
@@ -44,10 +45,16 @@ function handleRowKeyDown(e: KeyboardEvent<HTMLDivElement>, goToDetail: () => vo
 interface ProjectTableNavRowProps {
   gridTemplate: string
   goToDetail: () => void
+  hasDraft?: boolean
   children: ReactNode
 }
 
-function ProjectTableNavRow({ gridTemplate, goToDetail, children }: ProjectTableNavRowProps) {
+function ProjectTableNavRow({
+  gridTemplate,
+  goToDetail,
+  hasDraft,
+  children,
+}: ProjectTableNavRowProps) {
   return (
     <GridTableRow
       navigable
@@ -56,6 +63,7 @@ function ProjectTableNavRow({ gridTemplate, goToDetail, children }: ProjectTable
       tabIndex={0}
       onClick={goToDetail}
       onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
+      className={stageRowHighlightClass(hasDraft)}
     >
       {children}
     </GridTableRow>
@@ -93,6 +101,7 @@ export function ProjectsTableRow({
   assignDisabled,
 }: ProjectsTableRowProps) {
   const navigate = useNavigate()
+  const hasDraft = useProjectDraftHighlight(project.id)
   const withActions = resolveTableWithActions(columnView, renderRowAction)
   const gridTemplate = getTableGridTemplate(columnView, { withActions })
   const goToDetail = () =>
@@ -111,7 +120,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'outside-mag') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -137,7 +146,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'general') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -161,7 +170,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'closing-active') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectHallCell project={project} />
@@ -194,7 +203,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'closing-general') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -216,7 +225,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'closing-economics') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
         </div>
@@ -237,7 +246,7 @@ export function ProjectsTableRow({
   // Запросы / Закрытые запросы (ЛК бухгалтера) — менеджер без редактирования.
   if (columnView === 'requests') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -254,7 +263,7 @@ export function ProjectsTableRow({
 
   if (columnView === 'closed-requests') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -273,7 +282,7 @@ export function ProjectsTableRow({
   }
 
   return (
-    <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail}>
+    <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
       <div className="contents">
         <ProjectTitleCell project={project} />
       </div>
