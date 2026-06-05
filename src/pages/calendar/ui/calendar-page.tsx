@@ -11,12 +11,14 @@ import {
 import { mergeDates, removeDates } from '@/widgets/project-calendar/lib/date-range'
 import { filterCalendarProjects } from '@/widgets/project-calendar/lib/filter-calendar-projects'
 import type { PaintMode } from '@/widgets/project-calendar/lib/use-calendar-paint-select'
+import { useManagersDirectory } from '@/entities/manager'
 import {
   countProjectsInMonth,
   getProjectsForDates,
   groupByDay,
   mapBackendCalendarProjects,
 } from '@/entities/project'
+import { useUserRole } from '@/entities/user-role'
 import { useProjectsCalendarList } from '@/shared/api/generated/hooks/projectsController/useProjectsCalendarList'
 import { useElementSize } from '@/shared/hooks/use-element-size'
 import { DaySchedule } from '@/widgets/day-schedule'
@@ -24,7 +26,20 @@ import { ProjectCalendar } from '@/widgets/project-calendar'
 
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
+function parseMagManagerId(magManagerId: string | null): number | undefined {
+  if (!magManagerId) return undefined
+  const id = Number(magManagerId)
+  return Number.isFinite(id) ? id : undefined
+}
+
 export function CalendarPage() {
+  const role = useUserRole()
+  const showManagerFilter = role === 'director' || role === 'admin'
+  const {
+    filterOptions: managerFilterOptions,
+    isLoading: managersSelectLoading,
+    isError: managersSelectError,
+  } = useManagersDirectory()
   const { today, visibleMonth: initialVisibleMonth } = useMemo(() => {
     const now = new Date()
     return {
@@ -37,6 +52,7 @@ export function CalendarPage() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [loft, setLoft] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
+  const [magManagerId, setMagManagerId] = useState<string | null>(null)
   const [projectSearch, setProjectSearch] = useState('')
 
   const { event_date_after, event_date_before } = useMemo(() => {
@@ -51,9 +67,12 @@ export function CalendarPage() {
   // Используем `/projects/calendar/` — отдельную лёгкую ручку без пагинации,
   // которая уже фильтрует `out_of_mag_scope` на сервере. Возвращает 9-полевую
   // карточку (event_name/halls/mag_manager/stage), достаточно для сетки.
+  const magManagerParam = showManagerFilter ? parseMagManagerId(magManagerId) : undefined
+
   const { data, isLoading, isFetching } = useProjectsCalendarList({
     event_date_after,
     event_date_before,
+    ...(magManagerParam !== undefined ? { mag_manager: magManagerParam } : {}),
   })
   const projects = useMemo(
     () => (data ? mapBackendCalendarProjects(data.results) : []),
@@ -134,6 +153,12 @@ export function CalendarPage() {
             onPaintDates={applyPaintedDates}
             onChangeLoft={setLoft}
             onChangeHall={setHall}
+            showManagerFilter={showManagerFilter}
+            magManagerId={magManagerId}
+            onChangeMagManager={setMagManagerId}
+            managerFilterOptions={managerFilterOptions}
+            managersSelectLoading={managersSelectLoading}
+            managersSelectError={managersSelectError}
             totalThisMonth={totalThisMonth}
             isLoading={isLoading}
             isFetching={isFetching}
