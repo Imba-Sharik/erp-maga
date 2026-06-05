@@ -15,8 +15,8 @@ export interface StageDraft {
   values?: Partial<StageFormData>
   /** Финансовые статьи (ready_to_event / expenses_entered / bonus_calculated). */
   articles?: ProjectArticles
-  /** Ставка налога (ready_to_event). */
-  taxRate?: number
+  /** Ставка налога (ready_to_event). `null` — введён пустой/сброшенный процент. */
+  taxRate?: number | null
   /** ISO-datetime сохранения. */
   savedAt: string
   /**

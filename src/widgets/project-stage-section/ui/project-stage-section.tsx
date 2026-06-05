@@ -33,9 +33,9 @@ interface ProjectStageSectionProps {
    */
   onPatchStageValues?: (stage: ProjectStage, values: Partial<StageFormData>) => void
   articles: ProjectArticles
-  taxRate: number
+  taxRate: number | null
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
-  onTaxRateChange: (rate: number) => void
+  onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
   /** Получить запись произвольного этапа (например, `data_confirmed` для отображения «Кто подтвердил» на этапе бонуса). */
   getRecord: (stage: ProjectStage) => StageRecord | undefined

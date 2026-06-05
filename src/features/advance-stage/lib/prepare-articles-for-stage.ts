@@ -23,3 +23,16 @@ export function prepareArticlesForStage(
   if (!aspect) return articles
   return normalizeAspectZeroToNull(articles, aspect)
 }
+
+/**
+ * Налог вводится менеджером вручную на `ready_to_event`. Бэк может вернуть `0`
+ * для незаполненного значения — трактуем его как «ещё не вводили» (`null`),
+ * чтобы заставить ввести явно. На других этапах оставляем значение как есть.
+ */
+export function prepareTaxRateForStage(
+  taxRate: number | null | undefined,
+  stage: ProjectStage,
+): number | null {
+  if (stage !== 'ready_to_event') return taxRate ?? null
+  return taxRate ? taxRate : null
+}
