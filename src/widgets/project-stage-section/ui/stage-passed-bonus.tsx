@@ -64,8 +64,8 @@ interface ArticleRowProps {
 function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
   const { netProfit, bonusAmount } = calcRow(row.values)
   return (
-    <div className="grid grid-cols-1 items-end gap-4 @[900px]:grid-cols-[minmax(0,1fr)_88px_120px]">
-      <div className="flex min-w-0 flex-col gap-1.5">
+    <div className="grid grid-cols-2 items-end gap-4 @[900px]:grid-cols-[minmax(0,1fr)_88px_120px]">
+      <div className="col-span-2 flex min-w-0 flex-col gap-1.5 @[900px]:col-span-1">
         <span className="text-xs font-medium text-[#454545]">{ARTICLE_LABELS[row.kind]}</span>
         <div className="flex min-w-0 items-center gap-1.5">
           <StageReadonlyBox
