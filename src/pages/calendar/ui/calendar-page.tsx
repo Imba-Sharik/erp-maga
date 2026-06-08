@@ -8,9 +8,9 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns'
-import { mergeDates, removeDates } from '@/widgets/project-calendar/lib/date-range'
+import { mergeDates, removeDates } from '@/widgets/month-calendar'
 import { filterCalendarProjects } from '@/widgets/project-calendar/lib/filter-calendar-projects'
-import type { PaintMode } from '@/widgets/project-calendar/lib/use-calendar-paint-select'
+import type { PaintMode } from '@/widgets/month-calendar'
 import { useManagersDirectory } from '@/entities/manager'
 import {
   countProjectsInMonth,
@@ -74,10 +74,7 @@ export function CalendarPage() {
     event_date_before,
     ...(magManagerParam !== undefined ? { mag_manager: magManagerParam } : {}),
   })
-  const projects = useMemo(
-    () => (data ? mapBackendCalendarProjects(data.results) : []),
-    [data],
-  )
+  const projects = useMemo(() => (data ? mapBackendCalendarProjects(data.results) : []), [data])
 
   const projectsByDay = useMemo(
     () =>

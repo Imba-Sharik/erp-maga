@@ -7,6 +7,7 @@ import {
 } from './redirects/closed-projects-redirect'
 import { AppLayout } from './layouts/app-layout'
 import { CalendarPage } from '@/pages/calendar'
+import { MeetingsCalendarPage } from '@/pages/meetings-calendar'
 import { ClosedRequestsPage } from '@/pages/closed-requests'
 import { ClosingPage } from '@/pages/closing'
 import { DashboardPage } from '@/pages/dashboard'
@@ -40,6 +41,14 @@ const router = createBrowserRouter([
         element: (
           <RequireRole roles={['manager', 'director', 'admin']}>
             <CalendarPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'meetings-calendar',
+        element: (
+          <RequireRole roles={['manager', 'director', 'admin']}>
+            <MeetingsCalendarPage />
           </RequireRole>
         ),
       },

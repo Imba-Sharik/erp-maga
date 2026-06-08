@@ -1,18 +1,11 @@
-import { format } from 'date-fns'
+import { groupByDay as groupByDayGeneric, toDayKey } from '@/shared/lib/date'
+
 import type { Project } from '../model/types'
 
 export type ProjectsByDay = Map<string, Project[]>
 
-export function toDayKey(date: Date): string {
-  return format(date, 'yyyy-MM-dd')
-}
+export { toDayKey }
 
 export function groupByDay(projects: Project[]): ProjectsByDay {
-  const map: ProjectsByDay = new Map()
-  for (const p of projects) {
-    const list = map.get(p.date)
-    if (list) list.push(p)
-    else map.set(p.date, [p])
-  }
-  return map
+  return groupByDayGeneric(projects, (p) => p.date)
 }
