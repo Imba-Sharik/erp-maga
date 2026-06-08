@@ -49,6 +49,7 @@ import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { DateField } from '@/shared/ui/date-field'
 import { StageDocumentField } from '@/features/stage-document'
+import { StageEstimateField } from './stage-estimate-field'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 import { StageStatusHeader } from './stage-status-header'
@@ -336,6 +337,17 @@ export function StageSectionCurrent({
             <FormControl>
               {f.type === 'document' && f.documentType ? (
                 renderDocumentUploadControl(f, fieldEditable, field)
+              ) : f.type === 'estimate' ? (
+                <StageEstimateField
+                  value={(field.value as string) ?? ''}
+                  addButtonLabel={f.addButtonLabel}
+                  interaction="upload"
+                  disabled={!fieldEditable}
+                  onChange={(fileName) => {
+                    field.onChange(fileName)
+                    onPatchValues?.({ [f.name]: fileName })
+                  }}
+                />
               ) : f.type === 'textarea' ? (
                 <Textarea
                   {...field}

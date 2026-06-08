@@ -1,4 +1,4 @@
-import { PLUM_EVENT_STATUS_OPTIONS } from '@/entities/project'
+import { PlumEventStatusFilterSelect } from '@/entities/project'
 import { useVenueCatalog } from '@/entities/venue'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 
@@ -56,10 +56,8 @@ export function TableHeaderPlumStatusFilter({
   onColumnFilterChange,
 }: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
   return (
-    <ClearableSelect
-      placeholder="Статус в PLUM"
+    <PlumEventStatusFilterSelect
       value={columnFilters.plumEventStatus}
-      options={PLUM_EVENT_STATUS_OPTIONS}
       onChange={(v) => onColumnFilterChange('plumEventStatus', v)}
       triggerClassName={HEADER_FILTER_TRIGGER}
     />

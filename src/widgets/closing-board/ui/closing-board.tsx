@@ -6,6 +6,7 @@ import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
+import { buildKanbanListParams } from '@/widgets/projects-board/lib/build-kanban-list-params'
 import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
@@ -68,12 +69,21 @@ export function ClosingBoard({
   const debouncedSearch = useDebouncedValue(search)
   const debouncedArchiveSearch = useDebouncedValue(archiveSearch)
 
-  const filtersActive = search.trim() !== '' || city !== null || hall !== null || loft !== null
-  // Поиск канбана уходит на сервер через listParams; клиентский filter только по фасетам.
+  const filtersActive =
+    search.trim() !== '' ||
+    city !== null ||
+    hall !== null ||
+    loft !== null ||
+    columnFilters.plumEventStatus !== null
+  // Поиск и статус Plum уходят на сервер через listParams; клиентский filter только по фасетам.
   const filter = useMemo(() => ({ search: '', city, hall, loft }), [city, hall, loft])
   const kanbanListParams = useMemo(
-    () => ({ ...listDateParams, search: debouncedSearch.trim() || undefined }),
-    [listDateParams, debouncedSearch],
+    () =>
+      buildKanbanListParams(listDateParams, {
+        search: debouncedSearch,
+        plumEventStatus: columnFilters.plumEventStatus,
+      }),
+    [listDateParams, debouncedSearch, columnFilters.plumEventStatus],
   )
 
   // Табличный вид активного закрытия: один запрос на все closing-этапы,
@@ -136,11 +146,13 @@ export function ClosingBoard({
           city={city}
           hall={hall}
           loft={loft}
+          plumEventStatus={columnFilters.plumEventStatus}
           viewMode={viewMode}
           onChangeSearch={setSearch}
           onChangeCity={setCity}
           onChangeHall={setHall}
           onChangeLoft={setLoft}
+          onChangePlumEventStatus={(value) => handleColumnFilterChange('plumEventStatus', value)}
           onViewModeChange={setViewMode}
           onToggleArchive={handleToggleArchive}
         />

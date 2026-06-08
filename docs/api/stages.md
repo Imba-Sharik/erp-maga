@@ -45,6 +45,18 @@
 - `calculation_prepared_at` — datetime входа в этап.
 - `calculation_prepared_set_by` — пользователь, выполнивший переход.
 
+### Смета (файл) — ⚠️ требуется поддержка бэка
+
+Менеджер обязан прикрепить файл сметы на этом этапе (обязательное действие перед переходом). Принимаем как закрывающие документы бухгалтера — отдельным файловым эндпойнтом, **не** в transition-body.
+
+Нужно расширить enum `document_type` (эндпойнты `/api/v1/projects/{id}/documents/{document_type}/file/`, GET + POST) новым значением:
+
+- `estimate` — смета.
+
+После загрузки `GET /projects/{id}/` должен отдавать файл сметы в общем словаре `documents` (как `project_closing` / `subrent_closing` / `staff_receipts`): `{ file: { name, url, uploaded_at }, ... }`.
+
+> Пока значения `estimate` на бэке нет, на фронте поле реализовано в демо-режиме: файл не загружается, в форме хранится только его имя (`StageEstimateField`). Когда enum добавят — компонент заменяется на `StageDocumentField` с `documentType="estimate"`, как у документов бухгалтера.
+
 ## Этап 4 — `contract_signed`
 
 ```json
