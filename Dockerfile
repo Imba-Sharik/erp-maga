@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -9,8 +9,11 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-ENV CHOKIDAR_USEPOLLING=true
+RUN pnpm build
 
-EXPOSE 5173
+FROM nginx:alpine
 
-CMD ["sh", "-c", "pnpm exec kubb generate && pnpm exec vite --host 0.0.0.0 --port 5173"]
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80

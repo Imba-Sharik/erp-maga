@@ -4,7 +4,6 @@ dist-ssr
 .git
 .gitignore
 *.md
-.env
 .env.local
 .env.*.local
 .playwright-mcp
