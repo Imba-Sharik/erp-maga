@@ -7,7 +7,7 @@ export type KanbanBoardScope = 'board-preproject' | 'board-closing' | 'board-out
 
 export type BoardListParams = Pick<
   ProjectsListQueryParams,
-  'event_date_after' | 'event_date_before' | 'ordering' | 'search'
+  'event_date_after' | 'event_date_before' | 'ordering' | 'search' | 'plum_event_status'
 >
 
 export function kanbanColumnQueryKey(

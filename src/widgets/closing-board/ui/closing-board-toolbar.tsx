@@ -27,11 +27,13 @@ interface ClosingBoardToolbarKanbanProps {
   city: string | null
   hall: string | null
   loft: string | null
+  plumEventStatus: string | null
   viewMode: ClosingViewMode
   onChangeSearch: (value: string) => void
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
+  onChangePlumEventStatus: (value: string | null) => void
   onViewModeChange: (value: ClosingViewMode) => void
   onToggleArchive: (value: boolean) => void
 }
@@ -50,18 +52,20 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="@container flex shrink-0 flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:justify-between @[1300px]:gap-4">
-        <div className="flex flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:gap-3">
+      <div className="@container flex min-w-0 shrink-0 flex-col gap-2.5 @[1300px]:flex-row @[1300px]:items-center @[1300px]:justify-between @[1300px]:gap-4">
+        <div className="flex min-w-0 flex-col gap-2.5 @[1300px]:min-w-0 @[1300px]:flex-1 @[1300px]:flex-row @[1300px]:items-center @[1300px]:gap-3">
           <ProjectsBoardToolbar
             filtersAlign="start"
             search={props.search}
             city={props.city}
             hall={props.hall}
             loft={props.loft}
+            plumEventStatus={props.plumEventStatus}
             onChangeSearch={props.onChangeSearch}
             onChangeCity={props.onChangeCity}
             onChangeHall={props.onChangeHall}
             onChangeLoft={props.onChangeLoft}
+            onChangePlumEventStatus={props.onChangePlumEventStatus}
           />
           {/* Мобила: тогл слева + свитч архива справа в одной строке.
               Десктоп: обёртка растворяется (contents) — тогл встаёт к фильтрам,
@@ -96,7 +100,7 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
             placeholder="Поиск проектов"
             value={props.search}
             onChange={(e) => props.onChangeSearch(e.target.value)}
-            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-7 pr-1.5 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @3xl:pl-9 @3xl:pr-3 @3xl:text-sm @3xl:placeholder:text-sm"
+            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
           />
         </div>
 
