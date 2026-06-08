@@ -3,6 +3,7 @@ import type { ComponentType, SVGProps } from 'react'
 import {
   BellIcon,
   CalendarIcon,
+  MeetingsCalendarIcon,
   DashboardIcon,
   FolderIcon,
   ListChecksIcon,
@@ -16,6 +17,7 @@ import type { UserRole } from './types'
 export type RoleNavItemId =
   | 'dashboard'
   | 'calendar'
+  | 'meetings-calendar'
   | 'projects'
   | 'closing'
   | 'outside-mag'
@@ -46,6 +48,13 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
     title: 'Календарь',
     url: '/calendar',
     icon: CalendarIcon,
+    roles: ['manager', 'director', 'admin'],
+  },
+  {
+    id: 'meetings-calendar',
+    title: 'Календарь встреч',
+    url: '/meetings-calendar',
+    icon: MeetingsCalendarIcon,
     roles: ['manager', 'director', 'admin'],
   },
   {
