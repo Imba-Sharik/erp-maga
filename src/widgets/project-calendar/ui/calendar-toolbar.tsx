@@ -1,28 +1,10 @@
-import { addMonths, getMonth, getYear, setMonth, setYear } from 'date-fns'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
 import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/utils'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchBar } from '@/shared/ui/search-bar'
-
-const MONTHS_RU = [
-  'Январь',
-  'Февраль',
-  'Март',
-  'Апрель',
-  'Май',
-  'Июнь',
-  'Июль',
-  'Август',
-  'Сентябрь',
-  'Октябрь',
-  'Ноябрь',
-  'Декабрь',
-]
-
-const YEAR_OPTIONS = [2024, 2025, 2026, 2027]
+import { MonthYearNavigator } from '@/widgets/month-calendar'
 
 const SELECT_BASE =
   'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
@@ -31,10 +13,6 @@ const SELECT_BASE =
 const TOOLBAR_LAYOUT = {
   default: {
     triggerBase: `${SELECT_BASE} @min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-32 @min-[880px]/calendar:flex-none`,
-    triggerYear: `${SELECT_BASE} @min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-20 @min-[880px]/calendar:flex-none`,
-    monthNav:
-      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
-      '@min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-28 @min-[880px]/calendar:flex-none',
     toolbar:
       'flex min-w-0 w-full flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:items-center @min-[880px]/calendar:gap-2.5',
     searchRow:
@@ -43,13 +21,10 @@ const TOOLBAR_LAYOUT = {
       'grid min-w-0 w-full grid-cols-2 gap-2.5 @min-[880px]/calendar:flex @min-[880px]/calendar:flex-1 @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:justify-end @min-[880px]/calendar:basis-[520px]',
     managerMobileHide: '@min-[880px]/calendar:hidden',
     managerDesktopShow: 'hidden @min-[880px]/calendar:block',
+    compactBreakpoint: '880px' as const,
   },
   withManagerFilter: {
     triggerBase: `${SELECT_BASE} @min-[1040px]/calendar:w-fit @min-[1040px]/calendar:min-w-32 @min-[1040px]/calendar:flex-none`,
-    triggerYear: `${SELECT_BASE} @min-[1040px]/calendar:w-fit @min-[1040px]/calendar:min-w-20 @min-[1040px]/calendar:flex-none`,
-    monthNav:
-      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
-      '@min-[1040px]/calendar:w-fit @min-[1040px]/calendar:min-w-28 @min-[1040px]/calendar:flex-none',
     toolbar:
       'flex min-w-0 w-full flex-col gap-3 @min-[1040px]/calendar:flex-row @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:items-center @min-[1040px]/calendar:gap-2.5',
     searchRow:
@@ -58,19 +33,9 @@ const TOOLBAR_LAYOUT = {
       'grid min-w-0 w-full grid-cols-2 gap-2.5 @min-[1040px]/calendar:flex @min-[1040px]/calendar:flex-1 @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:justify-end @min-[1040px]/calendar:basis-[520px]',
     managerMobileHide: '@min-[1040px]/calendar:hidden',
     managerDesktopShow: 'hidden @min-[1040px]/calendar:block',
+    compactBreakpoint: '1040px' as const,
   },
 } as const
-
-const MONTH_NAV_ARROW_BTN =
-  'flex h-full w-5 shrink-0 items-center justify-center text-[#3D3D3D] transition-colors ' +
-  'hover:bg-[#F5F5F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset'
-
-const MONTH_SELECT_TRIGGER =
-  'h-full min-w-0 flex-1 justify-center gap-0 rounded-none border-0 bg-transparent px-1 py-0 shadow-none ' +
-  'text-sm font-normal text-[#1B1A17] ' +
-  'focus-visible:z-10 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset ' +
-  '[&>svg]:hidden ' +
-  '[&_[data-slot=select-value]]:w-full [&_[data-slot=select-value]]:justify-center'
 
 interface CalendarToolbarProps {
   projectSearch: string
@@ -144,8 +109,6 @@ export function CalendarToolbar({
   const selectDisabled = isLoading || isError
   const managerSelectDisabled = managersSelectLoading || managersSelectError
   const managerPlaceholder = isMobile ? 'Менеджер' : 'Отв. менеджер'
-  const monthIndex = getMonth(visibleMonth)
-  const year = getYear(visibleMonth)
 
   const managerFilter =
     showManagerFilter && onChangeMagManager ? (
@@ -212,55 +175,12 @@ export function CalendarToolbar({
           disabled={selectDisabled}
         />
 
-        <Select
-          value={String(year)}
-          onValueChange={(v) => onChangeMonth(setYear(visibleMonth, Number(v)))}
-        >
-          <SelectTrigger className={layout.triggerYear}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {YEAR_OPTIONS.map((y) => (
-              <SelectItem key={y} value={String(y)}>
-                {y}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <div className={layout.monthNav}>
-          <button
-            type="button"
-            className={MONTH_NAV_ARROW_BTN}
-            aria-label="Предыдущий месяц"
-            onClick={() => onChangeMonth(addMonths(visibleMonth, -1))}
-          >
-            <ChevronLeft className="size-4" strokeWidth={2} />
-          </button>
-          <Select
-            value={String(monthIndex)}
-            onValueChange={(v) => onChangeMonth(setMonth(visibleMonth, Number(v)))}
-          >
-            <SelectTrigger className={MONTH_SELECT_TRIGGER}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {MONTHS_RU.map((name, i) => (
-                <SelectItem key={name} value={String(i)}>
-                  {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <button
-            type="button"
-            className={MONTH_NAV_ARROW_BTN}
-            aria-label="Следующий месяц"
-            onClick={() => onChangeMonth(addMonths(visibleMonth, 1))}
-          >
-            <ChevronRight className="size-4" strokeWidth={2} />
-          </button>
-        </div>
+        <MonthYearNavigator
+          visibleMonth={visibleMonth}
+          onChangeMonth={onChangeMonth}
+          compactBreakpoint={layout.compactBreakpoint}
+          grouped={false}
+        />
       </div>
     </div>
   )

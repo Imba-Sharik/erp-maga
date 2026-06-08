@@ -1,35 +1,35 @@
-import { ProjectCountBadge } from '@/entities/project'
+import type { ReactNode } from 'react'
 import { cn } from '@/shared/lib/utils'
 
-interface DayCellProps {
+interface MonthDayCellProps {
   dayKey: string
   dayNum: number
   outOfMonth: boolean
   isToday: boolean
   isSelected: boolean
-  count: number
+  badge: ReactNode
   onSelect: () => void
-  onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => void
-  onPointerEnter: (event: React.PointerEvent<HTMLButtonElement>) => void
+  onPointerDown?: (event: React.PointerEvent<HTMLButtonElement>) => void
+  onPointerEnter?: (event: React.PointerEvent<HTMLButtonElement>) => void
   colIdx: number
   isLastRow: boolean
   isLoading?: boolean
 }
 
-export function DayCell({
+export function MonthDayCell({
   dayKey,
   dayNum,
   outOfMonth,
   isToday,
   isSelected,
-  count,
+  badge,
   onSelect,
   onPointerDown,
   onPointerEnter,
   colIdx,
   isLastRow,
   isLoading = false,
-}: DayCellProps) {
+}: MonthDayCellProps) {
   return (
     <button
       type="button"
@@ -81,7 +81,7 @@ export function DayCell({
               aria-hidden
             />
           ) : (
-            <ProjectCountBadge count={count} />
+            badge
           )}
         </div>
       </div>

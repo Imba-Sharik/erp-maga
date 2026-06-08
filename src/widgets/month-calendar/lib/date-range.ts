@@ -1,4 +1,4 @@
-import { eachDayOfInterval, isSameDay, min, max } from 'date-fns'
+import { eachDayOfInterval, isSameDay, max, min } from 'date-fns'
 
 export function getInclusiveDateRange(a: Date, b: Date): Date[] {
   const start = min([a, b])
