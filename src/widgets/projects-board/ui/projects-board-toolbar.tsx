@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import { Search } from 'lucide-react'
-import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
+import { hallsToSelectOptions, useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
@@ -34,9 +35,35 @@ export function ProjectsBoardToolbar({
   onAddProject,
   filtersAlign = 'spread',
 }: ProjectsBoardToolbarProps) {
-  const { hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
+  const { halls, lofts, hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
   const selectDisabled = isLoading || isError
   const filtersAtStart = filtersAlign === 'start'
+
+  // Залы выбранного лофта: матчим по loft.id (FK), c запасным вариантом по loft.name.
+  const hallsOfSelectedLoft = useMemo(() => {
+    if (!loft) return null
+    const target = lofts.find((l) => l.name === loft)
+    return halls.filter(
+      (h) => (target != null && h.loft?.id === target.id) || h.loft?.name === loft,
+    )
+  }, [loft, halls, lofts])
+
+  // Выбран конкретный LOFT — в фильтре залов оставляем только его залы.
+  const hallOptionsForLoft = useMemo(
+    () => (hallsOfSelectedLoft ? hallsToSelectOptions(hallsOfSelectedLoft) : hallOptions),
+    [hallsOfSelectedLoft, hallOptions],
+  )
+
+  // Смена LOFT, при которой выбранный зал ему не принадлежит, — сбрасываем зал.
+  const handleChangeLoft = (next: string | null) => {
+    onChangeLoft(next)
+    if (!next || !hall) return
+    const target = lofts.find((l) => l.name === next)
+    const belongs = halls.some(
+      (h) => h.name === hall && ((target != null && h.loft?.id === target.id) || h.loft?.name === next),
+    )
+    if (!belongs) onChangeHall(null)
+  }
 
   return (
     <div
@@ -86,7 +113,7 @@ export function ProjectsBoardToolbar({
         <VenueFilterSelect
           filter="hall"
           value={hall}
-          options={hallOptions}
+          options={hallOptionsForLoft}
           onChange={onChangeHall}
           triggerClassName={TRIGGER_CLASS}
           disabled={selectDisabled}
@@ -95,7 +122,7 @@ export function ProjectsBoardToolbar({
           filter="loft"
           value={loft}
           options={loftOptions}
-          onChange={onChangeLoft}
+          onChange={handleChangeLoft}
           triggerClassName={TRIGGER_CLASS}
           disabled={selectDisabled}
         />
