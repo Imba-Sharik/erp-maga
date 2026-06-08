@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { X } from 'lucide-react'
 import { ProjectCard, type Project, type ProjectBackOrigin } from '@/entities/project'
 import { Button } from '@/shared/ui/button'
-import { DatePill } from './date-pill'
+import { DatePill } from '@/shared/ui/date-pill'
 
 const CALENDAR_BACK_ORIGIN: ProjectBackOrigin = {
   to: '/calendar',
