@@ -9,6 +9,13 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
+ARG VITE_API_URL
+ARG VITE_USE_MOCKS=false
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_USE_MOCKS=$VITE_USE_MOCKS
+
+RUN test -n "$VITE_API_URL"
+
 RUN pnpm build
 
 FROM nginx:alpine
