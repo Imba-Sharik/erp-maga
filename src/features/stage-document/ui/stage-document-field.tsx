@@ -7,26 +7,11 @@ import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 
 import type { StageDocumentInteraction } from '../lib/document-interaction'
+import { FILE_ACCEPT, validateAttachment } from '../lib/file-constraints'
 import { resolveStageDocumentFieldDisplay } from '../lib/resolve-document-field-display'
 import { useDownloadStageDocument } from '../model/use-download-stage-document'
 import { useUploadStageDocument } from '../model/use-upload-stage-document'
 import { ConfirmDownloadDialog } from './confirm-download-dialog'
-
-const FILE_ACCEPT =
-  'image/*,.pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-
-const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024
-
-const BLOCKED_MIME_PREFIXES = ['video/', 'audio/'] as const
-const BLOCKED_MIME_TYPES = new Set(['image/gif'])
-
-function isAllowedFile(file: File): boolean {
-  const mime = file.type.toLowerCase()
-  if (BLOCKED_MIME_TYPES.has(mime)) return false
-  if (BLOCKED_MIME_PREFIXES.some((prefix) => mime.startsWith(prefix))) return false
-  if (file.name.toLowerCase().endsWith('.gif')) return false
-  return true
-}
 
 const REUPLOAD_SUCCESS_MESSAGE = 'Обновлённые документы направлены бухгалтеру'
 
@@ -93,14 +78,10 @@ export function StageDocumentField({
 
   const handleFile = (file: File | undefined) => {
     if (!file || !onChange) return
-    if (!isAllowedFile(file)) {
+    const validationError = validateAttachment(file)
+    if (validationError) {
       setUploadSuccess(null)
-      setUploadError('Недопустимый формат. Загрузите фото или документ (без GIF, видео и аудио).')
-      return
-    }
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setUploadSuccess(null)
-      setUploadError('Файл слишком большой. Максимальный размер — 20 МБ.')
+      setUploadError(validationError)
       return
     }
     setUploadError(null)

@@ -109,6 +109,8 @@ export interface StageFormData {
   contactedAt?: string
 
   calcComment?: string
+  /** Имя файла сметы (этап calculation_prepared). Пока демо — файл не уходит на бэк. */
+  estimateFileName?: string
 
   contractType?: ContractType
   contractNumber?: string

@@ -3,7 +3,14 @@ import { DOCUMENT_STATUS_OPTIONS } from '@/entities/project-documents'
 import type { StageDocumentType } from '@/entities/stage-document-files'
 import type { UserRole } from '@/entities/user-role'
 
-export type StageFieldType = 'text' | 'textarea' | 'date' | 'select' | 'phone' | 'document'
+export type StageFieldType =
+  | 'text'
+  | 'textarea'
+  | 'date'
+  | 'select'
+  | 'phone'
+  | 'document'
+  | 'estimate'
 export type StageFieldSource = 'manager' | 'system'
 export type StageFieldRole = 'manager' | 'accountant' | 'director' | 'admin'
 export type { StageDocumentType }
@@ -23,6 +30,8 @@ export interface StageFieldConfig {
   editRoles?: readonly StageFieldRole[]
   /** Тип документа в API (для загрузки файлов). */
   documentType?: StageDocumentType
+  /** Подпись кнопки прикрепления (для `type: 'estimate'` / документов). */
+  addButtonLabel?: string
   /** Демонстрационное значение, показывается, если в entry.data ничего нет. */
   mockValue?: string
   /** Колспан на сетке passed-секции (по умолчанию 1 из 3). */
@@ -153,6 +162,14 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'date',
       source: 'system',
       mockValue: '2026-05-09',
+    },
+    {
+      name: 'estimateFileName',
+      label: 'Смета',
+      type: 'estimate',
+      required: true,
+      source: 'manager',
+      addButtonLabel: 'Добавить смету',
     },
   ],
   contract_signed: [

@@ -47,6 +47,7 @@ import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
 import { StageDocumentField } from '@/features/stage-document'
+import { StageEstimateField } from './stage-estimate-field'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
@@ -177,6 +178,16 @@ export function StageSectionPassed({
 
   const renderField = (f: StageFieldConfig) => {
     const fieldEditable = canEditField(stage, role, f)
+
+    if (f.type === 'estimate') {
+      const fileName = readField(ctx, values, f) ?? ''
+      return (
+        <div key={f.name} className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}>
+          <StageFieldLabel label={f.label} />
+          <StageEstimateField value={fileName} interaction="download" />
+        </div>
+      )
+    }
 
     if (f.type === 'document' && f.documentType) {
       const fileName = readField(ctx, values, f) ?? ''

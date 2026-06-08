@@ -25,6 +25,7 @@ export const stageFormSchemas = {
   }),
   calculation_prepared: z.object({
     calcComment: required(),
+    estimateFileName: required('Прикрепите смету'),
   }),
   // Все поля опциональные — этап целиком необязателен, его можно пройти не заполняя.
   contract_signed: z.object({
