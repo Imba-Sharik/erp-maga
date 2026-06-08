@@ -4,7 +4,10 @@ dist-ssr
 .git
 .gitignore
 *.md
+.env
 .env.local
 .env.*.local
+.env.development
+.env.production
 .playwright-mcp
 .claude
