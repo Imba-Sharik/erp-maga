@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 
 import { FILE_ACCEPT, validateAttachment } from '@/features/stage-document'
 import { CycleIcon, DocumentIcon } from '@/shared/assets'
-import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 
 /**
