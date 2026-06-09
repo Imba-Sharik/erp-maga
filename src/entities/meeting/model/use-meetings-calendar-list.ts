@@ -1,12 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
-import { meetingsCalendarQueryKey } from '../lib/meetings-query-key'
+import { mapBackendCalendarMeetings } from '../lib/from-meeting'
+import { meetingsCalendarQueryOptions } from '../lib/meetings-calendar-query'
 import type { ListMeetingsParams } from './types'
-import { listMeetings } from './meetings-mock-store'
 
 export function useMeetingsCalendarList(params: ListMeetingsParams) {
-  return useQuery({
-    queryKey: meetingsCalendarQueryKey(params),
-    queryFn: () => listMeetings(params),
-  })
+  const query = useQuery(meetingsCalendarQueryOptions(params))
+
+  const data = useMemo(
+    () => (query.data ? mapBackendCalendarMeetings(query.data.results) : undefined),
+    [query.data],
+  )
+
+  return { ...query, data }
 }
