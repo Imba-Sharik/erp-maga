@@ -55,7 +55,7 @@ export function MeetingCard({
           </div>
         ) : null}
       </div>
-      <p className="text-sm text-[#454545]">{meeting.comment}</p>
+      <p className="text-sm wrap-break-word whitespace-pre-wrap text-[#454545]">{meeting.comment}</p>
     </article>
   )
 }
