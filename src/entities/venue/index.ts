@@ -4,6 +4,9 @@ export { VENUE_FILTER_LABELS, venueFilterLongLabel, venueFilterPlaceholder } fro
 export { useVenueFilterPlaceholder } from './lib/use-venue-filter-placeholder'
 export { VenueFilterSelect } from './ui/venue-filter-select'
 export { hallsByLoftId, hallsToSelectOptions, loftsToSelectOptions } from './lib/to-select-options'
+export { hallsForLoft, hallBelongsToLoft } from './lib/halls-by-loft'
+export { useLoftHallFilter } from './model/use-loft-hall-filter'
+export type { LoftHallFilter } from './model/use-loft-hall-filter'
 export { prefetchVenueCatalog } from './lib/prefetch-venue-catalog'
 export {
   hallsCatalogQueryOptions,

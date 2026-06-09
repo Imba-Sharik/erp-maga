@@ -1,7 +1,6 @@
-import { useMemo } from 'react'
 import { Search } from 'lucide-react'
 import { PlumEventStatusFilterSelect } from '@/entities/project'
-import { hallsToSelectOptions, useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
+import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
@@ -40,34 +39,14 @@ export function ProjectsBoardToolbar({
   onAddProject,
   filtersAlign = 'spread',
 }: ProjectsBoardToolbarProps) {
-  const { halls, lofts, hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
-  const selectDisabled = isLoading || isError
+  const { loftOptions, hallOptions: hallOptionsForLoft, selectDisabled, shouldResetHall } =
+    useLoftHallFilter(loft)
   const filtersAtStart = filtersAlign === 'start'
-
-  // Залы выбранного лофта: матчим по loft.id (FK), c запасным вариантом по loft.name.
-  const hallsOfSelectedLoft = useMemo(() => {
-    if (!loft) return null
-    const target = lofts.find((l) => l.name === loft)
-    return halls.filter(
-      (h) => (target != null && h.loft?.id === target.id) || h.loft?.name === loft,
-    )
-  }, [loft, halls, lofts])
-
-  // Выбран конкретный LOFT — в фильтре залов оставляем только его залы.
-  const hallOptionsForLoft = useMemo(
-    () => (hallsOfSelectedLoft ? hallsToSelectOptions(hallsOfSelectedLoft) : hallOptions),
-    [hallsOfSelectedLoft, hallOptions],
-  )
 
   // Смена LOFT, при которой выбранный зал ему не принадлежит, — сбрасываем зал.
   const handleChangeLoft = (next: string | null) => {
     onChangeLoft(next)
-    if (!next || !hall) return
-    const target = lofts.find((l) => l.name === next)
-    const belongs = halls.some(
-      (h) => h.name === hall && ((target != null && h.loft?.id === target.id) || h.loft?.name === next),
-    )
-    if (!belongs) onChangeHall(null)
+    if (shouldResetHall(next, hall)) onChangeHall(null)
   }
 
   return (
