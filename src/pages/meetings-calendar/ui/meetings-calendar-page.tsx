@@ -97,6 +97,9 @@ export function MeetingsCalendarPage() {
     <div ref={pageRef} className="flex flex-col gap-6">
       <header className="flex flex-col gap-1.5">
         <h1 className="font-heading font-bold text-[#1B1A17]">Календарь встреч</h1>
+        <p className="hidden max-w-[640px] text-sm text-[#ACACAC] md:block">
+          Расписание встреч менеджеров
+        </p>
       </header>
 
       <div className="grid gap-6 @min-[1400px]/main:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] @min-[1400px]/main:items-start @min-[1400px]/main:gap-10">
