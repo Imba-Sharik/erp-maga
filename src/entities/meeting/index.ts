@@ -16,11 +16,5 @@ export {
   replaceMeetingInCache,
   removeMeetingFromCache,
 } from './lib/meetings-cache'
-export {
-  createMeeting,
-  updateMeeting,
-  deleteMeeting,
-  resetMeetingsMockStore,
-} from './model/meetings-mock-store'
 export { MeetingCountBadge } from './ui/meeting-count-badge'
 export { MeetingCard } from './ui/meeting-card'

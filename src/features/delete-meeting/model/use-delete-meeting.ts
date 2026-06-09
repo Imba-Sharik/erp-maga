@@ -1,13 +1,13 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useRef } from 'react'
 
 import {
-  deleteMeeting,
   prependMeetingToCache,
   removeMeetingFromCache,
   type ListMeetingsParams,
   type Meeting,
 } from '@/entities/meeting'
+import { useMeetingsDestroy } from '@/shared/api/generated/hooks/meetingsController/useMeetingsDestroy'
 
 type DeleteMeetingContext = {
   removed?: Meeting
@@ -20,28 +20,33 @@ export interface UseDeleteMeetingOptions {
 
 export function useDeleteMeeting({ queryParams, onSuccess }: UseDeleteMeetingOptions) {
   const queryClient = useQueryClient()
+  const pendingMeetingRef = useRef<Meeting | null>(null)
 
-  const mutation = useMutation<void, Error, Meeting, DeleteMeetingContext>({
-    mutationFn: async (meeting) => {
-      await deleteMeeting(meeting.id)
-    },
-    onMutate: async (meeting) => {
-      removeMeetingFromCache(queryClient, queryParams, meeting.id)
-      return { removed: meeting }
-    },
-    onSuccess: () => {
-      onSuccess?.()
-    },
-    onError: (_error, _meeting, context) => {
-      if (context?.removed) {
-        prependMeetingToCache(queryClient, queryParams, context.removed)
-      }
+  const mutation = useMeetingsDestroy<DeleteMeetingContext>({
+    mutation: {
+      onMutate: async () => {
+        const meeting = pendingMeetingRef.current
+        if (!meeting) return {}
+        removeMeetingFromCache(queryClient, queryParams, meeting.id)
+        return { removed: meeting }
+      },
+      onSuccess: () => {
+        pendingMeetingRef.current = null
+        onSuccess?.()
+      },
+      onError: (_error, _variables, context) => {
+        pendingMeetingRef.current = null
+        if (context?.removed) {
+          prependMeetingToCache(queryClient, queryParams, context.removed)
+        }
+      },
     },
   })
 
   const submit = useCallback(
     (meeting: Meeting) => {
-      mutation.mutate(meeting)
+      pendingMeetingRef.current = meeting
+      mutation.mutate({ id: meeting.id })
     },
     [mutation],
   )

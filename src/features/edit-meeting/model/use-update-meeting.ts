@@ -1,13 +1,15 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
 import {
+  fromMeeting,
   replaceMeetingInCache,
-  updateMeeting,
+  toMeetingUpdateRequest,
   type ListMeetingsParams,
   type Meeting,
   type MeetingFormValues,
 } from '@/entities/meeting'
+import { useMeetingsPartialUpdate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsPartialUpdate'
 
 type UpdateMeetingContext = {
   previous?: Meeting
@@ -22,34 +24,43 @@ export interface UseUpdateMeetingOptions {
 export function useUpdateMeeting({ queryParams, meeting, onSuccess }: UseUpdateMeetingOptions) {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<Meeting, Error, MeetingFormValues, UpdateMeetingContext>({
-    mutationFn: async (values) => {
-      if (!meeting) throw new Error('Встреча не выбрана')
-      return updateMeeting(meeting.id, values)
-    },
-    onMutate: async (values) => {
-      if (!meeting) return {}
-      const optimistic: Meeting = { ...meeting, ...values }
-      const previous = meeting
-      replaceMeetingInCache(queryClient, queryParams, optimistic)
-      return { previous }
-    },
-    onSuccess: (updated) => {
-      replaceMeetingInCache(queryClient, queryParams, updated)
-      onSuccess?.()
-    },
-    onError: (_error, _values, context) => {
-      if (context?.previous) {
-        replaceMeetingInCache(queryClient, queryParams, context.previous)
-      }
+  const mutation = useMeetingsPartialUpdate<UpdateMeetingContext>({
+    mutation: {
+      onMutate: async ({ data }) => {
+        if (!meeting || !data) return {}
+        const optimistic: Meeting = {
+          ...meeting,
+          title: data.name ?? meeting.title,
+          comment: data.comment ?? meeting.comment,
+          time: data.meeting_datetime
+            ? (data.meeting_datetime.match(/T(\d{2}:\d{2})/)?.[1] ?? meeting.time)
+            : meeting.time,
+        }
+        const previous = meeting
+        replaceMeetingInCache(queryClient, queryParams, optimistic)
+        return { previous }
+      },
+      onSuccess: (updated) => {
+        replaceMeetingInCache(queryClient, queryParams, fromMeeting(updated))
+        onSuccess?.()
+      },
+      onError: (_error, _variables, context) => {
+        if (context?.previous) {
+          replaceMeetingInCache(queryClient, queryParams, context.previous)
+        }
+      },
     },
   })
 
   const update = useCallback(
     (values: MeetingFormValues) => {
-      mutation.mutate(values)
+      if (!meeting) return
+      mutation.mutate({
+        id: meeting.id,
+        data: toMeetingUpdateRequest(values, meeting),
+      })
     },
-    [mutation],
+    [mutation, meeting],
   )
 
   return {
