@@ -1,13 +1,11 @@
 import type { MeetingCreateUpdateRequest } from '@/shared/api/generated/types/MeetingCreateUpdateRequest'
 import type { PatchedMeetingCreateUpdateRequest } from '@/shared/api/generated/types/PatchedMeetingCreateUpdateRequest'
+import { buildBusinessDatetime } from '@/shared/lib/date/business-datetime'
 
 import type { MeetingFormValues } from './meeting-form-schema'
 import type { Meeting } from '../model/types'
 
-/** Собирает ISO datetime из даты и времени без смещения таймзоны. */
-export function buildMeetingDatetime(date: string, time: string): string {
-  return `${date}T${time}:00`
-}
+export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date/business-datetime'
 
 export function toMeetingCreateRequest(
   values: MeetingFormValues,
@@ -16,7 +14,7 @@ export function toMeetingCreateRequest(
   return {
     name: values.title,
     comment: values.comment,
-    meeting_datetime: buildMeetingDatetime(date, values.time),
+    meeting_datetime: buildBusinessDatetime(date, values.time),
   }
 }
 
@@ -27,6 +25,6 @@ export function toMeetingUpdateRequest(
   return {
     name: values.title,
     comment: values.comment,
-    meeting_datetime: buildMeetingDatetime(meeting.date, values.time),
+    meeting_datetime: buildBusinessDatetime(meeting.date, values.time),
   }
 }

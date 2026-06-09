@@ -10,6 +10,7 @@ import {
   type MeetingFormValues,
 } from '@/entities/meeting'
 import { useMeetingsPartialUpdate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsPartialUpdate'
+import { formatBusinessTime } from '@/shared/lib/date/business-datetime'
 
 type UpdateMeetingContext = {
   previous?: Meeting
@@ -32,9 +33,7 @@ export function useUpdateMeeting({ queryParams, meeting, onSuccess }: UseUpdateM
           ...meeting,
           title: data.name ?? meeting.title,
           comment: data.comment ?? meeting.comment,
-          time: data.meeting_datetime
-            ? (data.meeting_datetime.match(/T(\d{2}:\d{2})/)?.[1] ?? meeting.time)
-            : meeting.time,
+          time: data.meeting_datetime ? formatBusinessTime(data.meeting_datetime) : meeting.time,
         }
         const previous = meeting
         replaceMeetingInCache(queryClient, queryParams, optimistic)

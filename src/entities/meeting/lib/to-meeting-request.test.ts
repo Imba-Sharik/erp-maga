@@ -8,8 +8,8 @@ import {
 import type { Meeting } from '../model/types'
 
 describe('to-meeting-request', () => {
-  it('buildMeetingDatetime собирает ISO без смещения', () => {
-    expect(buildMeetingDatetime('2026-06-10', '14:30')).toBe('2026-06-10T14:30:00')
+  it('buildMeetingDatetime добавляет offset МСК', () => {
+    expect(buildMeetingDatetime('2026-06-10', '14:30')).toBe('2026-06-10T14:30:00+03:00')
   })
 
   it('toMeetingCreateRequest маппит поля формы', () => {
@@ -21,7 +21,7 @@ describe('to-meeting-request', () => {
     ).toEqual({
       name: 'Встреча',
       comment: 'Комментарий',
-      meeting_datetime: '2026-06-12T09:15:00',
+      meeting_datetime: '2026-06-12T09:15:00+03:00',
     })
   })
 
@@ -40,7 +40,7 @@ describe('to-meeting-request', () => {
     ).toEqual({
       name: 'Новая',
       comment: 'Новый коммент',
-      meeting_datetime: '2026-06-15T11:45:00',
+      meeting_datetime: '2026-06-15T11:45:00+03:00',
     })
   })
 })

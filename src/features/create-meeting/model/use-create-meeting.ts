@@ -11,20 +11,10 @@ import {
   type MeetingFormValues,
 } from '@/entities/meeting'
 import { useMeetingsCreate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsCreate'
+import { parseBusinessDatetime } from '@/shared/lib/date/business-datetime'
 
 type CreateMeetingContext = {
   optimisticId: number
-}
-
-function parseMeetingDatetime(
-  meetingDatetime: string,
-  fallbackDate: string,
-): Pick<Meeting, 'date' | 'time'> {
-  const match = meetingDatetime.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/)
-  return {
-    date: match?.[1] ?? fallbackDate,
-    time: match?.[2] ?? '00:00',
-  }
 }
 
 export interface UseCreateMeetingOptions {
@@ -46,13 +36,13 @@ export function useCreateMeeting({
     mutation: {
       onMutate: async ({ data }) => {
         const optimisticId = -Date.now()
-        const { date: meetingDate, time } = parseMeetingDatetime(data.meeting_datetime, date)
+        const parsed = parseBusinessDatetime(data.meeting_datetime)
         const optimistic: Meeting = {
           id: optimisticId,
           title: data.name,
           comment: data.comment,
-          time,
-          date: meetingDate,
+          time: parsed?.time ?? '00:00',
+          date: parsed?.date ?? date,
           managerId,
         }
         prependMeetingToCache(queryClient, queryParams, optimistic)
