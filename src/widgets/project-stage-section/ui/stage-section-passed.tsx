@@ -184,7 +184,7 @@ export function StageSectionPassed({
       return (
         <div key={f.name} className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}>
           <StageFieldLabel label={f.label} />
-          <StageEstimateField value={fileName} interaction="download" />
+          <StageEstimateField projectId={project.id} value={fileName} interaction="download" />
         </div>
       )
     }

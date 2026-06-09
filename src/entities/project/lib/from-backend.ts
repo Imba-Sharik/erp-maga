@@ -314,7 +314,10 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
     buildSnapshot({
       enteredAt: b.calculation_prepared_at,
       enteredBy: userBriefName(b.calculation_prepared_set_by),
-      values: { calcComment: b.calculation_comment },
+      values: {
+        calcComment: b.calculation_comment,
+        estimateFileName: b.calculation_file_name ?? undefined,
+      },
     }),
   )
 

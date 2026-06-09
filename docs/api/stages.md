@@ -45,17 +45,16 @@
 - `calculation_prepared_at` — datetime входа в этап.
 - `calculation_prepared_set_by` — пользователь, выполнивший переход.
 
-### Смета (файл) — ⚠️ требуется поддержка бэка
+### Смета (файл)
 
-Менеджер обязан прикрепить файл сметы на этом этапе (обязательное действие перед переходом). Принимаем как закрывающие документы бухгалтера — отдельным файловым эндпойнтом, **не** в transition-body.
+Менеджер обязан прикрепить файл сметы на этом этапе (обязательное действие перед переходом). Файл — отдельным эндпойнтом, **не** в transition-body. У сметы своя ручка (не `document_type`-словарь бухгалтерских документов):
 
-Нужно расширить enum `document_type` (эндпойнты `/api/v1/projects/{id}/documents/{document_type}/file/`, GET + POST) новым значением:
+- `POST /api/v1/projects/{id}/calculation/file/` — загрузить или заменить (`multipart/form-data`, поле `file`). Повторная загрузка заменяет предыдущий файл. В ответ — обновлённый `ProjectDetail`.
+- `GET /api/v1/projects/{id}/calculation/file/` — скачать файл.
 
-- `estimate` — смета.
+`GET /projects/{id}/` отдаёт по смете: `calculation_file` (объект `{ name, url, uploaded_at }` или `null`), `calculation_file_name`, `calculation_file_url`.
 
-После загрузки `GET /projects/{id}/` должен отдавать файл сметы в общем словаре `documents` (как `project_closing` / `subrent_closing` / `staff_receipts`): `{ file: { name, url, uploaded_at }, ... }`.
-
-> Пока значения `estimate` на бэке нет, на фронте поле реализовано в демо-режиме: файл не загружается, в форме хранится только его имя (`StageEstimateField`). Когда enum добавят — компонент заменяется на `StageDocumentField` с `documentType="estimate"`, как у документов бухгалтера.
+> Фронт: загрузка/скачивание — `useUploadCalculationFile` / `useDownloadCalculationFile` (`features/stage-document`); UI — `StageEstimateField`. Имя файла гидрируется из `calculation_file_name` в snapshot этапа `calculation_prepared` (`from-backend.ts`) и гейтит обязательность.
 
 ## Этап 4 — `contract_signed`
 
