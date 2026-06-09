@@ -6,9 +6,10 @@ import { ProjectStageSection } from '@/widgets/project-stage-section'
 import { RequestGeneralCard } from './request-general-card'
 
 /**
- * Деталь проекта для бухгалтера: общая информация + единственный блок
- * «Подтверждение документов» (этап `documents_confirmed`).
- * Редактируемый, пока проект на этом этапе; после подтверждения — read-only.
+ * Деталь проекта для бухгалтера: общая информация, блок «Подтверждение
+ * документов» (этап `documents_confirmed`, редактируемый пока проект на нём)
+ * и read-only блок «Расчёт подготовлен» — чтобы бухгалтер мог скачать и
+ * посмотреть смету (редактировать этап он не может).
  */
 export function RequestDetail({ project }: { project: ProjectDetail }) {
   const flow = useStageFlow({
@@ -21,23 +22,35 @@ export function RequestDetail({ project }: { project: ProjectDetail }) {
   // useStageFlow гидрирован снимками с бэка — record этапа есть и для закрытого запроса.
   const isDocsCurrent = flow.isCurrent('documents_confirmed')
 
+  // Общие пропсы flow для секции этапа — calc-этап бухгалтер не редактирует,
+  // поэтому без onEditPassed (кнопка «Редактировать» не появляется).
+  const stageFlowProps = {
+    presentation: STAGE_PRESENTATION.pipeline,
+    project,
+    onAdvance: flow.advance,
+    onPatchValues: flow.patchCurrentStageValues,
+    articles: flow.articles,
+    taxRate: flow.taxRate,
+    onArticleChange: flow.updateArticle,
+    onTaxRateChange: flow.setTaxRate,
+    onToggleBackline: flow.toggleBackline,
+    getRecord: flow.getRecord,
+  }
+
   return (
     <div className="@container flex w-full min-w-0 flex-col gap-4">
       <RequestGeneralCard project={project} />
       <ProjectStageSection
-        presentation={STAGE_PRESENTATION.pipeline}
-        project={project}
+        {...stageFlowProps}
         stage="documents_confirmed"
         isCurrent={isDocsCurrent}
         record={flow.getRecord('documents_confirmed')}
-        onAdvance={flow.advance}
-        onPatchValues={flow.patchCurrentStageValues}
-        articles={flow.articles}
-        taxRate={flow.taxRate}
-        onArticleChange={flow.updateArticle}
-        onTaxRateChange={flow.setTaxRate}
-        onToggleBackline={flow.toggleBackline}
-        getRecord={flow.getRecord}
+      />
+      <ProjectStageSection
+        {...stageFlowProps}
+        stage="calculation_prepared"
+        isCurrent={flow.isCurrent('calculation_prepared')}
+        record={flow.getRecord('calculation_prepared')}
       />
     </div>
   )
