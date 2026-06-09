@@ -46,8 +46,7 @@ import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
 import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
-import { StageDocumentField } from '@/features/stage-document'
-import { StageEstimateField } from './stage-estimate-field'
+import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
@@ -252,10 +251,7 @@ export function StageSectionPassed({
         STATUS_CONFIRM_META_BY_STATUS[f.name as keyof typeof STATUS_CONFIRM_META_BY_STATUS]?.atField
 
       return (
-        <div
-          key={f.name}
-          className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}
-        >
+        <div key={f.name} className={cn('flex min-w-0 flex-col gap-1.5', spanClass(f.span, false))}>
           <StageFieldLabel label={readonlyLabel} />
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
             <div className="min-w-0 flex-1">
