@@ -262,6 +262,12 @@ paths:
     get:
       operationId: halls_halls_list
       summary: Справочник залов
+      parameters:
+      - in: query
+        name: loft_id
+        schema:
+          type: integer
+        description: Фильтр по внутреннему id лофта MAG.
       tags:
       - halls
       security:
@@ -356,6 +362,256 @@ paths:
                       net_profit_total: '320000.00'
                       final_bonus_total: '87500.00'
                   summary: Менеджер с привязками и метриками
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/meetings/:
+    get:
+      operationId: meetings_list
+      description: Правая панель календаря встреч. `date=YYYY-MM-DD` фильтрует встречи
+        выбранного дня. Поддерживает infinite-scroll пагинацию через `limit` и `offset`.
+      summary: Список встреч
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        description: Дата выбранного дня календаря.
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Количество записей на страницу (по умолчанию 10, макс. 200).
+      - in: query
+        name: manager
+        schema:
+          type: integer
+        description: ID менеджера MAG. Доступно lead/admin; менеджер всегда видит
+          только себя.
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Смещение от начала выборки.
+      tags:
+      - meetings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMeetingListPaginatedList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+    post:
+      operationId: meetings_create
+      description: Доступно только менеджеру MAG; владелец встречи берётся из текущего
+        пользователя.
+      summary: Создать встречу
+      tags:
+      - meetings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meeting'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/meetings/{id}/:
+    get:
+      operationId: meetings_retrieve
+      description: Единые правила видимости встреч для календаря, списка и detail.
+      summary: Детальная информация о встрече
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - meetings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meeting'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Встреча не найдена
+    patch:
+      operationId: meetings_partial_update
+      description: Доступно только менеджеру-владельцу встречи.
+      summary: Изменить встречу
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - meetings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMeetingCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMeetingCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMeetingCreateUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meeting'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Встреча не найдена
+    delete:
+      operationId: meetings_destroy
+      description: Доступно только менеджеру-владельцу встречи.
+      summary: Удалить встречу
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - meetings
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Встреча удалена
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Встреча не найдена
+  /api/v1/meetings/calendar/:
+    get:
+      operationId: meetings_calendar_retrieve
+      description: Единые правила видимости встреч для календаря, списка и detail.
+      summary: Календарь встреч за месяц или период
+      parameters:
+      - in: query
+        name: date_after
+        schema:
+          type: string
+          format: date
+        description: Начало произвольного периода.
+      - in: query
+        name: date_before
+        schema:
+          type: string
+          format: date
+        description: Конец произвольного периода.
+      - in: query
+        name: manager
+        schema:
+          type: integer
+        description: ID менеджера MAG. Доступно lead/admin; менеджер всегда видит
+          только себя.
+      - in: query
+        name: month
+        schema:
+          type: integer
+        description: Месяц 1-12.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Год календарного месяца.
+      tags:
+      - meetings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingCalendarResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
         '403':
           content:
@@ -797,6 +1053,76 @@ paths:
       responses:
         '204':
           description: Бэклайн удалён
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/projects/{id}/calculation/file/:
+    get:
+      operationId: projects_calculation_file_retrieve
+      summary: Скачать файл расчёта
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: Файл
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Файл не найден
+    post:
+      operationId: projects_calculation_file_create
+      description: Файл для поля на этапе `calculation_prepared` («Расчёт подготовлен»).
+        Повторная загрузка в это же поле заменяет предыдущий файл.
+      summary: Загрузить или заменить файл расчёта
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectDocumentUploadRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetail'
+          description: ''
         '400':
           content:
             application/json:
@@ -2258,6 +2584,109 @@ components:
           type: integer
       required:
       - marked_read
+    Meeting:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        comment:
+          type: string
+          readOnly: true
+        meeting_datetime:
+          type: string
+          format: date-time
+          readOnly: true
+        meeting_date:
+          type: string
+          readOnly: true
+        meeting_time:
+          type: string
+          readOnly: true
+        manager:
+          allOf:
+          - $ref: '#/components/schemas/MagManagerBrief'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - comment
+      - created_at
+      - id
+      - manager
+      - meeting_date
+      - meeting_datetime
+      - meeting_time
+      - name
+      - updated_at
+    MeetingCalendarResponse:
+      type: object
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+      required:
+      - count
+      - period_end
+      - period_start
+      - results
+    MeetingCreateUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        comment:
+          type: string
+          minLength: 1
+        meeting_datetime:
+          type: string
+          format: date-time
+      required:
+      - comment
+      - meeting_datetime
+      - name
+    MeetingListPaginated:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+      required:
+      - count
+      - next
+      - previous
+      - results
     Notification:
       type: object
       properties:
@@ -2622,6 +3051,29 @@ components:
       - stage_from
       - sync_error
       - updated_at
+    PaginatedMeetingListPaginatedList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingListPaginated'
     PaginatedOutOfMagProjectList:
       type: object
       required:
@@ -2793,6 +3245,19 @@ components:
         manager:
           type: integer
           title: Менеджер MAG
+    PatchedMeetingCreateUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        comment:
+          type: string
+          minLength: 1
+        meeting_datetime:
+          type: string
+          format: date-time
     PatchedProjectMagManagerUpdateRequest:
       type: object
       properties:
@@ -3782,6 +4247,19 @@ components:
           - $ref: '#/components/schemas/UserBrief'
           nullable: true
           readOnly: true
+        calculation_file:
+          allOf:
+          - $ref: '#/components/schemas/ProjectDocumentFile'
+          nullable: true
+          readOnly: true
+        calculation_file_name:
+          type: string
+          nullable: true
+          readOnly: true
+        calculation_file_url:
+          type: string
+          nullable: true
+          readOnly: true
         contract_type:
           enum:
           - with_vat
@@ -4096,6 +4574,9 @@ components:
       - bonus_calculated_set_by
       - bonus_calculated_total
       - calculation_comment
+      - calculation_file
+      - calculation_file_name
+      - calculation_file_url
       - calculation_prepared_at
       - calculation_prepared_set_by
       - city

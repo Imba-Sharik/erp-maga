@@ -339,6 +339,7 @@ export function StageSectionCurrent({
                 renderDocumentUploadControl(f, fieldEditable, field)
               ) : f.type === 'estimate' ? (
                 <StageEstimateField
+                  projectId={project.id}
                   value={(field.value as string) ?? ''}
                   addButtonLabel={f.addButtonLabel}
                   interaction="upload"

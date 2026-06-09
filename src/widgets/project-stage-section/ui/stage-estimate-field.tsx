@@ -1,18 +1,25 @@
 import { useRef, useState } from 'react'
 
-import { FILE_ACCEPT, validateAttachment } from '@/features/stage-document'
+import {
+  FILE_ACCEPT,
+  useDownloadCalculationFile,
+  useUploadCalculationFile,
+  validateAttachment,
+} from '@/features/stage-document'
 import { CycleIcon, DocumentIcon } from '@/shared/assets'
+import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 
 /**
- * ДЕМО-поле прикрепления сметы на этапе «Расчёт подготовлен».
+ * Поле сметы на этапе «Расчёт подготовлен».
  *
- * Бэкенд пока не знает про тип документа «смета» (enum `document_type` =
- * project_closing | staff_receipts | subrent_closing), поэтому файл не загружается
- * на сервер — в форме сохраняется только имя файла. Когда бэк добавит `estimate`,
- * этот компонент заменяется на `StageDocumentField` с `documentType="estimate"`.
+ * Файл загружается/заменяется через `POST /projects/:id/calculation/file/`
+ * (хук {@link useUploadCalculationFile}); скачивается через
+ * `GET /projects/:id/calculation/file/`. После успешной загрузки `onChange`
+ * получает `calculation_file_name` с бэка — он же гейтит обязательность этапа.
  */
 export interface StageEstimateFieldProps {
+  projectId: string | number
   value: string
   onChange?: (fileName: string) => void
   disabled?: boolean
@@ -22,6 +29,7 @@ export interface StageEstimateFieldProps {
 }
 
 export function StageEstimateField({
+  projectId,
   value,
   onChange,
   disabled,
@@ -30,10 +38,15 @@ export function StageEstimateField({
 }: StageEstimateFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
+  const upload = useUploadCalculationFile()
+  const download = useDownloadCalculationFile()
 
   const isUpload = interaction === 'upload'
+  const busy = upload.isPending || download.isPending
+  const uploadDisabled = disabled || busy
+
   const openPicker = () => {
-    if (!isUpload || disabled) return
+    if (!isUpload || uploadDisabled) return
     setError(null)
     inputRef.current?.click()
   }
@@ -46,10 +59,23 @@ export function StageEstimateField({
       return
     }
     setError(null)
-    onChange(file.name)
+    upload.upload(
+      { projectId, file },
+      {
+        onSuccess: (fileName) => onChange(fileName),
+        onError: (message) => setError(message),
+      },
+    )
   }
 
-  const canReplace = isUpload && Boolean(value) && !disabled
+  const requestDownload = () => {
+    if (!value || download.isPending) return
+    download.download({ projectId, fileName: value }).catch(() => {
+      setError('Не удалось скачать файл. Попробуйте позже.')
+    })
+  }
+
+  const canReplace = isUpload && Boolean(value) && !uploadDisabled
 
   return (
     <div className="flex min-w-0 flex-col gap-1">
@@ -59,7 +85,7 @@ export function StageEstimateField({
           type="file"
           accept={FILE_ACCEPT}
           className="sr-only"
-          disabled={disabled}
+          disabled={uploadDisabled}
           onChange={(e) => {
             handleFile(e.target.files?.[0])
             e.target.value = ''
@@ -73,9 +99,19 @@ export function StageEstimateField({
               className="size-3 shrink-0 text-[#B0B0B0] [&_path]:fill-current"
               aria-hidden
             />
-            <span className="min-w-0 flex-1 truncate text-left text-sm text-[#454545]" title={value}>
+            <button
+              type="button"
+              className={cn(
+                'min-w-0 flex-1 truncate text-left text-sm text-[#454545]',
+                'cursor-pointer underline-offset-2 hover:underline',
+                download.isPending && 'cursor-not-allowed opacity-70',
+              )}
+              title={value}
+              disabled={download.isPending}
+              onClick={requestDownload}
+            >
               {value}
-            </span>
+            </button>
           </div>
           {canReplace ? (
             <Button
@@ -83,7 +119,7 @@ export function StageEstimateField({
               variant="outline"
               size="icon"
               className="size-9 shrink-0 rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
-              disabled={disabled}
+              disabled={uploadDisabled}
               aria-label="Выбрать другой файл"
               onClick={openPicker}
             >
@@ -95,10 +131,10 @@ export function StageEstimateField({
         <Button
           type="button"
           className="h-9 w-full justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
-          disabled={disabled}
+          disabled={uploadDisabled}
           onClick={openPicker}
         >
-          {addButtonLabel}
+          {upload.isPending ? 'Загрузка…' : addButtonLabel}
         </Button>
       ) : (
         <div className="flex h-9 w-full items-center rounded-[10px] border border-[#B1B1B1] bg-[#FAFAFA] px-3 py-2 text-sm">
