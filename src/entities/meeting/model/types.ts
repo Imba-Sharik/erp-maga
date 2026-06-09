@@ -1,5 +1,5 @@
 export interface Meeting {
-  id: string
+  id: number
   title: string
   comment: string
   /** Время в формате HH:mm */
@@ -16,18 +16,4 @@ export interface ListMeetingsParams {
   dateTo: string
   /** null — все менеджеры */
   managerId: number | null
-}
-
-export interface CreateMeetingInput {
-  title: string
-  comment: string
-  time: string
-  date: string
-  managerId: number
-}
-
-export interface UpdateMeetingInput {
-  title: string
-  comment: string
-  time: string
 }

@@ -1,17 +1,20 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
 import {
-  createMeeting,
+  fromMeeting,
   prependMeetingToCache,
   removeMeetingFromCache,
+  toMeetingCreateRequest,
   type ListMeetingsParams,
   type Meeting,
   type MeetingFormValues,
 } from '@/entities/meeting'
+import { useMeetingsCreate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsCreate'
+import { parseBusinessDatetime } from '@/shared/lib/date/business-datetime'
 
 type CreateMeetingContext = {
-  optimisticId: string
+  optimisticId: number
 }
 
 export interface UseCreateMeetingOptions {
@@ -29,47 +32,42 @@ export function useCreateMeeting({
 }: UseCreateMeetingOptions) {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<Meeting, Error, MeetingFormValues, CreateMeetingContext>({
-    mutationFn: async (values) =>
-      createMeeting({
-        title: values.title,
-        comment: values.comment,
-        time: values.time,
-        date,
-        managerId,
-      }),
-    onMutate: async (values) => {
-      const optimisticId = `optimistic-${Date.now()}`
-      const optimistic: Meeting = {
-        id: optimisticId,
-        title: values.title,
-        comment: values.comment,
-        time: values.time,
-        date,
-        managerId,
-      }
-      prependMeetingToCache(queryClient, queryParams, optimistic)
-      return { optimisticId }
-    },
-    onSuccess: (created, _values, context) => {
-      if (context?.optimisticId) {
-        removeMeetingFromCache(queryClient, queryParams, context.optimisticId)
-      }
-      prependMeetingToCache(queryClient, queryParams, created)
-      onSuccess?.()
-    },
-    onError: (_error, _values, context) => {
-      if (context?.optimisticId) {
-        removeMeetingFromCache(queryClient, queryParams, context.optimisticId)
-      }
+  const mutation = useMeetingsCreate<CreateMeetingContext>({
+    mutation: {
+      onMutate: async ({ data }) => {
+        const optimisticId = -Date.now()
+        const parsed = parseBusinessDatetime(data.meeting_datetime)
+        const optimistic: Meeting = {
+          id: optimisticId,
+          title: data.name,
+          comment: data.comment,
+          time: parsed?.time ?? '00:00',
+          date: parsed?.date ?? date,
+          managerId,
+        }
+        prependMeetingToCache(queryClient, queryParams, optimistic)
+        return { optimisticId }
+      },
+      onSuccess: (created, _variables, context) => {
+        if (context?.optimisticId != null) {
+          removeMeetingFromCache(queryClient, queryParams, context.optimisticId)
+        }
+        prependMeetingToCache(queryClient, queryParams, fromMeeting(created))
+        onSuccess?.()
+      },
+      onError: (_error, _variables, context) => {
+        if (context?.optimisticId != null) {
+          removeMeetingFromCache(queryClient, queryParams, context.optimisticId)
+        }
+      },
     },
   })
 
   const create = useCallback(
     (values: MeetingFormValues) => {
-      mutation.mutate(values)
+      mutation.mutate({ data: toMeetingCreateRequest(values, date) })
     },
-    [mutation],
+    [mutation, date],
   )
 
   return {

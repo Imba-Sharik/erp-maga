@@ -1,4 +1,5 @@
-import { format } from 'date-fns'
+import { countItemsInMonth } from '@/shared/lib/date'
+
 import type { Project } from '../model/types'
 import { toDayKey, type ProjectsByDay } from './group-by-day'
 
@@ -18,10 +19,5 @@ export function getProjectsForDates(projectsByDay: ProjectsByDay, dates: Date[])
 }
 
 export function countProjectsInMonth(projectsByDay: ProjectsByDay, month: Date): number {
-  const prefix = `${format(month, 'yyyy-MM')}-`
-  let total = 0
-  for (const [key, projects] of projectsByDay) {
-    if (key.startsWith(prefix)) total += projects.length
-  }
-  return total
+  return countItemsInMonth(projectsByDay, month)
 }
