@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react'
-import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
+import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/utils'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
@@ -105,8 +105,11 @@ export function CalendarToolbar({
 }: CalendarToolbarProps) {
   const layout = showManagerFilter ? TOOLBAR_LAYOUT.withManagerFilter : TOOLBAR_LAYOUT.default
   const isMobile = useIsMobile()
-  const { hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
-  const selectDisabled = isLoading || isError
+  const { loftOptions, hallOptions, selectDisabled, shouldResetHall } = useLoftHallFilter(loft)
+  const handleChangeLoft = (next: string | null) => {
+    onChangeLoft(next)
+    if (shouldResetHall(next, hall)) onChangeHall(null)
+  }
   const managerSelectDisabled = managersSelectLoading || managersSelectError
   const managerPlaceholder = isMobile ? 'Менеджер' : 'Отв. менеджер'
 
@@ -170,7 +173,7 @@ export function CalendarToolbar({
           filter="loft"
           value={loft}
           options={loftOptions}
-          onChange={onChangeLoft}
+          onChange={handleChangeLoft}
           triggerClassName={layout.triggerBase}
           disabled={selectDisabled}
         />

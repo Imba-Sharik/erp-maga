@@ -1,5 +1,5 @@
 import { PlumEventStatusFilterSelect } from '@/entities/project'
-import { useVenueCatalog } from '@/entities/venue'
+import { useLoftHallFilter } from '@/entities/venue'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
@@ -19,16 +19,20 @@ export function TableHeaderLoftFilter({
   columnFilters,
   onColumnFilterChange,
 }: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
-  const { loftOptions, isLoading, isError } = useVenueCatalog()
+  const { loftOptions, selectDisabled, shouldResetHall } = useLoftHallFilter(columnFilters.loft)
 
   return (
     <ClearableSelect
       placeholder="LOFT"
       value={columnFilters.loft}
       options={loftOptions}
-      onChange={(v) => onColumnFilterChange('loft', v)}
+      onChange={(v) => {
+        onColumnFilterChange('loft', v)
+        // Выбранный зал не из нового лофта — сбрасываем.
+        if (shouldResetHall(v, columnFilters.hall)) onColumnFilterChange('hall', null)
+      }}
       triggerClassName={HEADER_FILTER_TRIGGER}
-      disabled={isLoading || isError}
+      disabled={selectDisabled}
     />
   )
 }
@@ -37,7 +41,8 @@ export function TableHeaderHallFilter({
   columnFilters,
   onColumnFilterChange,
 }: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
-  const { hallOptions, isLoading, isError } = useVenueCatalog()
+  // Выбран лофт — показываем только его залы.
+  const { hallOptions, selectDisabled } = useLoftHallFilter(columnFilters.loft)
 
   return (
     <ClearableSelect
@@ -46,7 +51,7 @@ export function TableHeaderHallFilter({
       options={hallOptions}
       onChange={(v) => onColumnFilterChange('hall', v)}
       triggerClassName={HEADER_FILTER_TRIGGER}
-      disabled={isLoading || isError}
+      disabled={selectDisabled}
     />
   )
 }

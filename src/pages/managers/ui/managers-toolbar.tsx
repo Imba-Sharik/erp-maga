@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react'
 
-import { useVenueCatalog, VenueFilterSelect } from '@/entities/venue'
+import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { Input } from '@/shared/ui/input'
 
 const TRIGGER_CLASS =
@@ -23,8 +23,11 @@ export function ManagersToolbar({
   onChangeHall,
   onChangeLoft,
 }: ManagersToolbarProps) {
-  const { hallOptions, loftOptions, isLoading, isError } = useVenueCatalog()
-  const selectDisabled = isLoading || isError
+  const { loftOptions, hallOptions, selectDisabled, shouldResetHall } = useLoftHallFilter(loft)
+  const handleChangeLoft = (next: string | null) => {
+    onChangeLoft(next)
+    if (shouldResetHall(next, hall)) onChangeHall(null)
+  }
 
   return (
     <div className="flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
@@ -52,7 +55,7 @@ export function ManagersToolbar({
           filter="loft"
           value={loft}
           options={loftOptions}
-          onChange={onChangeLoft}
+          onChange={handleChangeLoft}
           triggerClassName={TRIGGER_CLASS}
           disabled={selectDisabled}
         />
