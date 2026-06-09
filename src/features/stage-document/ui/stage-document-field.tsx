@@ -1,17 +1,21 @@
-import { useId, useRef, useState } from 'react'
+import { useCallback, useId, useRef, useState } from 'react'
 
 import type { StageDocumentFieldVariant } from '@/entities/project-documents'
 import type { StageDocumentType } from '@/entities/stage-document-files'
-import { CycleIcon, DocumentIcon } from '@/shared/assets'
-import { cn } from '@/shared/lib/utils'
-import { Button } from '@/shared/ui/button'
 
 import type { StageDocumentInteraction } from '../lib/document-interaction'
 import { FILE_ACCEPT, validateAttachment } from '../lib/file-constraints'
 import { resolveStageDocumentFieldDisplay } from '../lib/resolve-document-field-display'
+import { useConfirmDownload } from '../model/use-confirm-download'
 import { useDownloadStageDocument } from '../model/use-download-stage-document'
 import { useUploadStageDocument } from '../model/use-upload-stage-document'
-import { ConfirmDownloadDialog } from './confirm-download-dialog'
+import {
+  AttachmentEmptyPlaceholder,
+  AttachmentRejectedPlaceholder,
+  AttachmentUploadButton,
+} from './attachment-field-controls'
+import { AttachmentFileRow } from './attachment-file-row'
+import { ConfirmDownloadBinding } from './confirm-download-binding'
 
 const REUPLOAD_SUCCESS_MESSAGE = 'Обновлённые документы направлены бухгалтеру'
 
@@ -43,7 +47,6 @@ export function StageDocumentField({
   const inputRef = useRef<HTMLInputElement>(null)
   const upload = useUploadStageDocument()
   const download = useDownloadStageDocument()
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
 
@@ -52,28 +55,26 @@ export function StageDocumentField({
   const uploadDisabled = disabled || busy
   const downloadDisabled = busy
 
+  const performDownload = useCallback(
+    () => download.download({ projectId, documentType, fileName: value }),
+    [download, projectId, documentType, value],
+  )
+
+  const { confirmOpen, requestDownload, confirmDownload, onOpenChange } = useConfirmDownload({
+    fileName: value,
+    downloadDisabled,
+    isPending: download.isPending,
+    download: performDownload,
+    onDownloadError: () => {
+      window.alert('Не удалось скачать файл. Попробуйте позже.')
+    },
+  })
+
   const openPicker = () => {
     if (!isUpload || uploadDisabled) return
     setUploadError(null)
     setUploadSuccess(null)
     inputRef.current?.click()
-  }
-
-  const requestDownload = () => {
-    if (!value || downloadDisabled) return
-    setConfirmOpen(true)
-  }
-
-  const confirmDownload = () => {
-    download
-      .download({ projectId, documentType, fileName: value })
-      .then(() => {
-        setConfirmOpen(false)
-      })
-      .catch(() => {
-        setConfirmOpen(false)
-        window.alert('Не удалось скачать файл. Попробуйте позже.')
-      })
   }
 
   const handleFile = (file: File | undefined) => {
@@ -107,19 +108,8 @@ export function StageDocumentField({
 
   const display = resolveStageDocumentFieldDisplay(variant, value, interaction)
   const showFileRow = display === 'file-row'
-  // Замену показываем для любого файла (включая `confirmed`); право решает `disabled`,
-  // который проставляет вызывающий код по роли/статусу.
   const canReplace = isUpload && Boolean(value) && !uploadDisabled
   const canDownload = Boolean(value)
-
-  const fileNameClassName = cn(
-    'min-w-0 flex-1 truncate text-left text-sm',
-    variant === 'confirmed' && 'text-[#2E7D32]',
-    variant === 'rejected' && 'text-[#D25252]',
-    variant === 'uploaded' && 'text-[#B0B0B0]',
-    canDownload && 'cursor-pointer underline-offset-2 hover:underline',
-    downloadDisabled && 'cursor-not-allowed opacity-70',
-  )
 
   return (
     <div className="flex min-w-0 flex-col gap-1">
@@ -138,71 +128,27 @@ export function StageDocumentField({
         />
       ) : null}
       {showFileRow ? (
-        <div className="flex min-w-0 items-stretch gap-2">
-          <div
-            className={cn(
-              'flex h-9 min-w-0 flex-1 items-center gap-2 rounded-[10px] px-3 py-2',
-              variant === 'confirmed' && 'bg-[#E8F5E9]',
-              variant === 'rejected' && 'bg-[#FDEDED]',
-              variant === 'uploaded' && 'bg-[#F3F3F3]',
-            )}
-          >
-            <DocumentIcon
-              className={cn(
-                'size-3 shrink-0 [&_path]:fill-current',
-                variant === 'confirmed' && 'text-[#2E7D32]',
-                variant === 'rejected' && 'text-[#D25252]',
-                variant === 'uploaded' && 'text-[#B0B0B0]',
-              )}
-              aria-hidden
-            />
-            {canDownload ? (
-              <button
-                type="button"
-                className={fileNameClassName}
-                title={value}
-                disabled={downloadDisabled}
-                onClick={requestDownload}
-              >
-                {value}
-              </button>
-            ) : (
-              <span className={fileNameClassName} title={value}>
-                {value}
-              </span>
-            )}
-          </div>
-          {canReplace ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-9 shrink-0 rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
-              disabled={uploadDisabled}
-              aria-label="Выбрать другой файл"
-              onClick={openPicker}
-            >
-              <CycleIcon className="size-5 [&_path]:fill-current" />
-            </Button>
-          ) : null}
-        </div>
+        <AttachmentFileRow
+          value={value}
+          variant={variant}
+          canDownload={canDownload}
+          downloadDisabled={downloadDisabled}
+          onDownload={requestDownload}
+          canReplace={canReplace}
+          replaceDisabled={uploadDisabled}
+          onReplace={openPicker}
+        />
       ) : display === 'upload-button' ? (
-        <Button
-          type="button"
-          className="h-9 w-full justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
+        <AttachmentUploadButton
           disabled={uploadDisabled}
+          isPending={upload.isPending}
+          label={addButtonLabel}
           onClick={openPicker}
-        >
-          {upload.isPending ? 'Загрузка…' : addButtonLabel}
-        </Button>
+        />
       ) : display === 'placeholder-empty' ? (
-        <div className="flex h-9 w-full items-center rounded-[10px] border border-[#B1B1B1] bg-[#FAFAFA] px-3 py-2 text-sm">
-          <span className="text-muted-foreground">—</span>
-        </div>
+        <AttachmentEmptyPlaceholder />
       ) : display === 'placeholder-rejected' ? (
-        <div className="flex h-9 w-full items-center rounded-[10px] bg-[#FDEDED] px-3 py-2 text-sm">
-          <span className="text-[#D25252]">—</span>
-        </div>
+        <AttachmentRejectedPlaceholder />
       ) : null}
       {uploadError ? (
         <p className="text-destructive text-sm" role="alert">
@@ -213,17 +159,13 @@ export function StageDocumentField({
           {uploadSuccess}
         </p>
       ) : null}
-      {canDownload ? (
-        <ConfirmDownloadDialog
-          open={confirmOpen}
-          onOpenChange={(next) => {
-            if (!download.isPending) setConfirmOpen(next)
-          }}
-          fileName={value}
-          onConfirm={confirmDownload}
-          isPending={download.isPending}
-        />
-      ) : null}
+      <ConfirmDownloadBinding
+        fileName={value}
+        confirmOpen={confirmOpen}
+        onOpenChange={onOpenChange}
+        onConfirm={confirmDownload}
+        isPending={download.isPending}
+      />
     </div>
   )
 }

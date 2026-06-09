@@ -1,14 +1,12 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
-import {
-  FILE_ACCEPT,
-  useDownloadCalculationFile,
-  useUploadCalculationFile,
-  validateAttachment,
-} from '@/features/stage-document'
-import { CycleIcon, DocumentIcon } from '@/shared/assets'
-import { cn } from '@/shared/lib/utils'
-import { Button } from '@/shared/ui/button'
+import { FILE_ACCEPT, validateAttachment } from '../lib/file-constraints'
+import { useConfirmDownload } from '../model/use-confirm-download'
+import { useDownloadCalculationFile } from '../model/use-download-calculation-file'
+import { useUploadCalculationFile } from '../model/use-upload-calculation-file'
+import { AttachmentEmptyPlaceholder, AttachmentUploadButton } from './attachment-field-controls'
+import { AttachmentFileRow } from './attachment-file-row'
+import { ConfirmDownloadBinding } from './confirm-download-binding'
 
 /**
  * Поле сметы на этапе «Расчёт подготовлен».
@@ -44,6 +42,22 @@ export function StageEstimateField({
   const isUpload = interaction === 'upload'
   const busy = upload.isPending || download.isPending
   const uploadDisabled = disabled || busy
+  const downloadDisabled = busy
+
+  const performDownload = useCallback(
+    () => download.download({ projectId, fileName: value }),
+    [download, projectId, value],
+  )
+
+  const { confirmOpen, requestDownload, confirmDownload, onOpenChange } = useConfirmDownload({
+    fileName: value,
+    downloadDisabled,
+    isPending: download.isPending,
+    download: performDownload,
+    onDownloadError: () => {
+      setError('Не удалось скачать файл. Попробуйте позже.')
+    },
+  })
 
   const openPicker = () => {
     if (!isUpload || uploadDisabled) return
@@ -68,14 +82,8 @@ export function StageEstimateField({
     )
   }
 
-  const requestDownload = () => {
-    if (!value || download.isPending) return
-    download.download({ projectId, fileName: value }).catch(() => {
-      setError('Не удалось скачать файл. Попробуйте позже.')
-    })
-  }
-
   const canReplace = isUpload && Boolean(value) && !uploadDisabled
+  const canDownload = Boolean(value)
 
   return (
     <div className="flex min-w-0 flex-col gap-1">
@@ -93,59 +101,38 @@ export function StageEstimateField({
         />
       ) : null}
       {value ? (
-        <div className="flex min-w-0 items-stretch gap-2">
-          <div className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-[10px] bg-[#F3F3F3] px-3 py-2">
-            <DocumentIcon
-              className="size-3 shrink-0 text-[#B0B0B0] [&_path]:fill-current"
-              aria-hidden
-            />
-            <button
-              type="button"
-              className={cn(
-                'min-w-0 flex-1 truncate text-left text-sm text-[#454545]',
-                'cursor-pointer underline-offset-2 hover:underline',
-                download.isPending && 'cursor-not-allowed opacity-70',
-              )}
-              title={value}
-              disabled={download.isPending}
-              onClick={requestDownload}
-            >
-              {value}
-            </button>
-          </div>
-          {canReplace ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-9 shrink-0 rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
-              disabled={uploadDisabled}
-              aria-label="Выбрать другой файл"
-              onClick={openPicker}
-            >
-              <CycleIcon className="size-5 [&_path]:fill-current" />
-            </Button>
-          ) : null}
-        </div>
+        <AttachmentFileRow
+          value={value}
+          variant="uploaded"
+          canDownload={canDownload}
+          downloadDisabled={downloadDisabled}
+          onDownload={requestDownload}
+          canReplace={canReplace}
+          replaceDisabled={uploadDisabled}
+          onReplace={openPicker}
+        />
       ) : isUpload ? (
-        <Button
-          type="button"
-          className="h-9 w-full justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
+        <AttachmentUploadButton
           disabled={uploadDisabled}
+          isPending={upload.isPending}
+          label={addButtonLabel}
           onClick={openPicker}
-        >
-          {upload.isPending ? 'Загрузка…' : addButtonLabel}
-        </Button>
+        />
       ) : (
-        <div className="flex h-9 w-full items-center rounded-[10px] border border-[#B1B1B1] bg-[#FAFAFA] px-3 py-2 text-sm">
-          <span className="text-muted-foreground">—</span>
-        </div>
+        <AttachmentEmptyPlaceholder />
       )}
       {error ? (
         <p className="text-destructive text-sm" role="alert">
           {error}
         </p>
       ) : null}
+      <ConfirmDownloadBinding
+        fileName={value}
+        confirmOpen={confirmOpen}
+        onOpenChange={onOpenChange}
+        onConfirm={confirmDownload}
+        isPending={download.isPending}
+      />
     </div>
   )
 }
