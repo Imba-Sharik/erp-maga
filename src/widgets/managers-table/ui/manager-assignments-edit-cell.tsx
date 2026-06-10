@@ -13,7 +13,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { GridTableCell } from '@/shared/ui/grid-table'
 
-import type { ManagerAssignmentOptionGroup } from '../lib/build-assignment-options'
+import type { VenueAssignmentOptionGroup } from '@/entities/venue'
 
 function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
   e.stopPropagation()
@@ -22,7 +22,7 @@ function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
 export interface ManagerAssignmentsEditCellProps {
   ariaLabel: string
   displayText: string
-  groups: readonly ManagerAssignmentOptionGroup[]
+  groups: readonly VenueAssignmentOptionGroup[]
   selectedKeys: ReadonlySet<string>
   isOpen: boolean
   isDisabled?: boolean

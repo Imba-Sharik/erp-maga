@@ -7,15 +7,15 @@ import {
   GridTableRowActionCell,
 } from '@/shared/ui/grid-table'
 
-import type { ManagerAssignmentOptionGroup } from '../lib/build-assignment-options'
+import type { VenueAssignmentOptionGroup } from '@/entities/venue'
 import { MANAGERS_TABLE_GRID_TEMPLATE } from '../lib/managers-table-columns'
 import { DeleteManagerButton } from './delete-manager-button'
 import { ManagerAssignmentsEditCell } from './manager-assignments-edit-cell'
 
 interface ManagersTableRowProps {
   manager: Manager
-  hallGroups: readonly ManagerAssignmentOptionGroup[]
-  loftGroups: readonly ManagerAssignmentOptionGroup[]
+  hallGroups: readonly VenueAssignmentOptionGroup[]
+  loftGroups: readonly VenueAssignmentOptionGroup[]
   hallSelectedKeys: ReadonlySet<string>
   loftSelectedKeys: ReadonlySet<string>
   editing: { managerId: string; mode: ManagerAssignmentMode } | null

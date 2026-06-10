@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from './dropdown-menu'
 
@@ -13,7 +14,33 @@ export type MultiSelectOption = {
   label: string
 }
 
+export type MultiSelectOptionGroup = {
+  /** Подзаголовок группы. Если не задан — рендерится без заголовка. */
+  label?: string
+  options: MultiSelectOption[]
+}
+
+type KeyedOption = { key: string; label: string }
+type KeyedOptionGroup = { label?: string; options: readonly KeyedOption[] }
+
+/** Адаптер опций с `key` (venue, managers-table) → `value` (MultiSelect). */
+export function keyedOptionsToMultiSelect(options: readonly KeyedOption[]): MultiSelectOption[] {
+  return options.map((option) => ({ value: option.key, label: option.label }))
+}
+
+export function keyedGroupsToMultiSelect(groups: readonly KeyedOptionGroup[]): MultiSelectOptionGroup[] {
+  return groups.map((group) => ({
+    label: group.label,
+    options: keyedOptionsToMultiSelect(group.options),
+  }))
+}
+
 type MultiSelectOptions = readonly string[] | readonly MultiSelectOption[]
+type MultiSelectItems = MultiSelectOptions | readonly MultiSelectOptionGroup[]
+
+function isGroupedOptions(items: MultiSelectItems): items is readonly MultiSelectOptionGroup[] {
+  return items.length > 0 && typeof items[0] === 'object' && 'options' in items[0]
+}
 
 function normalizeOptions(options: MultiSelectOptions): MultiSelectOption[] {
   if (options.length === 0) return []
@@ -23,10 +50,17 @@ function normalizeOptions(options: MultiSelectOptions): MultiSelectOption[] {
   return [...(options as readonly MultiSelectOption[])]
 }
 
+function flattenOptions(items: MultiSelectItems): MultiSelectOption[] {
+  if (isGroupedOptions(items)) {
+    return items.flatMap((group) => group.options)
+  }
+  return normalizeOptions(items)
+}
+
 interface MultiSelectProps {
   values: string[]
   onChange: (values: string[]) => void
-  options: MultiSelectOptions
+  options: MultiSelectItems
   placeholder: string
   triggerClassName?: string
   disabled?: boolean
@@ -44,8 +78,9 @@ export function MultiSelect({
   triggerClassName,
   disabled = false,
 }: MultiSelectProps) {
-  const normalized = normalizeOptions(options)
-  const selectedLabels = normalized.filter((o) => values.includes(o.value)).map((o) => o.label)
+  const flatOptions = flattenOptions(options)
+  const grouped = isGroupedOptions(options)
+  const selectedLabels = flatOptions.filter((o) => values.includes(o.value)).map((o) => o.label)
   const hasSelection = selectedLabels.length > 0
 
   const toggle = (value: string, checked: boolean) => {
@@ -82,10 +117,30 @@ export function MultiSelect({
         className="max-h-72 w-(--radix-dropdown-menu-trigger-width) min-w-56 p-1"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
-        {normalized.length === 0 ? (
+        {flatOptions.length === 0 ? (
           <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
+        ) : grouped ? (
+          (options as readonly MultiSelectOptionGroup[]).map((group, groupIndex) => (
+            <div key={group.label ?? groupIndex}>
+              {group.label ? (
+                <DropdownMenuLabel className="px-2 py-1 text-xs text-[#ACACAC]">
+                  {group.label}
+                </DropdownMenuLabel>
+              ) : null}
+              {group.options.map((option) => (
+                <DropdownMenuCheckboxItem
+                  key={option.value}
+                  checked={values.includes(option.value)}
+                  onCheckedChange={(checked) => toggle(option.value, checked === true)}
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <span className="min-w-0 truncate">{option.label}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </div>
+          ))
         ) : (
-          normalized.map((option) => (
+          flatOptions.map((option) => (
             <DropdownMenuCheckboxItem
               key={option.value}
               checked={values.includes(option.value)}

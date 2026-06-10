@@ -53,3 +53,18 @@ export function applyLoftSelection(
 
   return [...result]
 }
+
+/**
+ * Синхронизирует пару «залы + производные лофты» после изменения набора залов.
+ * Используется в формах (create-project) и при отображении выбора.
+ */
+export function syncLoftHallSelection(
+  halls: readonly VenueHall[],
+  hallIds: Iterable<number>,
+): { hallIds: number[]; loftIds: number[] } {
+  const normalizedHallIds = [...new Set(hallIds)]
+  return {
+    hallIds: normalizedHallIds,
+    loftIds: deriveSelectedLoftIds(halls, normalizedHallIds),
+  }
+}

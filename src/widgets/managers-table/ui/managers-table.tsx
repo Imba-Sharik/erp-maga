@@ -6,15 +6,17 @@ import {
   type Manager,
   type ManagerAssignmentMode,
 } from '@/entities/manager'
-import { applyLoftSelection, deriveSelectedLoftIds, useVenueCatalog } from '@/entities/venue'
+import {
+  applyLoftSelection,
+  buildFilteredHallGroups,
+  buildLoftAssignmentOptions,
+  deriveSelectedLoftIds,
+  useVenueCatalog,
+} from '@/entities/venue'
 import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
 import { useUpdateManagerAssignments } from '@/features/update-manager-assignments'
 import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
-import {
-  buildHallAssignmentGroups,
-  buildLoftAssignmentOptions,
-} from '../lib/build-assignment-options'
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
   MANAGERS_TABLE_COLUMN_COUNT,
@@ -134,7 +136,7 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
           const selectedLoftIds = deriveSelectedLoftIds(halls, selectedHallIds)
           const hallSelectedKeys = new Set(selectedHallIds.map(String))
           const loftSelectedKeys = new Set(selectedLoftIds.map(String))
-          const hallGroups = buildHallAssignmentGroups(halls, lofts, selectedLoftIds)
+          const hallGroups = buildFilteredHallGroups(halls, lofts, selectedHallIds)
 
           return (
             <ManagersTableRow

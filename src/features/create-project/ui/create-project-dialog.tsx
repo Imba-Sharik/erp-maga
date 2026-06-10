@@ -9,7 +9,13 @@ import { useCurrentUser } from '@/entities/current-user'
 import { useManagersDirectory } from '@/entities/manager'
 import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
-import { applyLoftSelection, deriveSelectedLoftIds, useVenueCatalog } from '@/entities/venue'
+import {
+  applyLoftSelection,
+  buildFilteredHallGroups,
+  buildLoftAssignmentOptions,
+  syncLoftHallSelection,
+  useVenueCatalog,
+} from '@/entities/venue'
 import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
@@ -18,7 +24,7 @@ import { DateField } from '@/shared/ui/date-field'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
-import { MultiSelect, type MultiSelectOption } from '@/shared/ui/multi-select'
+import { keyedGroupsToMultiSelect, keyedOptionsToMultiSelect, MultiSelect } from '@/shared/ui/multi-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'
@@ -27,14 +33,24 @@ import { useCreateProject } from '../model/use-create-project'
 const TRIGGER_CLASS =
   'h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
-const formSchema = z.object({
-  title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
-  eventType: z.string().min(1, 'Выберите тип мероприятия'),
-  eventDate: z.string().min(1, 'Выберите дату мероприятия'),
-  lofts: z.array(z.string()),
-  halls: z.array(z.string()).min(1, 'Выберите хотя бы один зал'),
-  magManagerId: z.string().optional(),
-}) satisfies z.ZodType<CreateProjectFormValues>
+const formSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
+    eventType: z.string().min(1, 'Выберите тип мероприятия'),
+    eventDate: z.string().min(1, 'Выберите дату мероприятия'),
+    lofts: z.array(z.string()),
+    halls: z.array(z.string()),
+    magManagerId: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.halls.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Выберите хотя бы один зал',
+        path: ['lofts'],
+      })
+    }
+  }) satisfies z.ZodType<CreateProjectFormValues>
 
 function getDefaultValues(): CreateProjectFormValues {
   return {
@@ -45,12 +61,6 @@ function getDefaultValues(): CreateProjectFormValues {
     halls: [],
     magManagerId: '',
   }
-}
-
-function toIdOptions(items: readonly { id: number; name: string }[]): MultiSelectOption[] {
-  return items
-    .map((item) => ({ value: String(item.id), label: item.name }))
-    .sort((a, b) => a.label.localeCompare(b.label, 'ru'))
 }
 
 export interface CreateProjectDialogProps {
@@ -72,18 +82,28 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
   } = useVenueCatalog(isManagerRole ? { assigned: true } : undefined)
   const selectDisabled = isVenueCatalogLoading || isVenueCatalogError
 
-  const hallOptions = useMemo(() => toIdOptions(halls), [halls])
-  const loftOptions = useMemo(() => toIdOptions(lofts), [lofts])
+  const loftOptions = useMemo(
+    () => keyedOptionsToMultiSelect(buildLoftAssignmentOptions(lofts)),
+    [lofts],
+  )
 
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   })
 
+  const selectedHallValues = form.watch('halls')
+  const hasHalls = selectedHallValues.length > 0
+
+  const hallOptionGroups = useMemo(
+    () => keyedGroupsToMultiSelect(buildFilteredHallGroups(halls, lofts, selectedHallValues.map(Number))),
+    [halls, lofts, selectedHallValues],
+  )
+
   const syncFromHalls = useCallback(
     (hallIds: number[]) => {
-      const loftIds = deriveSelectedLoftIds(halls, hallIds)
-      form.setValue('halls', hallIds.map(String), { shouldValidate: true })
+      const { hallIds: nextHallIds, loftIds } = syncLoftHallSelection(halls, hallIds)
+      form.setValue('halls', nextHallIds.map(String), { shouldValidate: true })
       form.setValue('lofts', loftIds.map(String), { shouldValidate: true })
     },
     [form, halls],
@@ -221,26 +241,28 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="halls"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Залы</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      placeholder="Выберите залы"
-                      values={field.value}
-                      options={hallOptions}
-                      onChange={handleHallsChange}
-                      triggerClassName={TRIGGER_CLASS}
-                      disabled={selectDisabled}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {hasHalls ? (
+              <FormField
+                control={form.control}
+                name="halls"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Залы</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        placeholder="Выберите залы"
+                        values={field.value}
+                        options={hallOptionGroups}
+                        onChange={handleHallsChange}
+                        triggerClassName={TRIGGER_CLASS}
+                        disabled={selectDisabled}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null}
             {isError && errorMessage ? (
               <p className="text-destructive text-sm" role="alert">
                 {errorMessage}

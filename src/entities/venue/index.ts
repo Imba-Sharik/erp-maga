@@ -13,7 +13,15 @@ export {
   applyLoftSelection,
   deriveSelectedLoftIds,
   getHallIdsForLoft,
+  syncLoftHallSelection,
 } from './lib/loft-hall-selection'
+export {
+  buildFilteredHallGroups,
+  buildHallAssignmentGroups,
+  buildLoftAssignmentOptions,
+  type VenueAssignmentOption,
+  type VenueAssignmentOptionGroup,
+} from './lib/build-assignment-options'
 export { resolveVenueFilterIds } from './lib/resolve-venue-filter-ids'
 export type { VenueFilterIds } from './lib/resolve-venue-filter-ids'
 export { useLoftHallFilter } from './model/use-loft-hall-filter'

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { applyLoftSelection, deriveSelectedLoftIds, getHallIdsForLoft } from './loft-hall-selection'
+import {
+  applyLoftSelection,
+  deriveSelectedLoftIds,
+  getHallIdsForLoft,
+  syncLoftHallSelection,
+} from './loft-hall-selection'
 import type { VenueHall } from '../model/types'
 
 function hall(id: number, loftId: number | null, name = `Hall ${id}`): VenueHall {
@@ -72,5 +77,31 @@ describe('applyLoftSelection', () => {
 
   it('идемпотентно при неизменном наборе лофтов', () => {
     expect(applyLoftSelection(halls, [10, 11], [1]).sort()).toEqual([10, 11])
+  })
+})
+
+describe('syncLoftHallSelection', () => {
+  it('нормализует залы и выводит производные лофты', () => {
+    expect(syncLoftHallSelection(halls, [10, 10, 20])).toEqual({
+      hallIds: [10, 20],
+      loftIds: [1, 2],
+    })
+  })
+
+  it('исключение всех залов лофта убирает лофт из производных', () => {
+    expect(syncLoftHallSelection(halls, [20])).toEqual({
+      hallIds: [20],
+      loftIds: [2],
+    })
+  })
+
+  it('сценарий «выбрали лофт → сняли один зал»: лофт остаётся', () => {
+    const afterLoft = applyLoftSelection(halls, [], [1])
+    const afterExclude = syncLoftHallSelection(halls, afterLoft.filter((id) => id !== 11))
+    expect(afterExclude).toEqual({ hallIds: [10], loftIds: [1] })
+  })
+
+  it('сценарий «сняли все залы лофта»: лофты пустые', () => {
+    expect(syncLoftHallSelection(halls, [])).toEqual({ hallIds: [], loftIds: [] })
   })
 })
