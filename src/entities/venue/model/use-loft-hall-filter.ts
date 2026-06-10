@@ -16,7 +16,8 @@ export interface LoftHallFilter {
   loftOptions: VenueSelectOption[]
   /** Опции залов с учётом выбранного лофта: выбран лофт — только его залы, иначе все. */
   hallOptions: VenueSelectOption[]
-  cityOptions: readonly string[]
+  /** Опции городов: `value` — Plum ID, `label` — название. */
+  cityOptions: readonly VenueSelectOption[]
   showCityFilter: boolean
   showLoftFilter: boolean
   selectDisabled: boolean

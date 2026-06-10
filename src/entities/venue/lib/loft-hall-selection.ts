@@ -13,6 +13,24 @@ export function getHallIdsForLoft(halls: readonly VenueHall[], loftId: number): 
   return halls.filter((hall) => hall.loft?.id === loftId).map((hall) => hall.id)
 }
 
+/**
+ * Plum ID городов для выбранных залов (через `hall.loft.city`).
+ * Уникальные, по возрастанию. Нужен для `city_ids` при создании проекта.
+ */
+export function deriveCityIdsFromHallIds(
+  halls: readonly VenueHall[],
+  selectedHallIds: Iterable<number>,
+): number[] {
+  const selected = new Set(selectedHallIds)
+  const cityIds = new Set<number>()
+  for (const hall of halls) {
+    if (!selected.has(hall.id)) continue
+    const cityId = hall.loft?.city
+    if (cityId != null) cityIds.add(cityId)
+  }
+  return [...cityIds].sort((a, b) => a - b)
+}
+
 /** Выбранные лофты, выведенные из выбранных залов (лофт выбран, если выбран ≥1 его зал). */
 export function deriveSelectedLoftIds(
   halls: readonly VenueHall[],

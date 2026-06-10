@@ -11,6 +11,7 @@ export { hallsByLoftId, hallsToSelectOptions, loftsToSelectOptions } from './lib
 export { hallsForLoft, hallBelongsToLoft } from './lib/halls-by-loft'
 export {
   applyLoftSelection,
+  deriveCityIdsFromHallIds,
   deriveSelectedLoftIds,
   getHallIdsForLoft,
   syncLoftHallSelection,
@@ -24,7 +25,7 @@ export {
 } from './lib/build-assignment-options'
 export { resolveVenueFilterIds } from './lib/resolve-venue-filter-ids'
 export type { VenueFilterIds } from './lib/resolve-venue-filter-ids'
-export { DEFAULT_CITY_OPTIONS } from './lib/default-city-options'
+export { DEFAULT_CITY_OPTIONS, plumCityLabelsByIds } from './lib/default-city-options'
 export { deriveCityOptionsFromLofts } from './lib/derive-city-options'
 export { useLoftHallFilter } from './model/use-loft-hall-filter'
 export type { LoftHallFilter, UseLoftHallFilterOptions } from './model/use-loft-hall-filter'

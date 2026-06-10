@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   applyLoftSelection,
+  deriveCityIdsFromHallIds,
   deriveSelectedLoftIds,
   getHallIdsForLoft,
   syncLoftHallSelection,
@@ -97,11 +98,53 @@ describe('syncLoftHallSelection', () => {
 
   it('сценарий «выбрали лофт → сняли один зал»: лофт остаётся', () => {
     const afterLoft = applyLoftSelection(halls, [], [1])
-    const afterExclude = syncLoftHallSelection(halls, afterLoft.filter((id) => id !== 11))
+    const afterExclude = syncLoftHallSelection(
+      halls,
+      afterLoft.filter((id) => id !== 11),
+    )
     expect(afterExclude).toEqual({ hallIds: [10], loftIds: [1] })
   })
 
   it('сценарий «сняли все залы лофта»: лофты пустые', () => {
     expect(syncLoftHallSelection(halls, [])).toEqual({ hallIds: [], loftIds: [] })
+  })
+})
+
+describe('deriveCityIdsFromHallIds', () => {
+  function hallWithCity(id: number, loftId: number | null, cityId: number | null): VenueHall {
+    return {
+      id,
+      plum_id: id,
+      name: `Hall ${id}`,
+      loft:
+        loftId == null
+          ? null
+          : { id: loftId, plum_id: loftId, name: `Loft ${loftId}`, city: cityId },
+      synced_at: '2024-01-01T00:00:00Z',
+    } as VenueHall
+  }
+
+  // Loft 1 → город 1 (залы 10, 11) | Loft 2 → город 2 (зал 20) | зал 30 без лофта
+  const cityHalls: VenueHall[] = [
+    hallWithCity(10, 1, 1),
+    hallWithCity(11, 1, 1),
+    hallWithCity(20, 2, 2),
+    hallWithCity(30, null, null),
+  ]
+
+  it('возвращает уникальные id городов по выбранным залам', () => {
+    expect(deriveCityIdsFromHallIds(cityHalls, [10, 11, 20])).toEqual([1, 2])
+  })
+
+  it('дедуплицирует город при нескольких залах одного лофта', () => {
+    expect(deriveCityIdsFromHallIds(cityHalls, [10, 11])).toEqual([1])
+  })
+
+  it('игнорирует залы без лофта или без города', () => {
+    expect(deriveCityIdsFromHallIds(cityHalls, [30])).toEqual([])
+  })
+
+  it('пустой выбор → пустой массив', () => {
+    expect(deriveCityIdsFromHallIds(cityHalls, [])).toEqual([])
   })
 })
