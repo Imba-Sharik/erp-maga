@@ -1,26 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useCallback, useMemo } from 'react'
+import type { Control } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useCurrentUser } from '@/entities/current-user'
+import { useManagersDirectory } from '@/entities/manager'
 import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/dialog'
-import { useVenueCatalog } from '@/entities/venue'
+import { useUserRole } from '@/entities/user-role'
+import { applyLoftSelection, deriveSelectedLoftIds, useVenueCatalog } from '@/entities/venue'
 import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
-import { DateField } from '@/shared/ui/date-field'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { ClearableSelect } from '@/shared/ui/clearable-select'
-import { MultiSelect } from '@/shared/ui/multi-select'
+import { DateField } from '@/shared/ui/date-field'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
+import { MultiSelect, type MultiSelectOption } from '@/shared/ui/multi-select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'
 import { useCreateProject } from '../model/use-create-project'
@@ -32,12 +31,26 @@ const formSchema = z.object({
   title: z.string().trim().min(1, 'Введите название проекта').max(500, 'Не длиннее 500 символов'),
   eventType: z.string().min(1, 'Выберите тип мероприятия'),
   eventDate: z.string().min(1, 'Выберите дату мероприятия'),
-  lofts: z.array(z.string()).min(1, 'Выберите хотя бы один лофт'),
+  lofts: z.array(z.string()),
   halls: z.array(z.string()).min(1, 'Выберите хотя бы один зал'),
+  magManagerId: z.string().optional(),
 }) satisfies z.ZodType<CreateProjectFormValues>
 
 function getDefaultValues(): CreateProjectFormValues {
-  return { title: '', eventType: '', eventDate: toIsoLocalDay(new Date()), lofts: [], halls: [] }
+  return {
+    title: '',
+    eventType: '',
+    eventDate: toIsoLocalDay(new Date()),
+    lofts: [],
+    halls: [],
+    magManagerId: '',
+  }
+}
+
+function toIdOptions(items: readonly { id: number; name: string }[]): MultiSelectOption[] {
+  return items
+    .map((item) => ({ value: String(item.id), label: item.name }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'ru'))
 }
 
 export interface CreateProjectDialogProps {
@@ -48,18 +61,49 @@ export interface CreateProjectDialogProps {
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
   const navigate = useNavigate()
   const currentUser = useCurrentUser()
+  const role = useUserRole()
+  const isManagerRole = role === 'manager'
+
   const {
-    hallOptions,
-    loftOptions,
+    halls,
+    lofts,
     isLoading: isVenueCatalogLoading,
     isError: isVenueCatalogError,
-  } = useVenueCatalog()
+  } = useVenueCatalog(isManagerRole ? { assigned: true } : undefined)
   const selectDisabled = isVenueCatalogLoading || isVenueCatalogError
+
+  const hallOptions = useMemo(() => toIdOptions(halls), [halls])
+  const loftOptions = useMemo(() => toIdOptions(lofts), [lofts])
 
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   })
+
+  const syncFromHalls = useCallback(
+    (hallIds: number[]) => {
+      const loftIds = deriveSelectedLoftIds(halls, hallIds)
+      form.setValue('halls', hallIds.map(String), { shouldValidate: true })
+      form.setValue('lofts', loftIds.map(String), { shouldValidate: true })
+    },
+    [form, halls],
+  )
+
+  const handleHallsChange = useCallback(
+    (nextHallValues: string[]) => {
+      syncFromHalls(nextHallValues.map(Number))
+    },
+    [syncFromHalls],
+  )
+
+  const handleLoftsChange = useCallback(
+    (nextLoftValues: string[]) => {
+      const currentHallIds = form.getValues('halls').map(Number)
+      const nextHallIds = applyLoftSelection(halls, currentHallIds, nextLoftValues.map(Number))
+      syncFromHalls(nextHallIds)
+    },
+    [form, halls, syncFromHalls],
+  )
 
   const {
     create,
@@ -121,7 +165,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                   <FormItem className="min-w-0">
                     <FormLabel>Тип мероприятия</FormLabel>
                     <FormControl>
-                      <div className="min-w-0 w-full self-end">
+                      <div className="w-full min-w-0 self-end">
                         <ClearableSelect
                           placeholder="Выберите тип"
                           value={field.value || null}
@@ -145,7 +189,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                   <FormItem className="min-w-0">
                     <FormLabel>Дата мероприятия</FormLabel>
                     <FormControl>
-                      <div className="min-w-0 w-full self-end">
+                      <div className="w-full min-w-0 self-end">
                         <DateField value={field.value} onChange={field.onChange} />
                       </div>
                     </FormControl>
@@ -154,6 +198,9 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 )}
               />
             </div>
+            {!isManagerRole ? (
+              <ManagerSelectField control={form.control} disabled={isPending} />
+            ) : null}
             <FormField
               control={form.control}
               name="lofts"
@@ -165,7 +212,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                       placeholder="Выберите лофты"
                       values={field.value}
                       options={loftOptions}
-                      onChange={field.onChange}
+                      onChange={handleLoftsChange}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}
                     />
@@ -185,7 +232,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                       placeholder="Выберите залы"
                       values={field.value}
                       options={hallOptions}
-                      onChange={field.onChange}
+                      onChange={handleHallsChange}
                       triggerClassName={TRIGGER_CLASS}
                       disabled={selectDisabled}
                     />
@@ -221,5 +268,54 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         </Form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+interface ManagerSelectFieldProps {
+  control: Control<CreateProjectFormValues>
+  disabled?: boolean
+}
+
+/**
+ * Выбор менеджера MAG руководителем/админом (mag_manager_id).
+ * Вынесено в отдельный компонент, чтобы справочник менеджеров не запрашивался
+ * для роли менеджера, у которой этого поля нет.
+ */
+function ManagerSelectField({ control, disabled = false }: ManagerSelectFieldProps) {
+  const {
+    selectOptions: managerOptions,
+    isLoading: isManagersLoading,
+    isError: isManagersError,
+  } = useManagersDirectory()
+  const isDisabled = disabled || isManagersLoading || isManagersError
+
+  return (
+    <FormField
+      control={control}
+      name="magManagerId"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Менеджер MAG</FormLabel>
+          <FormControl>
+            <Select value={field.value || ''} onValueChange={field.onChange} disabled={isDisabled}>
+              <SelectTrigger className={TRIGGER_CLASS}>
+                <SelectValue placeholder="Авто (по залам)" />
+              </SelectTrigger>
+              <SelectContent>
+                {managerOptions.map((option) => (
+                  <SelectItem key={option.id} value={option.id}>
+                    {option.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
+          {isManagersError ? (
+            <p className="text-destructive text-sm">Не удалось загрузить список менеджеров</p>
+          ) : null}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   )
 }

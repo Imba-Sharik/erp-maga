@@ -101,11 +101,11 @@ export function useCreateProject({ magManager, magManagerId, onCreated }: UseCre
   const create = useCallback(
     (values: CreateProjectFormValues) => {
       const halls = values.halls
-        .map((name) => venueHalls.find((h) => h.name === name))
+        .map((id) => venueHalls.find((h) => h.id === Number(id)))
         .filter((h): h is (typeof venueHalls)[number] => h != null)
       if (halls.length === 0) return
 
-      mutation.mutate({ data: toProjectCreateRequest(values, halls) })
+      mutation.mutate({ data: toProjectCreateRequest(values) })
     },
     [mutation, venueHalls],
   )
