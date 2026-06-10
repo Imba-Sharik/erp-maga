@@ -10,11 +10,13 @@ type KanbanListDateParams = Pick<
 interface BuildKanbanListParamsInput {
   search: string
   plumEventStatus: string | null
+  hall_id?: number
+  loft_id?: number
 }
 
 export function buildKanbanListParams(
   base: KanbanListDateParams,
-  { search, plumEventStatus }: BuildKanbanListParamsInput,
+  { search, plumEventStatus, hall_id, loft_id }: BuildKanbanListParamsInput,
 ): BoardListParams {
   const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
   const trimmedSearch = search.trim() || undefined
@@ -23,5 +25,7 @@ export function buildKanbanListParams(
     ...base,
     ...(trimmedSearch ? { search: trimmedSearch } : {}),
     ...(plum_event_status !== undefined ? { plum_event_status } : {}),
+    ...(hall_id !== undefined ? { hall_id } : {}),
+    ...(loft_id !== undefined ? { loft_id } : {}),
   }
 }

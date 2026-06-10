@@ -33,7 +33,7 @@ export interface UseClosingActiveTableQueryResult {
  * Плоский список проектов закрывающей воронки — для табличного представления
  * канбана «Закрытие». Один запрос с `stage__in` вместо колоночных запросов
  * канбана. Те же `listParams` (event_date_after = сегодня, ordering, search),
- * фасетные фильтры (город/зал/LOFT) применяются на клиенте.
+ * фасетный фильтр «город» применяется на клиенте.
  */
 export function useClosingActiveTableQuery({
   listParams,
