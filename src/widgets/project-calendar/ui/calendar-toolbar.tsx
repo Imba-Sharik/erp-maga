@@ -1,4 +1,5 @@
 import { Loader2 } from 'lucide-react'
+import { useUserRole } from '@/entities/user-role'
 import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/utils'
@@ -105,7 +106,10 @@ export function CalendarToolbar({
 }: CalendarToolbarProps) {
   const layout = showManagerFilter ? TOOLBAR_LAYOUT.withManagerFilter : TOOLBAR_LAYOUT.default
   const isMobile = useIsMobile()
-  const { loftOptions, hallOptions, selectDisabled, shouldResetHall } = useLoftHallFilter(loft)
+  const role = useUserRole()
+  const isManagerRole = role === 'manager'
+  const { loftOptions, hallOptions, showLoftFilter, selectDisabled, shouldResetHall } =
+    useLoftHallFilter(loft, { assigned: isManagerRole })
   const handleChangeLoft = (next: string | null) => {
     onChangeLoft(next)
     if (shouldResetHall(next, hall)) onChangeHall(null)
@@ -169,14 +173,16 @@ export function CalendarToolbar({
           triggerClassName={layout.triggerBase}
           disabled={selectDisabled}
         />
-        <VenueFilterSelect
-          filter="loft"
-          value={loft}
-          options={loftOptions}
-          onChange={handleChangeLoft}
-          triggerClassName={layout.triggerBase}
-          disabled={selectDisabled}
-        />
+        {showLoftFilter ? (
+          <VenueFilterSelect
+            filter="loft"
+            value={loft}
+            options={loftOptions}
+            onChange={handleChangeLoft}
+            triggerClassName={layout.triggerBase}
+            disabled={selectDisabled}
+          />
+        ) : null}
 
         <MonthYearNavigator
           visibleMonth={visibleMonth}

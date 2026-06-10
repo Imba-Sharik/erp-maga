@@ -24,8 +24,10 @@ export {
 } from './lib/build-assignment-options'
 export { resolveVenueFilterIds } from './lib/resolve-venue-filter-ids'
 export type { VenueFilterIds } from './lib/resolve-venue-filter-ids'
+export { DEFAULT_CITY_OPTIONS } from './lib/default-city-options'
+export { deriveCityOptionsFromLofts } from './lib/derive-city-options'
 export { useLoftHallFilter } from './model/use-loft-hall-filter'
-export type { LoftHallFilter } from './model/use-loft-hall-filter'
+export type { LoftHallFilter, UseLoftHallFilterOptions } from './model/use-loft-hall-filter'
 export { prefetchVenueCatalog } from './lib/prefetch-venue-catalog'
 export {
   hallsCatalogQueryOptions,

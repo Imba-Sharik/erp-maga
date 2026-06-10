@@ -1,10 +1,9 @@
 import { Search } from 'lucide-react'
 import { PlumEventStatusFilterSelect } from '@/entities/project'
+import { useUserRole } from '@/entities/user-role'
 import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-
-const CITY_OPTIONS = ['Москва', 'Санкт-Петербург', 'Казань']
 
 const TRIGGER_CLASS =
   'h-10! w-full min-w-[calc(50%-4px)] flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs data-placeholder:text-[#BCBCBC] @4xl:w-41.5 @4xl:min-w-0 @4xl:flex-none @4xl:text-sm'
@@ -39,8 +38,17 @@ export function ProjectsBoardToolbar({
   onAddProject,
   filtersAlign = 'spread',
 }: ProjectsBoardToolbarProps) {
-  const { loftOptions, hallOptions: hallOptionsForLoft, selectDisabled, shouldResetHall } =
-    useLoftHallFilter(loft)
+  const role = useUserRole()
+  const isManagerRole = role === 'manager'
+  const {
+    loftOptions,
+    hallOptions: hallOptionsForLoft,
+    cityOptions,
+    showCityFilter,
+    showLoftFilter,
+    selectDisabled,
+    shouldResetHall,
+  } = useLoftHallFilter(loft, { assigned: isManagerRole })
   const filtersAtStart = filtersAlign === 'start'
 
   // Смена LOFT, при которой выбранный зал ему не принадлежит, — сбрасываем зал.
@@ -87,13 +95,15 @@ export function ProjectsBoardToolbar({
             : 'flex min-w-0 flex-1 flex-wrap items-center gap-2 @4xl:flex-none @4xl:gap-2.5'
         }
       >
-        <VenueFilterSelect
-          filter="city"
-          value={city}
-          options={CITY_OPTIONS}
-          onChange={onChangeCity}
-          triggerClassName={TRIGGER_CLASS}
-        />
+        {showCityFilter ? (
+          <VenueFilterSelect
+            filter="city"
+            value={city}
+            options={cityOptions}
+            onChange={onChangeCity}
+            triggerClassName={TRIGGER_CLASS}
+          />
+        ) : null}
         <VenueFilterSelect
           filter="hall"
           value={hall}
@@ -102,14 +112,16 @@ export function ProjectsBoardToolbar({
           triggerClassName={TRIGGER_CLASS}
           disabled={selectDisabled}
         />
-        <VenueFilterSelect
-          filter="loft"
-          value={loft}
-          options={loftOptions}
-          onChange={handleChangeLoft}
-          triggerClassName={TRIGGER_CLASS}
-          disabled={selectDisabled}
-        />
+        {showLoftFilter ? (
+          <VenueFilterSelect
+            filter="loft"
+            value={loft}
+            options={loftOptions}
+            onChange={handleChangeLoft}
+            triggerClassName={TRIGGER_CLASS}
+            disabled={selectDisabled}
+          />
+        ) : null}
         <PlumEventStatusFilterSelect
           value={plumEventStatus}
           onChange={onChangePlumEventStatus}
