@@ -1,9 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
-import { ACCESS_TOKEN_KEY, clearSessionTokens } from '@/entities/session'
+import { clearSessionTokens, getAccessToken } from '@/entities/session'
 import { useUsersMeRetrieve } from '@/shared/api/generated/hooks/usersController/useUsersMeRetrieve'
+import { refreshAccessToken } from '@/shared/api/client'
 
 import type { ReactNode } from 'react'
 
@@ -11,9 +12,7 @@ interface RequireAuthProps {
   children: ReactNode
 }
 
-function hasAccessToken(): boolean {
-  return Boolean(localStorage.getItem(ACCESS_TOKEN_KEY))
-}
+type BootstrapState = 'idle' | 'pending' | 'failed'
 
 function isUnauthorized(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
@@ -22,16 +21,49 @@ function isUnauthorized(error: unknown): boolean {
   return status === 401 || respStatus === 401
 }
 
+function AuthSplash() {
+  return (
+    <div
+      role="status"
+      aria-label="Загрузка"
+      className="flex h-svh w-full items-center justify-center bg-background"
+    />
+  )
+}
+
 /**
  * Гард: пускает в защищённую зону только при валидной сессии.
- * - Нет access-токена → редирект на `/login` (с `state.from`).
- * - `/users/me/` отдал 401 → чистим токены, редирект на `/login`.
- * - Пока первый ответ не пришёл → splash-заглушка.
+ * - Нет access-токена → silent refresh по HttpOnly cookie.
+ * - `/users/me/` отдал 401 после провала refresh (interceptor) → редирект на `/login`.
+ * - Пока bootstrap или первый `/users/me/` — splash-заглушка.
  */
 export function RequireAuth({ children }: RequireAuthProps) {
   const location = useLocation()
   const queryClient = useQueryClient()
-  const tokenPresent = hasAccessToken()
+  const [tokenPresent, setTokenPresent] = useState(() => Boolean(getAccessToken()))
+  const [bootstrapState, setBootstrapState] = useState<BootstrapState>(() =>
+    getAccessToken() ? 'idle' : 'pending',
+  )
+
+  useEffect(() => {
+    if (tokenPresent || bootstrapState !== 'pending') return
+
+    let cancelled = false
+    void refreshAccessToken()
+      .then(() => {
+        if (cancelled) return
+        setTokenPresent(true)
+        setBootstrapState('idle')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setBootstrapState('failed')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [tokenPresent, bootstrapState])
 
   const { data, isLoading, isError, error } = useUsersMeRetrieve({
     query: {
@@ -44,25 +76,22 @@ export function RequireAuth({ children }: RequireAuthProps) {
   const unauthorized = isError && isUnauthorized(error)
 
   useEffect(() => {
-    if (unauthorized) {
-      clearSessionTokens()
-      queryClient.clear()
-    }
+    if (!unauthorized) return
+    clearSessionTokens()
+    queryClient.clear()
   }, [unauthorized, queryClient])
 
-  if (!tokenPresent || unauthorized) {
+  if (bootstrapState === 'pending') {
+    return <AuthSplash />
+  }
+
+  if (!tokenPresent || bootstrapState === 'failed' || unauthorized) {
     const from = location.pathname + location.search + location.hash
     return <Navigate to="/login" replace state={{ from }} />
   }
 
   if (isLoading || !data) {
-    return (
-      <div
-        role="status"
-        aria-label="Загрузка"
-        className="flex h-svh w-full items-center justify-center bg-background"
-      />
-    )
+    return <AuthSplash />
   }
 
   return <>{children}</>
