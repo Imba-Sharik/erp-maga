@@ -26,7 +26,14 @@ export interface UseClosingArchiveQueryResult {
 export function useClosingArchiveQuery({
   enabled = true,
   search,
-}: { enabled?: boolean; search?: string } = {}): UseClosingArchiveQueryResult {
+  hall_id,
+  loft_id,
+}: {
+  enabled?: boolean
+  search?: string
+  hall_id?: number
+  loft_id?: number
+} = {}): UseClosingArchiveQueryResult {
   const trimmedSearch = search?.trim() || undefined
 
   const query = useInfiniteQuery({
@@ -36,6 +43,8 @@ export function useClosingArchiveQuery({
         archived_only: true,
         ordering: PROJECTS_LIST_DEFAULT_ORDERING,
         search: trimmedSearch,
+        hall_id,
+        loft_id,
       },
     ] as const,
     enabled,
@@ -48,6 +57,8 @@ export function useClosingArchiveQuery({
           limit: PAGE_SIZE,
           offset: pageParam,
           ...(trimmedSearch ? { search: trimmedSearch } : {}),
+          ...(hall_id !== undefined ? { hall_id } : {}),
+          ...(loft_id !== undefined ? { loft_id } : {}),
         },
         { signal },
       ),

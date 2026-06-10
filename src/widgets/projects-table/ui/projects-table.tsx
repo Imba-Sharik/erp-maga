@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 
 import { useManagersDirectory } from '@/entities/manager'
 import type { Project } from '@/entities/project'
+import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 
 import {
@@ -33,6 +34,12 @@ export function ProjectsTable({
   const [columnView, setColumnView] = useState<ProjectsTableColumnView>('general')
   const debouncedSearch = useDebouncedValue(search)
 
+  const { halls, lofts } = useVenueCatalog()
+  const venueFilterIds = useMemo(
+    () => resolveVenueFilterIds(columnFilters.loft, columnFilters.hall, halls, lofts),
+    [columnFilters.loft, columnFilters.hall, halls, lofts],
+  )
+
   const {
     selectOptions,
     filterOptions,
@@ -47,6 +54,7 @@ export function ProjectsTable({
       magManagerId: columnFilters.manager,
       plumEventStatus: columnFilters.plumEventStatus,
       search: debouncedSearch,
+      ...venueFilterIds,
     })
 
   const filtered = useMemo(

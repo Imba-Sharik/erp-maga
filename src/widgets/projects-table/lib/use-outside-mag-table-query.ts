@@ -10,7 +10,7 @@ const PAGE_SIZE = 50
 
 export type OutsideMagTableListParams = Pick<
   ProjectsOutOfMagListQueryParams,
-  'event_date_after' | 'event_date_before' | 'ordering' | 'search'
+  'event_date_after' | 'event_date_before' | 'ordering' | 'search' | 'hall_id' | 'loft_id'
 >
 
 interface UseOutsideMagTableQueryOptions {

@@ -26,6 +26,10 @@ interface UseProjectsTableQueryParams {
   plumEventStatus: string | null
   /** Серверный поиск по названию проекта (`event_name`). */
   search?: string
+  /** Фильтр по лофту (`loft_id`). */
+  loft_id?: number
+  /** Фильтр по залу (`hall_id`). */
+  hall_id?: number
 }
 
 /**
@@ -46,6 +50,8 @@ export function useProjectsTableQuery({
   magManagerId,
   plumEventStatus,
   search,
+  loft_id,
+  hall_id,
 }: UseProjectsTableQueryParams) {
   const stageParams: StageParams = stage
     ? { stage: stage as ProjectsListQueryParamsStageEnumKey }
@@ -68,6 +74,8 @@ export function useProjectsTableQuery({
         mag_manager,
         plum_event_status,
         search: trimmedSearch,
+        loft_id,
+        hall_id,
       },
     ] as const,
     initialPageParam: 0,
@@ -81,6 +89,8 @@ export function useProjectsTableQuery({
           ...(mag_manager !== undefined ? { mag_manager } : {}),
           ...(plum_event_status !== undefined ? { plum_event_status } : {}),
           ...(trimmedSearch ? { search: trimmedSearch } : {}),
+          ...(loft_id !== undefined ? { loft_id } : {}),
+          ...(hall_id !== undefined ? { hall_id } : {}),
         },
         { signal },
       ),
