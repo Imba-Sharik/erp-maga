@@ -1,13 +1,21 @@
 import { useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
+import type { HallsHallsListQueryParams } from '@/shared/api/generated/types/hallsController/HallsHallsList'
+import type { HallsLoftsListQueryParams } from '@/shared/api/generated/types/hallsController/HallsLoftsList'
+
 import { hallsByLoftId, hallsToSelectOptions, loftsToSelectOptions } from '../lib/to-select-options'
 import { hallsCatalogQueryOptions, loftsCatalogQueryOptions } from '../lib/venue-catalog-query'
 import type { VenueHall, VenueLoft, VenueSelectOption } from './types'
 
 let loggedVenueCatalogError = false
 
-export function useVenueCatalog(): {
+export interface UseVenueCatalogParams {
+  /** Для менеджера MAG: вернуть только закреплённые за ним залы/лофты. */
+  assigned?: boolean
+}
+
+export function useVenueCatalog(params?: UseVenueCatalogParams): {
   halls: VenueHall[]
   lofts: VenueLoft[]
   hallOptions: VenueSelectOption[]
@@ -17,8 +25,15 @@ export function useVenueCatalog(): {
   isError: boolean
   error: Error | null
 } {
-  const hallsQuery = useQuery(hallsCatalogQueryOptions())
-  const loftsQuery = useQuery(loftsCatalogQueryOptions())
+  const hallsParams: HallsHallsListQueryParams | undefined = params?.assigned
+    ? { assigned: true }
+    : undefined
+  const loftsParams: HallsLoftsListQueryParams | undefined = params?.assigned
+    ? { assigned: true }
+    : undefined
+
+  const hallsQuery = useQuery(hallsCatalogQueryOptions(hallsParams))
+  const loftsQuery = useQuery(loftsCatalogQueryOptions(loftsParams))
 
   const halls = hallsQuery.data ?? []
   const lofts = loftsQuery.data ?? []

@@ -2,15 +2,30 @@ openapi: 3.0.3
 info:
   title: MAG Backend API
   version: 1.0.0
-  description: REST API v1 (JWT). WebSocket — extension `x-mag-websocket`, компоненты
-    `Ws*`.
+  description: 'REST API v1 (JWT). Access — в Authorization: Bearer; refresh — HttpOnly
+    cookie `refresh_token`. WebSocket — extension `x-mag-websocket`, компоненты `Ws*`.'
 paths:
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: 'Blacklist текущего refresh и удаление cookie. Cookie `refresh_token`
+        (HttpOnly, path `/api/v1/auth/`). На фронте все auth-запросы отправлять с
+        `credentials: include`.'
+      summary: Выйти (очистить refresh cookie)
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: Выход выполнен, cookie удалена
   /api/v1/auth/token/:
     post:
       operationId: auth_token_create
-      description: |-
-        Takes a set of user credentials and returns an access and refresh JSON web
-        token pair to prove the authentication of those credentials.
+      description: 'Возвращает только access-токен в JSON. Refresh устанавливается
+        в Cookie `refresh_token` (HttpOnly, path `/api/v1/auth/`). На фронте все auth-запросы
+        отправлять с `credentials: include`.'
       summary: Получить JWT (email + password)
       tags:
       - auth
@@ -31,35 +46,44 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenPairResponse'
+                $ref: '#/components/schemas/TokenObtainResponse'
+          description: Access-токен; refresh — в Set-Cookie.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/auth/token/refresh/:
     post:
       operationId: auth_token_refresh_create
-      description: |-
-        Takes a refresh type JSON web token and returns an access type JSON web
-        token if the refresh token is valid.
+      description: 'Тело запроса не требуется. Refresh читается из Cookie `refresh_token`
+        (HttpOnly, path `/api/v1/auth/`). На фронте все auth-запросы отправлять с
+        `credentials: include`. При ротации приходит новый Set-Cookie.'
       summary: Обновить access-токен
       tags:
       - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TokenRefreshRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/TokenRefreshRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/TokenRefreshRequest'
-        required: true
+      security:
+      - jwtAuth: []
+      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenRefreshResponse'
+          description: Новый access; при ротации — новый refresh в Set-Cookie.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/auth/token/verify/:
     post:
@@ -67,7 +91,7 @@ paths:
       description: |-
         Takes a token and indicates if it is valid.  This view provides no
         information about a token's fitness for a particular use.
-      summary: Проверить токен
+      summary: Проверить access-токен
       tags:
       - auth
       requestBody:
@@ -85,6 +109,12 @@ paths:
       responses:
         '200':
           description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/halls/hall-manager-assignments/:
     get:
       operationId: halls_manager_assignments_list
@@ -116,21 +146,24 @@ paths:
           description: ''
     post:
       operationId: halls_manager_assignments_create
-      summary: Создать назначение менеджера
+      description: |-
+        Одно назначение: `{hall, manager, loft?}`.
+
+        Несколько залов: `{manager, hall_ids: [...], loft?}` — создаёт связку на каждый зал; `loft` опционален.
+      summary: Создать назначение менеджера (одно или bulk)
       tags:
       - halls
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/HallManagerAssignmentWriteRequest'
+              $ref: '#/components/schemas/HallManagerAssignmentCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/HallManagerAssignmentWriteRequest'
+              $ref: '#/components/schemas/HallManagerAssignmentCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/HallManagerAssignmentWriteRequest'
-        required: true
+              $ref: '#/components/schemas/HallManagerAssignmentCreateRequest'
       security:
       - jwtAuth: []
       responses:
@@ -138,13 +171,39 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HallManagerAssignment'
+                $ref: '#/components/schemas/HallManagerAssignmentCreateResponse'
           description: ''
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignmentConflictError'
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+    delete:
+      operationId: halls_manager_assignments_bulk_destroy
+      description: |-
+        Удаляет записи матрицы по их `id` (HallManagerAssignment).
+
+        Тело запроса (JSON): `{"ids": [101, 102]}`.
+
+        OpenAPI 3.0 не описывает requestBody для DELETE — схема выше в описании.
+      summary: Удалить несколько назначений
+      tags:
+      - halls
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HallManagerAssignmentBulkDeleteResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/halls/hall-manager-assignments/{id}/:
     get:
@@ -199,12 +258,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AssignmentConflictError'
-          description: ''
     patch:
       operationId: halls_manager_assignments_partial_update
       summary: Изменить назначение
@@ -236,12 +289,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AssignmentConflictError'
-          description: ''
     delete:
       operationId: halls_manager_assignments_destroy
       summary: Удалить назначение
@@ -264,6 +311,12 @@ paths:
       summary: Справочник залов
       parameters:
       - in: query
+        name: assigned
+        schema:
+          type: boolean
+        description: Если true и пользователь — менеджер MAG, вернуть только залы,
+          закреплённые за ним руководителем.
+      - in: query
         name: loft_id
         schema:
           type: integer
@@ -285,6 +338,13 @@ paths:
     get:
       operationId: halls_lofts_list
       summary: Справочник лофтов
+      parameters:
+      - in: query
+        name: assigned
+        schema:
+          type: boolean
+        description: Если true и пользователь — менеджер MAG, вернуть только лофты,
+          закреплённые за ним руководителем.
       tags:
       - halls
       security:
@@ -814,9 +874,10 @@ paths:
       operationId: projects_create
       description: 'Ручное создание (не из Plum). **Тело:** `event_type` (обяз.),
         `event_name` или `title` (обяз.), `hall_ids` — внутренние id из `GET /api/v1/halls/halls/`
-        (минимум один) или alias `hall_id`; опционально `event_date` (иначе сегодня).
-        **Ответ 201:** `ProjectSerializer` с `halls[]`. Менеджер MAG: создатель =
-        `mag_manager`; lead: из матрицы залов. Доступ: менеджер MAG, руководитель.'
+        (минимум один) или alias `hall_id`; для lead/admin опционально `mag_manager_id`;
+        опционально `event_date` (иначе сегодня). **Ответ 201:** `ProjectSerializer`
+        с `halls[]`. Менеджер MAG: создатель = `mag_manager`; lead: из `mag_manager_id`
+        или из матрицы залов, если не передан. Доступ: менеджер MAG, руководитель.'
       summary: Создать проект вручную
       tags:
       - projects
@@ -840,6 +901,13 @@ paths:
                   event_type: 1
                   hall_id: 10
                 summary: Новый проект (один зал, alias hall_id)
+              НовыйПроект(leadСРучнымНазначениемМенеджера):
+                value:
+                  event_name: Корпоратив с ручным назначением
+                  event_type: 3
+                  hall_id: 10
+                  mag_manager_id: 5
+                summary: Новый проект (lead с ручным назначением менеджера)
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ProjectCreateRequest'
@@ -2238,23 +2306,6 @@ components:
       required:
       - code
       - label
-    AssignmentConflictError:
-      type: object
-      properties:
-        detail:
-          type: string
-        code:
-          type: string
-          description: assignment_conflict — дубликат в матрице (та же связка hall+loft)
-        invalid_loft_ids:
-          type: array
-          items:
-            type: integer
-          description: ID лофтов из запроса; пустой список, если в запросе loft=null
-      required:
-      - code
-      - detail
-      - invalid_loft_ids
     BacklineCreatedSchema:
       type: object
       properties:
@@ -2400,6 +2451,49 @@ components:
       - manager
       - updated_at
       - updated_by
+    HallManagerAssignmentBulkCreateRequest:
+      type: object
+      properties:
+        manager:
+          type: integer
+        hall_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+        loft:
+          type: integer
+          nullable: true
+      required:
+      - hall_ids
+      - manager
+    HallManagerAssignmentBulkCreateResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/HallManagerAssignment'
+        count:
+          type: integer
+      required:
+      - count
+      - results
+    HallManagerAssignmentBulkDeleteResponse:
+      type: object
+      properties:
+        deleted:
+          type: integer
+      required:
+      - deleted
+    HallManagerAssignmentCreateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/HallManagerAssignmentWriteRequest'
+      - $ref: '#/components/schemas/HallManagerAssignmentBulkCreateRequest'
+    HallManagerAssignmentCreateResponse:
+      oneOf:
+      - $ref: '#/components/schemas/HallManagerAssignment'
+      - $ref: '#/components/schemas/HallManagerAssignmentBulkCreateResponse'
     HallManagerAssignmentWriteRequest:
       type: object
       properties:
@@ -3977,6 +4071,10 @@ components:
         event_date:
           type: string
           format: date
+        mag_manager_id:
+          type: integer
+          nullable: true
+          description: 'Опционально для lead/admin: вручную назначить менеджера MAG.'
         idempotency_key:
           type: string
           maxLength: 255
@@ -5115,24 +5213,13 @@ components:
       required:
       - email
       - password
-    TokenPairResponse:
+    TokenObtainResponse:
       type: object
       properties:
         access:
           type: string
-        refresh:
-          type: string
       required:
       - access
-      - refresh
-    TokenRefreshRequest:
-      type: object
-      properties:
-        refresh:
-          type: string
-          minLength: 1
-      required:
-      - refresh
     TokenRefreshResponse:
       type: object
       properties:
@@ -5501,7 +5588,7 @@ components:
       bearerFormat: JWT
 tags:
 - name: auth
-  description: 'JWT: вход, refresh, verify'
+  description: 'JWT: вход, refresh (cookie), verify, logout'
 - name: users
   description: Пользователи и профиль
 - name: projects

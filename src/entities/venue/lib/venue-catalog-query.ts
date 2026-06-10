@@ -1,5 +1,7 @@
 import { hallsHallsListQueryOptions } from '@/shared/api/generated/hooks/hallsController/useHallsHallsList'
 import { hallsLoftsListQueryOptions } from '@/shared/api/generated/hooks/hallsController/useHallsLoftsList'
+import type { HallsHallsListQueryParams } from '@/shared/api/generated/types/hallsController/HallsHallsList'
+import type { HallsLoftsListQueryParams } from '@/shared/api/generated/types/hallsController/HallsLoftsList'
 
 /** Справочники залов/лофтов меняются редко — держим в кэше до перезагрузки вкладки. */
 export const VENUE_CATALOG_STALE_TIME = Number.POSITIVE_INFINITY
@@ -11,16 +13,16 @@ const catalogQueryOverrides = {
   gcTime: VENUE_CATALOG_GC_TIME,
 } as const
 
-export function hallsCatalogQueryOptions() {
+export function hallsCatalogQueryOptions(params?: HallsHallsListQueryParams) {
   return {
-    ...hallsHallsListQueryOptions(),
+    ...hallsHallsListQueryOptions(params),
     ...catalogQueryOverrides,
   }
 }
 
-export function loftsCatalogQueryOptions() {
+export function loftsCatalogQueryOptions(params?: HallsLoftsListQueryParams) {
   return {
-    ...hallsLoftsListQueryOptions(),
+    ...hallsLoftsListQueryOptions(params),
     ...catalogQueryOverrides,
   }
 }

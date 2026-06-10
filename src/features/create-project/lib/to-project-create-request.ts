@@ -1,16 +1,21 @@
 import type { ProjectCreateRequest } from '@/shared/api/generated/types/ProjectCreateRequest'
-import type { VenueHall } from '@/entities/venue'
 
 import type { CreateProjectFormValues } from './create-project-form-values'
 
-export function toProjectCreateRequest(
-  values: CreateProjectFormValues,
-  halls: VenueHall[],
-): ProjectCreateRequest {
-  return {
+export function toProjectCreateRequest(values: CreateProjectFormValues): ProjectCreateRequest {
+  const hallIds = values.halls.map(Number).filter((id) => Number.isFinite(id))
+
+  const request: ProjectCreateRequest = {
     title: values.title.trim(),
     event_type: Number(values.eventType),
     event_date: values.eventDate,
-    hall_ids: halls.map((hall) => hall.id),
+    hall_ids: hallIds,
   }
+
+  const magManagerId = values.magManagerId ? Number(values.magManagerId) : NaN
+  if (Number.isFinite(magManagerId)) {
+    request.mag_manager_id = magManagerId
+  }
+
+  return request
 }

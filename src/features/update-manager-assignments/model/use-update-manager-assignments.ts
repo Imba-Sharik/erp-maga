@@ -2,23 +2,23 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 
 import {
-  findAssignmentByKey,
-  getSelectedAssignmentKeys,
+  findAssignmentsByHallId,
+  getSelectedHallIds,
   invalidateManagersDirectory,
-  parseAssignmentKey,
   type Manager,
   type ManagerAssignmentMode,
 } from '@/entities/manager'
+import { hallsManagerAssignmentsBulkDestroy } from '@/shared/api/generated/clients/hallsController/hallsManagerAssignmentsBulkDestroy'
 import { useHallsManagerAssignmentsCreate } from '@/shared/api/generated/hooks/hallsController/useHallsManagerAssignmentsCreate'
-import { useHallsManagerAssignmentsDestroy } from '@/shared/api/generated/hooks/hallsController/useHallsManagerAssignmentsDestroy'
 
-import { getAssignmentConflictErrorMessage } from '../lib/get-assignment-conflict-error-message'
+import { getAssignmentErrorMessage } from '../lib/get-assignment-error-message'
 
 export interface ApplyManagerAssignmentsInput {
   manager: Manager
+  /** Режим ячейки, инициировавшей сохранение — для индикатора pending/ошибки. */
   mode: ManagerAssignmentMode
-  selectedKeys: readonly string[]
-  loftIdToName?: ReadonlyMap<number, string>
+  /** Целевой набор id залов менеджера (источник правды). */
+  targetHallIds: readonly number[]
 }
 
 export type ApplyManagerAssignmentsResult = { ok: true } | { ok: false; errorMessage: string }
@@ -38,7 +38,6 @@ export function useUpdateManagerAssignments() {
   const [assignmentError, setAssignmentError] = useState<AssignmentErrorState | null>(null)
 
   const createMutation = useHallsManagerAssignmentsCreate()
-  const destroyMutation = useHallsManagerAssignmentsDestroy()
 
   const clearErrorFor = useCallback((managerId: string, mode: ManagerAssignmentMode) => {
     setAssignmentError((prev) =>
@@ -51,10 +50,10 @@ export function useUpdateManagerAssignments() {
       const managerId = Number(input.manager.id)
       if (!Number.isFinite(managerId)) return { ok: true }
 
-      const currentKeys = getSelectedAssignmentKeys(input.manager.assignments, input.mode)
-      const selectedSet = new Set(input.selectedKeys)
-      const toAdd = [...selectedSet].filter((key) => !currentKeys.has(key))
-      const toRemove = [...currentKeys].filter((key) => !selectedSet.has(key))
+      const currentHallIds = new Set(getSelectedHallIds(input.manager.assignments))
+      const targetHallIds = new Set(input.targetHallIds)
+      const toAdd = [...targetHallIds].filter((hallId) => !currentHallIds.has(hallId))
+      const toRemove = [...currentHallIds].filter((hallId) => !targetHallIds.has(hallId))
 
       if (toAdd.length === 0 && toRemove.length === 0) return { ok: true }
 
@@ -62,25 +61,21 @@ export function useUpdateManagerAssignments() {
       setPending({ managerId: input.manager.id, mode: input.mode })
 
       try {
-        for (const key of toRemove) {
-          const assignment = findAssignmentByKey(input.manager.assignments, key)
-          if (assignment) {
-            await destroyMutation.mutateAsync({ id: assignment.id })
-          }
+        const idsToRemove = toRemove.flatMap((hallId) =>
+          findAssignmentsByHallId(input.manager.assignments, hallId).map((a) => a.id),
+        )
+        if (idsToRemove.length > 0) {
+          await hallsManagerAssignmentsBulkDestroy({ data: { ids: idsToRemove } })
         }
-        for (const key of toAdd) {
-          const { hallId, loftId } = parseAssignmentKey(key)
+        if (toAdd.length > 0) {
+          // loft не передаём — бэкенд привяжет его сам по залу.
           await createMutation.mutateAsync({
-            data: {
-              hall: hallId,
-              loft: loftId,
-              manager: managerId,
-            },
+            data: { manager: managerId, hall_ids: toAdd },
           })
         }
         return { ok: true }
       } catch (error) {
-        const errorMessage = getAssignmentConflictErrorMessage(error, input.loftIdToName)
+        const errorMessage = getAssignmentErrorMessage(error)
         setAssignmentError({
           managerId: input.manager.id,
           mode: input.mode,
@@ -92,7 +87,7 @@ export function useUpdateManagerAssignments() {
         invalidateManagersDirectory(queryClient)
       }
     },
-    [createMutation, destroyMutation, queryClient],
+    [createMutation, queryClient],
   )
 
   const isPendingFor = useCallback(

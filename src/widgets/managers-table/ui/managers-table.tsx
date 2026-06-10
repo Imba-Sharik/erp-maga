@@ -1,21 +1,22 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import {
-  buildAssignmentOccupancy,
+  getSelectedHallIds,
   useManagersDirectory,
   type Manager,
   type ManagerAssignmentMode,
 } from '@/entities/manager'
-import { useVenueCatalog } from '@/entities/venue'
+import {
+  applyLoftSelection,
+  buildFilteredHallGroups,
+  buildLoftAssignmentOptions,
+  deriveSelectedLoftIds,
+  useVenueCatalog,
+} from '@/entities/venue'
 import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
 import { useUpdateManagerAssignments } from '@/features/update-manager-assignments'
 import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
 
-import {
-  buildHallAssignmentOptions,
-  buildLoftAssignmentOptions,
-  enrichAssignmentOptions,
-} from '../lib/build-assignment-options'
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
   MANAGERS_TABLE_COLUMN_COUNT,
@@ -53,27 +54,35 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
   } | null>(null)
 
   const { managers: allManagers, isLoading, isError } = useManagersDirectory()
-  const { halls, isLoading: isCatalogLoading, isError: isCatalogError } = useVenueCatalog()
+  const { halls, lofts, isLoading: isCatalogLoading, isError: isCatalogError } = useVenueCatalog()
   const { apply, isPendingFor, getErrorFor, clearErrorFor } = useUpdateManagerAssignments()
-
-  const hallOptionsBase = useMemo(() => buildHallAssignmentOptions(halls), [halls])
-  const loftOptionsBase = useMemo(() => buildLoftAssignmentOptions(halls), [halls])
-
-  const loftIdToName = useMemo(() => {
-    const map = new Map<number, string>()
-    for (const hallItem of halls) {
-      if (hallItem.loft?.id != null && hallItem.loft.name) {
-        map.set(hallItem.loft.id, hallItem.loft.name)
-      }
-    }
-    return map
-  }, [halls])
 
   const catalogDisabled = isCatalogLoading || isCatalogError
 
+  const loftGroups = useMemo(() => [{ options: buildLoftAssignmentOptions(lofts) }], [lofts])
+
+  const loftNameById = useMemo(
+    () => new Map(lofts.map((item) => [item.id, item.name] as const)),
+    [lofts],
+  )
+
+  // Лофты — производная от залов: бэкенд в справочнике может не отдавать loft,
+  // поэтому выводим названия лофтов из закреплённых залов (как и чекбоксы).
+  const managersWithLofts = useMemo(
+    () =>
+      allManagers.map((manager) => {
+        const selectedHallIds = getSelectedHallIds(manager.assignments)
+        const loftNames = deriveSelectedLoftIds(halls, selectedHallIds)
+          .map((id) => loftNameById.get(id))
+          .filter((name): name is string => Boolean(name))
+        return { ...manager, lofts: loftNames }
+      }),
+    [allManagers, halls, loftNameById],
+  )
+
   const managers = useMemo(
-    () => filterManagersTable(allManagers, { search, hall, loft }),
-    [allManagers, search, hall, loft],
+    () => filterManagersTable(managersWithLofts, { search, hall, loft }),
+    [managersWithLofts, search, hall, loft],
   )
 
   const handleEditOpenChange = useCallback(
@@ -95,10 +104,18 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
       mode: ManagerAssignmentMode,
       selectedKeys: string[],
     ): Promise<{ ok: true } | { ok: false }> => {
-      const result = await apply({ manager, mode, selectedKeys, loftIdToName })
+      let targetHallIds: number[]
+      if (mode === 'halls') {
+        targetHallIds = selectedKeys.map(Number)
+      } else {
+        const currentHallIds = getSelectedHallIds(manager.assignments)
+        const nextLoftIds = selectedKeys.map(Number)
+        targetHallIds = applyLoftSelection(halls, currentHallIds, nextLoftIds)
+      }
+      const result = await apply({ manager, mode, targetHallIds })
       return result.ok ? { ok: true } : { ok: false }
     },
-    [apply, loftIdToName],
+    [apply, halls],
   )
 
   const emptyMessage = isError ? 'Не удалось загрузить список менеджеров.' : 'Менеджеры не найдены.'
@@ -115,17 +132,20 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
         skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
       >
         {managers.map((manager) => {
-          const loftOccupancy = buildAssignmentOccupancy(allManagers, manager.id, 'lofts')
-          const hallOccupancy = buildAssignmentOccupancy(allManagers, manager.id, 'halls')
-          const loftOptions = enrichAssignmentOptions(loftOptionsBase, loftOccupancy)
-          const hallOptions = enrichAssignmentOptions(hallOptionsBase, hallOccupancy)
+          const selectedHallIds = getSelectedHallIds(manager.assignments)
+          const selectedLoftIds = deriveSelectedLoftIds(halls, selectedHallIds)
+          const hallSelectedKeys = new Set(selectedHallIds.map(String))
+          const loftSelectedKeys = new Set(selectedLoftIds.map(String))
+          const hallGroups = buildFilteredHallGroups(halls, lofts, selectedHallIds)
 
           return (
             <ManagersTableRow
               key={manager.id}
               manager={manager}
-              hallOptions={hallOptions}
-              loftOptions={loftOptions}
+              hallGroups={hallGroups}
+              loftGroups={loftGroups}
+              hallSelectedKeys={hallSelectedKeys}
+              loftSelectedKeys={loftSelectedKeys}
               editing={editing}
               catalogDisabled={catalogDisabled}
               isPendingFor={isPendingFor}
