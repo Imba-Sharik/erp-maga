@@ -8,8 +8,8 @@ import {
   type Manager,
   type ManagerAssignmentMode,
 } from '@/entities/manager'
+import { hallsManagerAssignmentsBulkDestroy } from '@/shared/api/generated/clients/hallsController/hallsManagerAssignmentsBulkDestroy'
 import { useHallsManagerAssignmentsCreate } from '@/shared/api/generated/hooks/hallsController/useHallsManagerAssignmentsCreate'
-import { useHallsManagerAssignmentsDestroy } from '@/shared/api/generated/hooks/hallsController/useHallsManagerAssignmentsDestroy'
 
 import { getAssignmentErrorMessage } from '../lib/get-assignment-error-message'
 
@@ -38,7 +38,6 @@ export function useUpdateManagerAssignments() {
   const [assignmentError, setAssignmentError] = useState<AssignmentErrorState | null>(null)
 
   const createMutation = useHallsManagerAssignmentsCreate()
-  const destroyMutation = useHallsManagerAssignmentsDestroy()
 
   const clearErrorFor = useCallback((managerId: string, mode: ManagerAssignmentMode) => {
     setAssignmentError((prev) =>
@@ -62,15 +61,16 @@ export function useUpdateManagerAssignments() {
       setPending({ managerId: input.manager.id, mode: input.mode })
 
       try {
-        for (const hallId of toRemove) {
-          for (const assignment of findAssignmentsByHallId(input.manager.assignments, hallId)) {
-            await destroyMutation.mutateAsync({ id: assignment.id })
-          }
+        const idsToRemove = toRemove.flatMap((hallId) =>
+          findAssignmentsByHallId(input.manager.assignments, hallId).map((a) => a.id),
+        )
+        if (idsToRemove.length > 0) {
+          await hallsManagerAssignmentsBulkDestroy({ data: { ids: idsToRemove } })
         }
-        for (const hallId of toAdd) {
+        if (toAdd.length > 0) {
           // loft не передаём — бэкенд привяжет его сам по залу.
           await createMutation.mutateAsync({
-            data: { hall: hallId, manager: managerId },
+            data: { manager: managerId, hall_ids: toAdd },
           })
         }
         return { ok: true }
@@ -87,7 +87,7 @@ export function useUpdateManagerAssignments() {
         invalidateManagersDirectory(queryClient)
       }
     },
-    [createMutation, destroyMutation, queryClient],
+    [createMutation, queryClient],
   )
 
   const isPendingFor = useCallback(
