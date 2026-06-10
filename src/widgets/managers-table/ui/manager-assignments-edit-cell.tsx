@@ -7,12 +7,13 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { GridTableCell } from '@/shared/ui/grid-table'
 
-import type { ManagerAssignmentOption } from '../lib/build-assignment-options'
+import type { ManagerAssignmentOptionGroup } from '../lib/build-assignment-options'
 
 function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
   e.stopPropagation()
@@ -21,7 +22,7 @@ function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
 export interface ManagerAssignmentsEditCellProps {
   ariaLabel: string
   displayText: string
-  options: readonly ManagerAssignmentOption[]
+  groups: readonly ManagerAssignmentOptionGroup[]
   selectedKeys: ReadonlySet<string>
   isOpen: boolean
   isDisabled?: boolean
@@ -35,7 +36,7 @@ export interface ManagerAssignmentsEditCellProps {
 export function ManagerAssignmentsEditCell({
   ariaLabel,
   displayText,
-  options,
+  groups,
   selectedKeys,
   isOpen,
   isDisabled = false,
@@ -46,6 +47,7 @@ export function ManagerAssignmentsEditCell({
   onClearError,
 }: ManagerAssignmentsEditCellProps) {
   const [draft, setDraft] = useState<Set<string>>(() => new Set(selectedKeys))
+  const totalOptions = groups.reduce((count, group) => count + group.options.length, 0)
 
   useEffect(() => {
     if (isOpen) setDraft(new Set(selectedKeys))
@@ -92,46 +94,41 @@ export function ManagerAssignmentsEditCell({
               onCloseAutoFocus={(e) => e.preventDefault()}
             >
               <div className="max-h-52 overflow-y-auto p-1">
-                {options.length === 0 ? (
+                {totalOptions === 0 ? (
                   <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
                 ) : (
-                  options.map((option) => {
-                    const isOccupied = Boolean(option.occupiedBy)
-                    const optionTitle = isOccupied
-                      ? `${option.label} — занято: ${option.occupiedBy}`
-                      : option.label
-
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={option.key}
-                        checked={draft.has(option.key)}
-                        disabled={isPending || isOccupied}
-                        title={optionTitle}
-                        onCheckedChange={(checked) => {
-                          onClearError?.()
-                          setDraft((prev) => {
-                            const next = new Set(prev)
-                            if (checked === true) next.add(option.key)
-                            else next.delete(option.key)
-                            return next
-                          })
-                        }}
-                        onSelect={(e) => e.preventDefault()}
-                      >
-                        <span className="flex min-w-0 flex-col gap-0.5">
+                  groups.map((group, groupIndex) => (
+                    <div key={group.label ?? groupIndex}>
+                      {group.label ? (
+                        <DropdownMenuLabel className="px-2 py-1 text-xs text-[#ACACAC]">
+                          {group.label}
+                        </DropdownMenuLabel>
+                      ) : null}
+                      {group.options.map((option) => (
+                        <DropdownMenuCheckboxItem
+                          key={option.key}
+                          checked={draft.has(option.key)}
+                          disabled={isPending}
+                          title={option.label}
+                          onCheckedChange={(checked) => {
+                            onClearError?.()
+                            setDraft((prev) => {
+                              const next = new Set(prev)
+                              if (checked === true) next.add(option.key)
+                              else next.delete(option.key)
+                              return next
+                            })
+                          }}
+                          onSelect={(e) => e.preventDefault()}
+                        >
                           <span className="min-w-0 truncate">{option.label}</span>
-                          {isOccupied ? (
-                            <span className="truncate text-xs text-[#ACACAC]">
-                              занято: {option.occupiedBy}
-                            </span>
-                          ) : null}
-                        </span>
-                      </DropdownMenuCheckboxItem>
-                    )
-                  })
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
+                  ))
                 )}
               </div>
-              {options.length > 0 ? (
+              {totalOptions > 0 ? (
                 <>
                   <DropdownMenuSeparator />
                   <div className="flex flex-col gap-1.5 p-1.5">

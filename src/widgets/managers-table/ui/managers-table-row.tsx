@@ -1,10 +1,4 @@
-import { useMemo } from 'react'
-
-import {
-  getSelectedAssignmentKeys,
-  type Manager,
-  type ManagerAssignmentMode,
-} from '@/entities/manager'
+import { type Manager, type ManagerAssignmentMode } from '@/entities/manager'
 import { formatTableMoney } from '@/shared/lib/format-table-money'
 import {
   formatGridTableList,
@@ -13,15 +7,17 @@ import {
   GridTableRowActionCell,
 } from '@/shared/ui/grid-table'
 
-import type { ManagerAssignmentOption } from '../lib/build-assignment-options'
+import type { ManagerAssignmentOptionGroup } from '../lib/build-assignment-options'
 import { MANAGERS_TABLE_GRID_TEMPLATE } from '../lib/managers-table-columns'
 import { DeleteManagerButton } from './delete-manager-button'
 import { ManagerAssignmentsEditCell } from './manager-assignments-edit-cell'
 
 interface ManagersTableRowProps {
   manager: Manager
-  hallOptions: readonly ManagerAssignmentOption[]
-  loftOptions: readonly ManagerAssignmentOption[]
+  hallGroups: readonly ManagerAssignmentOptionGroup[]
+  loftGroups: readonly ManagerAssignmentOptionGroup[]
+  hallSelectedKeys: ReadonlySet<string>
+  loftSelectedKeys: ReadonlySet<string>
   editing: { managerId: string; mode: ManagerAssignmentMode } | null
   catalogDisabled: boolean
   isPendingFor: (managerId: string, mode: ManagerAssignmentMode) => boolean
@@ -38,8 +34,10 @@ interface ManagersTableRowProps {
 
 export function ManagersTableRow({
   manager,
-  hallOptions,
-  loftOptions,
+  hallGroups,
+  loftGroups,
+  hallSelectedKeys,
+  loftSelectedKeys,
   editing,
   catalogDisabled,
   isPendingFor,
@@ -49,17 +47,9 @@ export function ManagersTableRow({
   onApplyAssignments,
   onRequestDelete,
 }: ManagersTableRowProps) {
-  const loftKeys = useMemo(
-    () => getSelectedAssignmentKeys(manager.assignments, 'lofts'),
-    [manager.assignments],
-  )
-  const hallKeys = useMemo(
-    () => getSelectedAssignmentKeys(manager.assignments, 'halls'),
-    [manager.assignments],
-  )
-
   const loftsDisplay = formatGridTableList(manager.lofts)
   const hallsDisplay = formatGridTableList(manager.halls)
+  const hasHalls = hallSelectedKeys.size > 0
 
   return (
     <GridTableRow gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}>
@@ -70,8 +60,8 @@ export function ManagersTableRow({
       <ManagerAssignmentsEditCell
         ariaLabel="Редактировать привязки LOFT"
         displayText={loftsDisplay}
-        options={loftOptions}
-        selectedKeys={loftKeys}
+        groups={loftGroups}
+        selectedKeys={loftSelectedKeys}
         isOpen={editing?.managerId === manager.id && editing.mode === 'lofts'}
         isDisabled={catalogDisabled}
         isPending={isPendingFor(manager.id, 'lofts')}
@@ -81,19 +71,23 @@ export function ManagersTableRow({
         onApply={(keys) => onApplyAssignments(manager, 'lofts', keys)}
       />
 
-      <ManagerAssignmentsEditCell
-        ariaLabel="Редактировать привязки залов"
-        displayText={hallsDisplay}
-        options={hallOptions}
-        selectedKeys={hallKeys}
-        isOpen={editing?.managerId === manager.id && editing.mode === 'halls'}
-        isDisabled={catalogDisabled}
-        isPending={isPendingFor(manager.id, 'halls')}
-        errorMessage={getErrorFor(manager.id, 'halls')}
-        onOpenChange={(open) => onEditOpenChange(manager.id, 'halls', open)}
-        onClearError={() => onClearError(manager.id, 'halls')}
-        onApply={(keys) => onApplyAssignments(manager, 'halls', keys)}
-      />
+      {hasHalls ? (
+        <ManagerAssignmentsEditCell
+          ariaLabel="Редактировать привязки залов"
+          displayText={hallsDisplay}
+          groups={hallGroups}
+          selectedKeys={hallSelectedKeys}
+          isOpen={editing?.managerId === manager.id && editing.mode === 'halls'}
+          isDisabled={catalogDisabled}
+          isPending={isPendingFor(manager.id, 'halls')}
+          errorMessage={getErrorFor(manager.id, 'halls')}
+          onOpenChange={(open) => onEditOpenChange(manager.id, 'halls', open)}
+          onClearError={() => onClearError(manager.id, 'halls')}
+          onApply={(keys) => onApplyAssignments(manager, 'halls', keys)}
+        />
+      ) : (
+        <GridTableCell muted>{hallsDisplay}</GridTableCell>
+      )}
 
       <GridTableCell muted>{String(manager.activeProjectsCount)}</GridTableCell>
       <GridTableCell muted>{String(manager.closedProjectsCount)}</GridTableCell>

@@ -1,49 +1,48 @@
-import {
-  hallOnlyAssignmentKey,
-  loftAssignmentKey,
-  type AssignmentOccupant,
-} from '@/entities/manager'
-import type { VenueHall } from '@/entities/venue'
+import type { VenueHall, VenueLoft } from '@/entities/venue'
 
 export type ManagerAssignmentOption = {
   key: string
   label: string
-  occupiedBy?: string
+}
+
+export type ManagerAssignmentOptionGroup = {
+  /** Подзаголовок группы (имя лофта). Если не задан — рендерится без заголовка. */
+  label?: string
+  options: ManagerAssignmentOption[]
 }
 
 function sortByLabelRu(a: ManagerAssignmentOption, b: ManagerAssignmentOption): number {
   return a.label.localeCompare(b.label, 'ru')
 }
 
-export function buildHallAssignmentOptions(halls: readonly VenueHall[]): ManagerAssignmentOption[] {
-  return halls
-    .map((hall) => ({
-      key: hallOnlyAssignmentKey(hall.id),
-      label: hall.name,
-    }))
-    .sort(sortByLabelRu)
+function sortByNameRu(a: VenueLoft, b: VenueLoft): number {
+  return a.name.localeCompare(b.name, 'ru')
 }
 
-export function buildLoftAssignmentOptions(halls: readonly VenueHall[]): ManagerAssignmentOption[] {
-  return halls
-    .filter(
-      (hall): hall is VenueHall & { loft: { id: number; name: string } } =>
-        hall.loft != null && Boolean(hall.loft.name),
-    )
-    .map((hall) => ({
-      key: loftAssignmentKey(hall.id, hall.loft.id),
-      label: `${hall.loft.name} — ${hall.name}`,
-    }))
-    .sort(sortByLabelRu)
+/** Опции лофтов: ключ — id лофта. */
+export function buildLoftAssignmentOptions(lofts: readonly VenueLoft[]): ManagerAssignmentOption[] {
+  return lofts.map((loft) => ({ key: String(loft.id), label: loft.name })).sort(sortByLabelRu)
 }
 
-export function enrichAssignmentOptions(
-  options: readonly ManagerAssignmentOption[],
-  occupancy: ReadonlyMap<string, AssignmentOccupant>,
-): ManagerAssignmentOption[] {
-  return options.map((option) => {
-    const occupant = occupancy.get(option.key)
-    if (!occupant) return option
-    return { ...option, occupiedBy: occupant.fullName }
-  })
+/**
+ * Группы залов для выбранных лофтов: один блок на лофт (подзаголовок — имя лофта),
+ * внутри — залы этого лофта. Показываем только залы выбранных лофтов.
+ */
+export function buildHallAssignmentGroups(
+  halls: readonly VenueHall[],
+  lofts: readonly VenueLoft[],
+  selectedLoftIds: readonly number[],
+): ManagerAssignmentOptionGroup[] {
+  const selected = new Set(selectedLoftIds)
+
+  return lofts
+    .filter((loft) => selected.has(loft.id))
+    .sort(sortByNameRu)
+    .map((loft) => ({
+      label: loft.name,
+      options: halls
+        .filter((hall) => hall.loft?.id === loft.id)
+        .map((hall) => ({ key: String(hall.id), label: hall.name }))
+        .sort(sortByLabelRu),
+    }))
 }
