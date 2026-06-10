@@ -9,23 +9,15 @@ import {
 } from '@/entities/project'
 import { Card } from '@/shared/ui/card'
 
-import type { ProjectsFilter } from '../lib/filter-projects'
 import type { BoardListParams } from '../lib/kanban-board-query'
 import { KanbanColumnWithQuery } from './kanban-column-with-query'
 
 interface ProjectsKanbanProps {
   listParams: BoardListParams
-  filter: ProjectsFilter
-  filtersActive: boolean
   onMoveOutsideMag?: (project: Project) => void
 }
 
-export function ProjectsKanban({
-  listParams,
-  filter,
-  filtersActive,
-  onMoveOutsideMag,
-}: ProjectsKanbanProps) {
+export function ProjectsKanban({ listParams, onMoveOutsideMag }: ProjectsKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
       <OverlayScrollbarsComponent
@@ -45,8 +37,6 @@ export function ProjectsKanban({
               key={stage}
               stage={stage}
               listParams={listParams}
-              filter={filter}
-              filtersActive={filtersActive}
               onMoveOutsideMag={onMoveOutsideMag}
             />
           ))}
@@ -59,14 +49,10 @@ export function ProjectsKanban({
 function ProjectsKanbanColumnItem({
   stage,
   listParams,
-  filter,
-  filtersActive,
   onMoveOutsideMag,
 }: {
   stage: PreprojectStage
   listParams: BoardListParams
-  filter: ProjectsFilter
-  filtersActive: boolean
   onMoveOutsideMag?: (project: Project) => void
 }) {
   return (
@@ -76,8 +62,6 @@ function ProjectsKanbanColumnItem({
       apiStage={preprojectStageToApi(stage)}
       title={STAGE_LABELS[stage]}
       listParams={listParams}
-      filter={filter}
-      filtersActive={filtersActive}
       onMoveOutsideMag={onMoveOutsideMag}
     />
   )

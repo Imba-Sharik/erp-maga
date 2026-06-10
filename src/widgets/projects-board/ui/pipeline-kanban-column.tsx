@@ -14,13 +14,9 @@ import { draftKey, useStageDrafts } from '@/entities/stage-draft'
 const INITIAL_VISIBLE = 25
 const STEP = 25
 
-function columnCountLabel(
-  visible: number,
-  backendTotal: number | undefined,
-  filtersActive: boolean,
-): string {
+function columnCountLabel(visible: number, backendTotal: number | undefined): string {
   if (backendTotal === undefined) return String(visible)
-  if (filtersActive || visible !== backendTotal) return `${visible} / ${backendTotal}`
+  if (visible !== backendTotal) return `${visible} / ${backendTotal}`
   return String(backendTotal)
 }
 
@@ -30,7 +26,6 @@ export interface PipelineKanbanColumnProps {
   headerAccentClassName: 'bg-funnel-preproject' | 'bg-funnel-closing'
   backOrigin: ProjectBackOrigin
   backendTotalCount?: number
-  filtersActive?: boolean
   onLoadMore?: () => void
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
@@ -45,7 +40,6 @@ export function PipelineKanbanColumn({
   headerAccentClassName,
   backOrigin,
   backendTotalCount,
-  filtersActive = false,
   onLoadMore,
   hasNextPage,
   isFetchingNextPage,
@@ -77,7 +71,7 @@ export function PipelineKanbanColumn({
           <div className="flex items-center justify-between gap-2">
             <span className="truncate text-sm text-[#454545]">{title}</span>
             <span className="shrink-0 text-xs text-[#ACACAC]">
-              {columnCountLabel(projects.length, backendTotalCount, filtersActive)}
+              {columnCountLabel(projects.length, backendTotalCount)}
             </span>
           </div>
           <div className={`h-1.25 rounded-b-[5px] ${headerAccentClassName}`} />

@@ -12,11 +12,13 @@ interface BuildKanbanListParamsInput {
   plumEventStatus: string | null
   hall_id?: number
   loft_id?: number
+  /** Plum ID города (`city` в `/projects/`); `null` — фильтр не задан. */
+  city?: string | null
 }
 
 export function buildKanbanListParams(
   base: KanbanListDateParams,
-  { search, plumEventStatus, hall_id, loft_id }: BuildKanbanListParamsInput,
+  { search, plumEventStatus, hall_id, loft_id, city }: BuildKanbanListParamsInput,
 ): BoardListParams {
   const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
   const trimmedSearch = search.trim() || undefined
@@ -27,5 +29,6 @@ export function buildKanbanListParams(
     ...(plum_event_status !== undefined ? { plum_event_status } : {}),
     ...(hall_id !== undefined ? { hall_id } : {}),
     ...(loft_id !== undefined ? { loft_id } : {}),
+    ...(city ? { city } : {}),
   }
 }

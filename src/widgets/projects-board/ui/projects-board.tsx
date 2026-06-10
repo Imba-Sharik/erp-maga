@@ -30,18 +30,16 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
     [loft, hall, halls, lofts],
   )
 
-  const clientFiltersActive = city !== null
-
-  // Поиск, статус Plum и loft/hall уходят на сервер через listParams; клиентский filter только по городу.
-  const filter = useMemo(() => ({ search: '', city, hall: null, loft: null }), [city])
+  // Поиск, статус Plum, loft/hall и город уходят на сервер через listParams.
   const listParams = useMemo(
     () =>
       buildKanbanListParams(listDateParams, {
         search: debouncedSearch,
         plumEventStatus,
+        city,
         ...venueFilterIds,
       }),
-    [listDateParams, debouncedSearch, plumEventStatus, venueFilterIds],
+    [listDateParams, debouncedSearch, plumEventStatus, city, venueFilterIds],
   )
 
   return (
@@ -60,12 +58,7 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
         onAddProject={onAddProject}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ProjectsKanban
-          listParams={listParams}
-          filter={filter}
-          filtersActive={clientFiltersActive}
-          onMoveOutsideMag={setOutsideMagTarget}
-        />
+        <ProjectsKanban listParams={listParams} onMoveOutsideMag={setOutsideMagTarget} />
       </div>
 
       <MoveProjectOutsideMagDialog
