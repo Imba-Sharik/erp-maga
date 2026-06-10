@@ -11,6 +11,8 @@ export function buildOptimisticProject(params: {
   event_date: string
   mag_manager: string
   mag_manager_id: number
+  city_ids: number[]
+  city_labels: string[]
 }): Project {
   const nowIso = new Date().toISOString()
   const id = optimisticIdSeq--
@@ -29,8 +31,8 @@ export function buildOptimisticProject(params: {
     event_format_label: '',
     event_date: params.event_date,
     halls: params.halls,
-    city: 'Москва',
-    city_label: 'Москва',
+    city: params.city_ids,
+    city_labels: params.city_labels,
     plum_event_status: '',
     plum_event_status_label: '',
     plum_comment: '',

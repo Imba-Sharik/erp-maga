@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
-import { useVenueCatalog } from '@/entities/venue'
+import { plumCityLabelsByIds, useVenueCatalog } from '@/entities/venue'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { useProjectsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsCreate'
 import type { Project } from '@/shared/api/generated/types/Project'
@@ -51,6 +51,7 @@ function buildOptimisticFromRequest(
   const event_date = data.event_date ?? toIsoLocalDay(new Date())
   const event_name = (data.title ?? data.event_name ?? '').trim()
   const event_type = data.event_type
+  const city_ids = data.city_ids ?? []
 
   return buildOptimisticProject({
     event_name,
@@ -60,6 +61,8 @@ function buildOptimisticFromRequest(
     event_date,
     mag_manager: magManager,
     mag_manager_id: magManagerId,
+    city_ids,
+    city_labels: plumCityLabelsByIds(city_ids),
   })
 }
 
@@ -105,7 +108,7 @@ export function useCreateProject({ magManager, magManagerId, onCreated }: UseCre
         .filter((h): h is (typeof venueHalls)[number] => h != null)
       if (halls.length === 0) return
 
-      mutation.mutate({ data: toProjectCreateRequest(values) })
+      mutation.mutate({ data: toProjectCreateRequest(values, venueHalls) })
     },
     [mutation, venueHalls],
   )
