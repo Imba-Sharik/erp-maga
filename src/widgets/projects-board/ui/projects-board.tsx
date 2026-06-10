@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { Project } from '@/entities/project'
+import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 
@@ -22,19 +23,25 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
   const [plumEventStatus, setPlumEventStatus] = useState<string | null>(null)
   const [outsideMagTarget, setOutsideMagTarget] = useState<Project | null>(null)
   const debouncedSearch = useDebouncedValue(search)
+  const { halls, lofts } = useVenueCatalog()
 
-  const filtersActive =
-    search.trim() !== '' ||
-    city !== null ||
-    hall !== null ||
-    loft !== null ||
-    plumEventStatus !== null
+  const venueFilterIds = useMemo(
+    () => resolveVenueFilterIds(loft, hall, halls, lofts),
+    [loft, hall, halls, lofts],
+  )
 
-  // Поиск и статус Plum уходят на сервер через listParams; клиентский filter только по фасетам.
-  const filter = useMemo(() => ({ search: '', city, hall, loft }), [city, hall, loft])
+  const clientFiltersActive = city !== null
+
+  // Поиск, статус Plum и loft/hall уходят на сервер через listParams; клиентский filter только по городу.
+  const filter = useMemo(() => ({ search: '', city, hall: null, loft: null }), [city])
   const listParams = useMemo(
-    () => buildKanbanListParams(listDateParams, { search: debouncedSearch, plumEventStatus }),
-    [listDateParams, debouncedSearch, plumEventStatus],
+    () =>
+      buildKanbanListParams(listDateParams, {
+        search: debouncedSearch,
+        plumEventStatus,
+        ...venueFilterIds,
+      }),
+    [listDateParams, debouncedSearch, plumEventStatus, venueFilterIds],
   )
 
   return (
@@ -56,7 +63,7 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
         <ProjectsKanban
           listParams={listParams}
           filter={filter}
-          filtersActive={filtersActive}
+          filtersActive={clientFiltersActive}
           onMoveOutsideMag={setOutsideMagTarget}
         />
       </div>

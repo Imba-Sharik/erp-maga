@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
+import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
@@ -69,21 +70,30 @@ export function ClosingBoard({
   const debouncedSearch = useDebouncedValue(search)
   const debouncedArchiveSearch = useDebouncedValue(archiveSearch)
 
-  const filtersActive =
-    search.trim() !== '' ||
-    city !== null ||
-    hall !== null ||
-    loft !== null ||
-    columnFilters.plumEventStatus !== null
-  // Поиск и статус Plum уходят на сервер через listParams; клиентский filter только по фасетам.
-  const filter = useMemo(() => ({ search: '', city, hall, loft }), [city, hall, loft])
+  const { halls, lofts } = useVenueCatalog()
+
+  const kanbanVenueFilterIds = useMemo(
+    () => resolveVenueFilterIds(loft, hall, halls, lofts),
+    [loft, hall, halls, lofts],
+  )
+
+  const archiveVenueFilterIds = useMemo(
+    () => resolveVenueFilterIds(columnFilters.loft, columnFilters.hall, halls, lofts),
+    [columnFilters.loft, columnFilters.hall, halls, lofts],
+  )
+
+  const clientFiltersActive = city !== null
+
+  // Поиск, статус Plum и loft/hall уходят на сервер через listParams; клиентский filter только по городу.
+  const filter = useMemo(() => ({ search: '', city, hall: null, loft: null }), [city])
   const kanbanListParams = useMemo(
     () =>
       buildKanbanListParams(listDateParams, {
         search: debouncedSearch,
         plumEventStatus: columnFilters.plumEventStatus,
+        ...kanbanVenueFilterIds,
       }),
-    [listDateParams, debouncedSearch, columnFilters.plumEventStatus],
+    [listDateParams, debouncedSearch, columnFilters.plumEventStatus, kanbanVenueFilterIds],
   )
 
   // Табличный вид активного закрытия: один запрос на все closing-этапы,
@@ -101,6 +111,7 @@ export function ClosingBoard({
   const archiveQuery = useClosingArchiveQuery({
     enabled: archiveMode,
     search: debouncedArchiveSearch,
+    ...archiveVenueFilterIds,
   })
 
   const archiveManagerFilterName = useMemo(
@@ -217,7 +228,7 @@ export function ClosingBoard({
           <ClosingKanban
             listParams={kanbanListParams}
             filter={filter}
-            filtersActive={filtersActive}
+            filtersActive={clientFiltersActive}
             backOrigin={backOrigin}
             onChangeManager={
               canChangeManager && role === 'director' ? setChangeManagerTarget : undefined

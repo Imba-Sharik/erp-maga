@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import { OUTSIDE_MAG_BACK_ORIGIN, type Project } from '@/entities/project'
 import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
+import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -32,6 +33,12 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const [returnTarget, setReturnTarget] = useState<Project | null>(null)
   const debouncedSearch = useDebouncedValue(search)
 
+  const { halls, lofts } = useVenueCatalog()
+  const venueFilterIds = useMemo(
+    () => resolveVenueFilterIds(columnFilters.loft, columnFilters.hall, halls, lofts),
+    [columnFilters.loft, columnFilters.hall, halls, lofts],
+  )
+
   const {
     selectOptions,
     filterOptions,
@@ -40,8 +47,12 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   } = useManagersDirectory()
 
   const listParams = useMemo(
-    () => ({ ...listDateParams, search: debouncedSearch.trim() || undefined }),
-    [listDateParams, debouncedSearch],
+    () => ({
+      ...listDateParams,
+      search: debouncedSearch.trim() || undefined,
+      ...(isOutsideMagMocksEnabled ? {} : venueFilterIds),
+    }),
+    [listDateParams, debouncedSearch, venueFilterIds],
   )
 
   const query = useOutsideMagTableQuery(
@@ -74,6 +85,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
     return filterProjectsTable(source, {
       columns: columnFilters,
       columnView: 'outside-mag',
+      clientSideLoftHall: isOutsideMagMocksEnabled,
       ...(isOutsideMagMocksEnabled ? { managerName: managerFilterName } : {}),
     })
   }, [projects, debouncedSearch, columnFilters, managerFilterName])
