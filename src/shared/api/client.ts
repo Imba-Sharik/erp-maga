@@ -1,4 +1,5 @@
 import { clearSessionTokens, getAccessToken, setAccessToken } from '@/entities/session'
+import { shouldAttachAccessToken } from '@/shared/api/lib/should-attach-access-token'
 import { shouldAttemptTokenRefresh } from '@/shared/api/lib/should-attempt-token-refresh'
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
@@ -20,7 +21,7 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   const token = getAccessToken()
-  if (!token) return config
+  if (!token || !shouldAttachAccessToken(config.url)) return config
 
   config.headers.set('Authorization', `Bearer ${token}`)
   return config

@@ -76,6 +76,7 @@ describe('client auth refresh', () => {
     axiosInstance.defaults.adapter = vi.fn(async (config) => {
       const url = config.url ?? ''
       if (url.includes('/auth/token/refresh/')) {
+        expect(config.headers?.Authorization).toBeUndefined()
         return axiosResponse(config, { access: 'fresh-access' })
       }
       if (url.includes('/users/me')) {
