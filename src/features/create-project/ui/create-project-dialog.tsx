@@ -46,7 +46,7 @@ const formSchema = z
     if (data.halls.length === 0) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Выберите хотя бы один зал',
+        message: 'Выберите хотя бы один лофт',
         path: ['lofts'],
       })
     }
