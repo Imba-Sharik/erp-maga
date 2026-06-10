@@ -1,17 +1,15 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, User } from 'lucide-react'
 import { useCallback } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { MagLogo, SettingsIcon } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
 import { useUnreadNotificationCount } from '@/entities/notification'
-import { clearSessionTokens } from '@/entities/session'
 import {
   USER_ROLE_LABELS,
   useRoleNavItems,
   useUserRole,
 } from '@/entities/user-role'
-import { DEV_ROLES_WITH_CREDS, useDevLogin, type DevRole } from '@/features/auth'
+import { DEV_ROLES_WITH_CREDS, useDevLogin, useLogout, type DevRole } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -43,28 +41,25 @@ const IS_DEV = import.meta.env.DEV
 
 export function AppSidebar() {
   const { pathname } = useLocation()
-  const navigate = useNavigate()
   const { state, isMobile, setOpenMobile } = useSidebar()
   const handleNavClick = useCallback(() => {
     if (isMobile) setOpenMobile(false)
   }, [isMobile, setOpenMobile])
   const showCollapseInSidebar = !isMobile && state === 'expanded'
-  const queryClient = useQueryClient()
   const role = useUserRole()
   const user = useCurrentUser()
   const roleName = `${USER_ROLE_LABELS[role]} MAG`
   const navItems = useRoleNavItems()
   const unreadCount = useUnreadNotificationCount()
   const { loginAs, isPending: isDevLoginPending } = useDevLogin()
+  const { logout } = useLogout()
 
   const handleLogout = () => {
     if (isMobile) setOpenMobile(false)
-    clearSessionTokens()
-    queryClient.clear()
-    // Defer navigation: даём Radix-овским Sheet/DropdownMenu отработать unmount
+    // Defer: даём Radix-овским Sheet/DropdownMenu отработать unmount
     // и снять body-стили (pointer-events:none), иначе после редиректа на /login
     // инпуты на мобиле остаются некликабельными.
-    setTimeout(() => navigate('/login', { replace: true }), 0)
+    setTimeout(() => void logout(), 0)
   }
 
   return (
