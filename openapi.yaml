@@ -2564,12 +2564,23 @@ components:
           type: string
           readOnly: true
           title: Название
+        city:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Город (Plum)
+          description: ID города из api/loft/ (поле city)
+        city_label:
+          type: string
+          readOnly: true
         synced_at:
           type: string
           format: date-time
           readOnly: true
           title: Последняя синхронизация
       required:
+      - city
+      - city_label
       - id
       - name
       - plum_id
@@ -2583,7 +2594,11 @@ components:
           type: integer
         name:
           type: string
+        city:
+          type: integer
+          nullable: true
       required:
+      - city
       - id
       - name
       - plum_id
