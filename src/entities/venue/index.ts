@@ -9,6 +9,11 @@ export { useVenueFilterPlaceholder } from './lib/use-venue-filter-placeholder'
 export { VenueFilterSelect } from './ui/venue-filter-select'
 export { hallsByLoftId, hallsToSelectOptions, loftsToSelectOptions } from './lib/to-select-options'
 export { hallsForLoft, hallBelongsToLoft } from './lib/halls-by-loft'
+export {
+  applyLoftSelection,
+  deriveSelectedLoftIds,
+  getHallIdsForLoft,
+} from './lib/loft-hall-selection'
 export { resolveVenueFilterIds } from './lib/resolve-venue-filter-ids'
 export type { VenueFilterIds } from './lib/resolve-venue-filter-ids'
 export { useLoftHallFilter } from './model/use-loft-hall-filter'
