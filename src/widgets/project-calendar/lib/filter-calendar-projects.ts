@@ -1,5 +1,3 @@
-import { format } from 'date-fns'
-
 import type { Project } from '@/entities/project'
 
 export interface CalendarProjectsFilter {
@@ -14,17 +12,16 @@ export interface CalendarProjectsFilter {
  * `company`/`phone`/`email`. Поэтому:
  * - hall/loft-фильтры мэтчатся подстрокой против `hallLoft`
  * - поиск идёт только по `title` и `manager`
- * - прошедшие проекты (event_date < сегодня) отбрасываются
+ *
+ * Прошедшие проекты НЕ отбрасываются — календарь показывает весь видимый
+ * месяц целиком (бэк уже отдаёт диапазон с начала сетки месяца).
  */
 export function filterCalendarProjects(
   projects: Project[],
   filter: CalendarProjectsFilter,
 ): Project[] {
   const search = filter.search.trim().toLowerCase()
-  // ISO yyyy-MM-dd сравниваются как строки в правильном хронологическом порядке.
-  const todayKey = format(new Date(), 'yyyy-MM-dd')
   return projects.filter((p) => {
-    if (p.date && p.date < todayKey) return false
     const venue = (p.hallLoft || `${p.loft} ${p.hall}`).toLowerCase()
     if (filter.hall && !venue.includes(filter.hall.toLowerCase())) return false
     if (filter.loft && !venue.includes(filter.loft.toLowerCase())) return false
