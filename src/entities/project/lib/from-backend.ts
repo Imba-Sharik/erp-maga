@@ -39,6 +39,11 @@ function mapPlumEventStatusLabel(raw: string | undefined): string | null {
   return label ? label : null
 }
 
+/** Города проекта одной строкой для отображения (`city_labels` — массив с бэка). */
+function formatProjectCity(labels: readonly string[] | undefined): string {
+  return (labels ?? []).filter(Boolean).join(', ')
+}
+
 function inferIsFromPlum(b: BackendProjectListable): boolean {
   const plumEventId = b.plum_event_id?.trim() ?? ''
   if (!plumEventId) return false
@@ -137,7 +142,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     date: b.event_date,
     stage,
     ...(lastActiveStage ? { lastActiveStage } : {}),
-    city: b.city_label || b.city,
+    city: formatProjectCity(b.city_labels),
     loft: venue.loft,
     hall: venue.hall,
     ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),

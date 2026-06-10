@@ -14,6 +14,7 @@ export type BoardListParams = Pick<
   | 'plum_event_status'
   | 'hall_id'
   | 'loft_id'
+  | 'city'
 >
 
 export function kanbanColumnQueryKey(

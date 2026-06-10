@@ -1,10 +1,9 @@
-import { useMemo, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
-import { filterProjects, type ProjectsFilter } from '../lib/filter-projects'
 import type { BoardListParams, KanbanBoardScope } from '../lib/kanban-board-query'
 import { useKanbanColumnQuery } from '../lib/use-kanban-column-query'
 import { PipelineKanbanColumn } from './pipeline-kanban-column'
@@ -15,8 +14,6 @@ interface KanbanColumnWithQueryBaseProps {
   apiStage: ProjectStageEnumKey
   title: string
   listParams: BoardListParams
-  filter: ProjectsFilter
-  filtersActive: boolean
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
@@ -37,16 +34,13 @@ const COLUMN_SHELL_CLASS =
   'flex h-full w-70 shrink-0 flex-col @[1400px]:w-auto @[1400px]:min-w-65 @[1400px]:flex-1'
 
 export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
-  const { scope, apiStage, title, listParams, filter, filtersActive } = props
+  const { scope, apiStage, title, listParams } = props
   const query = useKanbanColumnQuery({ scope, apiStage, listParams })
-
-  const filtered = useMemo(() => filterProjects(query.projects, filter), [query.projects, filter])
 
   const columnProps = {
     title,
-    projects: filtered,
-    backendTotalCount: filtersActive ? undefined : query.totalCount,
-    filtersActive,
+    projects: query.projects,
+    backendTotalCount: query.totalCount,
     onLoadMore: () => query.fetchNextPage(),
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,

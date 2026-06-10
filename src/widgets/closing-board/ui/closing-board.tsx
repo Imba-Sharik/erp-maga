@@ -8,7 +8,6 @@ import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
 import { buildKanbanListParams } from '@/widgets/projects-board/lib/build-kanban-list-params'
-import { filterProjects } from '@/widgets/projects-board/lib/filter-projects'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
   EMPTY_COLUMN_FILTERS,
@@ -82,31 +81,25 @@ export function ClosingBoard({
     [columnFilters.loft, columnFilters.hall, halls, lofts],
   )
 
-  const clientFiltersActive = city !== null
-
-  // Поиск, статус Plum и loft/hall уходят на сервер через listParams; клиентский filter только по городу.
-  const filter = useMemo(() => ({ search: '', city, hall: null, loft: null }), [city])
+  // Поиск, статус Plum, loft/hall и город уходят на сервер через listParams.
   const kanbanListParams = useMemo(
     () =>
       buildKanbanListParams(listDateParams, {
         search: debouncedSearch,
         plumEventStatus: columnFilters.plumEventStatus,
+        city,
         ...kanbanVenueFilterIds,
       }),
-    [listDateParams, debouncedSearch, columnFilters.plumEventStatus, kanbanVenueFilterIds],
+    [listDateParams, debouncedSearch, columnFilters.plumEventStatus, city, kanbanVenueFilterIds],
   )
 
-  // Табличный вид активного закрытия: один запрос на все closing-этапы,
-  // фасетные фильтры (город/зал/LOFT) — на клиенте, как в канбане.
+  // Табличный вид активного закрытия: один запрос на все closing-этапы;
+  // город/зал/LOFT уже применены на сервере через `kanbanListParams`.
   const activeTableQuery = useClosingActiveTableQuery({
     listParams: kanbanListParams,
     plumEventStatus: columnFilters.plumEventStatus,
     enabled: !archiveMode && viewMode === 'table',
   })
-  const filteredActiveTable = useMemo(
-    () => filterProjects(activeTableQuery.projects, filter),
-    [activeTableQuery.projects, filter],
-  )
 
   const archiveQuery = useClosingArchiveQuery({
     enabled: archiveMode,
@@ -199,7 +192,7 @@ export function ClosingBoard({
       ) : viewMode === 'table' ? (
         <div className="flex h-full min-h-0 flex-1 flex-col">
           <ProjectsTableView
-            projects={filteredActiveTable}
+            projects={activeTableQuery.projects}
             columnView="closing-active"
             columnFilters={EMPTY_COLUMN_FILTERS}
             managerFilterOptions={filterOptions}
@@ -227,8 +220,6 @@ export function ClosingBoard({
         <div className="flex h-full min-h-0 flex-1 flex-col">
           <ClosingKanban
             listParams={kanbanListParams}
-            filter={filter}
-            filtersActive={clientFiltersActive}
             backOrigin={backOrigin}
             onChangeManager={
               canChangeManager && role === 'director' ? setChangeManagerTarget : undefined
