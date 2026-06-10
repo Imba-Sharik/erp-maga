@@ -140,12 +140,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AssignmentConflictError'
-          description: ''
   /api/v1/halls/hall-manager-assignments/{id}/:
     get:
       operationId: halls_manager_assignments_retrieve
@@ -199,12 +193,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AssignmentConflictError'
-          description: ''
     patch:
       operationId: halls_manager_assignments_partial_update
       summary: Изменить назначение
@@ -236,12 +224,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HallManagerAssignment'
           description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AssignmentConflictError'
-          description: ''
     delete:
       operationId: halls_manager_assignments_destroy
       summary: Удалить назначение
@@ -264,6 +246,12 @@ paths:
       summary: Справочник залов
       parameters:
       - in: query
+        name: assigned
+        schema:
+          type: boolean
+        description: Если true и пользователь — менеджер MAG, вернуть только залы,
+          закреплённые за ним руководителем.
+      - in: query
         name: loft_id
         schema:
           type: integer
@@ -285,6 +273,13 @@ paths:
     get:
       operationId: halls_lofts_list
       summary: Справочник лофтов
+      parameters:
+      - in: query
+        name: assigned
+        schema:
+          type: boolean
+        description: Если true и пользователь — менеджер MAG, вернуть только лофты,
+          закреплённые за ним руководителем.
       tags:
       - halls
       security:
@@ -814,9 +809,10 @@ paths:
       operationId: projects_create
       description: 'Ручное создание (не из Plum). **Тело:** `event_type` (обяз.),
         `event_name` или `title` (обяз.), `hall_ids` — внутренние id из `GET /api/v1/halls/halls/`
-        (минимум один) или alias `hall_id`; опционально `event_date` (иначе сегодня).
-        **Ответ 201:** `ProjectSerializer` с `halls[]`. Менеджер MAG: создатель =
-        `mag_manager`; lead: из матрицы залов. Доступ: менеджер MAG, руководитель.'
+        (минимум один) или alias `hall_id`; для lead/admin опционально `mag_manager_id`;
+        опционально `event_date` (иначе сегодня). **Ответ 201:** `ProjectSerializer`
+        с `halls[]`. Менеджер MAG: создатель = `mag_manager`; lead: из `mag_manager_id`
+        или из матрицы залов, если не передан. Доступ: менеджер MAG, руководитель.'
       summary: Создать проект вручную
       tags:
       - projects
@@ -840,6 +836,13 @@ paths:
                   event_type: 1
                   hall_id: 10
                 summary: Новый проект (один зал, alias hall_id)
+              НовыйПроект(leadСРучнымНазначениемМенеджера):
+                value:
+                  event_name: Корпоратив с ручным назначением
+                  event_type: 3
+                  hall_id: 10
+                  mag_manager_id: 5
+                summary: Новый проект (lead с ручным назначением менеджера)
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ProjectCreateRequest'
@@ -2238,23 +2241,6 @@ components:
       required:
       - code
       - label
-    AssignmentConflictError:
-      type: object
-      properties:
-        detail:
-          type: string
-        code:
-          type: string
-          description: assignment_conflict — дубликат в матрице (та же связка hall+loft)
-        invalid_loft_ids:
-          type: array
-          items:
-            type: integer
-          description: ID лофтов из запроса; пустой список, если в запросе loft=null
-      required:
-      - code
-      - detail
-      - invalid_loft_ids
     BacklineCreatedSchema:
       type: object
       properties:
@@ -3977,6 +3963,10 @@ components:
         event_date:
           type: string
           format: date
+        mag_manager_id:
+          type: integer
+          nullable: true
+          description: 'Опционально для lead/admin: вручную назначить менеджера MAG.'
         idempotency_key:
           type: string
           maxLength: 255
