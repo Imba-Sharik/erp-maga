@@ -39,7 +39,9 @@ pnpm install
 cp .env.example .env
 ```
 
-В `.env` (или `.env.local`) укажите dev JWT для переключателя ролей в сайдбаре — переменные `VITE_DEV_ACCESS_TOKEN_*` и при необходимости `VITE_DEV_REFRESH_TOKEN_*` (см. `.env.example`). Токены не коммитятся.
+В `.env` (или `.env.local`) укажите dev-креды для переключателя ролей в сайдбаре — `VITE_DEV_EMAIL_*` / `VITE_DEV_PASSWORD_*` (см. `.env.example`). Значения не коммитятся.
+
+**Авторизация:** access-токен хранится в `localStorage`, refresh — в HttpOnly cookie `refresh_token` (path `/api/v1/auth/`). Axios отправляет запросы с `withCredentials: true`. В dev `VITE_API_URL` оставьте пустым — запросы идут через Vite proxy (`VITE_API_PROXY_TARGET`), чтобы cookie работали на same-origin.
 
 ```bash
 pnpm dev
