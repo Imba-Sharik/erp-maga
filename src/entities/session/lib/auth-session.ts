@@ -1,18 +1,15 @@
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '../model/keys'
+import { ACCESS_TOKEN_KEY } from '../model/keys'
 
-export interface SessionTokens {
-  access: string
-  refresh: string
+export function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_TOKEN_KEY)
 }
 
-/** Сохраняет JWT-пару в localStorage после успешного логина. */
-export function setSessionTokens({ access, refresh }: SessionTokens): void {
+/** Сохраняет access-токен после логина или refresh. */
+export function setAccessToken(access: string): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, access)
-  localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
 }
 
 /** Очищает сессию (logout). */
 export function clearSessionTokens(): void {
   localStorage.removeItem(ACCESS_TOKEN_KEY)
-  localStorage.removeItem(REFRESH_TOKEN_KEY)
 }
