@@ -92,7 +92,11 @@ export { shouldShowPlumStatusLine, formatPlumStatusTableValue } from './lib/plum
 export {
   PLUM_EVENT_STATUS_LABELS,
   PLUM_EVENT_STATUS_OPTIONS,
-  plumEventStatusFilterParam,
+  plumEventStatusFilterQueryParams,
+} from './lib/plum-event-status-catalog'
+export type {
+  PlumEventStatusFilterQueryParams,
+  PlumEventStatusFilterValues,
 } from './lib/plum-event-status-catalog'
 export { ProjectCard } from './ui/project-card'
 export { ProjectCountBadge } from './ui/project-count-badge'

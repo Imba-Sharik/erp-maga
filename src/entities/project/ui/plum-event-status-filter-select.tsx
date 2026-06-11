@@ -1,24 +1,24 @@
-import { ClearableSelect } from '@/shared/ui/clearable-select'
+import { MultiSelect } from '@/shared/ui/multi-select'
 
 import { PLUM_EVENT_STATUS_OPTIONS } from '../lib/plum-event-status-catalog'
 
 interface PlumEventStatusFilterSelectProps {
-  value: string | null
-  onChange: (value: string | null) => void
+  values: string[]
+  onChange: (values: string[]) => void
   triggerClassName?: string
   disabled?: boolean
 }
 
 export function PlumEventStatusFilterSelect({
-  value,
+  values,
   onChange,
   triggerClassName,
   disabled,
 }: PlumEventStatusFilterSelectProps) {
   return (
-    <ClearableSelect
+    <MultiSelect
       placeholder="Статус в PLUM"
-      value={value}
+      values={values}
       options={PLUM_EVENT_STATUS_OPTIONS}
       onChange={onChange}
       triggerClassName={triggerClassName}
