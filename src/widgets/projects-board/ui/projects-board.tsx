@@ -20,7 +20,7 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
-  const [plumEventStatus, setPlumEventStatus] = useState<string | null>(null)
+  const [plumEventStatus, setPlumEventStatus] = useState<string[]>([])
   const [outsideMagTarget, setOutsideMagTarget] = useState<Project | null>(null)
   const debouncedSearch = useDebouncedValue(search)
   const { halls, lofts } = useVenueCatalog()
