@@ -94,6 +94,10 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
     setColumnFilters((prev) => ({ ...prev, [key]: value }))
   }
 
+  const handlePlumEventStatusChange = (values: string[]) => {
+    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
       <OutsideMagSearchToolbar search={search} onChangeSearch={setSearch} />
@@ -107,6 +111,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
           managersSelectLoading={isManagersLoading}
           managersSelectError={isManagersError}
           onColumnFilterChange={handleColumnFilterChange}
+          onPlumEventStatusChange={handlePlumEventStatusChange}
           isLoading={isLoading}
           isError={isError}
           hasNextPage={hasNextPage}

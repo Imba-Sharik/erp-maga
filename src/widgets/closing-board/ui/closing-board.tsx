@@ -126,6 +126,10 @@ export function ClosingBoard({
     setColumnFilters((prev) => ({ ...prev, [key]: value }))
   }
 
+  const handlePlumEventStatusChange = (values: string[]) => {
+    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+  }
+
   const handleToggleArchive = (value: boolean) => {
     setArchiveMode(value)
     setColumnFilters(EMPTY_COLUMN_FILTERS)
@@ -156,7 +160,7 @@ export function ClosingBoard({
           onChangeCity={setCity}
           onChangeHall={setHall}
           onChangeLoft={setLoft}
-          onChangePlumEventStatus={(value) => handleColumnFilterChange('plumEventStatus', value)}
+          onChangePlumEventStatus={handlePlumEventStatusChange}
           onViewModeChange={setViewMode}
           onToggleArchive={handleToggleArchive}
         />
@@ -173,6 +177,7 @@ export function ClosingBoard({
             managersSelectLoading={isManagersLoading}
             managersSelectError={isManagersError}
             onColumnFilterChange={handleColumnFilterChange}
+            onPlumEventStatusChange={handlePlumEventStatusChange}
             isLoading={archiveQuery.isLoading}
             isError={archiveQuery.isError}
             hasNextPage={archiveQuery.hasNextPage}
@@ -194,12 +199,13 @@ export function ClosingBoard({
           <ProjectsTableView
             projects={activeTableQuery.projects}
             columnView="closing-active"
-            columnFilters={EMPTY_COLUMN_FILTERS}
+            columnFilters={columnFilters}
             managerFilterOptions={filterOptions}
             directoryOptions={selectOptions}
             managersSelectLoading={isManagersLoading}
             managersSelectError={isManagersError}
-            onColumnFilterChange={() => {}}
+            onColumnFilterChange={handleColumnFilterChange}
+            onPlumEventStatusChange={handlePlumEventStatusChange}
             isLoading={activeTableQuery.isLoading}
             isError={activeTableQuery.isError}
             hasNextPage={activeTableQuery.hasNextPage}

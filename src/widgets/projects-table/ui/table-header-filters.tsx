@@ -57,13 +57,16 @@ export function TableHeaderHallFilter({
 }
 
 export function TableHeaderPlumStatusFilter({
-  columnFilters,
-  onColumnFilterChange,
-}: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
+  values,
+  onChange,
+}: {
+  values: string[]
+  onChange: (values: string[]) => void
+}) {
   return (
     <PlumEventStatusFilterSelect
-      value={columnFilters.plumEventStatus}
-      onChange={(v) => onColumnFilterChange('plumEventStatus', v)}
+      values={values}
+      onChange={onChange}
       triggerClassName={HEADER_FILTER_TRIGGER}
     />
   )

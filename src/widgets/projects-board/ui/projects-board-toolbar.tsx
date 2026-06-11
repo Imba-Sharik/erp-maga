@@ -13,12 +13,12 @@ interface ProjectsBoardToolbarProps {
   city: string | null
   hall: string | null
   loft: string | null
-  plumEventStatus: string | null
+  plumEventStatus: string[]
   onChangeSearch: (value: string) => void
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
-  onChangePlumEventStatus: (value: string | null) => void
+  onChangePlumEventStatus: (values: string[]) => void
   onAddProject?: () => void
   /** Селекты рядом с поиском (слева), без растягивания вправо */
   filtersAlign?: 'start' | 'spread'
@@ -123,7 +123,7 @@ export function ProjectsBoardToolbar({
           />
         ) : null}
         <PlumEventStatusFilterSelect
-          value={plumEventStatus}
+          values={plumEventStatus}
           onChange={onChangePlumEventStatus}
           triggerClassName={TRIGGER_CLASS}
         />

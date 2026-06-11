@@ -27,13 +27,13 @@ interface ClosingBoardToolbarKanbanProps {
   city: string | null
   hall: string | null
   loft: string | null
-  plumEventStatus: string | null
+  plumEventStatus: string[]
   viewMode: ClosingViewMode
   onChangeSearch: (value: string) => void
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
-  onChangePlumEventStatus: (value: string | null) => void
+  onChangePlumEventStatus: (values: string[]) => void
   onViewModeChange: (value: ClosingViewMode) => void
   onToggleArchive: (value: boolean) => void
 }
