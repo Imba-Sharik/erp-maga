@@ -66,6 +66,10 @@ export function ProjectsTable({
     setColumnFilters((prev) => ({ ...prev, [key]: value }))
   }
 
+  const handlePlumEventStatusChange = (values: string[]) => {
+    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-5">
       <ProjectsTableToolbar
@@ -86,6 +90,7 @@ export function ProjectsTable({
         managersSelectLoading={isManagersLoading}
         managersSelectError={isManagersError}
         onColumnFilterChange={handleColumnFilterChange}
+        onPlumEventStatusChange={handlePlumEventStatusChange}
         isLoading={isLoading}
         isError={isError}
         hasNextPage={hasNextPage}

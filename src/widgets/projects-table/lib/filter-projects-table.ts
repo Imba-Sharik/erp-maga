@@ -3,15 +3,15 @@ import type { Project } from '@/entities/project'
 import type { ProjectsTableColumnView } from './economics-columns'
 
 /** Фильтры, живущие в шапке таблицы (по колонкам). */
-export type ColumnFilterKey = 'loft' | 'hall' | 'manager' | 'stage' | 'plumEventStatus'
+export type ColumnFilterKey = 'loft' | 'hall' | 'manager' | 'stage'
 
 export interface ColumnFilters {
   loft: string | null
   hall: string | null
   manager: string | null
   stage: string | null
-  /** Код статуса Plum (строка «1»…«14») — параметр `plum_event_status` в API. */
-  plumEventStatus: string | null
+  /** Коды статуса Plum (строки «1»…«14») — параметры `plum_event_status` / `plum_event_status__in` в API. */
+  plumEventStatus: string[]
 }
 
 export const EMPTY_COLUMN_FILTERS: ColumnFilters = {
@@ -19,7 +19,7 @@ export const EMPTY_COLUMN_FILTERS: ColumnFilters = {
   hall: null,
   manager: null,
   stage: null,
-  plumEventStatus: null,
+  plumEventStatus: [],
 }
 
 export interface ProjectsTableFilter {
@@ -42,10 +42,17 @@ export interface ProjectsTableFilter {
  */
 export function filterProjectsTable(projects: Project[], filter: ProjectsTableFilter): Project[] {
   const { columns } = filter
-  const plumStatusCode = columns.plumEventStatus !== null ? Number(columns.plumEventStatus) : null
+  const plumStatusCodes = columns.plumEventStatus
+    .map((value) => Number(value))
+    .filter((code) => Number.isFinite(code))
 
   return projects.filter((p) => {
-    if (plumStatusCode !== null && p.plumEventStatus !== plumStatusCode) return false
+    if (
+      plumStatusCodes.length > 0 &&
+      (p.plumEventStatus === null || !plumStatusCodes.includes(p.plumEventStatus))
+    ) {
+      return false
+    }
     if (filter.clientSideLoftHall) {
       if (columns.loft && p.loft !== columns.loft) return false
       if (columns.hall && p.hall !== columns.hall) return false

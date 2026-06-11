@@ -45,6 +45,7 @@ interface ProjectsTableViewProps {
   managersSelectLoading?: boolean
   managersSelectError?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+  onPlumEventStatusChange: (values: string[]) => void
   isLoading: boolean
   isError: boolean
   hasNextPage: boolean
@@ -64,6 +65,7 @@ export function ProjectsTableView({
   managersSelectLoading = false,
   managersSelectError = false,
   onColumnFilterChange,
+  onPlumEventStatusChange,
   isLoading,
   isError,
   hasNextPage,
@@ -102,12 +104,12 @@ export function ProjectsTableView({
     columnView === 'requests' ? (
       <RequestsTableHeader
         columnFilters={columnFilters}
-        onColumnFilterChange={onColumnFilterChange}
+        onPlumEventStatusChange={onPlumEventStatusChange}
       />
     ) : columnView === 'closed-requests' ? (
       <ClosedRequestsTableHeader
         columnFilters={columnFilters}
-        onColumnFilterChange={onColumnFilterChange}
+        onPlumEventStatusChange={onPlumEventStatusChange}
       />
     ) : columnView === 'general' ? (
       <GeneralTableHeader
@@ -116,6 +118,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        onPlumEventStatusChange={onPlumEventStatusChange}
         withActions={withActions}
       />
     ) : columnView === 'economics' ? (
@@ -125,12 +128,13 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        onPlumEventStatusChange={onPlumEventStatusChange}
         withActions={withActions}
       />
     ) : columnView === 'closing-active' ? (
       <ClosingActiveTableHeader
         columnFilters={columnFilters}
-        onColumnFilterChange={onColumnFilterChange}
+        onPlumEventStatusChange={onPlumEventStatusChange}
       />
     ) : columnView === 'closing-general' ? (
       <ClosingGeneralTableHeader
@@ -157,6 +161,7 @@ export function ProjectsTableView({
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
         onColumnFilterChange={onColumnFilterChange}
+        onPlumEventStatusChange={onPlumEventStatusChange}
       />
     )
 
@@ -201,6 +206,7 @@ function GeneralTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  onPlumEventStatusChange,
   withActions,
 }: {
   columnFilters: ColumnFilters
@@ -208,6 +214,7 @@ function GeneralTableHeader({
   managersSelectLoading?: boolean
   managersSelectError?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+  onPlumEventStatusChange: (values: string[]) => void
   withActions: boolean
 }) {
   return (
@@ -245,8 +252,8 @@ function GeneralTableHeader({
       </GridTableHeaderCell>
       <GridTableHeaderCell>
         <TableHeaderPlumStatusFilter
-          columnFilters={columnFilters}
-          onColumnFilterChange={onColumnFilterChange}
+          values={columnFilters.plumEventStatus}
+          onChange={onPlumEventStatusChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
@@ -267,7 +274,10 @@ type ManagerHeaderProps = {
   withActions?: boolean
 }
 
-type PlumStatusHeaderProps = Pick<ManagerHeaderProps, 'columnFilters' | 'onColumnFilterChange'>
+type PlumStatusHeaderProps = {
+  columnFilters: ColumnFilters
+  onPlumEventStatusChange: (values: string[]) => void
+}
 
 function OutsideMagTableHeader({
   columnFilters,
@@ -275,7 +285,8 @@ function OutsideMagTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
-}: ManagerHeaderProps) {
+  onPlumEventStatusChange,
+}: ManagerHeaderProps & PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -303,8 +314,8 @@ function OutsideMagTableHeader({
       <GridTableHeaderLabel>Крайний этап</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderPlumStatusFilter
-          columnFilters={columnFilters}
-          onColumnFilterChange={onColumnFilterChange}
+          values={columnFilters.plumEventStatus}
+          onChange={onPlumEventStatusChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата перевода</GridTableHeaderLabel>
@@ -322,8 +333,9 @@ function EconomicsTableHeader({
   managersSelectLoading,
   managersSelectError,
   onColumnFilterChange,
+  onPlumEventStatusChange,
   withActions,
-}: ManagerHeaderProps) {
+}: ManagerHeaderProps & PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -348,8 +360,8 @@ function EconomicsTableHeader({
       </GridTableHeaderCell>
       <GridTableHeaderCell>
         <TableHeaderPlumStatusFilter
-          columnFilters={columnFilters}
-          onColumnFilterChange={onColumnFilterChange}
+          values={columnFilters.plumEventStatus}
+          onChange={onPlumEventStatusChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Сумма продаж</GridTableHeaderLabel>
@@ -361,7 +373,10 @@ function EconomicsTableHeader({
 }
 
 /** Активное закрытие (табличный вид) — фильтр по статусу Plum в шапке. */
-function ClosingActiveTableHeader({ columnFilters, onColumnFilterChange }: PlumStatusHeaderProps) {
+function ClosingActiveTableHeader({
+  columnFilters,
+  onPlumEventStatusChange,
+}: PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -369,8 +384,8 @@ function ClosingActiveTableHeader({ columnFilters, onColumnFilterChange }: PlumS
       <GridTableHeaderLabel>LOFT</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderPlumStatusFilter
-          columnFilters={columnFilters}
-          onColumnFilterChange={onColumnFilterChange}
+          values={columnFilters.plumEventStatus}
+          onChange={onPlumEventStatusChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
@@ -453,7 +468,7 @@ function ClosingEconomicsTableHeader({
 }
 
 /** Запросы бухгалтера — фильтр по статусу Plum в шапке. */
-function RequestsTableHeader({ columnFilters, onColumnFilterChange }: PlumStatusHeaderProps) {
+function RequestsTableHeader({ columnFilters, onPlumEventStatusChange }: PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -462,8 +477,8 @@ function RequestsTableHeader({ columnFilters, onColumnFilterChange }: PlumStatus
       <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderPlumStatusFilter
-          columnFilters={columnFilters}
-          onColumnFilterChange={onColumnFilterChange}
+          values={columnFilters.plumEventStatus}
+          onChange={onPlumEventStatusChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
@@ -474,7 +489,10 @@ function RequestsTableHeader({ columnFilters, onColumnFilterChange }: PlumStatus
 }
 
 /** Закрытые запросы бухгалтера — то же + «Дата подтверждения». */
-function ClosedRequestsTableHeader({ columnFilters, onColumnFilterChange }: PlumStatusHeaderProps) {
+function ClosedRequestsTableHeader({
+  columnFilters,
+  onPlumEventStatusChange,
+}: PlumStatusHeaderProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
@@ -483,8 +501,8 @@ function ClosedRequestsTableHeader({ columnFilters, onColumnFilterChange }: Plum
       <GridTableHeaderLabel>Ответственный менеджер</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderPlumStatusFilter
-          columnFilters={columnFilters}
-          onColumnFilterChange={onColumnFilterChange}
+          values={columnFilters.plumEventStatus}
+          onChange={onPlumEventStatusChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderLabel>Дата мероприятия</GridTableHeaderLabel>
