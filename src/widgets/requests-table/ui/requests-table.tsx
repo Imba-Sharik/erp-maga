@@ -50,6 +50,10 @@ export function RequestsTable({ variant }: RequestsTableProps) {
     setColumnFilters((prev) => ({ ...prev, [key]: value }))
   }
 
+  const handlePlumEventStatusChange = (values: string[]) => {
+    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-5">
       <div className="relative w-full shrink-0 md:w-75">
@@ -69,6 +73,7 @@ export function RequestsTable({ variant }: RequestsTableProps) {
         managerFilterOptions={[]}
         directoryOptions={[]}
         onColumnFilterChange={handleColumnFilterChange}
+        onPlumEventStatusChange={handlePlumEventStatusChange}
         isLoading={isLoading}
         isError={isError}
         hasNextPage={hasNextPage}
