@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { mapBackendProjects, plumEventStatusFilterParam } from '@/entities/project'
+import { mapBackendProjects, plumEventStatusFilterQueryParams } from '@/entities/project'
 import {
   buildOpenRequestsQueryParams,
   type AccountantRequestsStageParams,
@@ -31,18 +31,18 @@ const CLOSED_STAGE_IN = [
 export function useRequestsTableQuery(
   variant: RequestsTableVariant,
   search?: string,
-  plumEventStatus: string | null = null,
+  plumEventStatus: string[] = [],
 ) {
   const stageParams: AccountantRequestsStageParams =
     variant === 'open' ? buildOpenRequestsQueryParams() : { stage__in: CLOSED_STAGE_IN }
 
   const trimmedSearch = search?.trim() || undefined
-  const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
+  const plumStatusParams = plumEventStatusFilterQueryParams(plumEventStatus)
 
   const query = useInfiniteQuery({
     queryKey: [
       'requests-table',
-      { variant, ...stageParams, search: trimmedSearch, plum_event_status },
+      { variant, ...stageParams, search: trimmedSearch, ...plumStatusParams },
     ] as const,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
@@ -52,7 +52,7 @@ export function useRequestsTableQuery(
           ordering: PROJECTS_LIST_DEFAULT_ORDERING,
           limit: PAGE_SIZE,
           offset: pageParam,
-          ...(plum_event_status !== undefined ? { plum_event_status } : {}),
+          ...plumStatusParams,
           ...(trimmedSearch ? { search: trimmedSearch } : {}),
         },
         { signal },

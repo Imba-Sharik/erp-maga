@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 
 import {
   mapBackendProjects,
-  plumEventStatusFilterParam,
+  plumEventStatusFilterQueryParams,
   PROJECTS_TABLE_DEFAULT_STAGE_IN,
   PROJECTS_TABLE_PENDING_STAGE_IN_PARAM,
 } from '@/entities/project'
@@ -22,8 +22,8 @@ interface UseProjectsTableQueryParams {
   stage: string | null
   /** ID менеджера MAG для `mag_manager` (или `null`). */
   magManagerId: string | null
-  /** Код статуса Plum в шапке таблицы (`plum_event_status`). */
-  plumEventStatus: string | null
+  /** Коды статуса Plum в шапке таблицы (`plum_event_status` / `plum_event_status__in`). */
+  plumEventStatus: string[]
   /** Серверный поиск по названию проекта (`event_name`). */
   search?: string
   /** Фильтр по лофту (`loft_id`). */
@@ -62,7 +62,7 @@ export function useProjectsTableQuery({
       }
 
   const mag_manager = parseMagManagerId(magManagerId)
-  const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
+  const plumStatusParams = plumEventStatusFilterQueryParams(plumEventStatus)
   const trimmedSearch = search?.trim() || undefined
 
   const query = useInfiniteQuery({
@@ -72,7 +72,7 @@ export function useProjectsTableQuery({
         ...stageParams,
         ordering: PROJECTS_LIST_DEFAULT_ORDERING,
         mag_manager,
-        plum_event_status,
+        ...plumStatusParams,
         search: trimmedSearch,
         loft_id,
         hall_id,
@@ -87,7 +87,7 @@ export function useProjectsTableQuery({
           limit: PAGE_SIZE,
           offset: pageParam,
           ...(mag_manager !== undefined ? { mag_manager } : {}),
-          ...(plum_event_status !== undefined ? { plum_event_status } : {}),
+          ...plumStatusParams,
           ...(trimmedSearch ? { search: trimmedSearch } : {}),
           ...(loft_id !== undefined ? { loft_id } : {}),
           ...(hall_id !== undefined ? { hall_id } : {}),

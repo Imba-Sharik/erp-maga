@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { mapBackendOutOfMagProjects, plumEventStatusFilterParam } from '@/entities/project'
+import { mapBackendOutOfMagProjects, plumEventStatusFilterQueryParams } from '@/entities/project'
 import { projectsOutOfMagList } from '@/shared/api/generated/clients/projectsController/projectsOutOfMagList'
 import type { ProjectsOutOfMagListQueryParams } from '@/shared/api/generated/types/projectsController/ProjectsOutOfMagList'
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
@@ -26,11 +26,11 @@ function parseMagManagerId(magManagerId: string | null): number | undefined {
 export function useOutsideMagTableQuery(
   listParams: OutsideMagTableListParams,
   magManagerId: string | null,
-  plumEventStatus: string | null = null,
+  plumEventStatus: string[] = [],
   { enabled = true }: UseOutsideMagTableQueryOptions = {},
 ) {
   const mag_manager = parseMagManagerId(magManagerId)
-  const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
+  const plumStatusParams = plumEventStatusFilterQueryParams(plumEventStatus)
 
   const query = useInfiniteQuery({
     queryKey: [
@@ -39,7 +39,7 @@ export function useOutsideMagTableQuery(
         ...listParams,
         ordering: listParams.ordering ?? PROJECTS_LIST_DEFAULT_ORDERING,
         mag_manager,
-        plum_event_status,
+        ...plumStatusParams,
       },
     ] as const,
     enabled,
@@ -52,7 +52,7 @@ export function useOutsideMagTableQuery(
           limit: PAGE_SIZE,
           offset: pageParam,
           ...(mag_manager !== undefined ? { mag_manager } : {}),
-          ...(plum_event_status !== undefined ? { plum_event_status } : {}),
+          ...plumStatusParams,
         },
         { signal },
       ),

@@ -5,7 +5,7 @@ import {
   CLOSING_STAGE_ORDER,
   closingStageToApi,
   mapBackendProjects,
-  plumEventStatusFilterParam,
+  plumEventStatusFilterQueryParams,
   type Project,
 } from '@/entities/project'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
@@ -37,19 +37,19 @@ export interface UseClosingActiveTableQueryResult {
  */
 export function useClosingActiveTableQuery({
   listParams,
-  plumEventStatus = null,
+  plumEventStatus = [],
   enabled = true,
 }: {
   listParams: BoardListParams
-  plumEventStatus?: string | null
+  plumEventStatus?: string[]
   enabled?: boolean
 }): UseClosingActiveTableQueryResult {
-  const plum_event_status = plumEventStatusFilterParam(plumEventStatus)
+  const plumStatusParams = plumEventStatusFilterQueryParams(plumEventStatus)
 
   const query = useInfiniteQuery({
     queryKey: [
       'projects-closing-active-table',
-      { ...listParams, stage__in: CLOSING_STAGE_IN, plum_event_status },
+      { ...listParams, stage__in: CLOSING_STAGE_IN, ...plumStatusParams },
     ],
     enabled,
     initialPageParam: 0,
@@ -60,7 +60,7 @@ export function useClosingActiveTableQuery({
           stage__in: CLOSING_STAGE_IN,
           limit: PAGE_SIZE,
           offset: pageParam,
-          ...(plum_event_status !== undefined ? { plum_event_status } : {}),
+          ...plumStatusParams,
         },
         { signal },
       ),

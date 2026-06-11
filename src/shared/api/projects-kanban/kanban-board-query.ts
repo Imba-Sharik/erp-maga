@@ -12,6 +12,7 @@ export type BoardListParams = Pick<
   | 'ordering'
   | 'search'
   | 'plum_event_status'
+  | 'plum_event_status__in'
   | 'hall_id'
   | 'loft_id'
   | 'city'
