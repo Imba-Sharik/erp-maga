@@ -74,7 +74,10 @@ export function CombinedCalendar({
             const reminders = remindersByDay.get(dayKey)?.length ?? 0
             if (!meetings && !reminders) return null
             return (
-              <div className="flex min-w-0 flex-col gap-1.5">
+              // Кружки (контейнер <700px) — в ряд без переноса. До 375px вплотную
+              // (чтобы оба влезли), с 375px — зазор между ними.
+              // Текстовые плашки (≥700px) — столбиком.
+              <div className="flex min-w-0 flex-row flex-nowrap items-center gap-0 min-[375px]:gap-1.5 @min-[700px]/calendar:flex-col @min-[700px]/calendar:items-start @min-[700px]/calendar:gap-1.5">
                 <MeetingCountBadge count={meetings} />
                 <ReminderCountBadge count={reminders} />
               </div>
