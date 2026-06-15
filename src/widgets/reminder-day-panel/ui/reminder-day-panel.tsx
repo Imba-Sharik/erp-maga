@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
+import { useQueries } from '@tanstack/react-query'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { Plus } from 'lucide-react'
 import {
@@ -9,6 +10,7 @@ import {
   type Reminder,
   type RemindersByDay,
 } from '@/entities/reminder'
+import { projectsRetrieveQueryOptions } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -36,9 +38,32 @@ export function ReminderDayPanel({
   onEditReminder,
   onDeleteReminder,
 }: ReminderDayPanelProps) {
-  const reminders = selectedDate
-    ? sortRemindersByTime(getRemindersForDate(remindersByDay, selectedDate))
-    : []
+  const reminders = useMemo(
+    () =>
+      selectedDate ? sortRemindersByTime(getRemindersForDate(remindersByDay, selectedDate)) : [],
+    [selectedDate, remindersByDay],
+  )
+
+  // Резолвим названия проектов для привязанных напоминаний (бэк отдаёт только project_id).
+  const projectIds = useMemo(
+    () => [...new Set(reminders.map((r) => r.projectId).filter((id): id is number => id != null))],
+    [reminders],
+  )
+  const projectQueries = useQueries({
+    queries: projectIds.map((id) => ({
+      ...projectsRetrieveQueryOptions(id),
+      staleTime: 5 * 60 * 1000,
+    })),
+  })
+  const projectTitles = useMemo(() => {
+    const map = new Map<number, string>()
+    projectIds.forEach((id, i) => {
+      const data = projectQueries[i]?.data as { event_name?: string } | undefined
+      if (data?.event_name) map.set(id, data.event_name)
+    })
+    return map
+  }, [projectIds, projectQueries])
+
   const heightCapped = maxHeightPx != null && maxHeightPx > 0
   const subtitle =
     selectedDate !== null
@@ -99,6 +124,16 @@ export function ReminderDayPanel({
                       key={reminder.id}
                       reminder={reminder}
                       editable={editable && !reminder.sentAt}
+                      projectHref={
+                        reminder.projectId != null
+                          ? `/projects/${reminder.projectId}`
+                          : undefined
+                      }
+                      projectTitle={
+                        reminder.projectId != null
+                          ? projectTitles.get(reminder.projectId)
+                          : undefined
+                      }
                       onEdit={onEditReminder}
                       onDelete={onDeleteReminder}
                     />
