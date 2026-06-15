@@ -1,4 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
+import { cn } from '@/shared/lib/utils'
 
 const RESET_VALUE = '__clearable_select_reset__'
 const EMPTY_KEY = '__clearable_select_empty__'
@@ -49,7 +50,13 @@ export function ClearableSelect({
       onValueChange={(v) => onChange(v === RESET_VALUE ? null : v)}
       disabled={disabled}
     >
-      <SelectTrigger className={triggerClassName} disabled={disabled}>
+      <SelectTrigger
+        className={cn(
+          'w-full min-w-0 overflow-hidden *:data-[slot=select-value]:min-w-0 *:data-[slot=select-value]:truncate',
+          triggerClassName,
+        )}
+        disabled={disabled}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

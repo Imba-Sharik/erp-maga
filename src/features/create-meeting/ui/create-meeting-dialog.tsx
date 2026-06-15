@@ -8,6 +8,7 @@ import {
   type ListMeetingsParams,
   type MeetingFormValues,
 } from '@/entities/meeting'
+import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -25,7 +26,9 @@ import { TimeField } from '@/shared/ui/time-field'
 
 import { useCreateMeeting } from '../model/use-create-meeting'
 
-const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '' }
+const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
+
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white'
 
 function formatDayLabel(iso: string): string | null {
   const d = parseISO(iso)
@@ -52,6 +55,8 @@ export function CreateMeetingDialog({
     defaultValues: EMPTY_VALUES,
     mode: 'onSubmit',
   })
+
+  const assignment = useLoftHallAssignment(form, { assigned: true })
 
   const {
     create,
@@ -128,6 +133,16 @@ export function CreateMeetingDialog({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+            <LoftHallAssignmentFields
+              control={form.control}
+              assignment={assignment}
+              triggerClassName={TRIGGER_CLASS}
+              layout="inline"
+              alwaysShowHalls
+              required
+              loftLabel="Лофт"
+              hallLabel="Зал"
             />
             <FormField
               control={form.control}

@@ -8,6 +8,7 @@ import {
   type Meeting,
   type MeetingFormValues,
 } from '@/entities/meeting'
+import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
@@ -18,7 +19,9 @@ import { TimeField } from '@/shared/ui/time-field'
 
 import { useUpdateMeeting } from '../model/use-update-meeting'
 
-const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '' }
+const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
+
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white'
 
 export interface EditMeetingDialogProps {
   open: boolean
@@ -41,13 +44,23 @@ export function EditMeetingDialog({
 
   useEffect(() => {
     if (meeting && open) {
+      const hallIds = meeting.halls.map((hall) => String(hall.hallId))
+      const loftIds = [
+        ...new Set(
+          meeting.halls.flatMap((hall) => (hall.loftId == null ? [] : [String(hall.loftId)])),
+        ),
+      ]
       form.reset({
         title: meeting.title,
         comment: meeting.comment,
         time: meeting.time,
+        lofts: loftIds,
+        halls: hallIds,
       })
     }
   }, [meeting, open, form])
+
+  const assignment = useLoftHallAssignment(form, { assigned: true })
 
   const {
     update,
@@ -117,6 +130,16 @@ export function EditMeetingDialog({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+            <LoftHallAssignmentFields
+              control={form.control}
+              assignment={assignment}
+              triggerClassName={TRIGGER_CLASS}
+              layout="inline"
+              alwaysShowHalls
+              required
+              loftLabel="Лофт"
+              hallLabel="Зал"
             />
             <FormField
               control={form.control}

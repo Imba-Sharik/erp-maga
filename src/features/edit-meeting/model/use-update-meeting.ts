@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 
 import {
   fromMeeting,
+  meetingHallsForHallIds,
   replaceMeetingInCache,
   toMeetingUpdateRequest,
   type ListMeetingsParams,
@@ -34,6 +35,10 @@ export function useUpdateMeeting({ queryParams, meeting, onSuccess }: UseUpdateM
           title: data.name ?? meeting.title,
           comment: data.comment ?? meeting.comment,
           time: data.meeting_datetime ? formatBusinessTime(data.meeting_datetime) : meeting.time,
+          halls:
+            data.hall_ids != null
+              ? meetingHallsForHallIds(meeting.halls, data.hall_ids)
+              : meeting.halls,
         }
         const previous = meeting
         replaceMeetingInCache(queryClient, queryParams, optimistic)

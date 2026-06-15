@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCallback, useMemo } from 'react'
 import type { Control } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -9,13 +8,7 @@ import { useCurrentUser } from '@/entities/current-user'
 import { useManagersDirectory } from '@/entities/manager'
 import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
-import {
-  applyLoftSelection,
-  buildFilteredHallGroups,
-  buildLoftAssignmentOptions,
-  syncLoftHallSelection,
-  useVenueCatalog,
-} from '@/entities/venue'
+import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
 import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
@@ -24,7 +17,6 @@ import { DateField } from '@/shared/ui/date-field'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
-import { keyedGroupsToMultiSelect, keyedOptionsToMultiSelect, MultiSelect } from '@/shared/ui/multi-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'
@@ -74,57 +66,12 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
   const role = useUserRole()
   const isManagerRole = role === 'manager'
 
-  const {
-    halls,
-    lofts,
-    isLoading: isVenueCatalogLoading,
-    isError: isVenueCatalogError,
-  } = useVenueCatalog(isManagerRole ? { assigned: true } : undefined)
-  const selectDisabled = isVenueCatalogLoading || isVenueCatalogError
-
-  const loftOptions = useMemo(
-    () => keyedOptionsToMultiSelect(buildLoftAssignmentOptions(lofts)),
-    [lofts],
-  )
-  const isSingleLoftSelect = lofts.length === 1
-
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   })
 
-  const selectedHallValues = form.watch('halls')
-  const hasHalls = selectedHallValues.length > 0
-
-  const hallOptionGroups = useMemo(
-    () => keyedGroupsToMultiSelect(buildFilteredHallGroups(halls, lofts, selectedHallValues.map(Number))),
-    [halls, lofts, selectedHallValues],
-  )
-
-  const syncFromHalls = useCallback(
-    (hallIds: number[]) => {
-      const { hallIds: nextHallIds, loftIds } = syncLoftHallSelection(halls, hallIds)
-      form.setValue('halls', nextHallIds.map(String), { shouldValidate: true })
-      form.setValue('lofts', loftIds.map(String), { shouldValidate: true })
-    },
-    [form, halls],
-  )
-
-  const handleHallsChange = useCallback(
-    (nextHallValues: string[]) => {
-      syncFromHalls(nextHallValues.map(Number))
-    },
-    [syncFromHalls],
-  )
-
-  const handleLoftsChange = useCallback(
-    (nextLoftValues: string[]) => {
-      const currentHallIds = form.getValues('halls').map(Number)
-      const nextHallIds = applyLoftSelection(halls, currentHallIds, nextLoftValues.map(Number))
-      syncFromHalls(nextHallIds)
-    },
-    [form, halls, syncFromHalls],
-  )
+  const assignment = useLoftHallAssignment(form, { assigned: isManagerRole })
 
   const {
     create,
@@ -222,59 +169,11 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
             {!isManagerRole ? (
               <ManagerSelectField control={form.control} disabled={isPending} />
             ) : null}
-            <FormField
+            <LoftHallAssignmentFields
               control={form.control}
-              name="lofts"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Лофты</FormLabel>
-                  <FormControl>
-                    {isSingleLoftSelect ? (
-                      <ClearableSelect
-                        placeholder="Выберите лофт"
-                        value={field.value[0] ?? null}
-                        options={loftOptions}
-                        onChange={(v) => handleLoftsChange(v ? [v] : [])}
-                        triggerClassName={TRIGGER_CLASS}
-                        disabled={selectDisabled}
-                      />
-                    ) : (
-                      <MultiSelect
-                        placeholder="Выберите лофты"
-                        values={field.value}
-                        options={loftOptions}
-                        onChange={handleLoftsChange}
-                        triggerClassName={TRIGGER_CLASS}
-                        disabled={selectDisabled}
-                      />
-                    )}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              assignment={assignment}
+              triggerClassName={TRIGGER_CLASS}
             />
-            {hasHalls ? (
-              <FormField
-                control={form.control}
-                name="halls"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Залы</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        placeholder="Выберите залы"
-                        values={field.value}
-                        options={hallOptionGroups}
-                        onChange={handleHallsChange}
-                        triggerClassName={TRIGGER_CLASS}
-                        disabled={selectDisabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : null}
             {isError && errorMessage ? (
               <p className="text-destructive text-sm" role="alert">
                 {errorMessage}

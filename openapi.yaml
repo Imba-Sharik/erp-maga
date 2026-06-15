@@ -433,7 +433,8 @@ paths:
     get:
       operationId: meetings_list
       description: Правая панель календаря встреч. `date=YYYY-MM-DD` фильтрует встречи
-        выбранного дня. Поддерживает infinite-scroll пагинацию через `limit` и `offset`.
+        выбранного дня; `loft` / `hall` — по привязанным залам. Поддерживает infinite-scroll
+        пагинацию через `limit` и `offset`.
       summary: Список встреч
       parameters:
       - in: query
@@ -443,10 +444,20 @@ paths:
           format: date
         description: Дата выбранного дня календаря.
       - in: query
+        name: hall
+        schema:
+          type: integer
+        description: ID зала встречи.
+      - in: query
         name: limit
         schema:
           type: integer
         description: Количество записей на страницу (по умолчанию 10, макс. 200).
+      - in: query
+        name: loft
+        schema:
+          type: integer
+        description: ID лофта (через зал встречи).
       - in: query
         name: manager
         schema:
@@ -484,7 +495,7 @@ paths:
     post:
       operationId: meetings_create
       description: Доступно только менеджеру MAG; владелец встречи берётся из текущего
-        пользователя.
+        пользователя. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
       summary: Создать встречу
       tags:
       - meetings
@@ -492,13 +503,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+              $ref: '#/components/schemas/MeetingCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+              $ref: '#/components/schemas/MeetingCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+              $ref: '#/components/schemas/MeetingCreateRequest'
         required: true
       security:
       - jwtAuth: []
@@ -553,7 +564,8 @@ paths:
           description: Встреча не найдена
     patch:
       operationId: meetings_partial_update
-      description: Доступно только менеджеру-владельцу встречи.
+      description: Доступно только менеджеру-владельцу встречи. `hall_ids` опционально
+        на PATCH.
       summary: Изменить встречу
       parameters:
       - in: path
@@ -625,7 +637,7 @@ paths:
   /api/v1/meetings/calendar/:
     get:
       operationId: meetings_calendar_retrieve
-      description: Единые правила видимости встреч для календаря, списка и detail.
+      description: Фильтры `loft` и `hall` — по привязанным залам встречи.
       summary: Календарь встреч за месяц или период
       parameters:
       - in: query
@@ -640,6 +652,16 @@ paths:
           type: string
           format: date
         description: Конец произвольного периода.
+      - in: query
+        name: hall
+        schema:
+          type: integer
+        description: ID зала встречи.
+      - in: query
+        name: loft
+        schema:
+          type: integer
+        description: ID лофта (через зал встречи).
       - in: query
         name: manager
         schema:
@@ -3066,6 +3088,11 @@ components:
         meeting_time:
           type: string
           readOnly: true
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingHall'
+          readOnly: true
         manager:
           allOf:
           - $ref: '#/components/schemas/MagManagerBrief'
@@ -3081,6 +3108,7 @@ components:
       required:
       - comment
       - created_at
+      - halls
       - id
       - manager
       - meeting_date
@@ -3108,7 +3136,7 @@ components:
       - period_end
       - period_start
       - results
-    MeetingCreateUpdateRequest:
+    MeetingCreateRequest:
       type: object
       properties:
         name:
@@ -3121,10 +3149,41 @@ components:
         meeting_datetime:
           type: string
           format: date-time
+        hall_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          writeOnly: true
+          description: Один или несколько id залов из GET /api/v1/halls/halls/.
+          minItems: 1
+        hall_id:
+          type: integer
+          minimum: 1
+          writeOnly: true
+          description: Alias для одного зала, если не передан hall_ids.
       required:
       - comment
+      - hall_ids
       - meeting_datetime
       - name
+    MeetingHall:
+      type: object
+      properties:
+        hall_id:
+          type: integer
+        hall_name:
+          type: string
+        loft_id:
+          type: integer
+          nullable: true
+        loft_name:
+          type: string
+      required:
+      - hall_id
+      - hall_name
+      - loft_id
+      - loft_name
     MeetingListPaginated:
       type: object
       properties:
@@ -3761,6 +3820,16 @@ components:
         meeting_datetime:
           type: string
           format: date-time
+        hall_ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          writeOnly: true
+        hall_id:
+          type: integer
+          minimum: 1
+          writeOnly: true
     PatchedProjectMagManagerUpdateRequest:
       type: object
       properties:
