@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { Plus } from 'lucide-react'
 import {
@@ -18,6 +19,8 @@ interface ReminderDayPanelProps {
   remindersByDay: RemindersByDay
   editable?: boolean
   maxHeightPx?: number
+  /** Заменяет заголовок панели (напр. табы Встречи/Напоминания). */
+  titleSlot?: ReactNode
   onAddReminder?: () => void
   onEditReminder?: (reminder: Reminder) => void
   onDeleteReminder?: (reminder: Reminder) => void
@@ -28,6 +31,7 @@ export function ReminderDayPanel({
   remindersByDay,
   editable = false,
   maxHeightPx,
+  titleSlot,
   onAddReminder,
   onEditReminder,
   onDeleteReminder,
@@ -46,8 +50,10 @@ export function ReminderDayPanel({
       className={cn('flex flex-col gap-4', heightCapped && 'min-h-0 overflow-visible')}
       style={heightCapped ? { maxHeight: maxHeightPx } : undefined}
     >
-      <div className="flex h-10 flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="font-heading leading-none font-bold text-[#1B1A17]">Напоминания</h2>
+      <div className="flex min-h-10 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        {titleSlot ?? (
+          <h2 className="font-heading leading-none font-bold text-[#1B1A17]">Напоминания</h2>
+        )}
         {subtitle ? <span className="text-sm text-[#ACACAC]">{subtitle}</span> : null}
       </div>
 

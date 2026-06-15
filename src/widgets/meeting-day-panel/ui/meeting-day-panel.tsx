@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { Plus } from 'lucide-react'
 import {
@@ -17,6 +18,8 @@ interface MeetingDayPanelProps {
   meetingsByDay: MeetingsByDay
   editable?: boolean
   maxHeightPx?: number
+  /** Заменяет заголовок панели (напр. табы Встречи/Напоминания). */
+  titleSlot?: ReactNode
   onAddMeeting?: () => void
   onEditMeeting?: (meeting: Meeting) => void
   onDeleteMeeting?: (meeting: Meeting) => void
@@ -27,6 +30,7 @@ export function MeetingDayPanel({
   meetingsByDay,
   editable = false,
   maxHeightPx,
+  titleSlot,
   onAddMeeting,
   onEditMeeting,
   onDeleteMeeting,
@@ -42,6 +46,7 @@ export function MeetingDayPanel({
       <MeetingDayPanelHeader
         meetingsCount={meetings.length}
         hasSelectedDate={selectedDate !== null}
+        titleSlot={titleSlot}
       />
 
       <Card

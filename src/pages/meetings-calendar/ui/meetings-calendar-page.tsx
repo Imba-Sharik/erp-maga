@@ -27,23 +27,18 @@ import {
 } from '@/features/manage-reminders'
 import { toDayKey } from '@/shared/lib/date'
 import { useElementSize } from '@/shared/hooks/use-element-size'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { CombinedCalendar } from '@/widgets/combined-calendar'
-import { CombinedDayPanel } from '@/widgets/combined-day-panel'
 import { MeetingCalendar } from '@/widgets/meeting-calendar'
 import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
-import { ReminderCalendar } from '@/widgets/reminder-calendar'
 import { ReminderDayPanel } from '@/widgets/reminder-day-panel'
 
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
-type CalendarTab = 'meetings' | 'reminders' | 'both'
+type PanelTab = 'meetings' | 'reminders'
+
+const PANEL_TAB_CLASS =
+  'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10 cursor-pointer rounded-[10px] border border-[#B1B1B1] bg-white px-4 py-1.5 text-sm font-normal text-[#454545] data-[state=active]:border-transparent data-[state=active]:shadow-none'
 
 function parseManagerId(value: string | null | undefined): number | null {
   if (!value) return null
@@ -56,10 +51,11 @@ export function MeetingsCalendarPage() {
   const currentUser = useCurrentUser()
   const showManagerFilter = role === 'director' || role === 'admin'
   const editable = role === 'manager'
-  // У руководителя нет логики напоминаний — он видит только встречи.
-  const showReminders = role !== 'director'
+  // Логика напоминаний — только у менеджера. Руководитель/админ видят встречи (с фильтром по менеджеру).
+  const showReminders = role === 'manager'
 
-  const [calendarTab, setCalendarTab] = useState<CalendarTab>('both')
+  // Таб справа фильтрует список (встречи/напоминания); по умолчанию — встречи.
+  const [panelTab, setPanelTab] = useState<PanelTab>('meetings')
 
   const {
     filterOptions: managerFilterOptions,
@@ -142,22 +138,17 @@ export function MeetingsCalendarPage() {
   const panelMaxHeightPx =
     isWideCalendarLayout && calendarSize?.height ? calendarSize.height : undefined
 
-  const mode: CalendarTab = showReminders ? calendarTab : 'meetings'
-
-  const calendarViewSelect = showReminders ? (
-    <Select value={calendarTab} onValueChange={(v) => setCalendarTab(v as CalendarTab)}>
-      <SelectTrigger
-        aria-label="Что показать в календаре"
-        className="h-10! w-fit min-w-52 rounded-[10px] border-[#B1B1B1] bg-white text-sm font-normal text-[#454545]"
-      >
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="both">Встречи и напоминания</SelectItem>
-        <SelectItem value="meetings">Встречи</SelectItem>
-        <SelectItem value="reminders">Напоминания</SelectItem>
-      </SelectContent>
-    </Select>
+  const panelTabs = showReminders ? (
+    <Tabs value={panelTab} onValueChange={(v) => setPanelTab(v as PanelTab)}>
+      <TabsList className="h-auto gap-1.5 bg-transparent p-0">
+        <TabsTrigger value="meetings" className={PANEL_TAB_CLASS}>
+          Встречи
+        </TabsTrigger>
+        <TabsTrigger value="reminders" className={PANEL_TAB_CLASS}>
+          Напоминания
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   ) : null
 
   return (
@@ -171,7 +162,7 @@ export function MeetingsCalendarPage() {
 
       <div className="grid gap-6 @min-[1400px]/main:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] @min-[1400px]/main:items-start @min-[1400px]/main:gap-10">
         <div ref={calendarRef} className="min-h-0 min-w-0">
-          {mode === 'both' ? (
+          {showReminders ? (
             <CombinedCalendar
               visibleMonth={visibleMonth}
               selectedDate={selectedDate}
@@ -180,24 +171,10 @@ export function MeetingsCalendarPage() {
               remindersByDay={remindersByDay}
               onChangeMonth={setVisibleMonth}
               onSelectDate={handleSelectDate}
-              leading={calendarViewSelect}
               totalMeetings={totalThisMonth}
               totalReminders={totalRemindersThisMonth}
               isLoading={isLoading || remindersLoading}
               isFetching={isFetching || remindersFetching}
-            />
-          ) : mode === 'reminders' ? (
-            <ReminderCalendar
-              visibleMonth={visibleMonth}
-              selectedDate={selectedDate}
-              today={today}
-              remindersByDay={remindersByDay}
-              onChangeMonth={setVisibleMonth}
-              onSelectDate={handleSelectDate}
-              totalThisMonth={totalRemindersThisMonth}
-              leading={calendarViewSelect}
-              isLoading={remindersLoading}
-              isFetching={remindersFetching}
             />
           ) : (
             <MeetingCalendar
@@ -207,7 +184,6 @@ export function MeetingsCalendarPage() {
               meetingsByDay={meetingsByDay}
               onChangeMonth={setVisibleMonth}
               onSelectDate={handleSelectDate}
-              leading={calendarViewSelect}
               showManagerFilter={showManagerFilter}
               magManagerId={magManagerId}
               onChangeMagManager={setMagManagerId}
@@ -221,26 +197,13 @@ export function MeetingsCalendarPage() {
           )}
         </div>
         <div className="min-h-0 min-w-0">
-          {mode === 'both' ? (
-            <CombinedDayPanel
-              selectedDate={selectedDate}
-              meetingsByDay={meetingsByDay}
-              remindersByDay={remindersByDay}
-              editable={editable}
-              maxHeightPx={panelMaxHeightPx}
-              onAddMeeting={() => setCreateOpen(true)}
-              onAddReminder={() => setReminderCreateOpen(true)}
-              onEditMeeting={setEditTarget}
-              onDeleteMeeting={setDeleteTarget}
-              onEditReminder={setReminderEditTarget}
-              onDeleteReminder={setReminderDeleteTarget}
-            />
-          ) : mode === 'reminders' ? (
+          {showReminders && panelTab === 'reminders' ? (
             <ReminderDayPanel
               selectedDate={selectedDate}
               remindersByDay={remindersByDay}
               editable={editable}
               maxHeightPx={panelMaxHeightPx}
+              titleSlot={panelTabs}
               onAddReminder={() => setReminderCreateOpen(true)}
               onEditReminder={setReminderEditTarget}
               onDeleteReminder={setReminderDeleteTarget}
@@ -251,6 +214,7 @@ export function MeetingsCalendarPage() {
               meetingsByDay={meetingsByDay}
               editable={editable}
               maxHeightPx={panelMaxHeightPx}
+              titleSlot={panelTabs}
               onAddMeeting={() => setCreateOpen(true)}
               onEditMeeting={setEditTarget}
               onDeleteMeeting={setDeleteTarget}
