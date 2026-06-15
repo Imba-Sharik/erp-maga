@@ -25,6 +25,8 @@ interface ProjectCalendarProps {
   managerFilterOptions?: readonly SelectOption[]
   managersSelectLoading?: boolean
   managersSelectError?: boolean
+  restrictToHallIds?: readonly number[] | undefined
+  venueSelectDisabled?: boolean
   totalThisMonth: number
   isLoading?: boolean
   isFetching?: boolean
@@ -50,6 +52,8 @@ export function ProjectCalendar({
   managerFilterOptions = [],
   managersSelectLoading = false,
   managersSelectError = false,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   totalThisMonth,
   isLoading = false,
   isFetching = false,
@@ -76,6 +80,8 @@ export function ProjectCalendar({
         managerFilterOptions={managerFilterOptions}
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
+        restrictToHallIds={restrictToHallIds}
+        venueSelectDisabled={venueSelectDisabled}
         isFetching={isFetching}
       />
       <div>

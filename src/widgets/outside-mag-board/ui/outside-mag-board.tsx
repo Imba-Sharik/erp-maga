@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react'
 
 import { OUTSIDE_MAG_BACK_ORIGIN, type Project } from '@/entities/project'
-import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
+import {
+  resolveManagerFilterName,
+  useManagerVenueRestriction,
+  useManagersDirectory,
+} from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
   EMPTY_COLUMN_FILTERS,
+  applyColumnFilterChange,
   filterProjectsTable,
   ProjectsTableView,
   useOutsideMagTableQuery,
@@ -40,11 +45,18 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   )
 
   const {
+    managers,
     selectOptions,
     filterOptions,
     isLoading: isManagersLoading,
     isError: isManagersError,
   } = useManagersDirectory()
+
+  const { restrictToHallIds, venueSelectDisabled } = useManagerVenueRestriction({
+    managerId: columnFilters.manager,
+    managers,
+    managersLoading: isManagersLoading,
+  })
 
   const listParams = useMemo(
     () => ({
@@ -91,7 +103,7 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   }, [projects, debouncedSearch, columnFilters, managerFilterName])
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => ({ ...prev, [key]: value }))
+    setColumnFilters((prev) => applyColumnFilterChange(prev, key, value))
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
@@ -110,6 +122,8 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
           directoryOptions={selectOptions}
           managersSelectLoading={isManagersLoading}
           managersSelectError={isManagersError}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={handleColumnFilterChange}
           onPlumEventStatusChange={handlePlumEventStatusChange}
           isLoading={isLoading}

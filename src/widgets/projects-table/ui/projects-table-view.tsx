@@ -44,6 +44,8 @@ interface ProjectsTableViewProps {
   directoryOptions: ManagerSelectOption[]
   managersSelectLoading?: boolean
   managersSelectError?: boolean
+  restrictToHallIds?: readonly number[] | undefined
+  venueSelectDisabled?: boolean
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
   onPlumEventStatusChange: (values: string[]) => void
   isLoading: boolean
@@ -64,6 +66,8 @@ export function ProjectsTableView({
   directoryOptions,
   managersSelectLoading = false,
   managersSelectError = false,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   onColumnFilterChange,
   onPlumEventStatusChange,
   isLoading,
@@ -117,6 +121,8 @@ export function ProjectsTableView({
         managerFilterOptions={managerFilterOptions}
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
+        restrictToHallIds={restrictToHallIds}
+        venueSelectDisabled={venueSelectDisabled}
         onColumnFilterChange={onColumnFilterChange}
         onPlumEventStatusChange={onPlumEventStatusChange}
         withActions={withActions}
@@ -142,6 +148,8 @@ export function ProjectsTableView({
         managerFilterOptions={managerFilterOptions}
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
+        restrictToHallIds={restrictToHallIds}
+        venueSelectDisabled={venueSelectDisabled}
         onColumnFilterChange={onColumnFilterChange}
         withActions={withActions}
       />
@@ -160,6 +168,8 @@ export function ProjectsTableView({
         managerFilterOptions={managerFilterOptions}
         managersSelectLoading={managersSelectLoading}
         managersSelectError={managersSelectError}
+        restrictToHallIds={restrictToHallIds}
+        venueSelectDisabled={venueSelectDisabled}
         onColumnFilterChange={onColumnFilterChange}
         onPlumEventStatusChange={onPlumEventStatusChange}
       />
@@ -200,11 +210,18 @@ export function ProjectsTableView({
   )
 }
 
+type VenueRestrictionProps = {
+  restrictToHallIds?: readonly number[] | undefined
+  venueSelectDisabled?: boolean
+}
+
 function GeneralTableHeader({
   columnFilters,
   managerFilterOptions,
   managersSelectLoading,
   managersSelectError,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   onColumnFilterChange,
   onPlumEventStatusChange,
   withActions,
@@ -216,19 +233,23 @@ function GeneralTableHeader({
   onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
   onPlumEventStatusChange: (values: string[]) => void
   withActions: boolean
-}) {
+} & VenueRestrictionProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderLoftFilter
           columnFilters={columnFilters}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderCell>
         <TableHeaderHallFilter
           columnFilters={columnFilters}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
@@ -284,21 +305,27 @@ function OutsideMagTableHeader({
   managerFilterOptions,
   managersSelectLoading,
   managersSelectError,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   onColumnFilterChange,
   onPlumEventStatusChange,
-}: ManagerHeaderProps & PlumStatusHeaderProps) {
+}: ManagerHeaderProps & PlumStatusHeaderProps & VenueRestrictionProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderLoftFilter
           columnFilters={columnFilters}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderCell>
         <TableHeaderHallFilter
           columnFilters={columnFilters}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
@@ -402,21 +429,27 @@ function ClosingGeneralTableHeader({
   managerFilterOptions,
   managersSelectLoading,
   managersSelectError,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   onColumnFilterChange,
   withActions,
-}: ManagerHeaderProps) {
+}: ManagerHeaderProps & VenueRestrictionProps) {
   return (
     <>
       <GridTableHeaderLabel>Название проекта</GridTableHeaderLabel>
       <GridTableHeaderCell>
         <TableHeaderLoftFilter
           columnFilters={columnFilters}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>
       <GridTableHeaderCell>
         <TableHeaderHallFilter
           columnFilters={columnFilters}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
           onColumnFilterChange={onColumnFilterChange}
         />
       </GridTableHeaderCell>

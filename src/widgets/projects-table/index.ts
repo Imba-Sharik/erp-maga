@@ -8,3 +8,4 @@ export {
   type ColumnFilterKey,
   type ColumnFilters,
 } from './lib/filter-projects-table'
+export { applyColumnFilterChange } from './lib/apply-column-filter-change'

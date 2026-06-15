@@ -11,7 +11,7 @@ import {
 import { mergeDates, removeDates } from '@/widgets/month-calendar'
 import { filterCalendarProjects } from '@/widgets/project-calendar/lib/filter-calendar-projects'
 import type { PaintMode } from '@/widgets/month-calendar'
-import { useManagersDirectory } from '@/entities/manager'
+import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import {
   countProjectsInMonth,
   getProjectsForDates,
@@ -36,6 +36,7 @@ export function CalendarPage() {
   const role = useUserRole()
   const showManagerFilter = role === 'director' || role === 'admin'
   const {
+    managers,
     filterOptions: managerFilterOptions,
     isLoading: managersSelectLoading,
     isError: managersSelectError,
@@ -68,6 +69,19 @@ export function CalendarPage() {
   // которая уже фильтрует `out_of_mag_scope` на сервере. Возвращает 9-полевую
   // карточку (event_name/halls/mag_manager/stage), достаточно для сетки.
   const magManagerParam = showManagerFilter ? parseMagManagerId(magManagerId) : undefined
+
+  const { restrictToHallIds, venueSelectDisabled } = useManagerVenueRestriction({
+    managerId: magManagerId,
+    managers,
+    enabled: showManagerFilter,
+    managersLoading: managersSelectLoading,
+  })
+
+  const handleChangeMagManager = useCallback((value: string | null) => {
+    setMagManagerId(value)
+    setHall(null)
+    setLoft(null)
+  }, [])
 
   const { data, isLoading, isFetching } = useProjectsCalendarList({
     event_date_after,
@@ -152,10 +166,12 @@ export function CalendarPage() {
             onChangeHall={setHall}
             showManagerFilter={showManagerFilter}
             magManagerId={magManagerId}
-            onChangeMagManager={setMagManagerId}
+            onChangeMagManager={handleChangeMagManager}
             managerFilterOptions={managerFilterOptions}
             managersSelectLoading={managersSelectLoading}
             managersSelectError={managersSelectError}
+            restrictToHallIds={restrictToHallIds}
+            venueSelectDisabled={venueSelectDisabled}
             totalThisMonth={totalThisMonth}
             isLoading={isLoading}
             isFetching={isFetching}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { useManagersDirectory } from '@/entities/manager'
+import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import type { Project } from '@/entities/project'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
@@ -12,6 +12,7 @@ import {
   type ColumnFilterKey,
   type ColumnFilters,
 } from '../lib/filter-projects-table'
+import { applyColumnFilterChange } from '../lib/apply-column-filter-change'
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import { useProjectsTableQuery } from '../lib/use-projects-table-query'
 import { ProjectsTableToolbar } from './projects-table-toolbar'
@@ -41,11 +42,18 @@ export function ProjectsTable({
   )
 
   const {
+    managers,
     selectOptions,
     filterOptions,
     isLoading: isManagersLoading,
     isError: isManagersError,
   } = useManagersDirectory()
+
+  const { restrictToHallIds, venueSelectDisabled } = useManagerVenueRestriction({
+    managerId: columnFilters.manager,
+    managers,
+    managersLoading: isManagersLoading,
+  })
 
   const { projects, hasNextPage, isLoading, isError, isFetchingNextPage, fetchNextPage } =
     useProjectsTableQuery({
@@ -63,7 +71,7 @@ export function ProjectsTable({
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => ({ ...prev, [key]: value }))
+    setColumnFilters((prev) => applyColumnFilterChange(prev, key, value))
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
@@ -89,6 +97,8 @@ export function ProjectsTable({
         directoryOptions={selectOptions}
         managersSelectLoading={isManagersLoading}
         managersSelectError={isManagersError}
+        restrictToHallIds={restrictToHallIds}
+        venueSelectDisabled={venueSelectDisabled}
         onColumnFilterChange={handleColumnFilterChange}
         onPlumEventStatusChange={handlePlumEventStatusChange}
         isLoading={isLoading}
