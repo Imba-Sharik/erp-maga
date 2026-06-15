@@ -26,6 +26,7 @@ export function PlumDataCard({ project }: { project: ProjectDetail }) {
       subline={`Источник: Plum · ID ${project.plumId}`}
     >
       <KvRow label="Статус в PLUM" value={project.plumEventStatusLabel ?? '—'} />
+      <KvRow label="Менеджер PLUM" value={project.plumLofthallManager} />
       <KvRow label="Тип мероприятия" value={project.type} />
       <KvRow label="Дата" value={formatDate(project.date)} />
       <KvRow label="Лофт" value={project.loft} />
