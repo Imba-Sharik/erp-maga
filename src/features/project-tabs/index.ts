@@ -1,2 +1,3 @@
-export { ProjectTabs, useProjectTab } from './ui/project-tabs'
-export type { ProjectTabKey } from './ui/project-tabs'
+export { ProjectTabs } from './ui/project-tabs'
+export { useProjectTab, useProjectTabsForRole, PROJECT_TABS } from './model/project-tab'
+export type { ProjectTabKey } from './model/project-tab'

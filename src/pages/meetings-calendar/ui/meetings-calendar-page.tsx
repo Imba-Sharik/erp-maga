@@ -9,16 +9,37 @@ import {
   type Meeting,
   useMeetingsCalendarList,
 } from '@/entities/meeting'
+import {
+  countRemindersInMonth,
+  groupRemindersByDay,
+  useReminders,
+  type Reminder,
+} from '@/entities/reminder'
 import { useUserRole } from '@/entities/user-role'
 import { ConfirmDeleteMeetingDialog } from '@/features/delete-meeting'
 import { CreateMeetingDialog } from '@/features/create-meeting'
 import { EditMeetingDialog } from '@/features/edit-meeting'
+import {
+  ConfirmDeleteReminderDialog,
+  ReminderFormDialog,
+} from '@/features/manage-reminders'
 import { toDayKey } from '@/shared/lib/date'
 import { useElementSize } from '@/shared/hooks/use-element-size'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select'
 import { MeetingCalendar } from '@/widgets/meeting-calendar'
 import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
+import { ReminderCalendar } from '@/widgets/reminder-calendar'
+import { ReminderDayPanel } from '@/widgets/reminder-day-panel'
 
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
+
+type CalendarTab = 'meetings' | 'reminders'
 
 function parseManagerId(value: string | null | undefined): number | null {
   if (!value) return null
@@ -31,6 +52,10 @@ export function MeetingsCalendarPage() {
   const currentUser = useCurrentUser()
   const showManagerFilter = role === 'director' || role === 'admin'
   const editable = role === 'manager'
+  // У руководителя нет логики напоминаний — он видит только встречи.
+  const showReminders = role !== 'director'
+
+  const [calendarTab, setCalendarTab] = useState<CalendarTab>('meetings')
 
   const {
     filterOptions: managerFilterOptions,
@@ -49,6 +74,10 @@ export function MeetingsCalendarPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Meeting | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Meeting | null>(null)
+
+  const [reminderCreateOpen, setReminderCreateOpen] = useState(false)
+  const [reminderEditTarget, setReminderEditTarget] = useState<Reminder | null>(null)
+  const [reminderDeleteTarget, setReminderDeleteTarget] = useState<Reminder | null>(null)
 
   const filterManagerId = useMemo((): number | null => {
     if (showManagerFilter) return parseManagerId(magManagerId)
@@ -78,6 +107,18 @@ export function MeetingsCalendarPage() {
     [meetingsByDay, visibleMonth],
   )
 
+  // Напоминания живут в локальном сторе (бэка пока нет). Менеджер видит свои.
+  const myManagerId = parseManagerId(currentUser.id) ?? 0
+  const allReminders = useReminders()
+  const remindersByDay = useMemo(
+    () => groupRemindersByDay(allReminders.filter((r) => r.managerId === myManagerId)),
+    [allReminders, myManagerId],
+  )
+  const totalRemindersThisMonth = useMemo(
+    () => countRemindersInMonth(remindersByDay, visibleMonth),
+    [remindersByDay, visibleMonth],
+  )
+
   const handleSelectDate = useCallback((date: Date) => {
     setSelectedDate(date)
   }, [])
@@ -93,45 +134,88 @@ export function MeetingsCalendarPage() {
   const panelMaxHeightPx =
     isWideCalendarLayout && calendarSize?.height ? calendarSize.height : undefined
 
+  const isReminders = showReminders && calendarTab === 'reminders'
+
+  const calendarViewSelect = showReminders ? (
+    <Select value={calendarTab} onValueChange={(v) => setCalendarTab(v as CalendarTab)}>
+      <SelectTrigger
+        aria-label="Что показать в календаре"
+        className="h-10! w-fit min-w-44 rounded-[10px] border-[#B1B1B1] bg-white text-sm font-normal text-[#454545]"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="meetings">Встречи</SelectItem>
+        <SelectItem value="reminders">Напоминания</SelectItem>
+      </SelectContent>
+    </Select>
+  ) : null
+
   return (
     <div ref={pageRef} className="flex flex-col gap-6">
       <header className="flex flex-col gap-1.5">
         <h1 className="font-heading font-bold text-[#1B1A17]">Календарь встреч</h1>
-        <p className="hidden max-w-[640px] text-sm text-[#ACACAC] md:block">
+        <p className="hidden max-w-160 text-sm text-[#ACACAC] md:block">
           Расписание встреч менеджеров
         </p>
       </header>
 
       <div className="grid gap-6 @min-[1400px]/main:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] @min-[1400px]/main:items-start @min-[1400px]/main:gap-10">
         <div ref={calendarRef} className="min-h-0 min-w-0">
-          <MeetingCalendar
-            visibleMonth={visibleMonth}
-            selectedDate={selectedDate}
-            today={today}
-            meetingsByDay={meetingsByDay}
-            onChangeMonth={setVisibleMonth}
-            onSelectDate={handleSelectDate}
-            showManagerFilter={showManagerFilter}
-            magManagerId={magManagerId}
-            onChangeMagManager={setMagManagerId}
-            managerFilterOptions={managerFilterOptions}
-            managersSelectLoading={managersSelectLoading}
-            managersSelectError={managersSelectError}
-            totalThisMonth={totalThisMonth}
-            isLoading={isLoading}
-            isFetching={isFetching}
-          />
+          {isReminders ? (
+            <ReminderCalendar
+              visibleMonth={visibleMonth}
+              selectedDate={selectedDate}
+              today={today}
+              remindersByDay={remindersByDay}
+              onChangeMonth={setVisibleMonth}
+              onSelectDate={handleSelectDate}
+              totalThisMonth={totalRemindersThisMonth}
+              leading={calendarViewSelect}
+            />
+          ) : (
+            <MeetingCalendar
+              visibleMonth={visibleMonth}
+              selectedDate={selectedDate}
+              today={today}
+              meetingsByDay={meetingsByDay}
+              onChangeMonth={setVisibleMonth}
+              onSelectDate={handleSelectDate}
+              leading={calendarViewSelect}
+              showManagerFilter={showManagerFilter}
+              magManagerId={magManagerId}
+              onChangeMagManager={setMagManagerId}
+              managerFilterOptions={managerFilterOptions}
+              managersSelectLoading={managersSelectLoading}
+              managersSelectError={managersSelectError}
+              totalThisMonth={totalThisMonth}
+              isLoading={isLoading}
+              isFetching={isFetching}
+            />
+          )}
         </div>
         <div className="min-h-0 min-w-0">
-          <MeetingDayPanel
-            selectedDate={selectedDate}
-            meetingsByDay={meetingsByDay}
-            editable={editable}
-            maxHeightPx={panelMaxHeightPx}
-            onAddMeeting={() => setCreateOpen(true)}
-            onEditMeeting={setEditTarget}
-            onDeleteMeeting={setDeleteTarget}
-          />
+          {isReminders ? (
+            <ReminderDayPanel
+              selectedDate={selectedDate}
+              remindersByDay={remindersByDay}
+              editable={editable}
+              maxHeightPx={panelMaxHeightPx}
+              onAddReminder={() => setReminderCreateOpen(true)}
+              onEditReminder={setReminderEditTarget}
+              onDeleteReminder={setReminderDeleteTarget}
+            />
+          ) : (
+            <MeetingDayPanel
+              selectedDate={selectedDate}
+              meetingsByDay={meetingsByDay}
+              editable={editable}
+              maxHeightPx={panelMaxHeightPx}
+              onAddMeeting={() => setCreateOpen(true)}
+              onEditMeeting={setEditTarget}
+              onDeleteMeeting={setDeleteTarget}
+            />
+          )}
         </div>
       </div>
 
@@ -158,6 +242,34 @@ export function MeetingsCalendarPage() {
         meeting={deleteTarget}
         queryParams={queryParams}
       />
+
+      {showReminders ? (
+        <>
+          {editable && selectedDateKey ? (
+            <ReminderFormDialog
+              open={reminderCreateOpen}
+              onOpenChange={setReminderCreateOpen}
+              managerId={myManagerId}
+              projectId={null}
+              defaultDate={selectedDateKey}
+            />
+          ) : null}
+
+          <ReminderFormDialog
+            open={reminderEditTarget !== null}
+            onOpenChange={(open) => !open && setReminderEditTarget(null)}
+            managerId={myManagerId}
+            projectId={reminderEditTarget?.projectId ?? null}
+            reminder={reminderEditTarget}
+          />
+
+          <ConfirmDeleteReminderDialog
+            open={reminderDeleteTarget !== null}
+            onOpenChange={(open) => !open && setReminderDeleteTarget(null)}
+            reminder={reminderDeleteTarget}
+          />
+        </>
+      ) : null}
     </div>
   )
 }

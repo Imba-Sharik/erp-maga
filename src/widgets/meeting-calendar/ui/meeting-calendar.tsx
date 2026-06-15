@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 import { MeetingCountBadge, pluralMeetings, type MeetingsByDay } from '@/entities/meeting'
 import { toDayKey } from '@/shared/lib/date'
@@ -48,6 +48,8 @@ interface MeetingCalendarProps {
   managersSelectLoading?: boolean
   managersSelectError?: boolean
   totalThisMonth: number
+  /** Слот слева в тулбаре (переключатель Встречи/Напоминания) */
+  leading?: ReactNode
   isLoading?: boolean
   isFetching?: boolean
 }
@@ -103,6 +105,7 @@ export function MeetingCalendar({
   managersSelectLoading = false,
   managersSelectError = false,
   totalThisMonth,
+  leading,
   isLoading = false,
   isFetching = false,
 }: MeetingCalendarProps) {
@@ -137,6 +140,7 @@ export function MeetingCalendar({
   return (
     <div className="@container/calendar flex min-w-0 flex-col gap-4 overflow-x-hidden">
       <div className={layout.toolbar}>
+        {leading ? <div className="min-w-0">{leading}</div> : null}
         {showManagerFilter && onChangeMagManager ? (
           <div className={layout.topRow}>
             {managerFilterMobile}
