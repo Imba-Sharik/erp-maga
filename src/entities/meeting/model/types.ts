@@ -1,3 +1,10 @@
+export interface MeetingHall {
+  hallId: number
+  hallName: string
+  loftId: number | null
+  loftName: string
+}
+
 export interface Meeting {
   id: number
   title: string
@@ -7,6 +14,7 @@ export interface Meeting {
   /** Дата в формате yyyy-MM-dd */
   date: string
   managerId: number
+  halls: MeetingHall[]
 }
 
 export type MeetingsByDay = Map<string, Meeting[]>

@@ -1,4 +1,4 @@
-export type { Meeting, MeetingsByDay, ListMeetingsParams } from './model/types'
+export type { Meeting, MeetingHall, MeetingsByDay, ListMeetingsParams } from './model/types'
 export { useMeetingsCalendarList } from './model/use-meetings-calendar-list'
 export { meetingsCalendarQueryKey } from './lib/meetings-calendar-query'
 export { fromMeeting, mapBackendCalendarMeetings } from './lib/from-meeting'
