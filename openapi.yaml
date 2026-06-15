@@ -495,7 +495,7 @@ paths:
     post:
       operationId: meetings_create
       description: Доступно только менеджеру MAG; владелец встречи берётся из текущего
-        пользователя. Обязательно `hall_ids` (или `hall_id`) — id залов из GET /api/v1/halls/halls/.
+        пользователя. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
       summary: Создать встречу
       tags:
       - meetings
@@ -503,13 +503,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+              $ref: '#/components/schemas/MeetingCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+              $ref: '#/components/schemas/MeetingCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/MeetingCreateUpdateRequest'
+              $ref: '#/components/schemas/MeetingCreateRequest'
         required: true
       security:
       - jwtAuth: []
@@ -3136,7 +3136,7 @@ components:
       - period_end
       - period_start
       - results
-    MeetingCreateUpdateRequest:
+    MeetingCreateRequest:
       type: object
       properties:
         name:
@@ -3154,13 +3154,17 @@ components:
           items:
             type: integer
             minimum: 1
-          description: Один или несколько id залов из GET /api/v1/halls/halls/
+          writeOnly: true
+          description: Один или несколько id залов из GET /api/v1/halls/halls/.
+          minItems: 1
         hall_id:
           type: integer
           minimum: 1
-          description: 'Alias: один зал → [hall_id]'
+          writeOnly: true
+          description: Alias для одного зала, если не передан hall_ids.
       required:
       - comment
+      - hall_ids
       - meeting_datetime
       - name
     MeetingHall:
@@ -3821,11 +3825,11 @@ components:
           items:
             type: integer
             minimum: 1
-          description: Один или несколько id залов из GET /api/v1/halls/halls/
+          writeOnly: true
         hall_id:
           type: integer
           minimum: 1
-          description: 'Alias: один зал → [hall_id]'
+          writeOnly: true
     PatchedProjectMagManagerUpdateRequest:
       type: object
       properties:
