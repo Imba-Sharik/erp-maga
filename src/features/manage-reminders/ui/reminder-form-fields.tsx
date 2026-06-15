@@ -108,7 +108,8 @@ export function ReminderFormFields({ control }: { control: Control<ReminderFormV
       {notifyTelegram && !telegram.isLoading && !telegram.isLinked ? (
         <div className="flex flex-col gap-2 rounded-[10px] border border-[#E4D3B7] bg-[#FBF4E8] px-3 py-2.5">
           <p className="text-sm text-[#AA8540]">
-            Telegram-бот не привязан — уведомление в Telegram не придёт.
+            Telegram-бот не привязан. Привяжите его или выключите тумблер — иначе напоминание не
+            сохранится.
           </p>
           <Button
             type="button"

@@ -17,6 +17,8 @@ import { useRemindersDestroy } from '@/shared/api/generated/hooks/remindersContr
 import { useRemindersPartialUpdate } from '@/shared/api/generated/hooks/remindersController/useRemindersPartialUpdate'
 import { parseBusinessDatetime } from '@/shared/lib/date/business-datetime'
 
+import { getReminderErrorMessage } from '../lib/get-reminder-error-message'
+
 interface CreateContext {
   optimisticId?: number
 }
@@ -78,7 +80,9 @@ export function useCreateReminder({ queryParams, onSuccess }: UseCreateReminderO
   return {
     create,
     isPending: mutation.isPending,
-    errorMessage: mutation.isError ? 'Не удалось создать напоминание' : null,
+    errorMessage: mutation.error
+      ? getReminderErrorMessage(mutation.error, 'Не удалось создать напоминание')
+      : null,
     reset: mutation.reset,
   }
 }
@@ -133,7 +137,9 @@ export function useUpdateReminder({ queryParams, reminder, onSuccess }: UseUpdat
   return {
     update,
     isPending: mutation.isPending,
-    errorMessage: mutation.isError ? 'Не удалось изменить напоминание' : null,
+    errorMessage: mutation.error
+      ? getReminderErrorMessage(mutation.error, 'Не удалось изменить напоминание')
+      : null,
     reset: mutation.reset,
   }
 }
@@ -172,7 +178,9 @@ export function useDeleteReminder({ queryParams, onSuccess }: UseDeleteReminderO
   return {
     submit,
     isPending: mutation.isPending,
-    errorMessage: mutation.isError ? 'Не удалось удалить напоминание' : null,
+    errorMessage: mutation.error
+      ? getReminderErrorMessage(mutation.error, 'Не удалось удалить напоминание')
+      : null,
     reset: mutation.reset,
   }
 }
