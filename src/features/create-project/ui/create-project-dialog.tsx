@@ -86,6 +86,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     () => keyedOptionsToMultiSelect(buildLoftAssignmentOptions(lofts)),
     [lofts],
   )
+  const isSingleLoftSelect = lofts.length === 1
 
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(formSchema),
@@ -228,14 +229,25 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 <FormItem>
                   <FormLabel>Лофты</FormLabel>
                   <FormControl>
-                    <MultiSelect
-                      placeholder="Выберите лофты"
-                      values={field.value}
-                      options={loftOptions}
-                      onChange={handleLoftsChange}
-                      triggerClassName={TRIGGER_CLASS}
-                      disabled={selectDisabled}
-                    />
+                    {isSingleLoftSelect ? (
+                      <ClearableSelect
+                        placeholder="Выберите лофт"
+                        value={field.value[0] ?? null}
+                        options={loftOptions}
+                        onChange={(v) => handleLoftsChange(v ? [v] : [])}
+                        triggerClassName={TRIGGER_CLASS}
+                        disabled={selectDisabled}
+                      />
+                    ) : (
+                      <MultiSelect
+                        placeholder="Выберите лофты"
+                        values={field.value}
+                        options={loftOptions}
+                        onChange={handleLoftsChange}
+                        triggerClassName={TRIGGER_CLASS}
+                        disabled={selectDisabled}
+                      />
+                    )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
