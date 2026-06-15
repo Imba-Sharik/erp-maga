@@ -109,42 +109,32 @@ function PercentInput({
 interface ArticleRowProps {
   kind: ArticleKind
   values: ArticleValues
-  percent: number
   aspect: Aspect
   editable: boolean
   showValidation: boolean
   onChange: (patch: Partial<ArticleValues>) => void
 }
 
-function ArticleRow({
-  kind,
-  values,
-  percent,
-  aspect,
-  editable,
-  showValidation,
-  onChange,
-}: ArticleRowProps) {
+// % бонуса намеренно не показываем на этапах sales/expense — он считается,
+// но визуально живёт только на этапе «Бонус рассчитан» (StagePassedBonus).
+function ArticleRow({ kind, values, aspect, editable, showValidation, onChange }: ArticleRowProps) {
   const isEmpty = values[aspect] === null
   const fieldError = showValidation && isEmpty ? REQUIRED_FIELD_MESSAGE : undefined
 
   return (
     <StageField label={ARTICLE_LABELS[kind]} required error={fieldError}>
-      <div className="grid grid-cols-[1fr_56px] gap-1.5">
-        {editable ? (
-          <MoneyInput
-            value={values[aspect]}
-            invalid={Boolean(fieldError)}
-            onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
-          />
-        ) : (
-          <StageReadonlyBox
-            value={values[aspect] === null ? '—' : formatMoney(values[aspect])}
-            source="system"
-          />
-        )}
-        <StageReadonlyBox value={formatPercent(percent)} source="system" align="center" />
-      </div>
+      {editable ? (
+        <MoneyInput
+          value={values[aspect]}
+          invalid={Boolean(fieldError)}
+          onCommit={(n) => onChange({ [aspect]: n } as Partial<ArticleValues>)}
+        />
+      ) : (
+        <StageReadonlyBox
+          value={values[aspect] === null ? '—' : formatMoney(values[aspect])}
+          source="system"
+        />
+      )}
     </StageField>
   )
 }
@@ -270,7 +260,6 @@ export function FinanceBlockWithBackline({
         key={`${block}-${kind}`}
         kind={kind}
         values={values}
-        percent={values.bonusPercent}
         aspect={aspect}
         editable={editable}
         showValidation={showValidation}
