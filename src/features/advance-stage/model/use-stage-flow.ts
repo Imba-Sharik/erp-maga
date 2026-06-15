@@ -16,9 +16,11 @@ import { pickDocumentStageValues } from '@/entities/project-documents'
 import { stageDraftActions } from '@/entities/stage-draft'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+import { useProjectsClientPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsClientPartialUpdate'
 import { useProjectsContractPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsContractPartialUpdate'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
 
+import { buildClientPatchBody, mapClientBlockToFormData } from '../lib/to-client-patch-body'
 import { buildContractPatchBody, mapContractBlockToFormData } from '../lib/to-contract-patch-body'
 import { prepareArticlesForStage, prepareTaxRateForStage } from '../lib/prepare-articles-for-stage'
 import { buildTransitionBody } from '../lib/to-transition-body'
@@ -114,6 +116,7 @@ export function useStageFlow({
   const queryClient = useQueryClient()
   const transitionMutation = useProjectsTransitionsCreate()
   const contractPatchMutation = useProjectsContractPartialUpdate()
+  const clientPatchMutation = useProjectsClientPartialUpdate()
   // Черновик с прошлого визита — только свой (по пользователю) и только если этап не сменился.
   const initialDraft = useMemo(() => {
     const draft =
@@ -269,8 +272,33 @@ export function useStageFlow({
           values: { ...prev[currentStage]?.values, ...patch },
         },
       }))
+
+      if (currentStage !== 'plum_request' || projectId === undefined || !('magComment' in patch)) {
+        return
+      }
+
+      const data = buildClientPatchBody(patch)
+      if (Object.keys(data).length === 0) return
+
+      clientPatchMutation.mutate(
+        { id: projectId, data },
+        {
+          onSuccess: (block) => {
+            const synced = mapClientBlockToFormData(block)
+            setRecords((prev) => ({
+              ...prev,
+              [currentStage]: {
+                ...prev[currentStage],
+                values: { ...prev[currentStage]?.values, ...synced },
+              },
+            }))
+            queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
+            queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+          },
+        },
+      )
     },
-    [currentStage],
+    [clientPatchMutation, currentStage, projectId, queryClient],
   )
 
   const applyStageValuesLocally = useCallback(

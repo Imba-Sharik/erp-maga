@@ -92,6 +92,7 @@ export function buildTransitionBody({
   if (v.phone) body.phone = v.phone
   if (v.contactPerson) body.contact_person = v.contactPerson
   if (v.email) body.email = v.email
+  if (v.magComment) body.mag_comment = v.magComment
   if (v.contactComment) body.contact_comment = v.contactComment
   if (v.contactChannel) body.contact_channel = v.contactChannel
   if (v.calcComment) body.calculation_comment = v.calcComment

@@ -355,6 +355,12 @@ export function StageSectionCurrent({
                   placeholder={f.placeholder}
                   style={{ fieldSizing: 'fixed' }}
                   className="native-os-scrollbar h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
+                  onBlur={(event) => {
+                    field.onBlur()
+                    if (f.patchOnBlur) {
+                      onPatchValues?.({ [f.name]: event.target.value })
+                    }
+                  }}
                 />
               ) : f.type === 'select' ? (
                 stage === 'documents_confirmed' &&
@@ -389,6 +395,12 @@ export function StageSectionCurrent({
                   value={(field.value as string) ?? ''}
                   placeholder={f.placeholder}
                   className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
+                  onBlur={(event) => {
+                    field.onBlur()
+                    if (f.patchOnBlur) {
+                      onPatchValues?.({ [f.name]: event.target.value })
+                    }
+                  }}
                 />
               )}
             </FormControl>

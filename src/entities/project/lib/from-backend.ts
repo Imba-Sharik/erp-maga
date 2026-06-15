@@ -299,6 +299,7 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
         phone: b.phone || b.plum_phone,
         contactPerson: b.contact_person || b.plum_contact_person,
         email: b.email || b.plum_email,
+        magComment: b.mag_comment ?? undefined,
       },
     }),
   )
