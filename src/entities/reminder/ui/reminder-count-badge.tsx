@@ -19,7 +19,9 @@ export function ReminderCountBadge({ count }: { count: number }) {
       <span className="hidden @[700px]:inline">
         {count} {pluralReminders(count)}
       </span>
-      <span className="leading-none @[700px]:hidden">{count}</span>
+      <span className="flex size-full items-center justify-center leading-none @[700px]:hidden">
+        {count}
+      </span>
     </Badge>
   )
 }

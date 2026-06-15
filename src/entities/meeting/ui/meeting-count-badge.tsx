@@ -18,7 +18,9 @@ export function MeetingCountBadge({ count }: { count: number }) {
       <span className="hidden @[700px]:inline">
         {count} {pluralMeetings(count)}
       </span>
-      <span className="leading-none @[700px]:hidden">{count}</span>
+      <span className="flex size-full items-center justify-center leading-none @[700px]:hidden">
+        {count}
+      </span>
     </Badge>
   )
 }
