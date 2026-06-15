@@ -1897,7 +1897,7 @@ paths:
 
         **Доступ:** manager_mag — только свои проекты; lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
 
-        В `results`: event_type, event_type_label, client_company, phone, halls[] — залы проекта (внутренние hall_id / loft_id MAG; данные из каталога и ProjectEventHall). При отсутствии зала в каталоге — sync_error на проекте.
+        В `results`: event_type, event_type_label, plum_event_status, plum_event_status_label, is_from_plum, client_company, phone, halls[] — залы проекта (внутренние hall_id / loft_id MAG; данные из каталога и ProjectEventHall). При отсутствии зала в каталоге — sync_error на проекте.
       summary: 'Календарь: проекты за месяц / период'
       parameters:
       - in: query
@@ -1960,6 +1960,9 @@ paths:
                         hall_name: Зал B
                         loft_id: 2
                         loft_name: Loft Центр
+                      plum_event_status: '4'
+                      plum_event_status_label: Заявка
+                      is_from_plum: true
                       plum_lofthall_manager: Петров
                       stage: calculation_prepared
                       stage_label: Расчёт подготовлен
@@ -2137,6 +2140,249 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedOutOfMagProjectList'
+          description: ''
+  /api/v1/reminders/:
+    get:
+      operationId: reminders_list
+      description: Личные напоминания менеджера MAG. `date=YYYY-MM-DD` фильтрует записи
+        выбранного дня.
+      summary: Список напоминаний
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        description: Дата выбранного дня.
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Количество записей на страницу (по умолчанию 10, макс. 200).
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Смещение от начала выборки.
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReminderListPaginatedList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+    post:
+      operationId: reminders_create
+      description: Доступно только менеджеру MAG; владелец берётся из текущего пользователя.
+      summary: Создать напоминание
+      tags:
+      - reminders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReminderCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReminderCreateUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/reminders/{id}/:
+    get:
+      operationId: reminders_retrieve
+      summary: Детальная информация о напоминании
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Напоминание не найдено
+    patch:
+      operationId: reminders_partial_update
+      description: Только неотправленные напоминания (`sent_at` пусто).
+      summary: Изменить напоминание
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - reminders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReminderCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReminderCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReminderCreateUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Напоминание не найдено
+    delete:
+      operationId: reminders_destroy
+      description: Только неотправленные напоминания (`sent_at` пусто).
+      summary: Удалить напоминание
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Напоминание удалено
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Напоминание не найдено
+  /api/v1/reminders/calendar/:
+    get:
+      operationId: reminders_calendar_retrieve
+      description: Период задаётся парой `year`+`month` или `date_after`+`date_before`.
+        Дополнительно `date=YYYY-MM-DD` сужает выборку до одного дня внутри периода.
+      summary: Календарь напоминаний за месяц или период
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        description: Дата выбранного дня (доп. фильтр внутри периода).
+      - in: query
+        name: date_after
+        schema:
+          type: string
+          format: date
+        description: Начало произвольного периода.
+      - in: query
+        name: date_before
+        schema:
+          type: string
+          format: date
+        description: Конец произвольного периода.
+      - in: query
+        name: month
+        schema:
+          type: integer
+        description: Месяц 1-12.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Год календарного месяца.
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderCalendarResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
   /api/v1/telegram/link/:
     get:
@@ -2846,6 +3092,7 @@ components:
           - documents_uploaded
           - documents_re_requested
           - documents_reuploaded
+          - reminder_due
           - other
           type: string
           description: |-
@@ -2858,8 +3105,9 @@ components:
             * `documents_uploaded` - Документы загружены
             * `documents_re_requested` - Повторный запрос документов
             * `documents_reuploaded` - Документы прикреплены повторно
+            * `reminder_due` - Напоминание
             * `other` - Прочее
-          x-spec-enum-id: d535249535aa2240
+          x-spec-enum-id: 1d005612a26c9a11
           readOnly: true
           title: Тип события
         title:
@@ -3291,6 +3539,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
+    PaginatedReminderListPaginatedList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReminderListPaginated'
     PatchedContractBlockUpdateRequest:
       type: object
       description: PATCH /projects/{id}/contract/ при can_edit_contract — все поля
@@ -3412,6 +3683,24 @@ components:
         mag_manager_id:
           type: integer
           nullable: true
+    PatchedReminderCreateUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 255
+        comment:
+          type: string
+          title: Комментарий
+        reminder_datetime:
+          type: string
+          format: date-time
+          title: Дата и время напоминания
+        is_telegram_reminder:
+          type: boolean
+          title: Дублировать в Telegram
     PatchedSalesBlockUpdateRequest:
       type: object
       properties:
@@ -4025,6 +4314,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ProjectHallItem'
+        plum_event_status:
+          type: string
+          description: Код статуса мероприятия в Plum (строка с числом)
+        plum_event_status_label:
+          type: string
+          description: Человекочитаемый статус Plum (справочник LoftHall)
+        is_from_plum:
+          type: boolean
+          description: True — проект из синхронизации Plum; False — создан вручную
+            в ERP
         plum_lofthall_manager:
           type: string
         stage:
@@ -4078,8 +4377,11 @@ components:
       - event_type_label
       - halls
       - id
+      - is_from_plum
       - mag_manager
       - phone
+      - plum_event_status
+      - plum_event_status_label
       - plum_lofthall_manager
       - stage
       - stage_label
@@ -5211,6 +5513,125 @@ components:
           minLength: 1
       required:
       - to_stage
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Название
+        comment:
+          type: string
+          readOnly: true
+          title: Комментарий
+        reminder_datetime:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата и время напоминания
+        reminder_date:
+          type: string
+          readOnly: true
+        reminder_time:
+          type: string
+          readOnly: true
+        is_telegram_reminder:
+          type: boolean
+          readOnly: true
+          title: Дублировать в Telegram
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Отправлено
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Создано
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Обновлено
+      required:
+      - comment
+      - created_at
+      - id
+      - is_telegram_reminder
+      - name
+      - reminder_date
+      - reminder_datetime
+      - reminder_time
+      - sent_at
+      - updated_at
+    ReminderCalendarResponse:
+      type: object
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reminder'
+      required:
+      - count
+      - period_end
+      - period_start
+      - results
+    ReminderCreateUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 255
+        comment:
+          type: string
+          title: Комментарий
+        reminder_datetime:
+          type: string
+          format: date-time
+          title: Дата и время напоминания
+        is_telegram_reminder:
+          type: boolean
+          title: Дублировать в Telegram
+      required:
+      - name
+      - reminder_datetime
+    ReminderListPaginated:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reminder'
+      required:
+      - count
+      - next
+      - previous
+      - results
     SalesArticleLineSchema:
       type: object
       properties:
@@ -5569,6 +5990,7 @@ components:
           - documents_uploaded
           - documents_re_requested
           - documents_reuploaded
+          - reminder_due
           - other
         title:
           type: string
