@@ -44,6 +44,7 @@ export function useCreateMeeting({
           time: parsed?.time ?? '00:00',
           date: parsed?.date ?? date,
           managerId,
+          halls: [],
         }
         prependMeetingToCache(queryClient, queryParams, optimistic)
         return { optimisticId }
