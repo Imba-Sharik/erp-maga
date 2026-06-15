@@ -203,6 +203,8 @@ export interface ProjectDetail extends Project {
   plumStatus: PlumStatus
   plumComment?: string
   plumSyncedAt?: string
+  /** Менеджер PLUM (`plum_lofthall_manager` в API). */
+  plumLofthallManager?: string
   clientCompany: string
   clientStatus: PlumStatus
   finance: ProjectFinance
