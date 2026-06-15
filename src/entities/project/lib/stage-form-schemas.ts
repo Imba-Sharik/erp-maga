@@ -15,6 +15,7 @@ export const stageFormSchemas = {
     phone: ruPhone(),
     contactPerson: required(),
     email: z.union([z.literal(''), z.string().email('Невалидный email')]),
+    magComment: z.string().optional(),
     createdAt: z.string().optional(),
   }),
   primary_contact_done: z.object({

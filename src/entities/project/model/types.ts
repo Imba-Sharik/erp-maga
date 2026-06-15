@@ -103,6 +103,8 @@ export interface StageFormData {
   email?: string
   contactPerson?: string
   createdAt?: string
+  /** Комментарий менеджера MAG на этапе plum_request (не plum_comment). */
+  magComment?: string
 
   contactComment?: string
   contactChannel?: ContactChannel
