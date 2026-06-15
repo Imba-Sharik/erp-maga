@@ -28,8 +28,15 @@ export type { VenueFilterIds } from './lib/resolve-venue-filter-ids'
 export { DEFAULT_CITY_OPTIONS, plumCityLabelsByIds } from './lib/default-city-options'
 export { deriveCityOptionsFromLofts } from './lib/derive-city-options'
 export { scopeVenueCatalogByHallIds } from './lib/scope-venue-catalog-by-hall-ids'
+export type { LoftHallFormValues } from './lib/loft-hall-form-values'
 export { useLoftHallFilter } from './model/use-loft-hall-filter'
 export type { LoftHallFilter, UseLoftHallFilterOptions } from './model/use-loft-hall-filter'
+export { useLoftHallAssignment } from './model/use-loft-hall-assignment'
+export type {
+  LoftHallAssignment,
+  UseLoftHallAssignmentOptions,
+} from './model/use-loft-hall-assignment'
+export { LoftHallAssignmentFields } from './ui/loft-hall-assignment-fields'
 export { prefetchVenueCatalog } from './lib/prefetch-venue-catalog'
 export {
   hallsCatalogQueryOptions,
