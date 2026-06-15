@@ -74,9 +74,9 @@ export function CombinedCalendar({
             const reminders = remindersByDay.get(dayKey)?.length ?? 0
             if (!meetings && !reminders) return null
             return (
-              // По умолчанию плашки столбиком; только на узких телефонах (≤375px)
-              // ставим кружки в ряд без зазора, иначе второй кружок не влезает.
-              <div className="flex min-w-0 flex-col items-start gap-1.5 max-[375px]:flex-row max-[375px]:flex-nowrap max-[375px]:items-center max-[375px]:gap-0">
+              // Кружки (контейнер <700px) — в ряд, без переноса вниз; на самых узких
+              // убираем зазор, чтобы оба влезли. Текстовые плашки (≥700px) — столбиком.
+              <div className="flex min-w-0 flex-row flex-nowrap items-center gap-1 @max-[440px]/calendar:gap-0 @min-[700px]/calendar:flex-col @min-[700px]/calendar:items-start @min-[700px]/calendar:gap-1.5">
                 <MeetingCountBadge count={meetings} />
                 <ReminderCountBadge count={reminders} />
               </div>
