@@ -74,7 +74,7 @@ export function CombinedCalendar({
             const reminders = remindersByDay.get(dayKey)?.length ?? 0
             if (!meetings && !reminders) return null
             return (
-              <div className="flex min-w-0 flex-col gap-0.5">
+              <div className="flex min-w-0 flex-col gap-1.5">
                 <MeetingCountBadge count={meetings} />
                 <ReminderCountBadge count={reminders} />
               </div>
