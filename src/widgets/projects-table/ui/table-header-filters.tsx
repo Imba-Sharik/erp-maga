@@ -15,11 +15,24 @@ interface TableHeaderFiltersProps {
   managerOptionsError?: boolean
 }
 
+interface TableHeaderVenueFiltersProps {
+  columnFilters: ColumnFilters
+  restrictToHallIds?: readonly number[] | undefined
+  venueSelectDisabled?: boolean
+  onColumnFilterChange: (key: ColumnFilterKey, value: string | null) => void
+}
+
 export function TableHeaderLoftFilter({
   columnFilters,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   onColumnFilterChange,
-}: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
-  const { loftOptions, selectDisabled, shouldResetHall } = useLoftHallFilter(columnFilters.loft)
+}: TableHeaderVenueFiltersProps) {
+  const {
+    loftOptions,
+    selectDisabled: catalogDisabled,
+    shouldResetHall,
+  } = useLoftHallFilter(columnFilters.loft, { restrictToHallIds })
 
   return (
     <ClearableSelect
@@ -32,17 +45,20 @@ export function TableHeaderLoftFilter({
         if (shouldResetHall(v, columnFilters.hall)) onColumnFilterChange('hall', null)
       }}
       triggerClassName={HEADER_FILTER_TRIGGER}
-      disabled={selectDisabled}
+      disabled={catalogDisabled || venueSelectDisabled}
     />
   )
 }
 
 export function TableHeaderHallFilter({
   columnFilters,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   onColumnFilterChange,
-}: Pick<TableHeaderFiltersProps, 'columnFilters' | 'onColumnFilterChange'>) {
-  // Выбран лофт — показываем только его залы.
-  const { hallOptions, selectDisabled } = useLoftHallFilter(columnFilters.loft)
+}: TableHeaderVenueFiltersProps) {
+  const { hallOptions, selectDisabled: catalogDisabled } = useLoftHallFilter(columnFilters.loft, {
+    restrictToHallIds,
+  })
 
   return (
     <ClearableSelect
@@ -51,7 +67,7 @@ export function TableHeaderHallFilter({
       options={hallOptions}
       onChange={(v) => onColumnFilterChange('hall', v)}
       triggerClassName={HEADER_FILTER_TRIGGER}
-      disabled={selectDisabled}
+      disabled={catalogDisabled || venueSelectDisabled}
     />
   )
 }
