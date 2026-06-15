@@ -1,6 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
+import { formatMeetingVenueLine } from '../lib/format-meeting-venue'
 import type { Meeting } from '../model/types'
 
 interface MeetingCardProps {
@@ -18,6 +19,8 @@ export function MeetingCard({
   onDelete,
   className,
 }: MeetingCardProps) {
+  const venueLabel = formatMeetingVenueLine(meeting.halls)
+
   return (
     <article
       className={cn(
@@ -29,6 +32,7 @@ export function MeetingCard({
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-[#1B1A17]">{meeting.title}</h3>
           <p className="text-xs text-[#848484]">{meeting.time}</p>
+          {venueLabel ? <p className="text-xs text-[#ACACAC]">{venueLabel}</p> : null}
         </div>
         {editable ? (
           <div className="flex shrink-0 gap-1">

@@ -7,6 +7,11 @@ export {
   toMeetingUpdateRequest,
   buildMeetingDatetime,
 } from './lib/to-meeting-request'
+export {
+  formatMeetingVenueLabels,
+  formatMeetingVenueLine,
+  meetingHallsForHallIds,
+} from './lib/format-meeting-venue'
 export { meetingFormSchema } from './lib/meeting-form-schema'
 export type { MeetingFormValues } from './lib/meeting-form-schema'
 export { pluralMeetings } from './lib/plural'
