@@ -3,13 +3,16 @@ import { useCallback, useMemo } from 'react'
 import { DEFAULT_CITY_OPTIONS } from '../lib/default-city-options'
 import { deriveCityOptionsFromLofts } from '../lib/derive-city-options'
 import { hallBelongsToLoft, hallsForLoft } from '../lib/halls-by-loft'
-import { hallsToSelectOptions } from '../lib/to-select-options'
+import { scopeVenueCatalogByHallIds } from '../lib/scope-venue-catalog-by-hall-ids'
+import { hallsToSelectOptions, loftsToSelectOptions } from '../lib/to-select-options'
 import type { VenueSelectOption } from './types'
 import { useVenueCatalog } from './use-venue-catalog'
 
 export interface UseLoftHallFilterOptions {
   /** Для менеджера MAG — только закреплённые залы/лофты; скрывает лишние фильтры. */
   assigned?: boolean
+  /** Сузить каталог до указанных id залов (lead/admin при выборе менеджера). undefined — без ограничения. */
+  restrictToHallIds?: readonly number[] | undefined
 }
 
 export interface LoftHallFilter {
@@ -35,9 +38,21 @@ export function useLoftHallFilter(
   options?: UseLoftHallFilterOptions,
 ): LoftHallFilter {
   const assigned = options?.assigned ?? false
-  const { halls, lofts, hallOptions, loftOptions, isLoading, isError } = useVenueCatalog(
-    assigned ? { assigned: true } : undefined,
+  const restrictToHallIds = options?.restrictToHallIds
+  const {
+    halls: catalogHalls,
+    lofts: catalogLofts,
+    isLoading,
+    isError,
+  } = useVenueCatalog(assigned ? { assigned: true } : undefined)
+
+  const { halls, lofts } = useMemo(
+    () => scopeVenueCatalogByHallIds(catalogHalls, catalogLofts, restrictToHallIds),
+    [catalogHalls, catalogLofts, restrictToHallIds],
   )
+
+  const hallOptions = useMemo(() => hallsToSelectOptions(halls), [halls])
+  const loftOptions = useMemo(() => loftsToSelectOptions(lofts), [lofts])
 
   const filteredHallOptions = useMemo(() => {
     if (!loft) return hallOptions
