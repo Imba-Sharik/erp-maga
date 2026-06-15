@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Card } from '@/shared/ui/card'
 import { projectDetailPath } from '../lib/project-detail-path'
 import type { Project, ProjectBackOrigin } from '../model/types'
+import { ProjectPlumStatusLine } from './project-plum-status-line'
 import { ProjectStageBadge } from './project-stage-badge'
 import { ProjectTelegramLink } from './project-telegram-link'
 
@@ -48,6 +49,7 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
           Телефон: <span className="text-funnel-preproject">{project.phone}</span>
         </p>
       )}
+      <ProjectPlumStatusLine project={project} />
       {project.phone && <ProjectTelegramLink phone={project.phone} onClick={stop} />}
     </Card>
   )

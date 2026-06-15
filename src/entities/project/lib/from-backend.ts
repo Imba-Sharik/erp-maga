@@ -232,9 +232,11 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     phone: b.phone ?? '',
     email: '',
     plumCardUrl: '',
-    isFromPlum: false,
-    plumEventStatus: null,
-    plumEventStatusLabel: null,
+    isFromPlum: Boolean(b.is_from_plum),
+    plumEventStatus: parsePlumEventStatusCode(b.plum_event_status),
+    plumEventStatusLabel:
+      mapPlumEventStatusLabel(b.plum_event_status_label) ??
+      labelByPlumStatusCode(parsePlumEventStatusCode(b.plum_event_status)),
     updatedAt: '',
     createdAt: '',
   }

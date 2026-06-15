@@ -1,4 +1,5 @@
 import { Loader2 } from 'lucide-react'
+import { PlumEventStatusFilterSelect } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { useIsMobile } from '@/shared/hooks/use-mobile'
@@ -55,6 +56,8 @@ interface CalendarToolbarProps {
   managersSelectError?: boolean
   restrictToHallIds?: readonly number[] | undefined
   venueSelectDisabled?: boolean
+  plumEventStatus: string[]
+  onChangePlumEventStatus: (values: string[]) => void
   isFetching?: boolean
 }
 
@@ -106,6 +109,8 @@ export function CalendarToolbar({
   managersSelectError = false,
   restrictToHallIds,
   venueSelectDisabled = false,
+  plumEventStatus,
+  onChangePlumEventStatus,
   isFetching = false,
 }: CalendarToolbarProps) {
   const layout = showManagerFilter ? TOOLBAR_LAYOUT.withManagerFilter : TOOLBAR_LAYOUT.default
@@ -193,6 +198,11 @@ export function CalendarToolbar({
             disabled={selectDisabled}
           />
         ) : null}
+        <PlumEventStatusFilterSelect
+          values={plumEventStatus}
+          onChange={onChangePlumEventStatus}
+          triggerClassName={layout.triggerBase}
+        />
 
         <MonthYearNavigator
           visibleMonth={visibleMonth}

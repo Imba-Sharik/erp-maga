@@ -4,6 +4,8 @@ export interface CalendarProjectsFilter {
   search: string
   hall: string | null
   loft: string | null
+  /** Коды статуса Plum (строки «1»…«14»). */
+  plumEventStatus: string[]
 }
 
 /**
@@ -21,10 +23,20 @@ export function filterCalendarProjects(
   filter: CalendarProjectsFilter,
 ): Project[] {
   const search = filter.search.trim().toLowerCase()
+  const plumStatusCodes = filter.plumEventStatus
+    .map((value) => Number(value))
+    .filter((code) => Number.isFinite(code))
+
   return projects.filter((p) => {
     const venue = (p.hallLoft || `${p.loft} ${p.hall}`).toLowerCase()
     if (filter.hall && !venue.includes(filter.hall.toLowerCase())) return false
     if (filter.loft && !venue.includes(filter.loft.toLowerCase())) return false
+    if (
+      plumStatusCodes.length > 0 &&
+      (p.plumEventStatus === null || !plumStatusCodes.includes(p.plumEventStatus))
+    ) {
+      return false
+    }
     if (search) {
       const haystack = `${p.title} ${p.manager}`.toLowerCase()
       if (!haystack.includes(search)) return false

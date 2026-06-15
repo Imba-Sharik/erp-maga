@@ -55,6 +55,7 @@ export function CalendarPage() {
   const [hall, setHall] = useState<string | null>(null)
   const [magManagerId, setMagManagerId] = useState<string | null>(null)
   const [projectSearch, setProjectSearch] = useState('')
+  const [plumEventStatus, setPlumEventStatus] = useState<string[]>([])
 
   const { event_date_after, event_date_before } = useMemo(() => {
     const gridStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 })
@@ -97,9 +98,10 @@ export function CalendarPage() {
           search: projectSearch,
           hall,
           loft,
+          plumEventStatus,
         }),
       ),
-    [projects, projectSearch, hall, loft],
+    [projects, projectSearch, hall, loft, plumEventStatus],
   )
 
   const toggleSelectedDate = useCallback((date: Date) => {
@@ -172,6 +174,8 @@ export function CalendarPage() {
             managersSelectError={managersSelectError}
             restrictToHallIds={restrictToHallIds}
             venueSelectDisabled={venueSelectDisabled}
+            plumEventStatus={plumEventStatus}
+            onChangePlumEventStatus={setPlumEventStatus}
             totalThisMonth={totalThisMonth}
             isLoading={isLoading}
             isFetching={isFetching}
