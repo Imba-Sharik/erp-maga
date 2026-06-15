@@ -45,7 +45,7 @@ export function CombinedCalendar({
     <div className="@container/calendar flex min-w-0 flex-col gap-4 overflow-x-hidden">
       <div className="flex min-w-0 flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:items-center @min-[880px]/calendar:justify-between @min-[880px]/calendar:gap-2.5">
         {leading ? <div className="min-w-0">{leading}</div> : null}
-        <div className="flex min-w-0 items-center gap-2.5 @min-[880px]/calendar:justify-end">
+        <div className="flex min-w-0 items-center gap-2.5 @min-[880px]/calendar:ml-auto @min-[880px]/calendar:justify-end">
           <Loader2
             aria-hidden={!isFetching}
             aria-label={isFetching ? 'Загрузка' : undefined}
