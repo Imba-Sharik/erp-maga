@@ -13,6 +13,7 @@ import { useProjectTab } from '@/features/project-tabs'
 import { ProjectActivityLog } from '@/widgets/project-activity-log'
 import { ProjectDetailAside } from '@/widgets/project-detail-aside'
 import { ProjectDocuments } from '@/widgets/project-documents'
+import { ProjectReminders } from '@/widgets/project-reminders'
 
 import { ProjectDetailMainCard } from './project-detail-main-card'
 import { ProjectDetailStages } from './project-detail-stages'
@@ -54,6 +55,11 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
             <ProjectActivityLog projectId={Number(project.id)} />
           ) : tab === 'documents' ? (
             <ProjectDocuments project={project} getRecord={flow.getRecord} />
+          ) : tab === 'reminders' && currentUser.role !== 'director' ? (
+            <ProjectReminders
+              projectId={Number(project.id)}
+              editable={currentUser.role === 'manager' || currentUser.role === 'admin'}
+            />
           ) : (
             <ProjectDetailStages project={project} flow={flow} />
           )}

@@ -9,7 +9,7 @@ export function ProjectDetailTabsRow({
   onOutsideMagClick?: () => void
 }) {
   return (
-    <div className="flex w-full flex-row items-center justify-between gap-3 md:gap-4">
+    <div className="@container/tabrow flex w-full flex-row items-center justify-between gap-3 md:gap-4">
       <ProjectTabs />
       {showOutsideMagButton ? (
         <Button

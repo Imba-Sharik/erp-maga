@@ -10,10 +10,12 @@ interface MonthCalendarGridProps {
   visibleMonth: Date
   selectedKeys: ReadonlySet<string>
   today: Date
-  countsByDay: Map<string, number>
+  countsByDay?: Map<string, number>
   onToggleDate: (date: Date) => void
   onPaintDates?: (keys: string[], mode: PaintMode) => void
-  renderBadge: (count: number) => ReactNode
+  renderBadge?: (count: number) => ReactNode
+  /** Полный контроль над бейджами дня (напр. встречи + напоминания вместе). Приоритетнее `renderBadge`. */
+  renderDayBadge?: (dayKey: string) => ReactNode
   isLoading?: boolean
   enablePaintSelect?: boolean
 }
@@ -26,6 +28,7 @@ export function MonthCalendarGrid({
   onToggleDate,
   onPaintDates,
   renderBadge,
+  renderDayBadge,
   isLoading = false,
   enablePaintSelect = true,
 }: MonthCalendarGridProps) {
@@ -51,9 +54,10 @@ export function MonthCalendarGrid({
 
       <div className={cn('grid grid-cols-7', isDragging && 'select-none')}>
         {days.map((day, i) => {
-          const count = countsByDay.get(day.key) ?? 0
+          const count = countsByDay?.get(day.key) ?? 0
           const colIdx = i % 7
           const isLastRow = i >= days.length - 7
+          const badge = renderDayBadge ? renderDayBadge(day.key) : (renderBadge?.(count) ?? null)
           return (
             <MonthDayCell
               key={day.key}
@@ -62,7 +66,7 @@ export function MonthCalendarGrid({
               outOfMonth={day.outOfMonth}
               isToday={isSameDay(day.date, today)}
               isSelected={effectiveSelectedKeys.has(day.key)}
-              badge={renderBadge(count)}
+              badge={badge}
               onSelect={() => {
                 if (enablePaintSelect && paintSelect.shouldSuppressClick()) return
                 onToggleDate(day.date)

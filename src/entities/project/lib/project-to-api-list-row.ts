@@ -11,6 +11,7 @@ const EMPTY_API_ROW_FIELDS = {
   plum_event_status: '',
   plum_event_status_label: '',
   plum_comment: '',
+  mag_comment: '',
   plum_client_company: '',
   plum_contact_person: '',
   plum_phone: '',

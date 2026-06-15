@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { format, isValid, parseISO } from 'date-fns'
+import { ru } from 'date-fns/locale'
 
 import {
   meetingFormSchema,
@@ -7,7 +9,14 @@ import {
   type MeetingFormValues,
 } from '@/entities/meeting'
 import { Button } from '@/shared/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
 import { RequiredLabel } from '@/shared/ui/required-label'
@@ -17,6 +26,11 @@ import { TimeField } from '@/shared/ui/time-field'
 import { useCreateMeeting } from '../model/use-create-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '' }
+
+function formatDayLabel(iso: string): string | null {
+  const d = parseISO(iso)
+  return isValid(d) ? format(d, 'd MMMM yyyy', { locale: ru }) : null
+}
 
 export interface CreateMeetingDialogProps {
   open: boolean
@@ -68,6 +82,9 @@ export function CreateMeetingDialog({
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle className="font-heading text-[#1B1A17]">Добавить встречу</DialogTitle>
+          {formatDayLabel(date) ? (
+            <DialogDescription>На {formatDayLabel(date)}</DialogDescription>
+          ) : null}
         </DialogHeader>
         <Form {...form}>
           <form
