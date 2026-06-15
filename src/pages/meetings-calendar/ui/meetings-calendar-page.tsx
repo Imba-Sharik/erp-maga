@@ -34,6 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
+import { CombinedCalendar } from '@/widgets/combined-calendar'
+import { CombinedDayPanel } from '@/widgets/combined-day-panel'
 import { MeetingCalendar } from '@/widgets/meeting-calendar'
 import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
 import { ReminderCalendar } from '@/widgets/reminder-calendar'
@@ -41,7 +43,7 @@ import { ReminderDayPanel } from '@/widgets/reminder-day-panel'
 
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
-type CalendarTab = 'meetings' | 'reminders'
+type CalendarTab = 'meetings' | 'reminders' | 'both'
 
 function parseManagerId(value: string | null | undefined): number | null {
   if (!value) return null
@@ -140,19 +142,20 @@ export function MeetingsCalendarPage() {
   const panelMaxHeightPx =
     isWideCalendarLayout && calendarSize?.height ? calendarSize.height : undefined
 
-  const isReminders = showReminders && calendarTab === 'reminders'
+  const mode: CalendarTab = showReminders ? calendarTab : 'meetings'
 
   const calendarViewSelect = showReminders ? (
     <Select value={calendarTab} onValueChange={(v) => setCalendarTab(v as CalendarTab)}>
       <SelectTrigger
         aria-label="Что показать в календаре"
-        className="h-10! w-fit min-w-44 rounded-[10px] border-[#B1B1B1] bg-white text-sm font-normal text-[#454545]"
+        className="h-10! w-fit min-w-52 rounded-[10px] border-[#B1B1B1] bg-white text-sm font-normal text-[#454545]"
       >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="meetings">Встречи</SelectItem>
         <SelectItem value="reminders">Напоминания</SelectItem>
+        <SelectItem value="both">Встречи и напоминания</SelectItem>
       </SelectContent>
     </Select>
   ) : null
@@ -168,7 +171,22 @@ export function MeetingsCalendarPage() {
 
       <div className="grid gap-6 @min-[1400px]/main:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] @min-[1400px]/main:items-start @min-[1400px]/main:gap-10">
         <div ref={calendarRef} className="min-h-0 min-w-0">
-          {isReminders ? (
+          {mode === 'both' ? (
+            <CombinedCalendar
+              visibleMonth={visibleMonth}
+              selectedDate={selectedDate}
+              today={today}
+              meetingsByDay={meetingsByDay}
+              remindersByDay={remindersByDay}
+              onChangeMonth={setVisibleMonth}
+              onSelectDate={handleSelectDate}
+              leading={calendarViewSelect}
+              totalMeetings={totalThisMonth}
+              totalReminders={totalRemindersThisMonth}
+              isLoading={isLoading || remindersLoading}
+              isFetching={isFetching || remindersFetching}
+            />
+          ) : mode === 'reminders' ? (
             <ReminderCalendar
               visibleMonth={visibleMonth}
               selectedDate={selectedDate}
@@ -203,7 +221,21 @@ export function MeetingsCalendarPage() {
           )}
         </div>
         <div className="min-h-0 min-w-0">
-          {isReminders ? (
+          {mode === 'both' ? (
+            <CombinedDayPanel
+              selectedDate={selectedDate}
+              meetingsByDay={meetingsByDay}
+              remindersByDay={remindersByDay}
+              editable={editable}
+              maxHeightPx={panelMaxHeightPx}
+              onAddMeeting={() => setCreateOpen(true)}
+              onAddReminder={() => setReminderCreateOpen(true)}
+              onEditMeeting={setEditTarget}
+              onDeleteMeeting={setDeleteTarget}
+              onEditReminder={setReminderEditTarget}
+              onDeleteReminder={setReminderDeleteTarget}
+            />
+          ) : mode === 'reminders' ? (
             <ReminderDayPanel
               selectedDate={selectedDate}
               remindersByDay={remindersByDay}
