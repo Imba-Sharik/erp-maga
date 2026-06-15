@@ -27,6 +27,8 @@ interface ProjectCalendarProps {
   managersSelectError?: boolean
   restrictToHallIds?: readonly number[] | undefined
   venueSelectDisabled?: boolean
+  plumEventStatus: string[]
+  onChangePlumEventStatus: (values: string[]) => void
   totalThisMonth: number
   isLoading?: boolean
   isFetching?: boolean
@@ -54,6 +56,8 @@ export function ProjectCalendar({
   managersSelectError = false,
   restrictToHallIds,
   venueSelectDisabled = false,
+  plumEventStatus,
+  onChangePlumEventStatus,
   totalThisMonth,
   isLoading = false,
   isFetching = false,
@@ -82,6 +86,8 @@ export function ProjectCalendar({
         managersSelectError={managersSelectError}
         restrictToHallIds={restrictToHallIds}
         venueSelectDisabled={venueSelectDisabled}
+        plumEventStatus={plumEventStatus}
+        onChangePlumEventStatus={onChangePlumEventStatus}
         isFetching={isFetching}
       />
       <div>
