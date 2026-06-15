@@ -58,7 +58,6 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
           ) : tab === 'reminders' && currentUser.role !== 'director' ? (
             <ProjectReminders
               projectId={Number(project.id)}
-              managerId={Number(currentUser.id) || 0}
               editable={currentUser.role === 'manager' || currentUser.role === 'admin'}
             />
           ) : (

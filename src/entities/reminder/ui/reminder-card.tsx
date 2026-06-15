@@ -35,6 +35,7 @@ export function ReminderCard({
                 <Send className="size-3" />В Telegram
               </span>
             ) : null}
+            {reminder.sentAt ? <span className="text-xs text-[#9AAE8C]">Отправлено</span> : null}
           </div>
         </div>
         {editable ? (

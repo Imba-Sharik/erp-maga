@@ -1,4 +1,4 @@
-import { reminderActions, type Reminder } from '@/entities/reminder'
+import type { Reminder } from '@/entities/reminder'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -13,19 +13,20 @@ export interface ConfirmDeleteReminderDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   reminder: Reminder | null
+  isPending?: boolean
+  errorMessage?: string | null
+  onConfirm: (reminder: Reminder) => void
 }
 
+/** Презентационное подтверждение удаления; `onConfirm` инжектит API/локальную логику. */
 export function ConfirmDeleteReminderDialog({
   open,
   onOpenChange,
   reminder,
+  isPending = false,
+  errorMessage = null,
+  onConfirm,
 }: ConfirmDeleteReminderDialogProps) {
-  const handleDelete = () => {
-    if (!reminder) return
-    reminderActions.remove(reminder.id)
-    onOpenChange(false)
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
@@ -38,12 +39,14 @@ export function ConfirmDeleteReminderDialog({
             <p className="text-sm text-[#454545]">Напоминание: {reminder.title}</p>
           ) : null}
         </DialogHeader>
+        {errorMessage ? <p className="text-destructive text-sm">{errorMessage}</p> : null}
         <DialogFooter>
           <Button
             type="button"
             variant="outline"
             className="rounded-[10px]"
             onClick={() => onOpenChange(false)}
+            disabled={isPending}
           >
             Отмена
           </Button>
@@ -51,10 +54,10 @@ export function ConfirmDeleteReminderDialog({
             type="button"
             variant="destructive"
             className="rounded-[10px]"
-            disabled={!reminder}
-            onClick={handleDelete}
+            disabled={isPending || !reminder}
+            onClick={() => reminder && onConfirm(reminder)}
           >
-            Удалить
+            {isPending ? 'Удаление…' : 'Удалить'}
           </Button>
         </DialogFooter>
       </DialogContent>

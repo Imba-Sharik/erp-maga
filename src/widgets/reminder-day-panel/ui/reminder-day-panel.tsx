@@ -92,7 +92,7 @@ export function ReminderDayPanel({
                     <ReminderCard
                       key={reminder.id}
                       reminder={reminder}
-                      editable={editable}
+                      editable={editable && !reminder.sentAt}
                       onEdit={onEditReminder}
                       onDelete={onDeleteReminder}
                     />

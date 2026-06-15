@@ -12,7 +12,8 @@ import {
 import {
   countRemindersInMonth,
   groupRemindersByDay,
-  useReminders,
+  useRemindersCalendarList,
+  type ListRemindersParams,
   type Reminder,
 } from '@/entities/reminder'
 import { useUserRole } from '@/entities/user-role'
@@ -20,8 +21,9 @@ import { ConfirmDeleteMeetingDialog } from '@/features/delete-meeting'
 import { CreateMeetingDialog } from '@/features/create-meeting'
 import { EditMeetingDialog } from '@/features/edit-meeting'
 import {
-  ConfirmDeleteReminderDialog,
-  ReminderFormDialog,
+  CreateReminderDialog,
+  DeleteReminderDialog,
+  EditReminderDialog,
 } from '@/features/manage-reminders'
 import { toDayKey } from '@/shared/lib/date'
 import { useElementSize } from '@/shared/hooks/use-element-size'
@@ -107,13 +109,17 @@ export function MeetingsCalendarPage() {
     [meetingsByDay, visibleMonth],
   )
 
-  // Напоминания живут в локальном сторе (бэка пока нет). Менеджер видит свои.
-  const myManagerId = parseManagerId(currentUser.id) ?? 0
-  const allReminders = useReminders()
-  const remindersByDay = useMemo(
-    () => groupRemindersByDay(allReminders.filter((r) => r.managerId === myManagerId)),
-    [allReminders, myManagerId],
+  // Напоминания (user-scoped) с бэка /reminders/calendar/.
+  const reminderQueryParams: ListRemindersParams = useMemo(
+    () => ({ dateFrom, dateTo }),
+    [dateFrom, dateTo],
   )
+  const {
+    data: reminderData,
+    isLoading: remindersLoading,
+    isFetching: remindersFetching,
+  } = useRemindersCalendarList(reminderQueryParams)
+  const remindersByDay = useMemo(() => groupRemindersByDay(reminderData ?? []), [reminderData])
   const totalRemindersThisMonth = useMemo(
     () => countRemindersInMonth(remindersByDay, visibleMonth),
     [remindersByDay, visibleMonth],
@@ -172,6 +178,8 @@ export function MeetingsCalendarPage() {
               onSelectDate={handleSelectDate}
               totalThisMonth={totalRemindersThisMonth}
               leading={calendarViewSelect}
+              isLoading={remindersLoading}
+              isFetching={remindersFetching}
             />
           ) : (
             <MeetingCalendar
@@ -246,27 +254,26 @@ export function MeetingsCalendarPage() {
       {showReminders ? (
         <>
           {editable && selectedDateKey ? (
-            <ReminderFormDialog
+            <CreateReminderDialog
               open={reminderCreateOpen}
               onOpenChange={setReminderCreateOpen}
-              managerId={myManagerId}
-              projectId={null}
               defaultDate={selectedDateKey}
+              queryParams={reminderQueryParams}
             />
           ) : null}
 
-          <ReminderFormDialog
+          <EditReminderDialog
             open={reminderEditTarget !== null}
             onOpenChange={(open) => !open && setReminderEditTarget(null)}
-            managerId={myManagerId}
-            projectId={reminderEditTarget?.projectId ?? null}
             reminder={reminderEditTarget}
+            queryParams={reminderQueryParams}
           />
 
-          <ConfirmDeleteReminderDialog
+          <DeleteReminderDialog
             open={reminderDeleteTarget !== null}
             onOpenChange={(open) => !open && setReminderDeleteTarget(null)}
             reminder={reminderDeleteTarget}
+            queryParams={reminderQueryParams}
           />
         </>
       ) : null}

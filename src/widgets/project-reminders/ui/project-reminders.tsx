@@ -3,20 +3,18 @@ import { format } from 'date-fns'
 import { Plus } from 'lucide-react'
 
 import {
+  reminderActions,
   ReminderCard,
   sortRemindersByTime,
   useReminders,
   type Reminder,
+  type ReminderFormValues,
 } from '@/entities/reminder'
-import {
-  ConfirmDeleteReminderDialog,
-  ReminderFormDialog,
-} from '@/features/manage-reminders'
+import { ConfirmDeleteReminderDialog, ReminderFormDialog } from '@/features/manage-reminders'
 import { Button } from '@/shared/ui/button'
 
 interface ProjectRemindersProps {
   projectId: number
-  managerId: number
   /** Может ли текущая роль создавать/править напоминания */
   editable?: boolean
 }
@@ -24,9 +22,11 @@ interface ProjectRemindersProps {
 /**
  * Таб «Напоминания» внутри проекта. Менеджер вносит события по проекту,
  * чтобы получать уведомления в ЕРП и (опционально) в Telegram.
- * Бэка пока нет — данные живут в локальном сторе напоминаний.
+ *
+ * Бэка под ПРОЕКТНЫЕ напоминания пока нет (есть только user-scoped /reminders/),
+ * поэтому таб — визуальная заготовка на локальном сторе.
  */
-export function ProjectReminders({ projectId, managerId, editable = true }: ProjectRemindersProps) {
+export function ProjectReminders({ projectId, editable = true }: ProjectRemindersProps) {
   const allReminders = useReminders()
   const reminders = useMemo(() => {
     const forProject = allReminders.filter((r) => r.projectId === projectId)
@@ -38,6 +38,31 @@ export function ProjectReminders({ projectId, managerId, editable = true }: Proj
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null)
 
   const today = format(new Date(), 'yyyy-MM-dd')
+
+  const handleCreate = (values: ReminderFormValues) => {
+    reminderActions.add({
+      title: values.title,
+      comment: values.comment,
+      date: values.date,
+      time: values.time,
+      notifyTelegram: values.notifyTelegram,
+      sentAt: null,
+      projectId,
+    })
+    setCreateOpen(false)
+  }
+
+  const handleUpdate = (values: ReminderFormValues) => {
+    if (!editTarget) return
+    reminderActions.update(editTarget.id, {
+      title: values.title,
+      comment: values.comment,
+      date: values.date,
+      time: values.time,
+      notifyTelegram: values.notifyTelegram,
+    })
+    setEditTarget(null)
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -78,21 +103,23 @@ export function ProjectReminders({ projectId, managerId, editable = true }: Proj
       <ReminderFormDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        managerId={managerId}
-        projectId={projectId}
         defaultDate={today}
+        onSubmit={handleCreate}
       />
       <ReminderFormDialog
         open={editTarget !== null}
         onOpenChange={(open) => !open && setEditTarget(null)}
-        managerId={managerId}
-        projectId={projectId}
         reminder={editTarget}
+        onSubmit={handleUpdate}
       />
       <ConfirmDeleteReminderDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         reminder={deleteTarget}
+        onConfirm={(reminder) => {
+          reminderActions.remove(reminder.id)
+          setDeleteTarget(null)
+        }}
       />
     </div>
   )
