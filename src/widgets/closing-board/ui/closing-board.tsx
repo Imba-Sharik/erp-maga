@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
-import { resolveManagerFilterName, useManagersDirectory } from '@/entities/manager'
+import {
+  resolveManagerFilterName,
+  useManagerVenueRestriction,
+  useManagersDirectory,
+} from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
@@ -11,6 +15,7 @@ import { buildKanbanListParams } from '@/widgets/projects-board/lib/build-kanban
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import {
   EMPTY_COLUMN_FILTERS,
+  applyColumnFilterChange,
   filterProjectsTable,
   ProjectsTableView,
   type ColumnFilterKey,
@@ -48,6 +53,7 @@ export function ClosingBoard({
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
 
   const {
+    managers,
     selectOptions,
     filterOptions,
     isLoading: isManagersLoading,
@@ -65,6 +71,12 @@ export function ClosingBoard({
   const [archiveSearch, setArchiveSearch] = useState('')
   const [columnView, setColumnView] = useState<ClosingColumnView>('closing-general')
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
+
+  const { restrictToHallIds, venueSelectDisabled } = useManagerVenueRestriction({
+    managerId: columnFilters.manager,
+    managers,
+    managersLoading: isManagersLoading,
+  })
 
   const debouncedSearch = useDebouncedValue(search)
   const debouncedArchiveSearch = useDebouncedValue(archiveSearch)
@@ -123,7 +135,7 @@ export function ClosingBoard({
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => ({ ...prev, [key]: value }))
+    setColumnFilters((prev) => applyColumnFilterChange(prev, key, value))
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
@@ -176,6 +188,8 @@ export function ClosingBoard({
             directoryOptions={selectOptions}
             managersSelectLoading={isManagersLoading}
             managersSelectError={isManagersError}
+            restrictToHallIds={restrictToHallIds}
+            venueSelectDisabled={venueSelectDisabled}
             onColumnFilterChange={handleColumnFilterChange}
             onPlumEventStatusChange={handlePlumEventStatusChange}
             isLoading={archiveQuery.isLoading}
@@ -204,6 +218,8 @@ export function ClosingBoard({
             directoryOptions={selectOptions}
             managersSelectLoading={isManagersLoading}
             managersSelectError={isManagersError}
+            restrictToHallIds={restrictToHallIds}
+            venueSelectDisabled={venueSelectDisabled}
             onColumnFilterChange={handleColumnFilterChange}
             onPlumEventStatusChange={handlePlumEventStatusChange}
             isLoading={activeTableQuery.isLoading}
