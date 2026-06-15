@@ -18,7 +18,7 @@ import { TimeField } from '@/shared/ui/time-field'
 
 import { useUpdateMeeting } from '../model/use-update-meeting'
 
-const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '' }
+const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
 export interface EditMeetingDialogProps {
   open: boolean
@@ -41,10 +41,18 @@ export function EditMeetingDialog({
 
   useEffect(() => {
     if (meeting && open) {
+      const hallIds = meeting.halls.map((hall) => String(hall.hallId))
+      const loftIds = [
+        ...new Set(
+          meeting.halls.flatMap((hall) => (hall.loftId == null ? [] : [String(hall.loftId)])),
+        ),
+      ]
       form.reset({
         title: meeting.title,
         comment: meeting.comment,
         time: meeting.time,
+        lofts: loftIds,
+        halls: hallIds,
       })
     }
   }, [meeting, open, form])
