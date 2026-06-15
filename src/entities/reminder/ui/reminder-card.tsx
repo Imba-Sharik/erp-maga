@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FolderOpen, Pencil, Send, Trash2 } from 'lucide-react'
+import { FolderOpen, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 import type { Reminder } from '../model/types'
@@ -36,11 +36,6 @@ export function ReminderCard({
           <h3 className="truncate text-sm font-semibold text-[#1B1A17]">{reminder.title}</h3>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="text-xs text-[#848484]">{reminder.time}</span>
-            {reminder.notifyTelegram ? (
-              <span className="inline-flex items-center gap-1 text-xs text-[#4B61B9]">
-                <Send className="size-3" />В Telegram
-              </span>
-            ) : null}
             {reminder.sentAt ? <span className="text-xs text-[#9AAE8C]">Отправлено</span> : null}
             {projectHref ? (
               <Link
