@@ -74,7 +74,9 @@ export function CombinedCalendar({
             const reminders = remindersByDay.get(dayKey)?.length ?? 0
             if (!meetings && !reminders) return null
             return (
-              <div className="flex min-w-0 flex-col gap-1.5">
+              // Компактные (квадратные) ячейки: плашки-кружки в ряд, иначе нижняя обрезается.
+              // Крупные ячейки (≥1101): текстовые плашки столбиком.
+              <div className="flex min-w-0 flex-row flex-wrap items-center gap-1 @min-[1101px]/calendar:flex-col @min-[1101px]/calendar:flex-nowrap @min-[1101px]/calendar:items-start @min-[1101px]/calendar:gap-1.5">
                 <MeetingCountBadge count={meetings} />
                 <ReminderCountBadge count={reminders} />
               </div>
