@@ -21,7 +21,7 @@ export function ReminderCard({
   return (
     <article
       className={cn(
-        'flex flex-col gap-2 rounded-[10px] border border-[#E8E8E8] bg-white p-3',
+        'border-draft-highlight/45 flex flex-col gap-2 rounded-[10px] border bg-white p-3',
         className,
       )}
     >
