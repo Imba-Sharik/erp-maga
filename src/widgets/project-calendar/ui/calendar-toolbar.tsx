@@ -53,6 +53,8 @@ interface CalendarToolbarProps {
   managerFilterOptions?: readonly SelectOption[]
   managersSelectLoading?: boolean
   managersSelectError?: boolean
+  restrictToHallIds?: readonly number[] | undefined
+  venueSelectDisabled?: boolean
   isFetching?: boolean
 }
 
@@ -102,14 +104,22 @@ export function CalendarToolbar({
   managerFilterOptions = [],
   managersSelectLoading = false,
   managersSelectError = false,
+  restrictToHallIds,
+  venueSelectDisabled = false,
   isFetching = false,
 }: CalendarToolbarProps) {
   const layout = showManagerFilter ? TOOLBAR_LAYOUT.withManagerFilter : TOOLBAR_LAYOUT.default
   const isMobile = useIsMobile()
   const role = useUserRole()
   const isManagerRole = role === 'manager'
-  const { loftOptions, hallOptions, showLoftFilter, selectDisabled, shouldResetHall } =
-    useLoftHallFilter(loft, { assigned: isManagerRole })
+  const {
+    loftOptions,
+    hallOptions,
+    showLoftFilter,
+    selectDisabled: catalogDisabled,
+    shouldResetHall,
+  } = useLoftHallFilter(loft, { assigned: isManagerRole, restrictToHallIds })
+  const selectDisabled = catalogDisabled || venueSelectDisabled
   const handleChangeLoft = (next: string | null) => {
     onChangeLoft(next)
     if (shouldResetHall(next, hall)) onChangeHall(null)
