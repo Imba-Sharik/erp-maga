@@ -93,25 +93,28 @@ export function CombinedDayPanel({
             <p className="px-1 py-4 text-sm text-[#ACACAC]">Выберите один день в календаре слева.</p>
           ) : (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <DatePill date={selectedDate} />
+              <div className="flex items-center gap-2 text-xs">
+                <DatePill
+                  date={selectedDate}
+                  className="h-9 shrink-0 px-3 text-xs whitespace-nowrap"
+                />
                 {editable ? (
                   <>
                     <Button
                       type="button"
-                      className="h-10 shrink-0 rounded-[10px] bg-black px-3 text-white hover:bg-black/90"
+                      className="h-9 shrink-0 rounded-[10px] bg-black px-3 text-xs text-white hover:bg-black/90"
                       onClick={onAddMeeting}
                     >
-                      <Plus className="size-4" />
+                      <Plus className="size-3.5" />
                       Добавить встречу
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-10 shrink-0 rounded-[10px] border-[#B1B1B1] px-3"
+                      className="h-9 shrink-0 rounded-[10px] border-[#B1B1B1] px-3 text-xs"
                       onClick={onAddReminder}
                     >
-                      <Plus className="size-4" />
+                      <Plus className="size-3.5" />
                       Добавить напоминание
                     </Button>
                   </>
