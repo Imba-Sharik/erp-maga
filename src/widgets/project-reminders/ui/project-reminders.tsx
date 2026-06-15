@@ -1,16 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns'
-import { Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 
+import { ReminderCard, useProjectRemindersList, type Reminder } from '@/entities/reminder'
 import {
-  reminderActions,
-  ReminderCard,
-  sortRemindersByTime,
-  useReminders,
-  type Reminder,
-  type ReminderFormValues,
-} from '@/entities/reminder'
-import { ConfirmDeleteReminderDialog, ReminderFormDialog } from '@/features/manage-reminders'
+  ConfirmDeleteReminderDialog,
+  ReminderFormDialog,
+  useProjectReminders,
+} from '@/features/manage-reminders'
 import { Button } from '@/shared/ui/button'
 
 interface ProjectRemindersProps {
@@ -22,47 +19,24 @@ interface ProjectRemindersProps {
 /**
  * Таб «Напоминания» внутри проекта. Менеджер вносит события по проекту,
  * чтобы получать уведомления в ЕРП и (опционально) в Telegram.
- *
- * Бэка под ПРОЕКТНЫЕ напоминания пока нет (есть только user-scoped /reminders/),
- * поэтому таб — визуальная заготовка на локальном сторе.
+ * Данные — на бэке (`/reminders/?project=`), привязка через `project_id`.
  */
 export function ProjectReminders({ projectId, editable = true }: ProjectRemindersProps) {
-  const allReminders = useReminders()
-  const reminders = useMemo(() => {
-    const forProject = allReminders.filter((r) => r.projectId === projectId)
-    return sortRemindersByTime(forProject).sort((a, b) => a.date.localeCompare(b.date))
-  }, [allReminders, projectId])
+  const { data: reminders, isLoading, isError } = useProjectRemindersList(projectId)
 
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Reminder | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null)
 
-  const today = format(new Date(), 'yyyy-MM-dd')
-
-  const handleCreate = (values: ReminderFormValues) => {
-    reminderActions.add({
-      title: values.title,
-      comment: values.comment,
-      date: values.date,
-      time: values.time,
-      notifyTelegram: values.notifyTelegram,
-      sentAt: null,
+  const { create, update, remove, isCreating, isUpdating, isDeleting, createError, updateError, deleteError } =
+    useProjectReminders({
       projectId,
+      onCreated: () => setCreateOpen(false),
+      onUpdated: () => setEditTarget(null),
+      onDeleted: () => setDeleteTarget(null),
     })
-    setCreateOpen(false)
-  }
 
-  const handleUpdate = (values: ReminderFormValues) => {
-    if (!editTarget) return
-    reminderActions.update(editTarget.id, {
-      title: values.title,
-      comment: values.comment,
-      date: values.date,
-      time: values.time,
-      notifyTelegram: values.notifyTelegram,
-    })
-    setEditTarget(null)
-  }
+  const today = format(new Date(), 'yyyy-MM-dd')
 
   return (
     <div className="flex flex-col gap-3">
@@ -82,7 +56,16 @@ export function ProjectReminders({ projectId, editable = true }: ProjectReminder
         ) : null}
       </div>
 
-      {reminders.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-2 rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-sm text-[#ACACAC]">
+          <Loader2 className="size-4 animate-spin" />
+          Загрузка…
+        </div>
+      ) : isError ? (
+        <div className="rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-center text-sm text-[#D25252]">
+          Не удалось загрузить напоминания
+        </div>
+      ) : !reminders || reminders.length === 0 ? (
         <div className="rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-center text-sm text-[#ACACAC]">
           По этому проекту пока нет напоминаний
         </div>
@@ -92,7 +75,7 @@ export function ProjectReminders({ projectId, editable = true }: ProjectReminder
             <ReminderCard
               key={reminder.id}
               reminder={reminder}
-              editable={editable}
+              editable={editable && !reminder.sentAt}
               onEdit={setEditTarget}
               onDelete={setDeleteTarget}
             />
@@ -104,22 +87,25 @@ export function ProjectReminders({ projectId, editable = true }: ProjectReminder
         open={createOpen}
         onOpenChange={setCreateOpen}
         defaultDate={today}
-        onSubmit={handleCreate}
+        isPending={isCreating}
+        errorMessage={createError}
+        onSubmit={create}
       />
       <ReminderFormDialog
         open={editTarget !== null}
         onOpenChange={(open) => !open && setEditTarget(null)}
         reminder={editTarget}
-        onSubmit={handleUpdate}
+        isPending={isUpdating}
+        errorMessage={updateError}
+        onSubmit={(values) => editTarget && update(editTarget.id, values)}
       />
       <ConfirmDeleteReminderDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         reminder={deleteTarget}
-        onConfirm={(reminder) => {
-          reminderActions.remove(reminder.id)
-          setDeleteTarget(null)
-        }}
+        isPending={isDeleting}
+        errorMessage={deleteError}
+        onConfirm={(reminder) => remove(reminder.id)}
       />
     </div>
   )

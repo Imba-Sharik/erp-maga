@@ -19,7 +19,7 @@ export function fromReminder(api: ApiReminder): Reminder {
     date,
     notifyTelegram: api.is_telegram_reminder,
     sentAt: api.sent_at,
-    projectId: null,
+    projectId: api.project_id,
   }
 }
 
@@ -27,10 +27,26 @@ export function mapBackendCalendarReminders(list: readonly ApiReminder[]): Remin
   return list.map(fromReminder)
 }
 
+/**
+ * Достаёт плоский список напоминаний из ответа `/reminders/`.
+ * Схема описывает пагинацию двойне-вложенной (quirk бэка), поэтому
+ * поддерживаем оба варианта: плоский `results: Reminder[]` и вложенный.
+ */
+export function extractRemindersList(data: { results?: unknown } | undefined): ApiReminder[] {
+  const results = data?.results
+  if (!Array.isArray(results)) return []
+  const first = results[0] as { results?: unknown } | undefined
+  if (first && Array.isArray(first.results)) {
+    return (results as { results: ApiReminder[] }[]).flatMap((page) => page.results)
+  }
+  return results as ApiReminder[]
+}
+
 /** Минимальная API-форма для optimistic-обновлений кэша календаря. */
 export function reminderToApiStub(reminder: Reminder): ApiReminder {
   return {
     id: reminder.id,
+    project_id: reminder.projectId ?? null,
     name: reminder.title,
     comment: reminder.comment,
     reminder_datetime: buildBusinessDatetime(reminder.date, reminder.time),

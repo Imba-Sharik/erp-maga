@@ -4,6 +4,9 @@ export type { ReminderFormDialogProps } from './ui/reminder-form-dialog'
 export { ConfirmDeleteReminderDialog } from './ui/confirm-delete-reminder-dialog'
 export type { ConfirmDeleteReminderDialogProps } from './ui/confirm-delete-reminder-dialog'
 
+// Проектные напоминания (бэкенд /reminders/ c project_id)
+export { useProjectReminders } from './model/use-project-reminders'
+
 // API-контейнеры календаря напоминаний (бэкенд /reminders/)
 export { CreateReminderDialog } from './ui/create-reminder-dialog'
 export type { CreateReminderDialogProps } from './ui/create-reminder-dialog'

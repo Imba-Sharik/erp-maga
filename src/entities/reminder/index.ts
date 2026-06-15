@@ -1,8 +1,9 @@
 export type { Reminder, RemindersByDay, ListRemindersParams } from './model/types'
-export { useReminderStore, useReminders, reminderActions } from './model/store'
 export { useRemindersCalendarList } from './model/use-reminders-calendar-list'
+export { useProjectRemindersList } from './model/use-project-reminders-list'
 export { remindersCalendarQueryKey } from './lib/reminders-calendar-query'
-export { fromReminder, mapBackendCalendarReminders } from './lib/from-reminder'
+export { remindersListQueryKey, projectRemindersQueryOptions } from './lib/reminders-list-query'
+export { fromReminder, mapBackendCalendarReminders, extractRemindersList } from './lib/from-reminder'
 export { toReminderCreateRequest, toReminderUpdateRequest } from './lib/to-reminder-request'
 export {
   prependReminderToCache,

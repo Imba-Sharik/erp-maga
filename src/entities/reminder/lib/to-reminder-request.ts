@@ -4,12 +4,16 @@ import { buildBusinessDatetime } from '@/shared/lib/date/business-datetime'
 
 import type { ReminderFormValues } from './reminder-form-schema'
 
-export function toReminderCreateRequest(values: ReminderFormValues): ReminderCreateUpdateRequest {
+export function toReminderCreateRequest(
+  values: ReminderFormValues,
+  projectId?: number | null,
+): ReminderCreateUpdateRequest {
   return {
     name: values.title,
     comment: values.comment,
     reminder_datetime: buildBusinessDatetime(values.date, values.time),
     is_telegram_reminder: values.notifyTelegram,
+    ...(projectId != null ? { project_id: projectId } : {}),
   }
 }
 
