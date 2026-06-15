@@ -40,7 +40,7 @@ describe('meetingFormSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('требует хотя бы один зал', () => {
+  it('требует выбрать лофт и зал', () => {
     const result = meetingFormSchema.safeParse({
       title: 'Встреча',
       comment: 'Комментарий',
@@ -51,6 +51,7 @@ describe('meetingFormSchema', () => {
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.issues.some((issue) => issue.path[0] === 'lofts')).toBe(true)
+      expect(result.error.issues.some((issue) => issue.path[0] === 'halls')).toBe(true)
     }
   })
 })

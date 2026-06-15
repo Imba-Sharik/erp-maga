@@ -14,8 +14,13 @@ export const meetingFormSchema = z
     if (data.halls.length === 0) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Выберите хотя бы один лофт',
+        message: 'Выберите лофт',
         path: ['lofts'],
+      })
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Выберите зал',
+        path: ['halls'],
       })
     }
   })

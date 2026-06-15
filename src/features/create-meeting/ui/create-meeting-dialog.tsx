@@ -96,11 +96,6 @@ export function CreateMeetingDialog({
             onSubmit={form.handleSubmit((values) => create(values))}
             className="flex flex-col gap-4"
           >
-            <LoftHallAssignmentFields
-              control={form.control}
-              assignment={assignment}
-              triggerClassName={TRIGGER_CLASS}
-            />
             <FormField
               control={form.control}
               name="title"
@@ -138,6 +133,16 @@ export function CreateMeetingDialog({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+            <LoftHallAssignmentFields
+              control={form.control}
+              assignment={assignment}
+              triggerClassName={TRIGGER_CLASS}
+              layout="inline"
+              alwaysShowHalls
+              required
+              loftLabel="Лофт"
+              hallLabel="Зал"
             />
             <FormField
               control={form.control}
