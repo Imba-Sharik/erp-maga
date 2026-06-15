@@ -153,9 +153,9 @@ export function MeetingsCalendarPage() {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="both">Встречи и напоминания</SelectItem>
         <SelectItem value="meetings">Встречи</SelectItem>
         <SelectItem value="reminders">Напоминания</SelectItem>
-        <SelectItem value="both">Встречи и напоминания</SelectItem>
       </SelectContent>
     </Select>
   ) : null
