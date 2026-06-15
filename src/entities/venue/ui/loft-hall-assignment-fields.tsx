@@ -64,25 +64,27 @@ export function LoftHallAssignmentFields<TValues extends FieldValues & LoftHallF
         <FormItem className={cn(isInline && 'min-w-0')}>
           <FormLabel>{renderLabel(loftLabel)}</FormLabel>
           <FormControl>
-            {isSingleLoftSelect ? (
-              <ClearableSelect
-                placeholder="Выберите лофт"
-                value={(field.value as string[])[0] ?? null}
-                options={loftOptions}
-                onChange={(v) => handleLoftsChange(v ? [v] : [])}
-                triggerClassName={triggerClassName}
-                disabled={selectDisabled}
-              />
-            ) : (
-              <MultiSelect
-                placeholder="Выберите лофты"
-                values={field.value as string[]}
-                options={loftOptions}
-                onChange={handleLoftsChange}
-                triggerClassName={triggerClassName}
-                disabled={selectDisabled}
-              />
-            )}
+            <div className="w-full min-w-0">
+              {isSingleLoftSelect ? (
+                <ClearableSelect
+                  placeholder="Выберите лофт"
+                  value={(field.value as string[])[0] ?? null}
+                  options={loftOptions}
+                  onChange={(v) => handleLoftsChange(v ? [v] : [])}
+                  triggerClassName={triggerClassName}
+                  disabled={selectDisabled}
+                />
+              ) : (
+                <MultiSelect
+                  placeholder="Выберите лофты"
+                  values={field.value as string[]}
+                  options={loftOptions}
+                  onChange={handleLoftsChange}
+                  triggerClassName={triggerClassName}
+                  disabled={selectDisabled}
+                />
+              )}
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -98,14 +100,16 @@ export function LoftHallAssignmentFields<TValues extends FieldValues & LoftHallF
         <FormItem className={cn(isInline && 'min-w-0')}>
           <FormLabel>{renderLabel(hallLabel)}</FormLabel>
           <FormControl>
-            <MultiSelect
-              placeholder="Выберите залы"
-              values={field.value as string[]}
-              options={hallOptionGroups}
-              onChange={handleHallsChange}
-              triggerClassName={triggerClassName}
-              disabled={selectDisabled}
-            />
+            <div className="w-full min-w-0">
+              <MultiSelect
+                placeholder="Выберите залы"
+                values={field.value as string[]}
+                options={hallOptionGroups}
+                onChange={handleHallsChange}
+                triggerClassName={triggerClassName}
+                disabled={selectDisabled}
+              />
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>

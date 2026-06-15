@@ -28,7 +28,7 @@ import { useCreateMeeting } from '../model/use-create-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
-const TRIGGER_CLASS = 'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white'
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white'
 
 function formatDayLabel(iso: string): string | null {
   const d = parseISO(iso)

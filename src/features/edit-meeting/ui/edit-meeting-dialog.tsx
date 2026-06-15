@@ -21,7 +21,7 @@ import { useUpdateMeeting } from '../model/use-update-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
-const TRIGGER_CLASS = 'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white'
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white'
 
 export interface EditMeetingDialogProps {
   open: boolean
