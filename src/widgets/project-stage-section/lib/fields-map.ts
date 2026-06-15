@@ -40,6 +40,8 @@ export interface StageFieldConfig {
   narrow?: boolean
   /** Доп. класс на сам инпут (например, ограничение ширины date-пикера). */
   inputClassName?: string
+  /** Сохранить значение на бэк при blur (PATCH этапа, не transition). */
+  patchOnBlur?: boolean
 }
 
 /** Поле видно для роли; `roles` не задан — системное поле, видно всем. */
@@ -101,6 +103,13 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'text',
       source: 'manager',
       mockValue: 'client@gmail.com',
+    },
+    {
+      name: 'magComment',
+      label: 'Комментарий ',
+      type: 'text',
+      source: 'manager',
+      patchOnBlur: true,
     },
   ],
   primary_contact_done: [
