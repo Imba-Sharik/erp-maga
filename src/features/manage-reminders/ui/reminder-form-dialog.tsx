@@ -18,6 +18,8 @@ export interface ReminderFormDialogProps {
   reminder?: Reminder | null
   isPending?: boolean
   errorMessage?: string | null
+  /** Скрыть поле даты (день берётся из контекста, напр. выбранный день календаря). */
+  hideDate?: boolean
   onSubmit: (values: ReminderFormValues) => void
 }
 
@@ -37,6 +39,7 @@ export function ReminderFormDialog({
   reminder = null,
   isPending = false,
   errorMessage = null,
+  hideDate = false,
   onSubmit,
 }: ReminderFormDialogProps) {
   const isEdit = reminder !== null
@@ -71,7 +74,7 @@ export function ReminderFormDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <ReminderFormFields control={form.control} />
+            <ReminderFormFields control={form.control} hideDate={hideDate} />
 
             {errorMessage ? <p className="text-destructive text-sm">{errorMessage}</p> : null}
 

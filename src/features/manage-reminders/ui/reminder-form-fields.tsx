@@ -12,10 +12,53 @@ import { DateField } from '@/shared/ui/date-field'
 import { TimeField } from '@/shared/ui/time-field'
 import { ToggleSwitch } from '@/shared/ui/toggle-switch'
 
-export function ReminderFormFields({ control }: { control: Control<ReminderFormValues> }) {
+export function ReminderFormFields({
+  control,
+  hideDate = false,
+}: {
+  control: Control<ReminderFormValues>
+  /** Скрыть поле даты (день берётся из контекста, напр. выбранный день календаря). */
+  hideDate?: boolean
+}) {
   const telegram = useTelegramAccountStatus()
   const { requestLink, isPending: linkPending } = useRequestTelegramLink()
   const notifyTelegram = useWatch({ control, name: 'notifyTelegram' })
+
+  const dateField = (
+    <FormField
+      control={control}
+      name="date"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>
+            <RequiredLabel label="Дата напоминания" required />
+          </FormLabel>
+          <FormControl>
+            <DateField value={field.value} onChange={field.onChange} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  )
+
+  const timeField = (
+    <FormField
+      control={control}
+      name="time"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>
+            <RequiredLabel label="Время напоминания" required />
+          </FormLabel>
+          <FormControl>
+            <TimeField value={field.value} onChange={field.onChange} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  )
 
   return (
     <>
@@ -55,38 +98,7 @@ export function ReminderFormFields({ control }: { control: Control<ReminderFormV
           </FormItem>
         )}
       />
-      <div className="grid grid-cols-2 gap-3">
-        <FormField
-          control={control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <RequiredLabel label="Дата напоминания" required />
-              </FormLabel>
-              <FormControl>
-                <DateField value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="time"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <RequiredLabel label="Время напоминания" required />
-              </FormLabel>
-              <FormControl>
-                <TimeField value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {hideDate ? timeField : <div className="grid grid-cols-2 gap-3">{dateField}{timeField}</div>}
 
       <FormField
         control={control}

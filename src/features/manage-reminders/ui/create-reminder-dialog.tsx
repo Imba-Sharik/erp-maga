@@ -29,6 +29,7 @@ export function CreateReminderDialog({
         if (!next) reset()
       }}
       defaultDate={defaultDate}
+      hideDate
       isPending={isPending}
       errorMessage={errorMessage}
       onSubmit={create}
