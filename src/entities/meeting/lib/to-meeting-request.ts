@@ -27,5 +27,6 @@ export function toMeetingUpdateRequest(
     name: values.title,
     comment: values.comment,
     meeting_datetime: buildBusinessDatetime(meeting.date, values.time),
+    hall_ids: values.halls.map(Number),
   }
 }

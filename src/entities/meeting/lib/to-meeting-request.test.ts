@@ -32,7 +32,7 @@ describe('to-meeting-request', () => {
     })
   })
 
-  it('toMeetingUpdateRequest сохраняет дату встречи', () => {
+  it('toMeetingUpdateRequest сохраняет дату встречи и залы', () => {
     const meeting: Meeting = {
       id: 1,
       title: 'Старая',
@@ -45,13 +45,20 @@ describe('to-meeting-request', () => {
 
     expect(
       toMeetingUpdateRequest(
-        { title: 'Новая', comment: 'Новый коммент', time: '11:45', lofts: [], halls: [] },
+        {
+          title: 'Новая',
+          comment: 'Новый коммент',
+          time: '11:45',
+          lofts: ['1'],
+          halls: ['10', '11'],
+        },
         meeting,
       ),
     ).toEqual({
       name: 'Новая',
       comment: 'Новый коммент',
       meeting_datetime: '2026-06-15T11:45:00+03:00',
+      hall_ids: [10, 11],
     })
   })
 })

@@ -8,6 +8,7 @@ import {
   type Meeting,
   type MeetingFormValues,
 } from '@/entities/meeting'
+import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
@@ -19,6 +20,8 @@ import { TimeField } from '@/shared/ui/time-field'
 import { useUpdateMeeting } from '../model/use-update-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
+
+const TRIGGER_CLASS = 'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white'
 
 export interface EditMeetingDialogProps {
   open: boolean
@@ -56,6 +59,8 @@ export function EditMeetingDialog({
       })
     }
   }, [meeting, open, form])
+
+  const assignment = useLoftHallAssignment(form, { assigned: true })
 
   const {
     update,
@@ -125,6 +130,16 @@ export function EditMeetingDialog({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+            <LoftHallAssignmentFields
+              control={form.control}
+              assignment={assignment}
+              triggerClassName={TRIGGER_CLASS}
+              layout="inline"
+              alwaysShowHalls
+              required
+              loftLabel="Лофт"
+              hallLabel="Зал"
             />
             <FormField
               control={form.control}
