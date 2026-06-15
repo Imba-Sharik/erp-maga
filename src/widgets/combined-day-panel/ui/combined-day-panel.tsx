@@ -96,7 +96,7 @@ export function CombinedDayPanel({
               <div className="flex flex-wrap items-center gap-2">
                 <DatePill date={selectedDate} />
                 {editable ? (
-                  <>
+                  <div className="flex items-center gap-2">
                     <Button
                       type="button"
                       className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
@@ -114,7 +114,7 @@ export function CombinedDayPanel({
                       <Plus className="size-4" />
                       Добавить напоминание
                     </Button>
-                  </>
+                  </div>
                 ) : null}
               </div>
 

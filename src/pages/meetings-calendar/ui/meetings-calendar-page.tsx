@@ -59,7 +59,7 @@ export function MeetingsCalendarPage() {
   // У руководителя нет логики напоминаний — он видит только встречи.
   const showReminders = role !== 'director'
 
-  const [calendarTab, setCalendarTab] = useState<CalendarTab>('meetings')
+  const [calendarTab, setCalendarTab] = useState<CalendarTab>('both')
 
   const {
     filterOptions: managerFilterOptions,
