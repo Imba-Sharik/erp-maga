@@ -7,7 +7,7 @@ import {
   type ProjectBackOrigin,
 } from '@/entities/project'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
-import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
+import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView, GridTableViewport } from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import type { ManagerSelectOption } from '@/entities/manager'
@@ -176,37 +176,39 @@ export function ProjectsTableView({
     )
 
   return (
-    <GridTableView
-      minWidth={minWidth}
-      gridTemplate={gridTemplate}
-      header={header}
-      isLoading={isLoading}
-      isError={isError}
-      errorMessage="Не удалось загрузить проекты."
-      isEmpty={!isLoading && !isError && projects.length === 0}
-      emptyMessage="Проекты не найдены."
-      skeletonColumnCount={skeletonColumnCount}
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      onLoadMore={onLoadMore}
-    >
-      {projects.map((project) => (
-        <ProjectsTableRow
-          key={project.id}
-          project={project}
-          columnView={columnView}
-          backOrigin={backOrigin}
-          renderRowAction={renderRowAction}
-          directoryOptions={directoryOptions}
-          managerEditable={managerEditable}
-          isEditingManager={editingManagerProjectId === project.id}
-          onStartEditManager={() => handleStartEditManager(project.id)}
-          onAssignManager={(managerId) => handleAssignManager(project.id, managerId)}
-          onCancelEditManager={handleCancelEditManager}
-          assignDisabled={isAssigningManager}
-        />
-      ))}
-    </GridTableView>
+    <GridTableViewport>
+      <GridTableView
+        minWidth={minWidth}
+        gridTemplate={gridTemplate}
+        header={header}
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage="Не удалось загрузить проекты."
+        isEmpty={!isLoading && !isError && projects.length === 0}
+        emptyMessage="Проекты не найдены."
+        skeletonColumnCount={skeletonColumnCount}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={onLoadMore}
+      >
+        {projects.map((project) => (
+          <ProjectsTableRow
+            key={project.id}
+            project={project}
+            columnView={columnView}
+            backOrigin={backOrigin}
+            renderRowAction={renderRowAction}
+            directoryOptions={directoryOptions}
+            managerEditable={managerEditable}
+            isEditingManager={editingManagerProjectId === project.id}
+            onStartEditManager={() => handleStartEditManager(project.id)}
+            onAssignManager={(managerId) => handleAssignManager(project.id, managerId)}
+            onCancelEditManager={handleCancelEditManager}
+            assignDisabled={isAssigningManager}
+          />
+        ))}
+      </GridTableView>
+    </GridTableViewport>
   )
 }
 

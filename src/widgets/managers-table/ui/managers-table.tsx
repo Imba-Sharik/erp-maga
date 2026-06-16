@@ -15,7 +15,7 @@ import {
 } from '@/entities/venue'
 import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
 import { useUpdateManagerAssignments } from '@/features/update-manager-assignments'
-import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView } from '@/shared/ui/grid-table'
+import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView, GridTableViewport } from '@/shared/ui/grid-table'
 
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
@@ -122,42 +122,44 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
 
   return (
     <>
-      <GridTableView
-        minWidth={MANAGERS_TABLE_MIN_WIDTH}
-        gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}
-        header={<ManagersTableHeader />}
-        isEmpty={!isLoading && managers.length === 0}
-        isLoading={isLoading}
-        emptyMessage={emptyMessage}
-        skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
-      >
-        {managers.map((manager) => {
-          const selectedHallIds = getSelectedHallIds(manager.assignments)
-          const selectedLoftIds = deriveSelectedLoftIds(halls, selectedHallIds)
-          const hallSelectedKeys = new Set(selectedHallIds.map(String))
-          const loftSelectedKeys = new Set(selectedLoftIds.map(String))
-          const hallGroups = buildFilteredHallGroups(halls, lofts, selectedHallIds)
+      <GridTableViewport>
+        <GridTableView
+          minWidth={MANAGERS_TABLE_MIN_WIDTH}
+          gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}
+          header={<ManagersTableHeader />}
+          isEmpty={!isLoading && managers.length === 0}
+          isLoading={isLoading}
+          emptyMessage={emptyMessage}
+          skeletonColumnCount={MANAGERS_TABLE_COLUMN_COUNT}
+        >
+          {managers.map((manager) => {
+            const selectedHallIds = getSelectedHallIds(manager.assignments)
+            const selectedLoftIds = deriveSelectedLoftIds(halls, selectedHallIds)
+            const hallSelectedKeys = new Set(selectedHallIds.map(String))
+            const loftSelectedKeys = new Set(selectedLoftIds.map(String))
+            const hallGroups = buildFilteredHallGroups(halls, lofts, selectedHallIds)
 
-          return (
-            <ManagersTableRow
-              key={manager.id}
-              manager={manager}
-              hallGroups={hallGroups}
-              loftGroups={loftGroups}
-              hallSelectedKeys={hallSelectedKeys}
-              loftSelectedKeys={loftSelectedKeys}
-              editing={editing}
-              catalogDisabled={catalogDisabled}
-              isPendingFor={isPendingFor}
-              getErrorFor={getErrorFor}
-              onClearError={clearErrorFor}
-              onEditOpenChange={handleEditOpenChange}
-              onApplyAssignments={handleApplyAssignments}
-              onRequestDelete={setDeleteTarget}
-            />
-          )
-        })}
-      </GridTableView>
+            return (
+              <ManagersTableRow
+                key={manager.id}
+                manager={manager}
+                hallGroups={hallGroups}
+                loftGroups={loftGroups}
+                hallSelectedKeys={hallSelectedKeys}
+                loftSelectedKeys={loftSelectedKeys}
+                editing={editing}
+                catalogDisabled={catalogDisabled}
+                isPendingFor={isPendingFor}
+                getErrorFor={getErrorFor}
+                onClearError={clearErrorFor}
+                onEditOpenChange={handleEditOpenChange}
+                onApplyAssignments={handleApplyAssignments}
+                onRequestDelete={setDeleteTarget}
+              />
+            )
+          })}
+        </GridTableView>
+      </GridTableViewport>
 
       <ConfirmDeleteManagerDialog
         open={deleteTarget !== null}
