@@ -149,7 +149,7 @@ export function ClosingBoard({
   }
 
   return (
-    <div className="@container flex h-full min-h-0 flex-1 flex-col gap-3 @3xl:gap-6">
+    <div className="@container flex min-h-0 flex-1 flex-col gap-3 @3xl:gap-6">
       {archiveMode ? (
         <ClosingBoardToolbar
           archiveMode={true}
@@ -179,65 +179,61 @@ export function ClosingBoard({
       )}
 
       {archiveMode ? (
-        <div className="flex h-full min-h-0 flex-1 flex-col">
-          <ProjectsTableView
-            projects={filteredArchive}
-            columnView={columnView}
-            columnFilters={columnFilters}
-            managerFilterOptions={filterOptions}
-            directoryOptions={selectOptions}
-            managersSelectLoading={isManagersLoading}
-            managersSelectError={isManagersError}
-            restrictToHallIds={restrictToHallIds}
-            venueSelectDisabled={venueSelectDisabled}
-            onColumnFilterChange={handleColumnFilterChange}
-            onPlumEventStatusChange={handlePlumEventStatusChange}
-            isLoading={archiveQuery.isLoading}
-            isError={archiveQuery.isError}
-            hasNextPage={archiveQuery.hasNextPage}
-            isFetchingNextPage={archiveQuery.isFetchingNextPage}
-            onLoadMore={archiveQuery.fetchNextPage}
-            backOrigin={backOrigin}
-            managerEditable={canChangeManager}
-            renderRowAction={
-              onDeleteProject
-                ? (project) => (
-                    <DeleteProjectButton onRequestDelete={() => onDeleteProject(project)} />
-                  )
-                : undefined
-            }
-          />
-        </div>
+        <ProjectsTableView
+          projects={filteredArchive}
+          columnView={columnView}
+          columnFilters={columnFilters}
+          managerFilterOptions={filterOptions}
+          directoryOptions={selectOptions}
+          managersSelectLoading={isManagersLoading}
+          managersSelectError={isManagersError}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
+          onColumnFilterChange={handleColumnFilterChange}
+          onPlumEventStatusChange={handlePlumEventStatusChange}
+          isLoading={archiveQuery.isLoading}
+          isError={archiveQuery.isError}
+          hasNextPage={archiveQuery.hasNextPage}
+          isFetchingNextPage={archiveQuery.isFetchingNextPage}
+          onLoadMore={archiveQuery.fetchNextPage}
+          backOrigin={backOrigin}
+          managerEditable={canChangeManager}
+          renderRowAction={
+            onDeleteProject
+              ? (project) => (
+                  <DeleteProjectButton onRequestDelete={() => onDeleteProject(project)} />
+                )
+              : undefined
+          }
+        />
       ) : viewMode === 'table' ? (
-        <div className="flex h-full min-h-0 flex-1 flex-col">
-          <ProjectsTableView
-            projects={activeTableQuery.projects}
-            columnView="closing-active"
-            columnFilters={columnFilters}
-            managerFilterOptions={filterOptions}
-            directoryOptions={selectOptions}
-            managersSelectLoading={isManagersLoading}
-            managersSelectError={isManagersError}
-            restrictToHallIds={restrictToHallIds}
-            venueSelectDisabled={venueSelectDisabled}
-            onColumnFilterChange={handleColumnFilterChange}
-            onPlumEventStatusChange={handlePlumEventStatusChange}
-            isLoading={activeTableQuery.isLoading}
-            isError={activeTableQuery.isError}
-            hasNextPage={activeTableQuery.hasNextPage}
-            isFetchingNextPage={activeTableQuery.isFetchingNextPage}
-            onLoadMore={activeTableQuery.fetchNextPage}
-            backOrigin={backOrigin}
-            managerEditable={false}
-            renderRowAction={
-              canChangeManager && role === 'director'
-                ? (project) => (
-                    <ChangeManagerButton onRequestChange={() => setChangeManagerTarget(project)} />
-                  )
-                : undefined
-            }
-          />
-        </div>
+        <ProjectsTableView
+          projects={activeTableQuery.projects}
+          columnView="closing-active"
+          columnFilters={columnFilters}
+          managerFilterOptions={filterOptions}
+          directoryOptions={selectOptions}
+          managersSelectLoading={isManagersLoading}
+          managersSelectError={isManagersError}
+          restrictToHallIds={restrictToHallIds}
+          venueSelectDisabled={venueSelectDisabled}
+          onColumnFilterChange={handleColumnFilterChange}
+          onPlumEventStatusChange={handlePlumEventStatusChange}
+          isLoading={activeTableQuery.isLoading}
+          isError={activeTableQuery.isError}
+          hasNextPage={activeTableQuery.hasNextPage}
+          isFetchingNextPage={activeTableQuery.isFetchingNextPage}
+          onLoadMore={activeTableQuery.fetchNextPage}
+          backOrigin={backOrigin}
+          managerEditable={false}
+          renderRowAction={
+            canChangeManager && role === 'director'
+              ? (project) => (
+                  <ChangeManagerButton onRequestChange={() => setChangeManagerTarget(project)} />
+                )
+              : undefined
+          }
+        />
       ) : (
         <div className="flex h-full min-h-0 flex-1 flex-col">
           <ClosingKanban

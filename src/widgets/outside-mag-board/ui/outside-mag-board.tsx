@@ -111,10 +111,9 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
       <OutsideMagSearchToolbar search={search} onChangeSearch={setSearch} />
-      <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ProjectsTableView
+      <ProjectsTableView
           projects={filtered}
           columnView="outside-mag"
           columnFilters={columnFilters}
@@ -136,7 +135,6 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
             <ReturnFromOutsideMagButton onClick={() => setReturnTarget(project)} />
           )}
         />
-      </div>
 
       <ReturnProjectFromOutsideMagDialog
         open={returnTarget !== null}
