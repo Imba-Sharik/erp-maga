@@ -55,7 +55,7 @@ export function RequestsTable({ variant }: RequestsTableProps) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-5">
+    <div className="flex min-h-0 flex-1 flex-col gap-5">
       <div className="relative w-full shrink-0 md:w-75">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
         <Input

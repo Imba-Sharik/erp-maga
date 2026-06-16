@@ -4,4 +4,5 @@ export { GRID_TABLE_ROW_CLASS, GRID_TABLE_ROW_NAV_CLASS, GridTableRow } from './
 export { GridTableRowActionCell } from './grid-table-row-action-cell'
 export { GridTableSkeleton } from './grid-table-skeleton'
 export { GridTableView } from './grid-table-view'
+export { GridTableViewport } from './grid-table-viewport'
 export { TableIconActionButton } from './table-icon-action-button'
