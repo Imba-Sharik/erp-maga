@@ -9,7 +9,7 @@ interface GridTableSkeletonProps {
 export function GridTableSkeleton({
   columnCount,
   gridTemplate,
-  rowCount = 10,
+  rowCount = 5,
 }: GridTableSkeletonProps) {
   return (
     <>
