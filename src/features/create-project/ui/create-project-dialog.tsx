@@ -125,15 +125,15 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] grid-rows-[auto_auto_auto] gap-x-3 gap-y-1.5">
               <FormField
                 control={form.control}
                 name="eventType"
                 render={({ field }) => (
-                  <FormItem className="min-w-0">
+                  <FormItem className="row-span-3 min-w-0 grid-rows-subgrid gap-1.5">
                     <FormLabel>Тип мероприятия</FormLabel>
                     <FormControl>
-                      <div className="w-full min-w-0 self-end">
+                      <div className="w-full min-w-0">
                         <ClearableSelect
                           placeholder="Выберите тип"
                           value={field.value || null}
@@ -154,10 +154,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 control={form.control}
                 name="eventDate"
                 render={({ field }) => (
-                  <FormItem className="min-w-0">
+                  <FormItem className="row-span-3 min-w-0 grid-rows-subgrid gap-1.5">
                     <FormLabel>Дата мероприятия</FormLabel>
                     <FormControl>
-                      <div className="w-full min-w-0 self-end">
+                      <div className="w-full min-w-0">
                         <DateField value={field.value} onChange={field.onChange} />
                       </div>
                     </FormControl>
