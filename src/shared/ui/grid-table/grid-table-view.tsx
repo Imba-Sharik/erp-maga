@@ -1,6 +1,9 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+import {
+  OverlayScrollbarsComponent,
+  type OverlayScrollbarsComponentRef,
+} from 'overlayscrollbars-react'
 
 import { Card } from '@/shared/ui/card'
 
@@ -23,6 +26,8 @@ interface GridTableViewProps {
   scrollAreaClassName?: string
 }
 
+const DEFAULT_SCROLL_AREA_CLASS = 'projects-table-scroll-area min-h-0 flex-1'
+
 export function GridTableView({
   minWidth,
   gridTemplate,
@@ -37,23 +42,49 @@ export function GridTableView({
   hasNextPage = false,
   isFetchingNextPage = false,
   onLoadMore,
-  scrollAreaClassName = 'projects-table-scroll-area min-h-0 flex-1',
+  scrollAreaClassName = DEFAULT_SCROLL_AREA_CLASS,
 }: GridTableViewProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<OverlayScrollbarsComponentRef>(null)
+  const observerCleanupRef = useRef<(() => void) | null>(null)
 
-  useEffect(() => {
+  const setupInfiniteScrollObserver = useCallback(() => {
+    observerCleanupRef.current?.()
+    observerCleanupRef.current = null
+
     const el = sentinelRef.current
     if (!el || !hasNextPage || !onLoadMore) return
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) onLoadMore()
-    })
+
+    const viewport = scrollAreaRef.current?.osInstance()?.elements().viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) onLoadMore()
+      },
+      viewport ? { root: viewport, rootMargin: '120px' } : undefined,
+    )
     observer.observe(el)
-    return () => observer.disconnect()
+    observerCleanupRef.current = () => observer.disconnect()
   }, [hasNextPage, onLoadMore])
 
+  useEffect(() => {
+    setupInfiniteScrollObserver()
+    const raf = requestAnimationFrame(setupInfiniteScrollObserver)
+    return () => {
+      cancelAnimationFrame(raf)
+      observerCleanupRef.current?.()
+      observerCleanupRef.current = null
+    }
+  }, [setupInfiniteScrollObserver, isLoading, isEmpty, isError])
+
+  const handleScrollAreaInitialized = useCallback(() => {
+    setupInfiniteScrollObserver()
+  }, [setupInfiniteScrollObserver])
+
   return (
-    <Card className="flex h-full min-h-0 flex-1 flex-col gap-0 overflow-visible border-[#B1B1B1] py-0 shadow-none">
+    <Card className="flex max-h-full min-h-0 flex-col gap-0 overflow-visible border-[#B1B1B1] py-0 shadow-none">
       <OverlayScrollbarsComponent
+        ref={scrollAreaRef}
+        events={{ initialized: handleScrollAreaInitialized }}
         options={{
           overflow: { x: 'scroll', y: 'scroll' },
           scrollbars: {
