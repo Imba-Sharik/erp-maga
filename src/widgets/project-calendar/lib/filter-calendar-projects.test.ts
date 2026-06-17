@@ -15,6 +15,9 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     hall: 'Зал A',
     hallLoft: 'Loft Центр · Зал A',
     manager: 'Иванов',
+    canClaim: false,
+    canEdit: false,
+    isReadOnly: false,
     type: 'Свадьба',
     company: 'ООО Ромашка',
     phone: '+7 999 000-00-00',
@@ -47,9 +50,9 @@ describe('filterCalendarProjects', () => {
       makeProject({ id: '1', hallLoft: 'Loft Центр · Зал A' }),
       makeProject({ id: '2', hallLoft: 'Loft Юг · Зал B' }),
     ]
-    expect(filterCalendarProjects(projects, { ...emptyFilter, hall: 'Зал A' }).map((p) => p.id)).toEqual(
-      ['1'],
-    )
+    expect(
+      filterCalendarProjects(projects, { ...emptyFilter, hall: 'Зал A' }).map((p) => p.id),
+    ).toEqual(['1'])
   })
 
   it('фильтрует по подстроке hallLoft для лофта', () => {
@@ -57,9 +60,9 @@ describe('filterCalendarProjects', () => {
       makeProject({ id: '1', hallLoft: 'Loft Центр · Зал A' }),
       makeProject({ id: '2', hallLoft: 'Loft Юг · Зал B' }),
     ]
-    expect(filterCalendarProjects(projects, { ...emptyFilter, loft: 'Loft Юг' }).map((p) => p.id)).toEqual(
-      ['2'],
-    )
+    expect(
+      filterCalendarProjects(projects, { ...emptyFilter, loft: 'Loft Юг' }).map((p) => p.id),
+    ).toEqual(['2'])
   })
 
   it('ищет по title и manager', () => {
@@ -67,12 +70,12 @@ describe('filterCalendarProjects', () => {
       makeProject({ id: '1', title: 'Свадьба', manager: 'Иванов' }),
       makeProject({ id: '2', title: 'Корпоратив', manager: 'Петров' }),
     ]
-    expect(filterCalendarProjects(projects, { ...emptyFilter, search: 'петр' }).map((p) => p.id)).toEqual(
-      ['2'],
-    )
-    expect(filterCalendarProjects(projects, { ...emptyFilter, search: '  свадьба  ' }).map((p) => p.id)).toEqual(
-      ['1'],
-    )
+    expect(
+      filterCalendarProjects(projects, { ...emptyFilter, search: 'петр' }).map((p) => p.id),
+    ).toEqual(['2'])
+    expect(
+      filterCalendarProjects(projects, { ...emptyFilter, search: '  свадьба  ' }).map((p) => p.id),
+    ).toEqual(['1'])
   })
 
   it('фильтрует по одному статусу Plum', () => {

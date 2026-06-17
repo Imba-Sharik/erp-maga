@@ -60,6 +60,15 @@ export interface Project {
    */
   hallLoft?: string
   manager: string
+  /**
+   * Менеджер может «Взять проект» из пула (`can_claim`): он привязан к залу,
+   * а `mag_manager` пуст. Источник — `ProjectManagerAccess` на бэке.
+   */
+  canClaim: boolean
+  /** Текущий пользователь ведёт проект (`can_edit`): владелец-менеджер или lead. */
+  canEdit: boolean
+  /** Пользователь видит проект, но не ведёт его (`is_read_only`): пул или чужой claim. */
+  isReadOnly: boolean
   type: string
   company: string
   phone: string
