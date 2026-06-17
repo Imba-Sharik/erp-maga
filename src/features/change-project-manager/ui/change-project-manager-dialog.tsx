@@ -1,8 +1,13 @@
+import { useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useManagersDirectory } from '@/entities/manager'
+import {
+  buildManagerSelectOptions,
+  MANAGER_HALL_ASSIGNMENT_HINT,
+  useManagersDirectory,
+} from '@/entities/manager'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -41,11 +46,25 @@ export function ChangeProjectManagerDialog({
   projectTitle,
   currentManager,
 }: ChangeProjectManagerDialogProps) {
+  const projectIdNumber = useMemo(() => {
+    const id = Number(projectId)
+    return Number.isFinite(id) ? id : undefined
+  }, [projectId])
+
   const {
     selectOptions: managerOptions,
-    isLoading: isManagersLoading,
+    isOptionsLoading: isManagersLoading,
     isError: isManagersError,
-  } = useManagersDirectory()
+    showHallAssignmentHint,
+  } = useManagersDirectory(
+    projectIdNumber !== undefined ? { projectId: projectIdNumber } : undefined,
+    { enabled: open && projectIdNumber !== undefined },
+  )
+
+  const selectOptions = useMemo(
+    () => buildManagerSelectOptions(managerOptions, currentManager),
+    [managerOptions, currentManager],
+  )
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -64,7 +83,7 @@ export function ChangeProjectManagerDialog({
     submit({ projectId, managerId: values.managerId })
   }
 
-  const selectDisabled = isManagersLoading || isManagersError
+  const selectDisabled = isManagersLoading || isManagersError || showHallAssignmentHint
 
   return (
     <Dialog
@@ -113,8 +132,12 @@ export function ChangeProjectManagerDialog({
                         <SelectValue placeholder="Выберите менеджера" />
                       </SelectTrigger>
                       <SelectContent>
-                        {managerOptions.map((option) => (
-                          <SelectItem key={option.id} value={option.id}>
+                        {selectOptions.map((option) => (
+                          <SelectItem
+                            key={option.id}
+                            value={option.id}
+                            disabled={option.id.startsWith('name:')}
+                          >
                             {option.fullName}
                           </SelectItem>
                         ))}
@@ -130,6 +153,8 @@ export function ChangeProjectManagerDialog({
             ) : null}
             {isManagersError ? (
               <p className="text-destructive text-sm">Не удалось загрузить список менеджеров</p>
+            ) : showHallAssignmentHint ? (
+              <p className="text-muted-foreground text-sm">{MANAGER_HALL_ASSIGNMENT_HINT}</p>
             ) : null}
             <DialogFooter>
               <Button
