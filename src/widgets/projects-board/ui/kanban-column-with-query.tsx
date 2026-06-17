@@ -14,6 +14,7 @@ interface KanbanColumnWithQueryBaseProps {
   apiStage: ProjectStageEnumKey
   title: string
   listParams: BoardListParams
+  onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
@@ -44,6 +45,7 @@ export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
     onLoadMore: () => query.fetchNextPage(),
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
+    onClaimProject: props.onClaimProject,
     onMoveOutsideMag: props.onMoveOutsideMag,
     onChangeManager: props.onChangeManager,
     onDeleteProject: props.onDeleteProject,

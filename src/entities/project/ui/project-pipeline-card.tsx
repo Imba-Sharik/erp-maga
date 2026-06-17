@@ -20,6 +20,8 @@ interface ProjectPipelineCardProps {
   backOrigin?: ProjectBackOrigin
   /** Есть незавершённый черновик этапа — подсветить карточку жёлтой обводкой. */
   hasDraft?: boolean
+  /** «Взять проект» — показывается только при `project.canClaim`. */
+  onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
@@ -38,6 +40,7 @@ export function ProjectPipelineCard({
   project,
   backOrigin,
   hasDraft,
+  onClaimProject,
   onMoveOutsideMag,
   onChangeManager,
   onDeleteProject,
@@ -46,7 +49,10 @@ export function ProjectPipelineCard({
   const goToDetail = () =>
     navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
-  const hasMenu = Boolean(onMoveOutsideMag ?? onChangeManager ?? onDeleteProject)
+  const canClaim = Boolean(onClaimProject && project.canClaim)
+  // Проект, который пользователь не ведёт (read-only), не предлагает действий ведения.
+  const canMoveOutsideMag = Boolean(onMoveOutsideMag && !project.isReadOnly)
+  const hasMenu = Boolean(canClaim || canMoveOutsideMag || onChangeManager || onDeleteProject)
 
   const handleBodyKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -87,13 +93,21 @@ export function ProjectPipelineCard({
               className="min-w-44"
               onPointerDown={preventPortalClickThrough}
             >
+              {canClaim ? (
+                <DropdownMenuItem onSelect={() => onClaimProject?.(project)}>
+                  Взять проект
+                </DropdownMenuItem>
+              ) : null}
               {onChangeManager ? (
                 <DropdownMenuItem onSelect={() => onChangeManager(project)}>
                   Сменить менеджера
                 </DropdownMenuItem>
               ) : null}
-              {onMoveOutsideMag ? (
-                <DropdownMenuItem variant="destructive" onSelect={() => onMoveOutsideMag(project)}>
+              {canMoveOutsideMag ? (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => onMoveOutsideMag?.(project)}
+                >
                   Вне контура MAG
                 </DropdownMenuItem>
               ) : null}

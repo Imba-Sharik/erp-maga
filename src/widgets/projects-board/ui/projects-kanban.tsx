@@ -14,10 +14,15 @@ import { KanbanColumnWithQuery } from './kanban-column-with-query'
 
 interface ProjectsKanbanProps {
   listParams: BoardListParams
+  onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
 }
 
-export function ProjectsKanban({ listParams, onMoveOutsideMag }: ProjectsKanbanProps) {
+export function ProjectsKanban({
+  listParams,
+  onClaimProject,
+  onMoveOutsideMag,
+}: ProjectsKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
       <OverlayScrollbarsComponent
@@ -37,6 +42,7 @@ export function ProjectsKanban({ listParams, onMoveOutsideMag }: ProjectsKanbanP
               key={stage}
               stage={stage}
               listParams={listParams}
+              onClaimProject={onClaimProject}
               onMoveOutsideMag={onMoveOutsideMag}
             />
           ))}
@@ -49,10 +55,12 @@ export function ProjectsKanban({ listParams, onMoveOutsideMag }: ProjectsKanbanP
 function ProjectsKanbanColumnItem({
   stage,
   listParams,
+  onClaimProject,
   onMoveOutsideMag,
 }: {
   stage: PreprojectStage
   listParams: BoardListParams
+  onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
 }) {
   return (
@@ -62,6 +70,7 @@ function ProjectsKanbanColumnItem({
       apiStage={preprojectStageToApi(stage)}
       title={STAGE_LABELS[stage]}
       listParams={listParams}
+      onClaimProject={onClaimProject}
       onMoveOutsideMag={onMoveOutsideMag}
     />
   )
