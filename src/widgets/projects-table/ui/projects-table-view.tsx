@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 
 import {
   ALL_STAGE_LABELS,
@@ -6,12 +6,17 @@ import {
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
+import { useManagersDirectory } from '@/entities/manager'
+import { useChangeProjectManager } from '@/features/change-project-manager'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
-import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView, GridTableViewport } from '@/shared/ui/grid-table'
+import {
+  GridTableHeaderCell,
+  GridTableHeaderLabel,
+  GridTableView,
+  GridTableViewport,
+} from '@/shared/ui/grid-table'
 
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
-import type { ManagerSelectOption } from '@/entities/manager'
-import { useChangeProjectManager } from '@/features/change-project-manager'
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
 import {
   getTableGridTemplate,
@@ -41,7 +46,6 @@ interface ProjectsTableViewProps {
   columnView: ProjectsTableColumnView
   columnFilters: ColumnFilters
   managerFilterOptions: SelectOption[]
-  directoryOptions: ManagerSelectOption[]
   managersSelectLoading?: boolean
   managersSelectError?: boolean
   restrictToHallIds?: readonly number[] | undefined
@@ -63,7 +67,6 @@ export function ProjectsTableView({
   columnView,
   columnFilters,
   managerFilterOptions,
-  directoryOptions,
   managersSelectLoading = false,
   managersSelectError = false,
   restrictToHallIds,
@@ -84,6 +87,22 @@ export function ProjectsTableView({
   const minWidth = getTableMinWidth(columnView, { withActions })
   const skeletonColumnCount = TABLE_COLUMN_COUNT[columnView] + (withActions ? 1 : 0)
   const [editingManagerProjectId, setEditingManagerProjectId] = useState<string | null>(null)
+
+  const editingProjectId = useMemo(() => {
+    if (!editingManagerProjectId || !managerEditable) return undefined
+    const id = Number(editingManagerProjectId)
+    return Number.isFinite(id) ? id : undefined
+  }, [editingManagerProjectId, managerEditable])
+
+  const {
+    selectOptions: assignmentDirectoryOptions,
+    isOptionsLoading: isAssignmentManagersLoading,
+    isError: isAssignmentManagersError,
+    showHallAssignmentHint: showAssignmentHallHint,
+  } = useManagersDirectory(
+    editingProjectId !== undefined ? { projectId: editingProjectId } : undefined,
+    { enabled: editingProjectId !== undefined },
+  )
 
   const { submit: assignManager, isPending: isAssigningManager } = useChangeProjectManager({
     onSuccess: () => setEditingManagerProjectId(null),
@@ -198,7 +217,18 @@ export function ProjectsTableView({
             columnView={columnView}
             backOrigin={backOrigin}
             renderRowAction={renderRowAction}
-            directoryOptions={directoryOptions}
+            directoryOptions={
+              editingManagerProjectId === project.id ? assignmentDirectoryOptions : []
+            }
+            assignmentOptionsLoading={
+              editingManagerProjectId === project.id ? isAssignmentManagersLoading : false
+            }
+            assignmentOptionsError={
+              editingManagerProjectId === project.id ? isAssignmentManagersError : false
+            }
+            showHallAssignmentHint={
+              editingManagerProjectId === project.id ? showAssignmentHallHint : false
+            }
             managerEditable={managerEditable}
             isEditingManager={editingManagerProjectId === project.id}
             onStartEditManager={() => handleStartEditManager(project.id)}

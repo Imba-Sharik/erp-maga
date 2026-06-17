@@ -71,7 +71,6 @@ export function RequestsTable({ variant }: RequestsTableProps) {
         columnView={config.columnView}
         columnFilters={columnFilters}
         managerFilterOptions={[]}
-        directoryOptions={[]}
         onColumnFilterChange={handleColumnFilterChange}
         onPlumEventStatusChange={handlePlumEventStatusChange}
         isLoading={isLoading}

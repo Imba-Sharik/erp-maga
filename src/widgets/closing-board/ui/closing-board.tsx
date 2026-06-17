@@ -1,11 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { Project, ProjectBackOrigin } from '@/entities/project'
-import {
-  resolveManagerFilterName,
-  useManagerVenueRestriction,
-  useManagersDirectory,
-} from '@/entities/manager'
+import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
@@ -54,7 +50,6 @@ export function ClosingBoard({
 
   const {
     managers,
-    selectOptions,
     filterOptions,
     isLoading: isManagersLoading,
     isError: isManagersError,
@@ -119,10 +114,10 @@ export function ClosingBoard({
     ...archiveVenueFilterIds,
   })
 
-  const archiveManagerFilterName = useMemo(
-    () => resolveManagerFilterName(columnFilters.manager, selectOptions),
-    [columnFilters.manager, selectOptions],
-  )
+  const archiveManagerFilterName = useMemo(() => {
+    if (!columnFilters.manager) return null
+    return filterOptions.find((option) => option.value === columnFilters.manager)?.label ?? null
+  }, [columnFilters.manager, filterOptions])
 
   const filteredArchive = useMemo(
     () =>
@@ -184,7 +179,6 @@ export function ClosingBoard({
           columnView={columnView}
           columnFilters={columnFilters}
           managerFilterOptions={filterOptions}
-          directoryOptions={selectOptions}
           managersSelectLoading={isManagersLoading}
           managersSelectError={isManagersError}
           restrictToHallIds={restrictToHallIds}
@@ -212,7 +206,6 @@ export function ClosingBoard({
           columnView="closing-active"
           columnFilters={columnFilters}
           managerFilterOptions={filterOptions}
-          directoryOptions={selectOptions}
           managersSelectLoading={isManagersLoading}
           managersSelectError={isManagersError}
           restrictToHallIds={restrictToHallIds}
