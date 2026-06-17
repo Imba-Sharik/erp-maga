@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import {
@@ -21,6 +21,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 import { useChangeProjectManager } from '../model/use-change-project-manager'
+import {
+  isUnassignProjectManagerId,
+  UNASSIGN_PROJECT_MANAGER_ID,
+  UNASSIGN_PROJECT_MANAGER_LABEL,
+} from '../lib/unassign-project-manager'
 
 const TRIGGER_CLASS =
   'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
@@ -70,6 +75,7 @@ export function ChangeProjectManagerDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {} as Partial<FormValues>,
   })
+  const selectedManagerId = useWatch({ control: form.control, name: 'managerId' })
 
   const { submit, isPending, isError, errorMessage, reset } = useChangeProjectManager({
     onSuccess: () => {
@@ -83,7 +89,12 @@ export function ChangeProjectManagerDialog({
     submit({ projectId, managerId: values.managerId })
   }
 
-  const selectDisabled = isManagersLoading || isManagersError || showHallAssignmentHint
+  const canUnassign = Boolean(currentManager)
+  const selectDisabled =
+    isManagersLoading || isManagersError || (showHallAssignmentHint && !canUnassign)
+  const assignableOptions = showHallAssignmentHint
+    ? []
+    : selectOptions.filter((option) => !option.id.startsWith('name:'))
 
   return (
     <Dialog
@@ -121,7 +132,7 @@ export function ChangeProjectManagerDialog({
               name="managerId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Новый менеджер</FormLabel>
+                  <FormLabel>Менеджер MAG</FormLabel>
                   <FormControl>
                     <Select
                       value={field.value}
@@ -132,12 +143,13 @@ export function ChangeProjectManagerDialog({
                         <SelectValue placeholder="Выберите менеджера" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectOptions.map((option) => (
-                          <SelectItem
-                            key={option.id}
-                            value={option.id}
-                            disabled={option.id.startsWith('name:')}
-                          >
+                        {canUnassign ? (
+                          <SelectItem value={UNASSIGN_PROJECT_MANAGER_ID}>
+                            {UNASSIGN_PROJECT_MANAGER_LABEL}
+                          </SelectItem>
+                        ) : null}
+                        {assignableOptions.map((option) => (
+                          <SelectItem key={option.id} value={option.id}>
                             {option.fullName}
                           </SelectItem>
                         ))}
@@ -171,7 +183,7 @@ export function ChangeProjectManagerDialog({
                 className="rounded-[10px] bg-black text-white hover:bg-black/90"
                 disabled={isPending || selectDisabled}
               >
-                Сменить
+                {isUnassignProjectManagerId(selectedManagerId) ? 'Снять' : 'Сменить'}
               </Button>
             </DialogFooter>
           </form>
