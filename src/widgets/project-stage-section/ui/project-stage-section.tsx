@@ -65,6 +65,7 @@ export function ProjectStageSection({
   getRecord,
 }: ProjectStageSectionProps) {
   const hasDraftHighlight = useStageHasDraftHighlight(project.id, stage)
+  const readOnly = presentation.readOnly
 
   const financeProps = {
     presentation,
@@ -86,6 +87,7 @@ export function ProjectStageSection({
           record={record}
           articles={articles}
           hasDraftHighlight={hasDraftHighlight}
+          readOnly={readOnly}
           onFillSkipped={(values) => onPatchStageValues(stage, values)}
         />
       </StageSectionDraftFrame>
@@ -143,6 +145,7 @@ export function ProjectStageSection({
           record={record}
           articles={articles}
           hasDraftHighlight={hasDraftHighlight}
+          readOnly={readOnly}
           onAdvance={onAdvance}
           onPatchValues={onPatchValues}
         />
@@ -160,6 +163,7 @@ export function ProjectStageSection({
         record={record}
         articles={articles}
         hasDraftHighlight={hasDraftHighlight}
+        readOnly={readOnly}
         onAdvance={onAdvance}
         onEditPassed={
           EDITABLE_AFTER_PASS.has(stage) && onPatchStageValues

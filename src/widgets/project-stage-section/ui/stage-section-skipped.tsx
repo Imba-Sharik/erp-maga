@@ -25,6 +25,8 @@ interface StageSectionSkippedProps {
   record?: StageRecord
   articles?: ProjectArticles
   hasDraftHighlight?: boolean
+  /** Проект открыт только для просмотра — скрывает «Заполнить» и форму дозаполнения. */
+  readOnly?: boolean
   onFillSkipped: (values: Partial<StageFormData>) => void
 }
 
@@ -34,11 +36,12 @@ export function StageSectionSkipped({
   record,
   articles,
   hasDraftHighlight,
+  readOnly = false,
   onFillSkipped,
 }: StageSectionSkippedProps) {
   const [editing, setEditing] = useState(false)
   const role = useUserRole()
-  const canEdit = canEditStage(stage, role)
+  const canEdit = !readOnly && canEditStage(stage, role)
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
 
@@ -50,6 +53,7 @@ export function StageSectionSkipped({
         record={record}
         articles={articles}
         hasDraftHighlight={hasDraftHighlight}
+        readOnly={readOnly}
         editingMode="fill"
         onEditingSubmit={(values) => {
           onFillSkipped(values)

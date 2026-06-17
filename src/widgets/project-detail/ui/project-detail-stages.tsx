@@ -29,12 +29,15 @@ function FunnelHeader({ funnel }: { funnel: StageFunnel }) {
 interface ProjectDetailStagesProps {
   project: ProjectDetail
   flow: StageFlow
+  /** Проект открыт только для просмотра — форсит read-only поверх текущего таба. */
+  readOnly?: boolean
 }
 
-export function ProjectDetailStages({ project, flow }: ProjectDetailStagesProps) {
+export function ProjectDetailStages({ project, flow, readOnly = false }: ProjectDetailStagesProps) {
   const [tab] = useProjectTab()
   const economicsOnly = tab === 'economics'
-  const presentation = STAGE_PRESENTATION[presentationFromTab(tab)]
+  const basePresentation = STAGE_PRESENTATION[presentationFromTab(tab)]
+  const presentation = readOnly ? { ...basePresentation, readOnly: true } : basePresentation
 
   const closing: ProjectStage[] = []
   const preproject: ProjectStage[] = []

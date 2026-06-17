@@ -46,7 +46,8 @@ import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
-import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
+import { resolveStageEditAccess } from '../lib/resolve-stage-edit-access'
+import { canEditField } from '../lib/stage-permissions'
 import { DateField } from '@/shared/ui/date-field'
 import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
 import { StageFieldLabel } from './stage-field-label'
@@ -79,6 +80,8 @@ interface StageSectionCurrentProps {
    */
   editingMode?: 'fill' | 'edit'
   hasDraftHighlight?: boolean
+  /** Проект открыт только для просмотра — гасит редактирование полей и кнопки этапа. */
+  readOnly?: boolean
   onEditingSubmit?: (values: Partial<StageFormData>) => void
   onCancelEditing?: () => void
 }
@@ -92,6 +95,7 @@ export function StageSectionCurrent({
   onPatchValues,
   editingMode,
   hasDraftHighlight,
+  readOnly = false,
   onEditingSubmit,
   onCancelEditing,
 }: StageSectionCurrentProps) {
@@ -113,8 +117,7 @@ export function StageSectionCurrent({
   const defaults = getDefaults(editableFields, record?.values ?? {})
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  const canEdit = canEditStage(stage, role)
-  const canAdvance = canAdvanceStage(stage, role)
+  const { canEdit, canAdvance } = resolveStageEditAccess(stage, role, readOnly)
   const currentUser = useCurrentUser()
   const { update: updateDocumentStatus } = useUpdateDocumentStatus()
   const isMountRef = useRef(true)
@@ -226,7 +229,7 @@ export function StageSectionCurrent({
     const fileField = allFields.find((item) => item.name === docPair.fileName)
     if (!fileField?.documentType) return null
 
-    const fileEditable = canEditField(stage, role, fileField)
+    const fileEditable = !readOnly && canEditField(stage, role, fileField)
 
     return (
       <FormField
@@ -286,7 +289,7 @@ export function StageSectionCurrent({
   )
 
   const renderField = (f: StageFieldConfig) => {
-    const fieldEditable = canEditField(stage, role, f)
+    const fieldEditable = !readOnly && canEditField(stage, role, f)
     const values = record?.values ?? {}
 
     if (f.source === 'system' || !fieldEditable) {
