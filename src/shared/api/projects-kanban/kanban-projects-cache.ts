@@ -153,6 +153,39 @@ export function prependProjectToInfiniteCache(
   return { ...prev, pages: [nextFirst, ...rest] }
 }
 
+export function patchProjectInPaginatedCache(
+  prev: PaginatedProjectList,
+  project: ApiProject,
+): PaginatedProjectList {
+  let changed = false
+  const nextResults = prev.results.map((row) => {
+    if (!projectMatchesRow(project, row)) return row
+    changed = true
+    return project
+  })
+  if (!changed) return prev
+  return { ...prev, results: nextResults }
+}
+
+export function patchProjectInInfiniteCache(
+  prev: InfiniteData<PaginatedProjectList>,
+  project: ApiProject,
+): InfiniteData<PaginatedProjectList> {
+  let changed = false
+  const nextPages = prev.pages.map((page) => {
+    let pageChanged = false
+    const nextResults = page.results.map((row) => {
+      if (!projectMatchesRow(project, row)) return row
+      pageChanged = true
+      changed = true
+      return project
+    })
+    return pageChanged ? { ...page, results: nextResults } : page
+  })
+  if (!changed) return prev
+  return { ...prev, pages: nextPages }
+}
+
 function isInfiniteProjectsList(raw: unknown): raw is InfiniteData<PaginatedProjectList> {
   return (
     typeof raw === 'object' &&
@@ -171,17 +204,21 @@ function isPaginatedProjectsList(raw: unknown): raw is PaginatedProjectList {
   )
 }
 
-function patchListCache(raw: unknown, project: ApiProject, mode: 'remove' | 'prepend'): unknown {
+function patchListCache(
+  raw: unknown,
+  project: ApiProject,
+  mode: 'remove' | 'prepend' | 'patch',
+): unknown {
   if (isInfiniteProjectsList(raw)) {
-    return mode === 'remove'
-      ? removeProjectFromInfiniteCache(raw, project)
-      : prependProjectToInfiniteCache(raw, project)
+    if (mode === 'remove') return removeProjectFromInfiniteCache(raw, project)
+    if (mode === 'prepend') return prependProjectToInfiniteCache(raw, project)
+    return patchProjectInInfiniteCache(raw, project)
   }
 
   if (isPaginatedProjectsList(raw)) {
-    return mode === 'remove'
-      ? removeProjectFromPaginatedCache(raw, project)
-      : prependProjectToPaginatedCache(raw, project)
+    if (mode === 'remove') return removeProjectFromPaginatedCache(raw, project)
+    if (mode === 'prepend') return prependProjectToPaginatedCache(raw, project)
+    return patchProjectInPaginatedCache(raw, project)
   }
 
   return raw
@@ -236,6 +273,19 @@ export function removeProjectFromMatchingCaches(
     queryClient,
     (queryKey) => matchingProjectsListPredicate(queryKey, project, options),
     (_queryKey, raw) => patchListCache(raw, project, 'remove'),
+  )
+}
+
+/**
+ * Обновить проект «на месте» во всех кэшах списков `/api/v1/projects/` (канбан-колонки
+ * и прочие списки), не меняя его позицию. Для claim: проект остаётся в той же колонке,
+ * меняются только менеджер и флаги доступа. Каше без этого проекта — no-op.
+ */
+export function patchProjectInMatchingCaches(queryClient: QueryClient, project: ApiProject): void {
+  forEachMatchingProjectsListQuery(
+    queryClient,
+    () => true,
+    (_queryKey, raw) => patchListCache(raw, project, 'patch'),
   )
 }
 
