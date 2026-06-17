@@ -375,8 +375,29 @@ paths:
         - `net_profit_total` — чистая прибыль из расчёта бонуса, без строки «налог»;
         - `final_bonus_total` — итоговый бонус (`approved_bonus` или `total_bonus` расчёта).
 
+        **Фильтр по площадке (опционально):** `project_id` (приоритет) или `hall_id` + `loft_id` — только менеджеры с привязкой к залу/лофту проекта (для ручного назначения ответственного). Правило: при `loft_id` — привязка `(hall, loft)` или `(hall, null)`; без `loft_id` — только `(hall, null)`.
+
         CRUD назначений: `GET/POST /halls/hall-manager-assignments/`. Не склеивать с `GET /users/?role=manager_mag`.
       summary: Справочник менеджеров MAG (матрица)
+      parameters:
+      - in: query
+        name: hall_id
+        schema:
+          type: integer
+        description: ID primary зала (форма создания проекта). Обязателен для фильтра
+          без `project_id`.
+      - in: query
+        name: loft_id
+        schema:
+          type: integer
+        description: ID лофта (опционально, вместе с `hall_id`).
+      - in: query
+        name: project_id
+        schema:
+          type: integer
+        description: 'ID проекта: hall/loft берутся из primary зала проекта (`project.hall`,
+          `project.loft`). Приоритет над `hall_id`/`loft_id`. Для селекта менеджера
+          на карточке проекта.'
       tags:
       - users
       security:
@@ -422,6 +443,12 @@ paths:
                       net_profit_total: '320000.00'
                       final_bonus_total: '87500.00'
                   summary: Менеджер с привязками и метриками
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
         '403':
           content:
@@ -904,10 +931,13 @@ paths:
       description: 'Ручное создание (не из Plum). **Тело:** `event_type` (обяз.),
         `event_name` или `title` (обяз.), `hall_ids` — внутренние id из `GET /api/v1/halls/halls/`
         (минимум один) или alias `hall_id`; `city_ids` — ID городов Plum (минимум
-        один, напр. [1, 2]); для lead/admin опционально `mag_manager_id`; опционально
-        `event_date` (иначе сегодня). **Ответ 201:** `ProjectSerializer` с `halls[]`.
-        Менеджер MAG: создатель = `mag_manager`; lead: из `mag_manager_id` или из
-        матрицы залов, если не передан. Доступ: менеджер MAG, руководитель.'
+        один, напр. [1, 2]); для lead/admin опционально `mag_manager_id` (должен быть
+        закреплён за primary залом из `hall_ids`/`hall_id` в матрице; список для селекта
+        — `GET /api/v1/managers/?hall_id=<id>&loft_id=<id>`); опционально `event_date`
+        (иначе сегодня). **Ответ 201:** `ProjectSerializer` с `halls[]`. Менеджер
+        MAG: создатель = `mag_manager`; lead: из `mag_manager_id` или из матрицы залов,
+        если не передан. **400:** `mag_manager_id` — менеджер не закреплён за залом/лофтом.
+        Доступ: менеджер MAG, руководитель.'
       summary: Создать проект вручную
       tags:
       - projects
@@ -961,6 +991,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/Project'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/:
     get:
       operationId: projects_retrieve
@@ -986,8 +1028,12 @@ paths:
           description: ''
     patch:
       operationId: projects_partial_update
-      description: 'Тело: `{ "mag_manager_id": <user_id> | null }`. В ответе `mag_manager`
-        — объект назначенного в MAG; `plum_mag_manager` не меняется.'
+      description: |-
+        Тело: `{ "mag_manager_id": <user_id> | null }`. В ответе `mag_manager` — объект назначенного в MAG; `plum_mag_manager` не меняется.
+
+        Менеджер должен быть закреплён за primary залом проекта в матрице (`hall` + `loft` проекта). Список для селекта: `GET /api/v1/managers/?project_id=<id>`. `null` снимает назначение без проверки привязки.
+
+        **400:** `mag_manager_id` — менеджер заблокирован или не закреплён за залом/лофтом.
       summary: Переназначить менеджера MAG (lead/admin)
       parameters:
       - in: path
@@ -3836,6 +3882,9 @@ components:
         mag_manager_id:
           type: integer
           nullable: true
+          description: Назначенный менеджер MAG. Должен быть закреплён за primary
+            залом проекта; список для селекта — GET /api/v1/managers/?project_id=<id>.
+            null — снять назначение.
     PatchedReminderCreateUpdateRequest:
       type: object
       properties:
@@ -4598,7 +4647,9 @@ components:
         mag_manager_id:
           type: integer
           nullable: true
-          description: 'Опционально для lead/admin: вручную назначить менеджера MAG.'
+          description: 'Опционально для lead/admin: вручную назначить менеджера MAG.
+            Должен быть закреплён за primary залом (hall_ids[0]) в матрице; список
+            для селекта — GET /api/v1/managers/?hall_id=&loft_id=.'
         idempotency_key:
           type: string
           maxLength: 255

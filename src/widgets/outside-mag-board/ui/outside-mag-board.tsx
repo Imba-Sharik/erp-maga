@@ -1,11 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import { OUTSIDE_MAG_BACK_ORIGIN, type Project } from '@/entities/project'
-import {
-  resolveManagerFilterName,
-  useManagerVenueRestriction,
-  useManagersDirectory,
-} from '@/entities/manager'
+import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
@@ -46,7 +42,6 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
 
   const {
     managers,
-    selectOptions,
     filterOptions,
     isLoading: isManagersLoading,
     isError: isManagersError,
@@ -81,10 +76,10 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   const isFetchingNextPage = isOutsideMagMocksEnabled ? false : query.isFetchingNextPage
   const fetchNextPage = query.fetchNextPage
 
-  const managerFilterName = useMemo(
-    () => resolveManagerFilterName(columnFilters.manager, selectOptions),
-    [columnFilters.manager, selectOptions],
-  )
+  const managerFilterName = useMemo(() => {
+    if (!columnFilters.manager) return null
+    return filterOptions.find((option) => option.value === columnFilters.manager)?.label ?? null
+  }, [columnFilters.manager, filterOptions])
 
   const filtered = useMemo(() => {
     // Поиск серверный; для dev-моков (бэк не вызывается) фильтруем по названию на клиенте.
@@ -114,27 +109,26 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
     <div className="flex min-h-0 flex-1 flex-col gap-6">
       <OutsideMagSearchToolbar search={search} onChangeSearch={setSearch} />
       <ProjectsTableView
-          projects={filtered}
-          columnView="outside-mag"
-          columnFilters={columnFilters}
-          managerFilterOptions={filterOptions}
-          directoryOptions={selectOptions}
-          managersSelectLoading={isManagersLoading}
-          managersSelectError={isManagersError}
-          restrictToHallIds={restrictToHallIds}
-          venueSelectDisabled={venueSelectDisabled}
-          onColumnFilterChange={handleColumnFilterChange}
-          onPlumEventStatusChange={handlePlumEventStatusChange}
-          isLoading={isLoading}
-          isError={isError}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          onLoadMore={fetchNextPage}
-          backOrigin={OUTSIDE_MAG_BACK_ORIGIN}
-          renderRowAction={(project) => (
-            <ReturnFromOutsideMagButton onClick={() => setReturnTarget(project)} />
-          )}
-        />
+        projects={filtered}
+        columnView="outside-mag"
+        columnFilters={columnFilters}
+        managerFilterOptions={filterOptions}
+        managersSelectLoading={isManagersLoading}
+        managersSelectError={isManagersError}
+        restrictToHallIds={restrictToHallIds}
+        venueSelectDisabled={venueSelectDisabled}
+        onColumnFilterChange={handleColumnFilterChange}
+        onPlumEventStatusChange={handlePlumEventStatusChange}
+        isLoading={isLoading}
+        isError={isError}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+        backOrigin={OUTSIDE_MAG_BACK_ORIGIN}
+        renderRowAction={(project) => (
+          <ReturnFromOutsideMagButton onClick={() => setReturnTarget(project)} />
+        )}
+      />
 
       <ReturnProjectFromOutsideMagDialog
         open={returnTarget !== null}

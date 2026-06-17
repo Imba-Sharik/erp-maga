@@ -43,7 +43,6 @@ export function ProjectsTable({
 
   const {
     managers,
-    selectOptions,
     filterOptions,
     isLoading: isManagersLoading,
     isError: isManagersError,
@@ -94,7 +93,6 @@ export function ProjectsTable({
         columnView={columnView}
         columnFilters={columnFilters}
         managerFilterOptions={filterOptions}
-        directoryOptions={selectOptions}
         managersSelectLoading={isManagersLoading}
         managersSelectError={isManagersError}
         restrictToHallIds={restrictToHallIds}

@@ -1,14 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { Control } from 'react-hook-form'
-import { useForm } from 'react-hook-form'
+import { useEffect, useMemo } from 'react'
+import { useForm, useWatch, useFormContext } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useCurrentUser } from '@/entities/current-user'
-import { useManagersDirectory } from '@/entities/manager'
+import { useManagersDirectory, MANAGER_HALL_ASSIGNMENT_HINT } from '@/entities/manager'
 import { DEFAULT_PROJECTS_BACK_ORIGIN } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
-import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
+import { LoftHallAssignmentFields, useLoftHallAssignment, useVenueCatalog } from '@/entities/venue'
 import { EVENT_TYPE_OPTIONS } from '@/shared/constants/event-type-options'
 import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { Button } from '@/shared/ui/button'
@@ -20,6 +21,7 @@ import { Input } from '@/shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'
+import { resolvePrimaryHallVenueIds } from '../lib/resolve-primary-hall-venue-ids'
 import { useCreateProject } from '../model/use-create-project'
 
 const TRIGGER_CLASS =
@@ -166,14 +168,14 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 )}
               />
             </div>
-            {!isManagerRole ? (
-              <ManagerSelectField control={form.control} disabled={isPending} />
-            ) : null}
             <LoftHallAssignmentFields
               control={form.control}
               assignment={assignment}
               triggerClassName={TRIGGER_CLASS}
             />
+            {!isManagerRole ? (
+              <ManagerSelectField control={form.control} disabled={isPending} />
+            ) : null}
             {isError && errorMessage ? (
               <p className="text-destructive text-sm" role="alert">
                 {errorMessage}
@@ -215,12 +217,32 @@ interface ManagerSelectFieldProps {
  * для роли менеджера, у которой этого поля нет.
  */
 function ManagerSelectField({ control, disabled = false }: ManagerSelectFieldProps) {
+  const { setValue } = useFormContext<CreateProjectFormValues>()
+  const selectedHalls = useWatch({ control, name: 'halls' })
+  const { halls } = useVenueCatalog()
+
+  const venueFilter = useMemo(
+    () => resolvePrimaryHallVenueIds(selectedHalls ?? [], halls),
+    [selectedHalls, halls],
+  )
+
   const {
     selectOptions: managerOptions,
-    isLoading: isManagersLoading,
+    isOptionsLoading: isManagersLoading,
     isError: isManagersError,
-  } = useManagersDirectory()
-  const isDisabled = disabled || isManagersLoading || isManagersError
+    showHallAssignmentHint,
+  } = useManagersDirectory(venueFilter, { enabled: venueFilter !== undefined })
+
+  const selectedManagerId = useWatch({ control, name: 'magManagerId' })
+
+  useEffect(() => {
+    if (!selectedManagerId) return
+    if (!managerOptions.some((option) => option.id === selectedManagerId)) {
+      setValue('magManagerId', '')
+    }
+  }, [managerOptions, selectedManagerId, setValue])
+
+  const isDisabled = disabled || !venueFilter || isManagersLoading || isManagersError
 
   return (
     <FormField
@@ -245,6 +267,10 @@ function ManagerSelectField({ control, disabled = false }: ManagerSelectFieldPro
           </FormControl>
           {isManagersError ? (
             <p className="text-destructive text-sm">Не удалось загрузить список менеджеров</p>
+          ) : !venueFilter ? (
+            <p className="text-muted-foreground text-sm">Сначала выберите зал проекта</p>
+          ) : showHallAssignmentHint ? (
+            <p className="text-muted-foreground text-sm">{MANAGER_HALL_ASSIGNMENT_HINT}</p>
           ) : null}
           <FormMessage />
         </FormItem>

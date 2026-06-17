@@ -41,14 +41,13 @@ export function useChangeProjectManager({ onSuccess }: UseChangeProjectManagerOp
       const projectId = Number(input.projectId)
       if (!Number.isFinite(projectId)) return
 
+      // Невалидный id (в т.ч. синтетический `name:`) — buildChangeManagerRequest бросит.
       let data: ReturnType<typeof buildChangeManagerRequest>
       try {
         data = buildChangeManagerRequest(input.managerId)
       } catch {
         return
       }
-
-      if (input.managerId.startsWith('name:')) return
 
       mutation.mutate({ id: projectId, data })
     },

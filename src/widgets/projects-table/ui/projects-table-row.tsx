@@ -72,6 +72,9 @@ function ProjectTableNavRow({
 
 export interface ProjectsTableRowManagerProps {
   directoryOptions: ManagerSelectOption[]
+  assignmentOptionsLoading?: boolean
+  assignmentOptionsError?: boolean
+  showHallAssignmentHint?: boolean
   managerEditable?: boolean
   isEditingManager: boolean
   onStartEditManager: () => void
@@ -93,6 +96,9 @@ export function ProjectsTableRow({
   backOrigin,
   renderRowAction,
   directoryOptions,
+  assignmentOptionsLoading = false,
+  assignmentOptionsError = false,
+  showHallAssignmentHint = false,
   managerEditable = true,
   isEditingManager,
   onStartEditManager,
@@ -110,6 +116,9 @@ export function ProjectsTableRow({
   const managerCellProps: ProjectManagerCellProps = {
     manager: project.manager,
     directoryOptions,
+    optionsLoading: assignmentOptionsLoading,
+    optionsError: assignmentOptionsError,
+    showHallAssignmentHint,
     editable: managerEditable,
     isEditing: isEditingManager,
     onStartEdit: onStartEditManager,
