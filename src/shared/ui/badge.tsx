@@ -21,6 +21,10 @@ const badgeVariants = cva(
         success: "border-[#B7E4BE] bg-[#E8FBEB] text-[#295935]",
         info: "border-[#B7CCE4] bg-[#E9ECFF] text-[#4B61B9]",
         warning: "border-[#E4D3B7] bg-[#FBF4E8] text-[#AA8540]",
+        // Тон ведущего менеджера: текст под стать заливке (как у `warning`).
+        // Зелёный — проект ведёт текущий менеджер, серый — нейтрально/не назначен.
+        managerSelf: "border-[#B7E4BE] bg-[#E8FBEB] text-[#3E9E57]",
+        managerNeutral: "border-[#C7C7C7] bg-[#EBEBEB] text-[#767676]",
         funnelPreproject:
           "border-funnel-preproject/35 bg-funnel-preproject/10 text-funnel-preproject [a&]:hover:bg-funnel-preproject/15",
         funnelClosing:
