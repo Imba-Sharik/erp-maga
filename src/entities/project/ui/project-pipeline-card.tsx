@@ -12,6 +12,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { projectDetailPath } from '../lib/project-detail-path'
 import type { Project, ProjectBackOrigin } from '../model/types'
+import { ProjectManagerBadge } from './project-manager-badge'
 import { ProjectPlumStatusLine } from './project-plum-status-line'
 import { ProjectTelegramLink } from './project-telegram-link'
 
@@ -132,7 +133,7 @@ export function ProjectPipelineCard({
           {project.loft} · {project.hall}
         </p>
         <p className="text-xs text-[#ACACAC]">Дата мероприятия: {formatDate(project.date)}</p>
-        <p className="text-xs text-[#ACACAC]">Менеджер MAG: {project.manager}</p>
+        <ProjectManagerBadge project={project} />
         <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>
         <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>
         <p className="text-xs text-[#ACACAC]">
