@@ -40,6 +40,7 @@ export {
   mapBackendCalendarProjects,
 } from './lib/from-backend'
 export { projectToApiListRow } from './lib/project-to-api-list-row'
+export { resolveProjectReadOnly } from './lib/project-edit-access'
 export { getOutsideMagReasonLabel } from './lib/outside-mag-reason'
 export { PREPROJECT_STAGE_TO_API, preprojectStageToApi } from './lib/preproject-stage-api'
 export { CLOSING_STAGE_TO_API, closingStageToApi } from './lib/closing-stage-api'

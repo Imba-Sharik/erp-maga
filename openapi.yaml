@@ -788,7 +788,8 @@ paths:
         archived_only (true — только архив). По умолчанию проекты в стадии archived
         не возвращаются. Пагинация: limit, offset (LimitOffset, по умолчанию limit=10).
         В элементе списка: halls[] (внутренние hall_id/loft_id MAG), `mag_manager`
-        — объект `{id, full_name, email}` или null (назначенный в MAG); `plum_mag_manager`
+        — объект `{id, full_name, email}` или null (назначенный в MAG); для MAG_MANAGER:
+        `can_claim` (кнопка «Взять»), `can_edit`, `is_read_only`; `plum_mag_manager`
         — текст из Plum (справочно). sync_error — предупреждение синка (напр. зал
         не в каталоге).'
       summary: Список проектов
@@ -1029,12 +1030,15 @@ paths:
     patch:
       operationId: projects_partial_update
       description: |-
-        Тело: `{ "mag_manager_id": <user_id> | null }`. В ответе `mag_manager` — объект назначенного в MAG; `plum_mag_manager` не меняется.
+        **Lead/admin:** `{ "mag_manager_id": <user_id> | null }`. Менеджер должен быть закреплён за primary залом проекта. При смене менеджера прежний получает уведомление о снятии ведения.
 
-        Менеджер должен быть закреплён за primary залом проекта в матрице (`hall` + `loft` проекта). Список для селекта: `GET /api/v1/managers/?project_id=<id>`. `null` снимает назначение без проверки привязки.
+        **MAG_MANAGER (claim):** только `{ "mag_manager_id": <свой id> }` для проекта в пуле (`mag_manager` = null), если менеджер привязан к залу проекта. После claim `mag_manager_assigned_manually = true` (Plum-sync не перезапишет).
 
-        **400:** `mag_manager_id` — менеджер заблокирован или не закреплён за залом/лофтом.
-      summary: Переназначить менеджера MAG (lead/admin)
+        Список для селекта lead: `GET /api/v1/managers/?project_id=<id>`.
+
+        **400:** неверный менеджер, проект уже взят, нет привязки к залу.
+        **403:** менеджер пытается назначить чужого id или снять назначение.
+      summary: Переназначить или взять менеджера MAG
       parameters:
       - in: path
         name: id
@@ -3459,6 +3463,18 @@ components:
           - $ref: '#/components/schemas/MagManagerBrief'
           nullable: true
           readOnly: true
+        can_claim:
+          type: boolean
+          readOnly: true
+          description: 'Кнопка «Взять проект»: менеджер, пул, привязка к залу.'
+        can_edit:
+          type: boolean
+          readOnly: true
+          description: Менеджер ведёт проект (mag_manager_id == user.id).
+        is_read_only:
+          type: boolean
+          readOnly: true
+          description: Менеджер видит проект, но не ведёт (пул или чужой claim).
         sales_total:
           type: number
           format: double
@@ -3590,6 +3606,8 @@ components:
           nullable: true
           readOnly: true
       required:
+      - can_claim
+      - can_edit
       - city
       - city_labels
       - created_at
@@ -3603,6 +3621,7 @@ components:
       - halls
       - id
       - is_from_plum
+      - is_read_only
       - last_active_stage
       - mag_comment
       - mag_manager
@@ -3882,9 +3901,8 @@ components:
         mag_manager_id:
           type: integer
           nullable: true
-          description: Назначенный менеджер MAG. Должен быть закреплён за primary
-            залом проекта; список для селекта — GET /api/v1/managers/?project_id=<id>.
-            null — снять назначение.
+          description: 'Lead/admin: назначить менеджера по primary залу или null.
+            MAG_MANAGER: только свой id для claim проекта из пула.'
     PatchedReminderCreateUpdateRequest:
       type: object
       properties:
@@ -4053,6 +4071,17 @@ components:
           type: boolean
         can_edit_expenses:
           type: boolean
+        can_claim:
+          type: boolean
+          description: Менеджер может взять проект из пула (PATCH mag_manager_id =
+            self).
+        can_edit:
+          type: boolean
+          description: 'Агрегат прав редактирования: lead — всегда true; менеджер
+            — только владелец.'
+        is_read_only:
+          type: boolean
+          description: Менеджер видит проект, но не ведёт его (пул или чужой claim).
         data_rejected:
           type: boolean
         was_not_ready_for_event:
@@ -4064,18 +4093,21 @@ components:
       required:
       - allowed_transitions
       - blocks
+      - can_claim
+      - can_edit
       - can_edit_client
       - can_edit_contract
       - can_edit_expenses
       - can_edit_sales
       - data_rejected
+      - is_read_only
       - last_active_stage
       - stage
       - stage_label
       - was_not_ready_for_event
     Project:
       type: object
-      description: Все залы мероприятия (из Plum или ручного hall_ids).
+      description: UI-флаги claim/read-only для MAG_MANAGER (источник — ProjectManagerAccess).
       properties:
         id:
           type: integer
@@ -4206,6 +4238,18 @@ components:
           - $ref: '#/components/schemas/MagManagerBrief'
           nullable: true
           readOnly: true
+        can_claim:
+          type: boolean
+          readOnly: true
+          description: 'Кнопка «Взять проект»: менеджер, пул, привязка к залу.'
+        can_edit:
+          type: boolean
+          readOnly: true
+          description: Менеджер ведёт проект (mag_manager_id == user.id).
+        is_read_only:
+          type: boolean
+          readOnly: true
+          description: Менеджер видит проект, но не ведёт (пул или чужой claim).
         sales_total:
           type: number
           format: double
@@ -4319,6 +4363,8 @@ components:
           format: date-time
           readOnly: true
       required:
+      - can_claim
+      - can_edit
       - city
       - city_labels
       - created_at
@@ -4332,6 +4378,7 @@ components:
       - halls
       - id
       - is_from_plum
+      - is_read_only
       - last_active_stage
       - mag_comment
       - mag_manager
@@ -4665,7 +4712,7 @@ components:
       - event_type
     ProjectDetail:
       type: object
-      description: Все залы мероприятия (из Plum или ручного hall_ids).
+      description: UI-флаги claim/read-only для MAG_MANAGER (источник — ProjectManagerAccess).
       properties:
         id:
           type: integer
@@ -4796,6 +4843,18 @@ components:
           - $ref: '#/components/schemas/MagManagerBrief'
           nullable: true
           readOnly: true
+        can_claim:
+          type: boolean
+          readOnly: true
+          description: 'Кнопка «Взять проект»: менеджер, пул, привязка к залу.'
+        can_edit:
+          type: boolean
+          readOnly: true
+          description: Менеджер ведёт проект (mag_manager_id == user.id).
+        is_read_only:
+          type: boolean
+          readOnly: true
+          description: Менеджер видит проект, но не ведёт (пул или чужой claim).
         sales_total:
           type: number
           format: double
@@ -5270,6 +5329,8 @@ components:
       - calculation_file_url
       - calculation_prepared_at
       - calculation_prepared_set_by
+      - can_claim
+      - can_edit
       - city
       - city_labels
       - client_company
@@ -5315,6 +5376,7 @@ components:
       - halls
       - id
       - is_from_plum
+      - is_read_only
       - last_active_stage
       - legal_entity
       - mag_comment

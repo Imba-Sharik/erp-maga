@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import type { Project } from '@/entities/project'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
+import { useClaimProject } from '@/features/claim-project'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 
@@ -24,6 +25,7 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
   const [outsideMagTarget, setOutsideMagTarget] = useState<Project | null>(null)
   const debouncedSearch = useDebouncedValue(search)
   const { halls, lofts } = useVenueCatalog()
+  const { submit: claimProject } = useClaimProject()
 
   const venueFilterIds = useMemo(
     () => resolveVenueFilterIds(loft, hall, halls, lofts),
@@ -58,7 +60,11 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
         onAddProject={onAddProject}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
-        <ProjectsKanban listParams={listParams} onMoveOutsideMag={setOutsideMagTarget} />
+        <ProjectsKanban
+          listParams={listParams}
+          onClaimProject={(project) => claimProject({ project })}
+          onMoveOutsideMag={setOutsideMagTarget}
+        />
       </div>
 
       <MoveProjectOutsideMagDialog

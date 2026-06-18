@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useCurrentUser } from '@/entities/current-user'
 import {
   isOutsideMagStage,
+  resolveProjectReadOnly,
   STAGE_FUNNEL,
   type ProjectDetail as ProjectDetailEntity,
 } from '@/entities/project'
@@ -18,12 +19,17 @@ import { ProjectReminders } from '@/widgets/project-reminders'
 import { ProjectDetailMainCard } from './project-detail-main-card'
 import { ProjectDetailStages } from './project-detail-stages'
 import { ProjectDetailTabsRow } from './project-detail-tabs-row'
+import { ProjectReadOnlyBanner } from './project-read-only-banner'
 
 export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   const currentUser = useCurrentUser()
   const [outsideMagOpen, setOutsideMagOpen] = useState(false)
+  const readOnly = resolveProjectReadOnly(project)
+  // Баннер «ведёт другой менеджер» уместен только для занятого проекта. Свободный
+  // (из пула, без назначения) тоже read-only, но его никто не ведёт — баннер не нужен.
+  const showReadOnlyBanner = readOnly && Boolean(project.manager)
   const showOutsideMagButton =
-    STAGE_FUNNEL[project.stage] === 'pre_project' && !isOutsideMagStage(project.stage)
+    STAGE_FUNNEL[project.stage] === 'pre_project' && !isOutsideMagStage(project.stage) && !readOnly
 
   const flow = useStageFlow({
     projectId: Number(project.id),
@@ -47,6 +53,7 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
       <div className="grid grid-cols-1 items-start gap-5 @[1200px]:grid-cols-[minmax(0,1fr)_405px]">
         <div className="flex w-full min-w-0 flex-col gap-4">
           <ProjectDetailMainCard project={project} currentStage={flow.currentStage} />
+          {showReadOnlyBanner ? <ProjectReadOnlyBanner /> : null}
           <ProjectDetailTabsRow
             showOutsideMagButton={showOutsideMagButton}
             onOutsideMagClick={() => setOutsideMagOpen(true)}
@@ -58,10 +65,12 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
           ) : tab === 'reminders' && currentUser.role !== 'director' ? (
             <ProjectReminders
               projectId={Number(project.id)}
-              editable={currentUser.role === 'manager' || currentUser.role === 'admin'}
+              editable={
+                !readOnly && (currentUser.role === 'manager' || currentUser.role === 'admin')
+              }
             />
           ) : (
-            <ProjectDetailStages project={project} flow={flow} />
+            <ProjectDetailStages project={project} flow={flow} readOnly={readOnly} />
           )}
         </div>
         <ProjectDetailAside project={project} />

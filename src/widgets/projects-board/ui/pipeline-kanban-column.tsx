@@ -29,6 +29,7 @@ export interface PipelineKanbanColumnProps {
   onLoadMore?: () => void
   hasNextPage?: boolean
   isFetchingNextPage?: boolean
+  onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
@@ -43,6 +44,7 @@ export function PipelineKanbanColumn({
   onLoadMore,
   hasNextPage,
   isFetchingNextPage,
+  onClaimProject,
   onMoveOutsideMag,
   onChangeManager,
   onDeleteProject,
@@ -99,6 +101,7 @@ export function PipelineKanbanColumn({
                   project={p}
                   backOrigin={backOrigin}
                   hasDraft={Boolean(drafts[draftKey(p.id, currentUser.id)]?.highlightPending)}
+                  onClaimProject={onClaimProject}
                   onMoveOutsideMag={onMoveOutsideMag}
                   onChangeManager={onChangeManager}
                   onDeleteProject={onDeleteProject}

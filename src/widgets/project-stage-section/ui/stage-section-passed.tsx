@@ -45,7 +45,8 @@ import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
-import { canAdvanceStage, canEditField, canEditStage } from '../lib/stage-permissions'
+import { resolveStageEditAccess } from '../lib/resolve-stage-edit-access'
+import { canEditField } from '../lib/stage-permissions'
 import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
 import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldLabel } from './stage-field-label'
@@ -125,6 +126,8 @@ interface StageSectionPassedProps {
    */
   onEditPassed?: (values: Partial<StageFormData>) => void
   hasDraftHighlight?: boolean
+  /** Проект открыт только для просмотра — гасит inline-редактирование и переход этапа. */
+  readOnly?: boolean
 }
 
 export function StageSectionPassed({
@@ -136,6 +139,7 @@ export function StageSectionPassed({
   onAdvance,
   onEditPassed,
   hasDraftHighlight,
+  readOnly = false,
 }: StageSectionPassedProps) {
   const ctx: ResolveCtx = { project, stage, record, articles }
   const values = record?.values
@@ -152,8 +156,7 @@ export function StageSectionPassed({
   const extras = PASSED_EXTRAS[stage]
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  const canEdit = canEditStage(stage, role)
-  const canAdvance = canAdvanceStage(stage, role)
+  const { canEdit, canAdvance } = resolveStageEditAccess(stage, role, readOnly)
   const [editing, setEditing] = useState(false)
 
   if (editing && onEditPassed) {
@@ -163,6 +166,7 @@ export function StageSectionPassed({
         stage={stage}
         record={record}
         articles={articles}
+        readOnly={readOnly}
         editingMode="edit"
         onEditingSubmit={(next) => {
           onEditPassed(next)
@@ -176,7 +180,7 @@ export function StageSectionPassed({
   const showEditButton = !isCurrent && canEdit && Boolean(onEditPassed)
 
   const renderField = (f: StageFieldConfig) => {
-    const fieldEditable = canEditField(stage, role, f)
+    const fieldEditable = !readOnly && canEditField(stage, role, f)
 
     if (f.type === 'estimate') {
       const fileName = readField(ctx, values, f) ?? ''
