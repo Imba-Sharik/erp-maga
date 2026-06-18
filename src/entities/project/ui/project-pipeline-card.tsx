@@ -12,6 +12,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { projectDetailPath } from '../lib/project-detail-path'
 import type { Project, ProjectBackOrigin } from '../model/types'
+import { ProjectManagerBadge } from './project-manager-badge'
 import { ProjectPlumStatusLine } from './project-plum-status-line'
 import { ProjectTelegramLink } from './project-telegram-link'
 
@@ -132,7 +133,6 @@ export function ProjectPipelineCard({
           {project.loft} · {project.hall}
         </p>
         <p className="text-xs text-[#ACACAC]">Дата мероприятия: {formatDate(project.date)}</p>
-        <p className="text-xs text-[#ACACAC]">Менеджер MAG: {project.manager}</p>
         <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>
         <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>
         <p className="text-xs text-[#ACACAC]">
@@ -142,32 +142,29 @@ export function ProjectPipelineCard({
           <>
             <ProjectTelegramLink phone={project.phone} onClick={stop} />
             <ProjectPlumStatusLine project={project} />
-            <div className="mt-1 flex items-center justify-between gap-2">
-              <a
-                href={project.plumCardUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={stop}
-                className="text-funnel-preproject inline-flex items-center gap-1.5 text-xs underline-offset-2 hover:underline"
-              >
-                <span className="bg-funnel-preproject inline-flex size-4 items-center justify-center rounded-[5px] text-white">
-                  <Link2 className="size-3" />
-                </span>
-                Карточка в PLUM
-              </a>
-              <span className="text-2xs text-[#ACACAC]">
-                {formatRelativeUpdateLabel(project.updatedAt)}
+            <a
+              href={project.plumCardUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={stop}
+              className="text-funnel-preproject inline-flex w-fit items-center gap-1.5 text-xs underline-offset-2 hover:underline"
+            >
+              <span className="bg-funnel-preproject inline-flex size-4 items-center justify-center rounded-[5px] text-white">
+                <Link2 className="size-3" />
               </span>
-            </div>
+              Карточка в PLUM
+            </a>
           </>
         ) : (
-          <div className="flex items-center justify-between gap-2">
-            <ProjectTelegramLink phone={project.phone} onClick={stop} />
-            <span className="text-2xs ml-auto text-[#ACACAC]">
-              {formatRelativeUpdateLabel(project.updatedAt)}
-            </span>
-          </div>
+          <ProjectTelegramLink phone={project.phone} onClick={stop} />
         )}
+        {/* Бейдж ведущего менеджера всегда снизу; дата обновления — напротив него. */}
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <ProjectManagerBadge project={project} className="min-w-0 shrink" />
+          <span className="text-2xs shrink-0 text-[#ACACAC]">
+            {formatRelativeUpdateLabel(project.updatedAt)}
+          </span>
+        </div>
       </div>
     </Card>
   )
