@@ -77,4 +77,38 @@ describe('buildFilteredHallGroups', () => {
     expect(groups[0].options.map((o) => o.key)).toEqual(['10', '11'])
     expect(groups[1].options.map((o) => o.key)).toEqual(['20'])
   })
+
+  it('закреплённый зал с loft=null попадает в группу «Без лофта»', () => {
+    const withOrphan: VenueHall[] = [...halls, hall(30, null, 'Зал без лофта')]
+    const groups = buildFilteredHallGroups(withOrphan, lofts, [10, 30])
+    expect(groups).toHaveLength(2)
+    expect(groups[0].label).toBe('Alpha')
+    const noLoft = groups[groups.length - 1]
+    expect(noLoft).toEqual({ label: 'Без лофта', options: [{ key: '30', label: 'Зал без лофта' }] })
+  })
+
+  it('зал-сирота вне каталога подписывается из fallbackHallNames', () => {
+    const groups = buildFilteredHallGroups(
+      halls,
+      lofts,
+      [10, 999],
+      new Map([[999, 'Сиротский зал']]),
+    )
+    const noLoft = groups[groups.length - 1]
+    expect(noLoft).toEqual({
+      label: 'Без лофта',
+      options: [{ key: '999', label: 'Сиротский зал' }],
+    })
+  })
+
+  it('зал-сирота без имени показывается как «Зал #id»', () => {
+    expect(buildFilteredHallGroups(halls, lofts, [999])).toEqual([
+      { label: 'Без лофта', options: [{ key: '999', label: 'Зал #999' }] },
+    ])
+  })
+
+  it('не добавляет группу «Без лофта», если все выбранные залы покрыты лофтами', () => {
+    const groups = buildFilteredHallGroups(halls, lofts, [10, 20])
+    expect(groups.some((g) => g.label === 'Без лофта')).toBe(false)
+  })
 })
