@@ -4,7 +4,6 @@ import type { Project } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { ConfirmDeleteProjectDialog } from '@/features/delete-project'
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
-import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
 import { ClosingBoard } from '@/widgets/closing-board'
 
 export function ClosingPage() {
@@ -15,7 +14,6 @@ export function ClosingPage() {
 
   const listDateParams = useMemo(
     () => ({
-      event_date_after: toIsoLocalDay(new Date()),
       ordering: PROJECTS_LIST_DEFAULT_ORDERING,
     }),
     [],
