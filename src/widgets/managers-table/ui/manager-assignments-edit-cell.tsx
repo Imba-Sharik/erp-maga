@@ -19,17 +19,22 @@ function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
   e.stopPropagation()
 }
 
+const EMPTY_KEYS: ReadonlySet<string> = new Set()
+
 export interface ManagerAssignmentsEditCellProps {
   ariaLabel: string
   displayText: string
   groups: readonly VenueAssignmentOptionGroup[]
   selectedKeys: ReadonlySet<string>
+  /** Ключи, отрисованные как indeterminate (частично выбранные лофты), пока их не тронули. */
+  indeterminateKeys?: ReadonlySet<string>
   isOpen: boolean
   isDisabled?: boolean
   isPending?: boolean
   errorMessage?: string | null
   onOpenChange: (open: boolean) => void
-  onApply: (selectedKeys: string[]) => Promise<{ ok: true } | { ok: false }>
+  /** `touchedKeys` — ключи, которые пользователь переключал (нужно для tri-state лофтов). */
+  onApply: (selectedKeys: string[], touchedKeys: string[]) => Promise<{ ok: true } | { ok: false }>
   onClearError?: () => void
 }
 
@@ -38,6 +43,7 @@ export function ManagerAssignmentsEditCell({
   displayText,
   groups,
   selectedKeys,
+  indeterminateKeys = EMPTY_KEYS,
   isOpen,
   isDisabled = false,
   isPending = false,
@@ -47,14 +53,21 @@ export function ManagerAssignmentsEditCell({
   onClearError,
 }: ManagerAssignmentsEditCellProps) {
   const [draft, setDraft] = useState<Set<string>>(() => new Set(selectedKeys))
+  const [touched, setTouched] = useState<Set<string>>(() => new Set())
   const totalOptions = groups.reduce((count, group) => count + group.options.length, 0)
 
   useEffect(() => {
-    if (isOpen) setDraft(new Set(selectedKeys))
+    if (isOpen) {
+      setDraft(new Set(selectedKeys))
+      setTouched(new Set())
+    }
   }, [isOpen, selectedKeys])
 
   useEffect(() => {
-    if (errorMessage) setDraft(new Set(selectedKeys))
+    if (errorMessage) {
+      setDraft(new Set(selectedKeys))
+      setTouched(new Set())
+    }
   }, [errorMessage, selectedKeys])
 
   const handleOpenChange = (open: boolean) => {
@@ -63,7 +76,7 @@ export function ManagerAssignmentsEditCell({
   }
 
   const handleApply = async () => {
-    const result = await onApply([...draft])
+    const result = await onApply([...draft], [...touched])
     if (result.ok) {
       onClearError?.()
       onOpenChange(false)
@@ -104,26 +117,38 @@ export function ManagerAssignmentsEditCell({
                           {group.label}
                         </DropdownMenuLabel>
                       ) : null}
-                      {group.options.map((option) => (
-                        <DropdownMenuCheckboxItem
-                          key={option.key}
-                          checked={draft.has(option.key)}
-                          disabled={isPending}
-                          title={option.label}
-                          onCheckedChange={(checked) => {
-                            onClearError?.()
-                            setDraft((prev) => {
-                              const next = new Set(prev)
-                              if (checked === true) next.add(option.key)
-                              else next.delete(option.key)
-                              return next
-                            })
-                          }}
-                          onSelect={(e) => e.preventDefault()}
-                        >
-                          <span className="min-w-0 truncate">{option.label}</span>
-                        </DropdownMenuCheckboxItem>
-                      ))}
+                      {group.options.map((option) => {
+                        const isIndeterminate =
+                          indeterminateKeys.has(option.key) &&
+                          !touched.has(option.key) &&
+                          !draft.has(option.key)
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={option.key}
+                            checked={isIndeterminate ? 'indeterminate' : draft.has(option.key)}
+                            disabled={isPending}
+                            title={option.label}
+                            onCheckedChange={(checked) => {
+                              onClearError?.()
+                              setTouched((prev) => {
+                                if (prev.has(option.key)) return prev
+                                const next = new Set(prev)
+                                next.add(option.key)
+                                return next
+                              })
+                              setDraft((prev) => {
+                                const next = new Set(prev)
+                                if (checked === true) next.add(option.key)
+                                else next.delete(option.key)
+                                return next
+                              })
+                            }}
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <span className="min-w-0 truncate">{option.label}</span>
+                          </DropdownMenuCheckboxItem>
+                        )
+                      })}
                     </div>
                   ))
                 )}

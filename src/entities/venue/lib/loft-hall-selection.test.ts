@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   applyLoftSelection,
+  applyLoftToggles,
   deriveCityIdsFromHallIds,
   deriveSelectedLoftIds,
   getHallIdsForLoft,
@@ -78,6 +79,32 @@ describe('applyLoftSelection', () => {
 
   it('идемпотентно при неизменном наборе лофтов', () => {
     expect(applyLoftSelection(halls, [10, 11], [1]).sort()).toEqual([10, 11])
+  })
+})
+
+describe('applyLoftToggles', () => {
+  it('включение лофта добавляет все его залы', () => {
+    expect(applyLoftToggles(halls, [], [1], []).sort()).toEqual([10, 11])
+  })
+
+  it('дозаполняет частично выбранный лофт (в отличие от applyLoftSelection)', () => {
+    expect(applyLoftToggles(halls, [10], [1], []).sort()).toEqual([10, 11])
+  })
+
+  it('выключение лофта снимает все его залы', () => {
+    expect(applyLoftToggles(halls, [10, 11, 20], [], [2]).sort()).toEqual([10, 11])
+  })
+
+  it('нетронутый частичный лофт сохраняется', () => {
+    expect(applyLoftToggles(halls, [10], [], []).sort()).toEqual([10])
+  })
+
+  it('залы без лофта не трогаются', () => {
+    expect(applyLoftToggles(halls, [30], [1], []).sort()).toEqual([10, 11, 30])
+  })
+
+  it('одновременно включает один лофт и выключает другой', () => {
+    expect(applyLoftToggles(halls, [10, 11], [2], [1]).sort()).toEqual([20])
   })
 })
 

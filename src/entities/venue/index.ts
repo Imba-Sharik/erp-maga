@@ -12,6 +12,7 @@ export { hallsByLoftId, hallsToSelectOptions, loftsToSelectOptions } from './lib
 export { hallsForLoft, hallBelongsToLoft } from './lib/halls-by-loft'
 export {
   applyLoftSelection,
+  applyLoftToggles,
   deriveCityIdsFromHallIds,
   deriveSelectedLoftIds,
   getHallIdsForLoft,
