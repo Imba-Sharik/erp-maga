@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { Project, ProjectBackOrigin } from '@/entities/project'
+import { PROJECTS_SORT_DEFAULT, type Project, type ProjectBackOrigin } from '@/entities/project'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
@@ -57,6 +57,7 @@ export function ClosingBoard({
 
   // Kanban filters
   const [search, setSearch] = useState('')
+  const [sort, setSort] = useState(PROJECTS_SORT_DEFAULT)
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
@@ -95,9 +96,17 @@ export function ClosingBoard({
         search: debouncedSearch,
         plumEventStatus: columnFilters.plumEventStatus,
         city,
+        ordering: sort,
         ...kanbanVenueFilterIds,
       }),
-    [listDateParams, debouncedSearch, columnFilters.plumEventStatus, city, kanbanVenueFilterIds],
+    [
+      listDateParams,
+      debouncedSearch,
+      columnFilters.plumEventStatus,
+      city,
+      sort,
+      kanbanVenueFilterIds,
+    ],
   )
 
   // Табличный вид активного закрытия: один запрос на все closing-этапы;
@@ -158,12 +167,14 @@ export function ClosingBoard({
         <ClosingBoardToolbar
           archiveMode={false}
           search={search}
+          sort={sort}
           city={city}
           hall={hall}
           loft={loft}
           plumEventStatus={columnFilters.plumEventStatus}
           viewMode={viewMode}
           onChangeSearch={setSearch}
+          onChangeSort={setSort}
           onChangeCity={setCity}
           onChangeHall={setHall}
           onChangeLoft={setLoft}
