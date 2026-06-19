@@ -7,6 +7,7 @@ export {
 } from './lib/filter-labels'
 export { useVenueFilterPlaceholder } from './lib/use-venue-filter-placeholder'
 export { VenueFilterSelect } from './ui/venue-filter-select'
+export { VenueFilterMultiSelect } from './ui/venue-filter-multi-select'
 export { hallsByLoftId, hallsToSelectOptions, loftsToSelectOptions } from './lib/to-select-options'
 export { hallsForLoft, hallBelongsToLoft } from './lib/halls-by-loft'
 export {
