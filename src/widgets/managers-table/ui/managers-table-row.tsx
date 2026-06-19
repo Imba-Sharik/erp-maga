@@ -18,6 +18,7 @@ interface ManagersTableRowProps {
   loftGroups: readonly VenueAssignmentOptionGroup[]
   hallSelectedKeys: ReadonlySet<string>
   loftSelectedKeys: ReadonlySet<string>
+  loftIndeterminateKeys: ReadonlySet<string>
   editing: { managerId: string; mode: ManagerAssignmentMode } | null
   catalogDisabled: boolean
   isPendingFor: (managerId: string, mode: ManagerAssignmentMode) => boolean
@@ -28,6 +29,7 @@ interface ManagersTableRowProps {
     manager: Manager,
     mode: ManagerAssignmentMode,
     selectedKeys: string[],
+    touchedKeys: string[],
   ) => Promise<{ ok: true } | { ok: false }>
   onRequestDelete: (manager: Manager) => void
 }
@@ -38,6 +40,7 @@ export function ManagersTableRow({
   loftGroups,
   hallSelectedKeys,
   loftSelectedKeys,
+  loftIndeterminateKeys,
   editing,
   catalogDisabled,
   isPendingFor,
@@ -62,13 +65,14 @@ export function ManagersTableRow({
         displayText={loftsDisplay}
         groups={loftGroups}
         selectedKeys={loftSelectedKeys}
+        indeterminateKeys={loftIndeterminateKeys}
         isOpen={editing?.managerId === manager.id && editing.mode === 'lofts'}
         isDisabled={catalogDisabled}
         isPending={isPendingFor(manager.id, 'lofts')}
         errorMessage={getErrorFor(manager.id, 'lofts')}
         onOpenChange={(open) => onEditOpenChange(manager.id, 'lofts', open)}
         onClearError={() => onClearError(manager.id, 'lofts')}
-        onApply={(keys) => onApplyAssignments(manager, 'lofts', keys)}
+        onApply={(keys, touched) => onApplyAssignments(manager, 'lofts', keys, touched)}
       />
 
       {hasHalls ? (
@@ -83,7 +87,7 @@ export function ManagersTableRow({
           errorMessage={getErrorFor(manager.id, 'halls')}
           onOpenChange={(open) => onEditOpenChange(manager.id, 'halls', open)}
           onClearError={() => onClearError(manager.id, 'halls')}
-          onApply={(keys) => onApplyAssignments(manager, 'halls', keys)}
+          onApply={(keys, touched) => onApplyAssignments(manager, 'halls', keys, touched)}
         />
       ) : (
         <GridTableCell muted>{hallsDisplay}</GridTableCell>

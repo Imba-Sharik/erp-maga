@@ -73,6 +73,34 @@ export function applyLoftSelection(
 }
 
 /**
+ * Применяет явные переключения лофтов к набору залов (для tri-state селекта лофтов).
+ *
+ * В отличие от `applyLoftSelection`, который сравнивает наборы лофтов и не умеет
+ * «дозаполнять» уже частично выбранный лофт, здесь намерение задано явно:
+ * - `fullLoftIds` — лофты, включённые целиком: добавляем ВСЕ их залы (в т.ч. дозаполняем
+ *   частично выбранный лофт до полного);
+ * - `clearedLoftIds` — выключенные лофты: снимаем все их залы.
+ *
+ * Нетронутые лофты (нет ни в одном наборе) не меняются — частичный выбор сохраняется,
+ * поэтому открытие/закрытие селекта без изменений не трогает назначения.
+ */
+export function applyLoftToggles(
+  halls: readonly VenueHall[],
+  selectedHallIds: Iterable<number>,
+  fullLoftIds: Iterable<number>,
+  clearedLoftIds: Iterable<number>,
+): number[] {
+  const result = new Set(selectedHallIds)
+  for (const loftId of fullLoftIds) {
+    for (const hallId of getHallIdsForLoft(halls, loftId)) result.add(hallId)
+  }
+  for (const loftId of clearedLoftIds) {
+    for (const hallId of getHallIdsForLoft(halls, loftId)) result.delete(hallId)
+  }
+  return [...result]
+}
+
+/**
  * Синхронизирует пару «залы + производные лофты» после изменения набора залов.
  * Используется в формах (create-project) и при отображении выбора.
  */

@@ -7,15 +7,21 @@ import {
   type ManagerAssignmentMode,
 } from '@/entities/manager'
 import {
-  applyLoftSelection,
+  applyLoftToggles,
   buildFilteredHallGroups,
   buildLoftAssignmentOptions,
   deriveSelectedLoftIds,
+  getHallIdsForLoft,
   useVenueCatalog,
 } from '@/entities/venue'
 import { ConfirmDeleteManagerDialog } from '@/features/confirm-delete-manager'
 import { useUpdateManagerAssignments } from '@/features/update-manager-assignments'
-import { GridTableHeaderCell, GridTableHeaderLabel, GridTableView, GridTableViewport } from '@/shared/ui/grid-table'
+import {
+  GridTableHeaderCell,
+  GridTableHeaderLabel,
+  GridTableView,
+  GridTableViewport,
+} from '@/shared/ui/grid-table'
 
 import { filterManagersTable } from '../lib/filter-managers-table'
 import {
@@ -103,14 +109,20 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
       manager: Manager,
       mode: ManagerAssignmentMode,
       selectedKeys: string[],
+      touchedKeys: string[],
     ): Promise<{ ok: true } | { ok: false }> => {
       let targetHallIds: number[]
       if (mode === 'halls') {
         targetHallIds = selectedKeys.map(Number)
       } else {
+        // tri-state лофтов: применяем только реально тронутые лофты, чтобы не
+        // снести частичный выбор при открытии/закрытии селекта без изменений.
         const currentHallIds = getSelectedHallIds(manager.assignments)
-        const nextLoftIds = selectedKeys.map(Number)
-        targetHallIds = applyLoftSelection(halls, currentHallIds, nextLoftIds)
+        const draftLoftIds = new Set(selectedKeys.map(Number))
+        const touchedLoftIds = touchedKeys.map(Number)
+        const fullLoftIds = touchedLoftIds.filter((id) => draftLoftIds.has(id))
+        const clearedLoftIds = touchedLoftIds.filter((id) => !draftLoftIds.has(id))
+        targetHallIds = applyLoftToggles(halls, currentHallIds, fullLoftIds, clearedLoftIds)
       }
       const result = await apply({ manager, mode, targetHallIds })
       return result.ok ? { ok: true } : { ok: false }
@@ -134,10 +146,30 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
         >
           {managers.map((manager) => {
             const selectedHallIds = getSelectedHallIds(manager.assignments)
+            const selectedHallIdSet = new Set(selectedHallIds)
             const selectedLoftIds = deriveSelectedLoftIds(halls, selectedHallIds)
+
+            // Полностью выбранный лофт (все его залы) → галочка; частично → indeterminate.
+            const loftSelectedKeys = new Set<string>()
+            const loftIndeterminateKeys = new Set<string>()
+            for (const loftId of selectedLoftIds) {
+              const loftHallIds = getHallIdsForLoft(halls, loftId)
+              const isFull =
+                loftHallIds.length > 0 && loftHallIds.every((id) => selectedHallIdSet.has(id))
+              ;(isFull ? loftSelectedKeys : loftIndeterminateKeys).add(String(loftId))
+            }
+
             const hallSelectedKeys = new Set(selectedHallIds.map(String))
-            const loftSelectedKeys = new Set(selectedLoftIds.map(String))
-            const hallGroups = buildFilteredHallGroups(halls, lofts, selectedHallIds)
+            // Имена для залов вне каталога (сирот) — берём из назначений менеджера.
+            const assignmentHallNames = new Map(
+              manager.assignments.map((a) => [a.hallId, a.hallName] as const),
+            )
+            const hallGroups = buildFilteredHallGroups(
+              halls,
+              lofts,
+              selectedHallIds,
+              assignmentHallNames,
+            )
 
             return (
               <ManagersTableRow
@@ -147,6 +179,7 @@ export function ManagersTable({ search, hall, loft }: ManagersTableProps) {
                 loftGroups={loftGroups}
                 hallSelectedKeys={hallSelectedKeys}
                 loftSelectedKeys={loftSelectedKeys}
+                loftIndeterminateKeys={loftIndeterminateKeys}
                 editing={editing}
                 catalogDisabled={catalogDisabled}
                 isPendingFor={isPendingFor}
