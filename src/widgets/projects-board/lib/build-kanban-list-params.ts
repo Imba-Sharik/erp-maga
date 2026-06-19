@@ -14,11 +14,13 @@ interface BuildKanbanListParamsInput {
   loft_id?: number
   /** Plum ID города (`city` в `/projects/`); `null` — фильтр не задан. */
   city?: string | null
+  /** Сортировка (`ordering`); переопределяет значение из `base`, если задана. */
+  ordering?: string
 }
 
 export function buildKanbanListParams(
   base: KanbanListDateParams,
-  { search, plumEventStatus, hall_id, loft_id, city }: BuildKanbanListParamsInput,
+  { search, plumEventStatus, hall_id, loft_id, city, ordering }: BuildKanbanListParamsInput,
 ): BoardListParams {
   const trimmedSearch = search.trim() || undefined
 
@@ -29,5 +31,6 @@ export function buildKanbanListParams(
     ...(hall_id !== undefined ? { hall_id } : {}),
     ...(loft_id !== undefined ? { loft_id } : {}),
     ...(city ? { city } : {}),
+    ...(ordering ? { ordering } : {}),
   }
 }

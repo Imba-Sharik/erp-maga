@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { Project } from '@/entities/project'
+import { PROJECTS_SORT_DEFAULT, type Project } from '@/entities/project'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useClaimProject } from '@/features/claim-project'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
@@ -18,6 +18,7 @@ interface ProjectsBoardProps {
 
 export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardProps) {
   const [search, setSearch] = useState('')
+  const [sort, setSort] = useState(PROJECTS_SORT_DEFAULT)
   const [city, setCity] = useState<string | null>(null)
   const [hall, setHall] = useState<string | null>(null)
   const [loft, setLoft] = useState<string | null>(null)
@@ -39,20 +40,23 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
         search: debouncedSearch,
         plumEventStatus,
         city,
+        ordering: sort,
         ...venueFilterIds,
       }),
-    [listDateParams, debouncedSearch, plumEventStatus, city, venueFilterIds],
+    [listDateParams, debouncedSearch, plumEventStatus, city, sort, venueFilterIds],
   )
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6">
       <ProjectsBoardToolbar
         search={search}
+        sort={sort}
         city={city}
         hall={hall}
         loft={loft}
         plumEventStatus={plumEventStatus}
         onChangeSearch={setSearch}
+        onChangeSort={setSort}
         onChangeCity={setCity}
         onChangeHall={setHall}
         onChangeLoft={setLoft}

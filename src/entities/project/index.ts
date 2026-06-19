@@ -99,6 +99,12 @@ export type {
   PlumEventStatusFilterQueryParams,
   PlumEventStatusFilterValues,
 } from './lib/plum-event-status-catalog'
+export {
+  PROJECTS_SORT_BY_CREATED,
+  PROJECTS_SORT_BY_EVENT_DATE,
+  PROJECTS_SORT_DEFAULT,
+  PROJECTS_SORT_OPTIONS,
+} from './lib/projects-sort-catalog'
 export { ProjectCard } from './ui/project-card'
 export { ProjectCountBadge } from './ui/project-count-badge'
 export { ProjectPipelineCard } from './ui/project-pipeline-card'
@@ -112,3 +118,4 @@ export { PlumLink } from './ui/plum-link'
 export { KvRow } from './ui/kv-row'
 export { ProjectAsideCard } from './ui/project-aside-card'
 export { PlumEventStatusFilterSelect } from './ui/plum-event-status-filter-select'
+export { ProjectsSortSelect } from './ui/projects-sort-select'
