@@ -1,7 +1,7 @@
 import { Loader2 } from 'lucide-react'
 import { PlumEventStatusFilterSelect } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
-import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
+import { useLoftHallFilter, VenueFilterMultiSelect, VenueFilterSelect } from '@/entities/venue'
 import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/utils'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
@@ -46,8 +46,8 @@ interface CalendarToolbarProps {
   onChangeMonth: (date: Date) => void
   loft: string | null
   onChangeLoft: (loft: string | null) => void
-  hall: string | null
-  onChangeHall: (hall: string | null) => void
+  hall: string[]
+  onChangeHall: (hall: string[]) => void
   showManagerFilter?: boolean
   magManagerId?: string | null
   onChangeMagManager?: (value: string | null) => void
@@ -127,7 +127,7 @@ export function CalendarToolbar({
   const selectDisabled = catalogDisabled || venueSelectDisabled
   const handleChangeLoft = (next: string | null) => {
     onChangeLoft(next)
-    if (shouldResetHall(next, hall)) onChangeHall(null)
+    if (next) onChangeHall(hall.filter((h) => !shouldResetHall(next, h)))
   }
   const managerSelectDisabled = managersSelectLoading || managersSelectError
   const managerPlaceholder = isMobile ? 'Менеджер' : 'Отв. менеджер'
@@ -180,9 +180,9 @@ export function CalendarToolbar({
             className={layout.managerDesktopShow}
           />
         ) : null}
-        <VenueFilterSelect
+        <VenueFilterMultiSelect
           filter="hall"
-          value={hall}
+          values={hall}
           options={hallOptions}
           onChange={onChangeHall}
           triggerClassName={layout.triggerBase}

@@ -34,7 +34,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 
 const emptyFilter: CalendarProjectsFilter = {
   search: '',
-  hall: null,
+  hall: [],
   loft: null,
   plumEventStatus: [],
 }
@@ -51,8 +51,21 @@ describe('filterCalendarProjects', () => {
       makeProject({ id: '2', hallLoft: 'Loft Юг · Зал B' }),
     ]
     expect(
-      filterCalendarProjects(projects, { ...emptyFilter, hall: 'Зал A' }).map((p) => p.id),
+      filterCalendarProjects(projects, { ...emptyFilter, hall: ['Зал A'] }).map((p) => p.id),
     ).toEqual(['1'])
+  })
+
+  it('мультивыбор залов мэтчит проект по любому из выбранных (OR)', () => {
+    const projects = [
+      makeProject({ id: '1', hallLoft: 'Loft Центр · Зал A' }),
+      makeProject({ id: '2', hallLoft: 'Loft Юг · Зал B' }),
+      makeProject({ id: '3', hallLoft: 'Loft Запад · Зал C' }),
+    ]
+    expect(
+      filterCalendarProjects(projects, { ...emptyFilter, hall: ['Зал A', 'Зал C'] }).map(
+        (p) => p.id,
+      ),
+    ).toEqual(['1', '3'])
   })
 
   it('фильтрует по подстроке hallLoft для лофта', () => {
@@ -136,7 +149,7 @@ describe('filterCalendarProjects', () => {
     expect(
       filterCalendarProjects(projects, {
         search: 'свадьба',
-        hall: 'Зал A',
+        hall: ['Зал A'],
         loft: null,
         plumEventStatus: ['4'],
       }).map((p) => p.id),

@@ -13,12 +13,12 @@ interface ProjectCalendarProps {
   today: Date
   projectsByDay: ProjectsByDay
   loft: string | null
-  hall: string | null
+  hall: string[]
   onChangeMonth: (date: Date) => void
   onToggleDate: (date: Date) => void
   onPaintDates: (keys: string[], mode: PaintMode) => void
   onChangeLoft: (loft: string | null) => void
-  onChangeHall: (hall: string | null) => void
+  onChangeHall: (hall: string[]) => void
   showManagerFilter?: boolean
   magManagerId?: string | null
   onChangeMagManager?: (value: string | null) => void

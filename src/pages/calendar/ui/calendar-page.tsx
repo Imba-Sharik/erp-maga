@@ -52,7 +52,7 @@ export function CalendarPage() {
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [loft, setLoft] = useState<string | null>(null)
-  const [hall, setHall] = useState<string | null>(null)
+  const [hall, setHall] = useState<string[]>([])
   const [magManagerId, setMagManagerId] = useState<string | null>(null)
   const [projectSearch, setProjectSearch] = useState('')
   const [plumEventStatus, setPlumEventStatus] = useState<string[]>([])
@@ -80,7 +80,7 @@ export function CalendarPage() {
 
   const handleChangeMagManager = useCallback((value: string | null) => {
     setMagManagerId(value)
-    setHall(null)
+    setHall([])
     setLoft(null)
   }, [])
 
