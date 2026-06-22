@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 import { OutsideMagBoard } from '@/widgets/outside-mag-board'
 
 export function OutsideMagPage() {

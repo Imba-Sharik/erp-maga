@@ -4,7 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import type { Project } from '@/entities/project'
 import { mapBackendProjects } from '@/entities/project'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 
 const PAGE_SIZE = 50
 

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 
 import type { ProjectBackOrigin } from '@/entities/project'
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { useDebouncedValue } from '@/shared/hooks'
 import { Input } from '@/shared/ui/input'
 import {
   EMPTY_COLUMN_FILTERS,

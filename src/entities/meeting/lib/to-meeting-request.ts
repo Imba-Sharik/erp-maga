@@ -1,11 +1,11 @@
 import type { MeetingCreateRequest } from '@/shared/api/generated/types/MeetingCreateRequest'
 import type { PatchedMeetingCreateUpdateRequest } from '@/shared/api/generated/types/PatchedMeetingCreateUpdateRequest'
-import { buildBusinessDatetime } from '@/shared/lib/date/business-datetime'
+import { buildBusinessDatetime } from '@/shared/lib/date'
 
 import type { MeetingFormValues } from './meeting-form-schema'
 import type { Meeting } from '../model/types'
 
-export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date/business-datetime'
+export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date'
 
 export function toMeetingCreateRequest(
   values: MeetingFormValues,

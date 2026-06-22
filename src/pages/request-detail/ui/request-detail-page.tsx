@@ -7,7 +7,7 @@ import {
   type ProjectBackOrigin,
 } from '@/entities/project'
 import { useProjectsRetrieve } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
-import { useBreadcrumb } from '@/shared/hooks/use-breadcrumb'
+import { useBreadcrumb } from '@/shared/hooks'
 import { RequestDetail } from '@/widgets/request-detail'
 
 function isBackOrigin(state: unknown): state is ProjectBackOrigin {

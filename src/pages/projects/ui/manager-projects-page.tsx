@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import { CreateProjectDialog } from '@/features/create-project'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 import { Button } from '@/shared/ui/button'
 import { ProjectsBoard } from '@/widgets/projects-board'
 

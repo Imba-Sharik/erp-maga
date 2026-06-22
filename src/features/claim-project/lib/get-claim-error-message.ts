@@ -1,4 +1,4 @@
-import { getTransitionErrorMessage } from '@/shared/api/project-transition/get-transition-error-message'
+import { getTransitionErrorMessage } from '@/shared/api'
 
 /**
  * Текст ошибки claim. Бэк отдаёт `detail` для 400 (проект уже взят / нет привязки

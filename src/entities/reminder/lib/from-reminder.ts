@@ -1,9 +1,5 @@
 import type { Reminder as ApiReminder } from '@/shared/api/generated/types/Reminder'
-import {
-  buildBusinessDatetime,
-  formatBusinessDate,
-  formatBusinessTime,
-} from '@/shared/lib/date/business-datetime'
+import { buildBusinessDatetime, formatBusinessDate, formatBusinessTime } from '@/shared/lib/date'
 
 import type { Reminder } from '../model/types'
 

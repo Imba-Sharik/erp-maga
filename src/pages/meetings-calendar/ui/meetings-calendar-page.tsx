@@ -26,7 +26,7 @@ import {
   EditReminderDialog,
 } from '@/features/manage-reminders'
 import { toDayKey } from '@/shared/lib/date'
-import { useElementSize } from '@/shared/hooks/use-element-size'
+import { useElementSize } from '@/shared/hooks'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { CombinedCalendar } from '@/widgets/combined-calendar'
 import { MeetingCalendar } from '@/widgets/meeting-calendar'

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import type { ResponseErrorConfig } from '@/shared/api/client'
+import type { ResponseErrorConfig } from '@/shared/api'
 
 /** Поля DRF в порядке релевантности для загрузки файла. */
 const PREFERRED_ERROR_FIELDS = ['detail', 'file', 'non_field_errors'] as const

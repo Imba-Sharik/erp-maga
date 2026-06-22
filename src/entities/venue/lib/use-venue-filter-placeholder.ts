@@ -1,4 +1,4 @@
-import { useIsMobile } from '@/shared/hooks/use-mobile'
+import { useIsMobile } from '@/shared/hooks'
 
 import { venueFilterPlaceholder, type VenueFilterKey } from './filter-labels'
 

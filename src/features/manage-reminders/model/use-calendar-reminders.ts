@@ -15,7 +15,7 @@ import {
 import { useRemindersCreate } from '@/shared/api/generated/hooks/remindersController/useRemindersCreate'
 import { useRemindersDestroy } from '@/shared/api/generated/hooks/remindersController/useRemindersDestroy'
 import { useRemindersPartialUpdate } from '@/shared/api/generated/hooks/remindersController/useRemindersPartialUpdate'
-import { parseBusinessDatetime } from '@/shared/lib/date/business-datetime'
+import { parseBusinessDatetime } from '@/shared/lib/date'
 
 import { getReminderErrorMessage } from '../lib/get-reminder-error-message'
 
@@ -100,9 +100,7 @@ export function useUpdateReminder({ queryParams, reminder, onSuccess }: UseUpdat
     mutation: {
       onMutate: ({ data }) => {
         if (!reminder || !data) return {}
-        const parsed = data.reminder_datetime
-          ? parseBusinessDatetime(data.reminder_datetime)
-          : null
+        const parsed = data.reminder_datetime ? parseBusinessDatetime(data.reminder_datetime) : null
         const optimistic: Reminder = {
           ...reminder,
           title: data.name ?? reminder.title,

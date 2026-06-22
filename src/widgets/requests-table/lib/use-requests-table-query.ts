@@ -7,7 +7,7 @@ import {
   type AccountantRequestsStageParams,
 } from '@/features/accountant-requests'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 
 const PAGE_SIZE = 50
 

@@ -9,7 +9,7 @@ import {
 } from '@/entities/project'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
 import type { ProjectsListQueryParamsStageEnumKey } from '@/shared/api/generated/types/projectsController/ProjectsList'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 
 const PAGE_SIZE = 50
 

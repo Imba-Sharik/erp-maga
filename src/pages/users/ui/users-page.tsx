@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import { useUsersList } from '@/shared/api/generated/hooks/usersController/useUsersList'
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
-import { formatDateTime } from '@/shared/lib/date/format-date-time'
+import { useDebouncedValue } from '@/shared/hooks'
+import { formatDateTime } from '@/shared/lib/date'
 import {
   GridTableCell,
   GridTableHeaderLabel,

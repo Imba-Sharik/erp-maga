@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import type { Project } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { ConfirmDeleteProjectDialog } from '@/features/delete-project'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 import { ClosingBoard } from '@/widgets/closing-board'
 
 export function ClosingPage() {
