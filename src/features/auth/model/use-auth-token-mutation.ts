@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 
-import { setAccessToken } from '@/entities/session'
+import { setAccessToken } from '@/shared/lib/auth-session'
 import { useAuthTokenCreate } from '@/shared/api/generated/hooks/authController/useAuthTokenCreate'
 
 interface Options {

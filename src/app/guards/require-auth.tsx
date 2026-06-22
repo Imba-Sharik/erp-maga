@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
-import { clearSessionTokens, getAccessToken } from '@/entities/session'
+import { clearSessionTokens, getAccessToken } from '@/shared/lib/auth-session'
 import { useUsersMeRetrieve } from '@/shared/api/generated/hooks/usersController/useUsersMeRetrieve'
 import { refreshAccessToken } from '@/shared/api'
 
