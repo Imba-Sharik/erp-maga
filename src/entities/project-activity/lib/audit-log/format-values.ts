@@ -1,5 +1,5 @@
 import { ALL_STAGE_LABELS, type ProjectStage } from '@/entities/project'
-import { DOCUMENT_STATUS_LABELS } from '@/entities/project-documents'
+import { DOCUMENT_STATUS_LABELS } from '@/entities/project-document'
 
 import type { AuditLogFormatContext } from './types'
 

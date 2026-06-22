@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 import { client } from '@/shared/api'
 
 import { downloadBlob } from '../lib/download-blob'

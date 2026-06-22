@@ -3,7 +3,7 @@ import {
   normalizeAspectZeroToNull,
   type FinanceAspect,
   type ProjectArticles,
-} from '@/entities/project-articles'
+} from '@/entities/project-article'
 
 const STAGE_FINANCE_ASPECT: Partial<Record<ProjectStage, FinanceAspect>> = {
   ready_to_event: 'sales',

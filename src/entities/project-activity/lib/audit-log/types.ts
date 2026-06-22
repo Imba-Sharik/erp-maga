@@ -1,4 +1,4 @@
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 /** Контекст для форматирования значений audit-log (ID → имя и т.п.). */
 export interface AuditLogFormatContext {

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import type { ArticleKind } from '@/entities/project-articles'
+import type { ArticleKind } from '@/entities/project-article'
 import { cn } from '@/shared/lib/utils'
 
 const GRID_ROW = [

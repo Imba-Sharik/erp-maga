@@ -1,4 +1,4 @@
-import type { StageDocumentFieldVariant } from '@/entities/project-documents'
+import type { StageDocumentFieldVariant } from '@/entities/project-document'
 import { cn } from '@/shared/lib/utils'
 
 type FileRowVariant = Exclude<StageDocumentFieldVariant, 'empty'>

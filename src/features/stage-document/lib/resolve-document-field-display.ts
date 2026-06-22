@@ -1,4 +1,4 @@
-import type { StageDocumentFieldVariant } from '@/entities/project-documents'
+import type { StageDocumentFieldVariant } from '@/entities/project-document'
 
 import type { StageDocumentInteraction } from './document-interaction'
 

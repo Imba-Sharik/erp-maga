@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { ProjectDetail } from '@/entities/project'
-import { createInitialArticles, formatMoney } from '@/entities/project-articles'
+import { createInitialArticles, formatMoney } from '@/entities/project-article'
 import type { StageRecord } from '@/features/advance-stage'
 
 import { resolveSystemValue } from './resolve-system-value'

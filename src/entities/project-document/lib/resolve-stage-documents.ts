@@ -1,5 +1,5 @@
 import type { DocumentStatus, StageFormData } from '@/entities/project'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 import type { StageDocumentFile } from '../model/document-file'
 import { STAGE_DOCUMENTS } from './stage-document-registry'

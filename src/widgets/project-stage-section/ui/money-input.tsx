@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { formatMoney } from '@/entities/project-articles'
+import { formatMoney } from '@/entities/project-article'
 import { cn } from '@/shared/lib/utils'
 import { Input } from '@/shared/ui/input'
 

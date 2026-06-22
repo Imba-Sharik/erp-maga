@@ -1,4 +1,4 @@
-import type { ArticleBlock, ArticlesBlockMap, ProjectArticles } from '@/entities/project-articles'
+import type { ArticleBlock, ArticlesBlockMap, ProjectArticles } from '@/entities/project-article'
 import type { DocumentStatus, ProjectStage, StageFormData } from '@/entities/project'
 import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import type { ProjectTransitionRequestToStageEnumKey } from '@/shared/api/generated/types/ProjectTransitionRequest'

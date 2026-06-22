@@ -11,8 +11,8 @@ import {
   type ArticleKind,
   type ArticleValues,
   type ProjectArticles,
-} from '@/entities/project-articles'
-import { pickDocumentStageValues } from '@/entities/project-documents'
+} from '@/entities/project-article'
+import { pickDocumentStageValues } from '@/entities/project-document'
 import { stageDraftActions } from '@/entities/stage-draft'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'

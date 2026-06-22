@@ -14,7 +14,7 @@ import {
   type ArticleValues,
   type FinanceAspect,
   type ProjectArticles,
-} from '@/entities/project-articles'
+} from '@/entities/project-article'
 import type { ProjectStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'

@@ -1,5 +1,5 @@
 import type { ProjectStage, StageFormData } from '@/entities/project'
-import type { ProjectArticles } from '@/entities/project-articles'
+import type { ProjectArticles } from '@/entities/project-article'
 
 /**
  * Черновик незаполненного этапа: данные, которые пользователь успел ввести,

@@ -1,7 +1,7 @@
 import { useCallback, useId, useRef, useState } from 'react'
 
-import type { StageDocumentFieldVariant } from '@/entities/project-documents'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { StageDocumentFieldVariant } from '@/entities/project-document'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 import type { StageDocumentInteraction } from '../lib/document-interaction'
 import { FILE_ACCEPT, validateAttachment } from '../lib/file-constraints'
