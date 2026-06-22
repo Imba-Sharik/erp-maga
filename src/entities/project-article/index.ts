@@ -23,4 +23,4 @@ export {
   articleBonusAmount,
   bonusTotal,
 } from './lib/calc'
-export { formatMoney, formatPercent, parseMoney, parsePercent } from './lib/format'
+export { formatMoney, formatPercent, parseMoney, parsePercent } from '@/shared/lib/money'
