@@ -295,7 +295,7 @@ export function StageSectionCurrent({
     if (f.source === 'system' || !fieldEditable) {
       const raw =
         f.source === 'system'
-          ? resolveSystemValue(f.name, f.mockValue, { project, stage, record, articles })
+          ? resolveSystemValue(f.name, { project, stage, record, articles })
           : (values[f.name] as string | undefined)
       let display = raw
       if (raw && f.type === 'select') {
