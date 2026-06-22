@@ -6,7 +6,7 @@ import { DatePill } from '@/shared/ui/date-pill'
 
 const CALENDAR_BACK_ORIGIN: ProjectBackOrigin = {
   to: '/calendar',
-  label: 'Календарь',
+  label: 'Календарь проектов',
 }
 
 interface ScheduleDaySectionProps {
