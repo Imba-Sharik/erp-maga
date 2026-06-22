@@ -2,19 +2,31 @@ import { Link } from 'react-router-dom'
 
 import { cn } from '@/shared/lib/utils'
 
-import { formatNotificationTime } from '../lib/format-notification-time'
+import { formatNotificationClock, formatNotificationTime } from '../lib/format-notification-time'
 import type { NotificationView } from '../model/types'
 
 interface NotificationItemProps {
   notification: NotificationView
   /** Пометить прочитанным (вызывается при клике по уведомлению). */
   onRead?: (id: number) => void
+  /**
+   * Показывать относительную дату («Сегодня, 09:14»). Выключай, когда уведомления
+   * сгруппированы по дням — день уже в заголовке группы, в элементе остаётся только время.
+   */
+  showDateLabel?: boolean
 }
 
-export function NotificationItem({ notification, onRead }: NotificationItemProps) {
+export function NotificationItem({
+  notification,
+  onRead,
+  showDateLabel = true,
+}: NotificationItemProps) {
   const { id, title, message, isRead, projectId, projectTitle, createdAt, dotColor } = notification
 
-  const subtitle = [projectTitle, formatNotificationTime(createdAt)].filter(Boolean).join(' · ')
+  const time = showDateLabel
+    ? formatNotificationTime(createdAt)
+    : formatNotificationClock(createdAt)
+  const subtitle = [projectTitle, time].filter(Boolean).join(' · ')
 
   const content = (
     <>
@@ -42,16 +54,11 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
     </>
   )
 
-  const className =
-    'flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[#FAF9F6]'
+  const className = 'flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[#FAF9F6]'
 
   if (projectId != null) {
     return (
-      <Link
-        to={`/projects/${projectId}`}
-        onClick={() => onRead?.(id)}
-        className={className}
-      >
+      <Link to={`/projects/${projectId}`} onClick={() => onRead?.(id)} className={className}>
         {content}
       </Link>
     )
