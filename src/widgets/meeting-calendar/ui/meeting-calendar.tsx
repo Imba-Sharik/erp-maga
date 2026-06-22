@@ -4,7 +4,7 @@ import { MeetingCountBadge, pluralMeetings, type MeetingsByDay } from '@/entitie
 import { toDayKey } from '@/shared/lib/date'
 import { cn } from '@/shared/lib/utils'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
-import { MonthCalendarGrid, MonthYearNavigator } from '@/widgets/month-calendar'
+import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
   'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'

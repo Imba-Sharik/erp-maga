@@ -6,7 +6,7 @@ import { useIsMobile } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 import { SearchBar } from '@/shared/ui/search-bar'
-import { MonthYearNavigator } from '@/widgets/month-calendar'
+import { MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
   'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'

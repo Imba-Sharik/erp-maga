@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { isSameDay } from 'date-fns'
 import { Card } from '@/shared/ui/card'
 import { cn } from '@/shared/lib/utils'
-import { buildMonthMatrix, WEEKDAYS_RU } from '../lib/build-month-matrix'
-import { useCalendarPaintSelect, type PaintMode } from '../lib/use-calendar-paint-select'
+import { buildMonthMatrix, WEEKDAYS_RU } from './build-month-matrix'
+import { useCalendarPaintSelect, type PaintMode } from './use-calendar-paint-select'
 import { MonthDayCell } from './month-day-cell'
 
 interface MonthCalendarGridProps {

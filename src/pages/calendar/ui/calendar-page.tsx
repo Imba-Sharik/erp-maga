@@ -8,9 +8,9 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns'
-import { mergeDates, removeDates } from '@/widgets/month-calendar'
+import { mergeDates, removeDates } from '@/shared/ui/month-calendar'
 import { filterCalendarProjects } from '@/widgets/project-calendar'
-import type { PaintMode } from '@/widgets/month-calendar'
+import type { PaintMode } from '@/shared/ui/month-calendar'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import {
   countProjectsInMonth,

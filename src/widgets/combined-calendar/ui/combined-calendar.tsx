@@ -4,7 +4,7 @@ import { MeetingCountBadge, pluralMeetings, type MeetingsByDay } from '@/entitie
 import { pluralReminders, ReminderCountBadge, type RemindersByDay } from '@/entities/reminder'
 import { toDayKey } from '@/shared/lib/date'
 import { cn } from '@/shared/lib/utils'
-import { MonthCalendarGrid, MonthYearNavigator } from '@/widgets/month-calendar'
+import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 interface CombinedCalendarProps {
   visibleMonth: Date

@@ -1,5 +1,5 @@
 import { ProjectCountBadge, type ProjectsByDay } from '@/entities/project'
-import { MonthCalendarGrid, type PaintMode } from '@/widgets/month-calendar'
+import { MonthCalendarGrid, type PaintMode } from '@/shared/ui/month-calendar'
 
 interface CalendarGridProps {
   visibleMonth: Date

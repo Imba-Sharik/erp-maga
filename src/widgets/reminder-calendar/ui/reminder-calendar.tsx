@@ -7,7 +7,7 @@ import {
 } from '@/entities/reminder'
 import { toDayKey } from '@/shared/lib/date'
 import { cn } from '@/shared/lib/utils'
-import { MonthCalendarGrid, MonthYearNavigator } from '@/widgets/month-calendar'
+import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 interface ReminderCalendarProps {
   visibleMonth: Date
