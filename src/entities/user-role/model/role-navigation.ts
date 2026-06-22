@@ -45,7 +45,7 @@ export const ROLE_NAV_ITEMS: readonly RoleNavItemDef[] = [
   { id: 'dashboard', title: 'Дашборд', url: '/dashboard', icon: DashboardIcon },
   {
     id: 'calendar',
-    title: 'Календарь',
+    title: 'Календарь проектов',
     url: '/calendar',
     icon: CalendarIcon,
     roles: ['manager', 'director', 'admin'],
