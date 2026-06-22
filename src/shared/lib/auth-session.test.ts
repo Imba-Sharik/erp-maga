@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ACCESS_TOKEN_KEY } from '../model/keys'
-import { clearSessionTokens, getAccessToken, setAccessToken } from './auth-session'
+import { ACCESS_TOKEN_KEY, clearSessionTokens, getAccessToken, setAccessToken } from './auth-session'
 
 function createStorage() {
   const store: Record<string, string> = {}

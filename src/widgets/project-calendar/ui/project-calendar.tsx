@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { pluralProjects, toDayKey, type ProjectsByDay } from '@/entities/project'
 import type { SelectOption } from '@/shared/ui/clearable-select'
-import type { PaintMode } from '@/widgets/month-calendar'
+import type { PaintMode } from '@/shared/ui/month-calendar'
 import { CalendarGrid } from './calendar-grid'
 import { CalendarToolbar } from './calendar-toolbar'
 

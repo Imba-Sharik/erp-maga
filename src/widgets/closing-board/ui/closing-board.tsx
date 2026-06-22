@@ -8,7 +8,7 @@ import { useDebouncedValue } from '@/shared/hooks'
 import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
 import { buildKanbanListParams } from '@/widgets/projects-board/lib/build-kanban-list-params'
-import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
+import type { BoardListParams } from '@/shared/api'
 import {
   EMPTY_COLUMN_FILTERS,
   applyColumnFilterChange,

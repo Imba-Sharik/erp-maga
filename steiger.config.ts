@@ -19,4 +19,14 @@ export default defineConfig([
       'fsd/segments-by-purpose': 'off',
     },
   },
+  {
+    // Heuristic rules kept as warnings rather than errors. A slice with a single consumer is
+    // often a deliberate seam, not a defect; inlining all of them would bloat consumers and
+    // erase meaningful boundaries. The 20-slice "excessive slicing" threshold is likewise
+    // arbitrary. Surfaced as warnings so the signal stays visible without blocking on judgement.
+    rules: {
+      'fsd/insignificant-slice': 'warn',
+      'fsd/excessive-slicing': 'warn',
+    },
+  },
 ])

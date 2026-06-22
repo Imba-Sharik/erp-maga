@@ -9,7 +9,7 @@ import {
   type Project,
 } from '@/entities/project'
 import { projectsList } from '@/shared/api/generated/clients/projectsController/projectsList'
-import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
+import type { BoardListParams } from '@/shared/api'
 
 const PAGE_SIZE = 50
 

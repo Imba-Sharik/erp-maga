@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { clearSessionTokens } from '@/entities/session'
+import { clearSessionTokens } from '@/shared/lib/auth-session'
 import { authLogoutCreate } from '@/shared/api/generated/clients/authController/authLogoutCreate'
 
 /**

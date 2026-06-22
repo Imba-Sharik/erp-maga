@@ -1,6 +1,6 @@
 import type { ProjectDetail } from '@/entities/project'
 import { useStageFlow } from '@/features/advance-stage'
-import { STAGE_PRESENTATION } from '@/widgets/project-detail/lib/stage-presentation'
+import { STAGE_PRESENTATION } from '@/shared/lib/stage-presentation'
 import { ProjectStageSection } from '@/widgets/project-stage-section'
 
 import { RequestGeneralCard } from './request-general-card'

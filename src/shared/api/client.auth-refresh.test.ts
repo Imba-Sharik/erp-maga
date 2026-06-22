@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
 
-import { ACCESS_TOKEN_KEY } from '@/entities/session'
+import { ACCESS_TOKEN_KEY } from '@/shared/lib/auth-session'
 
 import { axiosInstance, refreshAccessToken, resetAuthRefreshStateForTests } from './client'
 

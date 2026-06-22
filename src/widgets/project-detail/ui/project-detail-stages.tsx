@@ -8,10 +8,8 @@ import {
 } from '@/entities/project'
 import { isStageSkipped, type StageFlow } from '@/features/advance-stage'
 import { useProjectTab } from '@/features/project-tabs'
-import {
-  presentationFromTab,
-  STAGE_PRESENTATION,
-} from '@/widgets/project-detail/lib/stage-presentation'
+import { STAGE_PRESENTATION } from '@/shared/lib/stage-presentation'
+import { presentationFromTab } from '../lib/stage-presentation'
 import { ProjectStageSection } from '@/widgets/project-stage-section'
 
 /** Этапы с финансовыми блоками (Продажная часть / Расходы / Бонус) — видны во вкладке «Экономика». */

@@ -1,4 +1,4 @@
-import { clearSessionTokens, getAccessToken, setAccessToken } from '@/entities/session'
+import { clearSessionTokens, getAccessToken, setAccessToken } from '@/shared/lib/auth-session'
 import { shouldAttachAccessToken } from '@/shared/api/internal/should-attach-access-token'
 import { shouldAttemptTokenRefresh } from '@/shared/api/internal/should-attempt-token-refresh'
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'

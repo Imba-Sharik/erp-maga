@@ -16,7 +16,7 @@ import {
 
 import { env } from '@/shared/config'
 import { useDebouncedValue } from '@/shared/hooks'
-import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
+import type { BoardListParams } from '@/shared/api'
 import { OUTSIDE_MAG_MOCK_PROJECTS } from '../model/outside-mag-mock-projects'
 import { OutsideMagSearchToolbar } from './outside-mag-search-toolbar'
 import { ReturnFromOutsideMagButton } from './return-from-outside-mag-button'
