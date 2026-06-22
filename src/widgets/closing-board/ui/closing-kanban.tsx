@@ -9,7 +9,7 @@ import {
 } from '@/entities/project'
 import { Card } from '@/shared/ui/card'
 import type { BoardListParams } from '@/shared/api'
-import { KanbanColumnWithQuery } from '@/widgets/projects-board/ui/kanban-column-with-query'
+import { KanbanColumnWithQuery } from '@/features/kanban-board'
 
 interface ClosingKanbanProps {
   listParams: BoardListParams

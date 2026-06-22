@@ -7,7 +7,7 @@ import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks'
 import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
-import { buildKanbanListParams } from '@/widgets/projects-board/lib/build-kanban-list-params'
+import { buildKanbanListParams } from '@/features/kanban-board'
 import type { BoardListParams } from '@/shared/api'
 import {
   EMPTY_COLUMN_FILTERS,

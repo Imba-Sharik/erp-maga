@@ -3,7 +3,7 @@ import { Search } from 'lucide-react'
 import { Input } from '@/shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { ToggleSwitch } from '@/shared/ui/toggle-switch'
-import { ProjectsBoardToolbar } from '@/widgets/projects-board/ui/projects-board-toolbar'
+import { ProjectsBoardToolbar } from '@/features/kanban-board'
 
 import type { ProjectsTableColumnView } from '@/widgets/projects-table/lib/economics-columns'
 import { ClosingViewToggle, type ClosingViewMode } from './closing-view-toggle'
