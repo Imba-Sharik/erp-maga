@@ -1,5 +1,5 @@
 import type { DocumentStatus, StageFormData } from '@/entities/project'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 export const STAGE_DOCUMENTS = [
   {

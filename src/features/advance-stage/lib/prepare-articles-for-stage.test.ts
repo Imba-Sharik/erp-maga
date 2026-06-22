@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createInitialArticles } from '@/entities/project-articles'
+import { createInitialArticles } from '@/entities/project-article'
 
 import {
   financeAspectForStage,

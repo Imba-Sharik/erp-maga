@@ -12,7 +12,7 @@ import {
   type ArticleKind,
   type ArticleValues,
   type ProjectArticles,
-} from '@/entities/project-articles'
+} from '@/entities/project-article'
 import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'

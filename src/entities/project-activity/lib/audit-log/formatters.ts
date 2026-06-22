@@ -1,4 +1,4 @@
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 import type { ProjectAuditLog } from '@/shared/api/generated/types/ProjectAuditLog'
 
 import { DOCUMENT_TYPE_LABELS } from './document-labels'

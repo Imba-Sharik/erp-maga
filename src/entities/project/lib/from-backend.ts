@@ -6,9 +6,9 @@ import type { ProjectDocumentFile } from '@/shared/api/generated/types/ProjectDo
 import type { ProjectDocumentStatus } from '@/shared/api/generated/types/ProjectDocumentStatus'
 import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
-import { mapBackendArticles } from '@/entities/project-articles'
-import { mapBackendDocumentFile, type StageDocumentFile } from '@/entities/project-documents'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import { mapBackendArticles } from '@/entities/project-article'
+import { mapBackendDocumentFile, type StageDocumentFile } from '@/entities/project-document'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 import { projectVenueFieldsFromHalls } from './map-project-halls'
 import {

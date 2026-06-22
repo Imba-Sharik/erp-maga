@@ -1,5 +1,5 @@
-import { STAGE_DOCUMENTS } from '@/entities/project-documents'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import { STAGE_DOCUMENTS } from '@/entities/project-document'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 export const DOCUMENT_TYPE_LABELS = Object.fromEntries(
   STAGE_DOCUMENTS.map((doc) => [doc.documentType, doc.label]),

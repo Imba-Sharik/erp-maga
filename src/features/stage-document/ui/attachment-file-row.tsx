@@ -1,4 +1,4 @@
-import type { StageDocumentFieldVariant } from '@/entities/project-documents'
+import type { StageDocumentFieldVariant } from '@/entities/project-document'
 import { CycleIcon, DocumentIcon } from '@/shared/assets'
 import { Button } from '@/shared/ui/button'
 

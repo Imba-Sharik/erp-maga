@@ -1,5 +1,5 @@
 import type { ProjectDetail, ProjectStage, StageFormData } from '@/entities/project'
-import { bonusTotal, formatMoney, type ProjectArticles } from '@/entities/project-articles'
+import { bonusTotal, formatMoney, type ProjectArticles } from '@/entities/project-article'
 import type { StageRecord } from '@/features/advance-stage'
 
 interface ResolveContext {

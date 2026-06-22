@@ -8,7 +8,7 @@ import {
   type ProjectStage,
   type StageFormData,
 } from '@/entities/project'
-import type { ProjectArticles } from '@/entities/project-articles'
+import type { ProjectArticles } from '@/entities/project-article'
 import { useUserRole } from '@/entities/user-role'
 import { stageBlockBorderClass } from '@/entities/stage-draft'
 import type { StageRecord } from '@/features/advance-stage'

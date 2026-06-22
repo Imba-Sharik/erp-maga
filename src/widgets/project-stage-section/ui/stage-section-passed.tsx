@@ -15,12 +15,12 @@ import {
   type ProjectStage,
   type StageFormData,
 } from '@/entities/project'
-import type { ProjectArticles } from '@/entities/project-articles'
+import type { ProjectArticles } from '@/entities/project-article'
 import { stageBlockBorderClass } from '@/entities/stage-draft'
 import {
   STATUS_CONFIRM_META_BY_STATUS,
   DOC_PAIR_BY_STATUS_FIELD,
-} from '@/entities/project-documents'
+} from '@/entities/project-document'
 
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'

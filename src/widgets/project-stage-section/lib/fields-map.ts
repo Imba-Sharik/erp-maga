@@ -1,6 +1,6 @@
 import type { ProjectStage, StageFormData } from '@/entities/project'
-import { DOCUMENT_STATUS_OPTIONS } from '@/entities/project-documents'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import { DOCUMENT_STATUS_OPTIONS } from '@/entities/project-document'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 import type { UserRole } from '@/entities/user-role'
 
 export type StageFieldType =

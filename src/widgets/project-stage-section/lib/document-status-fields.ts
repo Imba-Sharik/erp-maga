@@ -4,9 +4,9 @@ import {
   FILE_NAME_TO_STATUS_FIELD,
   getStageDocumentFieldVariant,
   statusFieldForConfirmedAt,
-} from '@/entities/project-documents'
+} from '@/entities/project-document'
 
-export type { StageDocumentFieldVariant } from '@/entities/project-documents'
+export type { StageDocumentFieldVariant } from '@/entities/project-document'
 export { getStageDocumentFieldVariant }
 export {
   statusFieldForConfirmedAt,

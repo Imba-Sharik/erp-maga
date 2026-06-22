@@ -1,6 +1,6 @@
 import type { ProjectStage, StageFormData } from '@/entities/project'
 import type { UserRole } from '@/entities/user-role'
-import { DOC_PAIR_BY_STATUS_FIELD, STAGE_DOCUMENTS } from '@/entities/project-documents'
+import { DOC_PAIR_BY_STATUS_FIELD, STAGE_DOCUMENTS } from '@/entities/project-document'
 
 import type { StageFieldConfig } from './fields-map'
 

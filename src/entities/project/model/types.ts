@@ -1,6 +1,6 @@
-import type { ProjectArticles } from '@/entities/project-articles'
-import type { StageDocumentFile } from '@/entities/project-documents'
-import type { StageDocumentType } from '@/entities/stage-document-files'
+import type { ProjectArticles } from '@/entities/project-article'
+import type { StageDocumentFile } from '@/entities/project-document'
+import type { StageDocumentType } from '@/entities/stage-document-file'
 
 export type ProjectBackOrigin = {
   to: string

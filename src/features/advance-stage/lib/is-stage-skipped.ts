@@ -1,5 +1,5 @@
 import { ALL_STAGE_ORDER, type ProjectStage } from '@/entities/project'
-import { isDocumentsStageSkipped } from '@/entities/project-documents'
+import { isDocumentsStageSkipped } from '@/entities/project-document'
 
 import type { StageRecords } from '../model/use-stage-flow'
 

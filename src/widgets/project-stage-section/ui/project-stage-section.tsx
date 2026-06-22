@@ -4,7 +4,7 @@ import type {
   ArticleKind,
   ArticleValues,
   ProjectArticles,
-} from '@/entities/project-articles'
+} from '@/entities/project-article'
 import { useStageHasDraftHighlight } from '@/entities/stage-draft'
 import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'

@@ -18,11 +18,11 @@ import {
   type StageFormData,
 } from '@/entities/project'
 import { useCurrentUser } from '@/entities/current-user'
-import type { ProjectArticles } from '@/entities/project-articles'
+import type { ProjectArticles } from '@/entities/project-article'
 import {
   DOC_PAIR_BY_STATUS_FIELD,
   STATUS_CONFIRM_META_BY_STATUS,
-} from '@/entities/project-documents'
+} from '@/entities/project-document'
 import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'

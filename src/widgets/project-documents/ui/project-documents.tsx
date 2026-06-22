@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 import type { ProjectDetail } from '@/entities/project'
-import { DOCUMENT_STATUS_LABELS, resolveStageDocuments } from '@/entities/project-documents'
+import { DOCUMENT_STATUS_LABELS, resolveStageDocuments } from '@/entities/project-document'
 import type { StageFlow } from '@/features/advance-stage'
 import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
 

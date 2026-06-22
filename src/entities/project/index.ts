@@ -8,8 +8,8 @@ export {
   resolveRequestBackFromPathname,
 } from './model/project-back-origins'
 export { projectDetailPath } from './lib/project-detail-path'
-export type { StageDocumentFieldVariant } from '@/entities/project-documents'
-export { getStageDocumentFieldVariant } from '@/entities/project-documents'
+export type { StageDocumentFieldVariant } from '@/entities/project-document'
+export { getStageDocumentFieldVariant } from '@/entities/project-document'
 export type {
   Project,
   ProjectEconomics,
