@@ -9,7 +9,7 @@ import {
   startOfWeek,
 } from 'date-fns'
 import { mergeDates, removeDates } from '@/widgets/month-calendar'
-import { filterCalendarProjects } from '@/widgets/project-calendar/lib/filter-calendar-projects'
+import { filterCalendarProjects } from '@/widgets/project-calendar'
 import type { PaintMode } from '@/widgets/month-calendar'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import {
@@ -20,7 +20,7 @@ import {
 } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { useProjectsCalendarList } from '@/shared/api/generated/hooks/projectsController/useProjectsCalendarList'
-import { useElementSize } from '@/shared/hooks/use-element-size'
+import { useElementSize } from '@/shared/hooks'
 import { DaySchedule } from '@/widgets/day-schedule'
 import { ProjectCalendar } from '@/widgets/project-calendar'
 
