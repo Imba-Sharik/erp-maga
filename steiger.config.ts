@@ -15,6 +15,8 @@ export default defineConfig([
     files: ['./src/shared/**'],
     rules: {
       'fsd/public-api': 'off',
+      // shared segments are conventionally named by type (ui, lib, api, hooks, constants, types)
+      'fsd/segments-by-purpose': 'off',
     },
   },
 ])
