@@ -35,12 +35,7 @@ import {
   filterDocumentsConfirmedGridFields,
   isDocumentStatusField,
 } from '../lib/documents-confirmed-layout'
-import {
-  filterStageFields,
-  PASSED_EXTRAS,
-  STAGE_FIELDS,
-  type StageFieldConfig,
-} from '../lib/fields-map'
+import { filterStageFields, STAGE_FIELDS, type StageFieldConfig } from '../lib/fields-map'
 import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
@@ -48,7 +43,6 @@ import { resolveSystemValue } from '../lib/resolve-system-value'
 import { resolveStageEditAccess } from '../lib/resolve-stage-edit-access'
 import { canEditField } from '../lib/stage-permissions'
 import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
-import { StageFieldDemoEditable } from './stage-field-demo-editable'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
 import { StageSectionCurrent } from './stage-section-current'
@@ -81,8 +75,8 @@ function fallbackValue(
 ): string | undefined {
   const fromValues = (values as Record<string, string | undefined> | undefined)?.[f.name]
   if (fromValues) return fromValues
-  if (f.source === 'system') return resolveSystemValue(f.name, f.mockValue, ctx)
-  // Manager-поле не заполнено менеджером — показываем пусто, без подсказочного mockValue.
+  if (f.source === 'system') return resolveSystemValue(f.name, ctx)
+  // Manager-поле не заполнено менеджером — показываем пусто.
   return undefined
 }
 
@@ -153,7 +147,6 @@ export function StageSectionPassed({
     () => filterDocumentsConfirmedGridFields(visibleFields, stage, role),
     [visibleFields, stage, role],
   )
-  const extras = PASSED_EXTRAS[stage]
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
   const { canEdit, canAdvance } = resolveStageEditAccess(stage, role, readOnly)
@@ -219,17 +212,6 @@ export function StageSectionPassed({
             interaction="download"
           />
         </div>
-      )
-    }
-
-    if (f.source === 'manager' && f.type !== 'document' && fieldEditable && isCurrent) {
-      return (
-        <StageFieldDemoEditable
-          key={f.name}
-          field={f}
-          initialValue={fallbackValue(ctx, values, f)}
-          className={spanClass(f.span, f.type === 'textarea')}
-        />
       )
     }
 
@@ -349,7 +331,7 @@ export function StageSectionPassed({
         </div>
         <CollapsibleContent className="flex flex-col gap-4 pt-4">
           <div className="h-px w-full bg-[#F0F0F0]" />
-          {visibleFields.length === 0 && extras.length === 0 ? (
+          {visibleFields.length === 0 ? (
             <p className="text-muted-foreground text-sm italic">
               Подробное содержимое раздела — в следующей итерации
             </p>
@@ -358,23 +340,6 @@ export function StageSectionPassed({
               {stage === 'documents_confirmed'
                 ? renderDocumentsConfirmedGrid(gridFields, renderField)
                 : renderNarrowPairs(gridFields, renderField)}
-              {extras.map((extra) =>
-                extra.source === 'manager' ? (
-                  <StageFieldReadonly
-                    key="manager"
-                    label={extra.label}
-                    value={record?.enteredBy ?? 'Иванов Иван Иванович'}
-                    source="system"
-                  />
-                ) : (
-                  <StageFieldReadonly
-                    key="enteredAt"
-                    label={extra.label}
-                    value={formatDate(record?.enteredAt) ?? '09-05-2026'}
-                    source="system"
-                  />
-                ),
-              )}
             </div>
           )}
         </CollapsibleContent>
