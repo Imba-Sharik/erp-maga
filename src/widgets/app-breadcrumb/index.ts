@@ -1,1 +1,1 @@
-export { AppBreadcrumb } from './app-breadcrumb'
+export { AppBreadcrumb } from './ui/app-breadcrumb'

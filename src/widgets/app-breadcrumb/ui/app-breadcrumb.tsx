@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useBreadcrumbValue } from '@/shared/hooks/use-breadcrumb'
+import { useBreadcrumbValue } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import {
   Breadcrumb,
@@ -29,8 +29,8 @@ export function AppBreadcrumb() {
   const compactBack = crumbs.length > 1
 
   return (
-    <Breadcrumb className="min-w-0 w-full">
-      <BreadcrumbList className="flex-nowrap gap-1 overflow-hidden text-sm md:flex-wrap md:overflow-visible md:gap-1.5">
+    <Breadcrumb className="w-full min-w-0">
+      <BreadcrumbList className="flex-nowrap gap-1 overflow-hidden text-sm md:flex-wrap md:gap-1.5 md:overflow-visible">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1
           const isFirst = index === 0
