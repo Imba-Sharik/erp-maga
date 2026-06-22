@@ -5,15 +5,13 @@ import type { PreprojectStage, Project } from '@/entities/project'
 import { preprojectStageToApi, projectToApiListRow } from '@/entities/project'
 import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import {
-  removeProjectFromOutsideMagCaches,
-  useProjectTransition,
-} from '@/shared/api/project-transition'
-import {
   moveProjectInKanbanCache,
-  type QueryCacheSnapshot,
+  removeProjectFromOutsideMagCaches,
   restoreQueryCaches,
   snapshotTransitionCaches,
-} from '@/shared/api/projects-kanban'
+  useProjectTransition,
+  type QueryCacheSnapshot,
+} from '@/shared/api'
 
 import { buildReturnFromOutsideMagBody } from '../lib/build-return-from-outside-mag-body'
 

@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 
 import { clearSessionTokens, getAccessToken } from '@/entities/session'
 import { useUsersMeRetrieve } from '@/shared/api/generated/hooks/usersController/useUsersMeRetrieve'
-import { refreshAccessToken } from '@/shared/api/client'
+import { refreshAccessToken } from '@/shared/api'
 
 import type { ReactNode } from 'react'
 
@@ -26,7 +26,7 @@ function AuthSplash() {
     <div
       role="status"
       aria-label="Загрузка"
-      className="flex h-svh w-full items-center justify-center bg-background"
+      className="bg-background flex h-svh w-full items-center justify-center"
     />
   )
 }

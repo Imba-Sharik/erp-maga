@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import type { Project } from '@/entities/project'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { useDebouncedValue } from '@/shared/hooks'
 
 import {
   EMPTY_COLUMN_FILTERS,

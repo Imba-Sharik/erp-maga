@@ -4,7 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { mapBackendOutOfMagProjects, plumEventStatusFilterQueryParams } from '@/entities/project'
 import { projectsOutOfMagList } from '@/shared/api/generated/clients/projectsController/projectsOutOfMagList'
 import type { ProjectsOutOfMagListQueryParams } from '@/shared/api/generated/types/projectsController/ProjectsOutOfMagList'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 
 const PAGE_SIZE = 50
 

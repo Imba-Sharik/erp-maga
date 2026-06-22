@@ -1,10 +1,6 @@
 import type { Meeting as ApiMeeting } from '@/shared/api/generated/types/Meeting'
 import type { MeetingHall as ApiMeetingHall } from '@/shared/api/generated/types/MeetingHall'
-import {
-  buildBusinessDatetime,
-  formatBusinessDate,
-  formatBusinessTime,
-} from '@/shared/lib/date/business-datetime'
+import { buildBusinessDatetime, formatBusinessDate, formatBusinessTime } from '@/shared/lib/date'
 
 import type { Meeting, MeetingHall } from '../model/types'
 

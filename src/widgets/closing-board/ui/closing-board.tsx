@@ -4,7 +4,7 @@ import { PROJECTS_SORT_DEFAULT, type Project, type ProjectBackOrigin } from '@/e
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { useDebouncedValue } from '@/shared/hooks'
 import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
 import { DeleteProjectButton } from '@/features/delete-project'
 import { buildKanbanListParams } from '@/widgets/projects-board/lib/build-kanban-list-params'

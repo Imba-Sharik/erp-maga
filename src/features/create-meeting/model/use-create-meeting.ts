@@ -11,7 +11,7 @@ import {
   type MeetingFormValues,
 } from '@/entities/meeting'
 import { useMeetingsCreate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsCreate'
-import { parseBusinessDatetime } from '@/shared/lib/date/business-datetime'
+import { parseBusinessDatetime } from '@/shared/lib/date'
 
 type CreateMeetingContext = {
   optimisticId: number

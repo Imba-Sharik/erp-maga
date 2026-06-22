@@ -1,7 +1,7 @@
 import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
-import { formatRelativeUpdateLabel } from '@/shared/lib/date/format-relative-update-label'
+import { formatRelativeUpdateLabel } from '@/shared/lib/date'
 import { Card } from '@/shared/ui/card'
 import { stageCardBorderClass } from '@/entities/stage-draft'
 import {

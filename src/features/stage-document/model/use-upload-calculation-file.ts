@@ -1,12 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
-import type { ResponseConfig } from '@/shared/api/client'
+import { invalidateProjectAfterTransition, type ResponseConfig } from '@/shared/api'
 import { useProjectsCalculationFileCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsCalculationFileCreate'
 import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
-
-import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
 
 import { getDocumentUploadErrorMessage } from '../lib/get-document-upload-error-message'
 
@@ -33,7 +31,10 @@ export function useUploadCalculationFile() {
   const mutation = useProjectsCalculationFileCreate()
 
   const upload = useCallback(
-    ({ projectId, file }: UploadCalculationFileArgs, callbacks?: UploadCalculationFileCallbacks) => {
+    (
+      { projectId, file }: UploadCalculationFileArgs,
+      callbacks?: UploadCalculationFileCallbacks,
+    ) => {
       const id = Number(projectId)
       mutation.mutate(
         { id, data: { file } },

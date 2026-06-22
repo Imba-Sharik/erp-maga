@@ -1,10 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { Project as ApiProject } from '@/shared/api/generated/types/Project'
-import {
-  prependProjectToMatchingCaches,
-  removeProjectFromMatchingCaches,
-} from '@/shared/api/projects-kanban'
+import { prependProjectToMatchingCaches, removeProjectFromMatchingCaches } from '@/shared/api'
 
 function cacheOptionsForProject(project: ApiProject) {
   return {

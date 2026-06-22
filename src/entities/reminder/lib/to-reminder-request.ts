@@ -1,6 +1,6 @@
 import type { PatchedReminderCreateUpdateRequest } from '@/shared/api/generated/types/PatchedReminderCreateUpdateRequest'
 import type { ReminderCreateUpdateRequest } from '@/shared/api/generated/types/ReminderCreateUpdateRequest'
-import { buildBusinessDatetime } from '@/shared/lib/date/business-datetime'
+import { buildBusinessDatetime } from '@/shared/lib/date'
 
 import type { ReminderFormValues } from './reminder-form-schema'
 

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { isValidRuPhone } from '@/shared/lib/phone/is-valid-ru-phone'
+import { isValidRuPhone } from '@/shared/lib/phone'
 import type { UserRole } from '@/entities/user-role'
 
 import type { ProjectStage } from '../model/types'

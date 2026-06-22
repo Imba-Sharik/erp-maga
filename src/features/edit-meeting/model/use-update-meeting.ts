@@ -11,7 +11,7 @@ import {
   type MeetingFormValues,
 } from '@/entities/meeting'
 import { useMeetingsPartialUpdate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsPartialUpdate'
-import { formatBusinessTime } from '@/shared/lib/date/business-datetime'
+import { formatBusinessTime } from '@/shared/lib/date'
 
 type UpdateMeetingContext = {
   previous?: Meeting

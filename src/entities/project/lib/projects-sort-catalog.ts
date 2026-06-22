@@ -1,4 +1,4 @@
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants/projects-list-ordering'
+import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 import type { SelectOption } from '@/shared/ui/clearable-select'
 
 /** Сортировка проектов по дате мероприятия (сначала поздние). */

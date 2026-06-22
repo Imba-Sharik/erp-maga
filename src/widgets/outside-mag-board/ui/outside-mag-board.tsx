@@ -14,8 +14,8 @@ import {
   type ColumnFilters,
 } from '@/widgets/projects-table'
 
-import { env } from '@/shared/config/env'
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { env } from '@/shared/config'
+import { useDebouncedValue } from '@/shared/hooks'
 import type { BoardListParams } from '@/widgets/projects-board/lib/kanban-board-query'
 import { OUTSIDE_MAG_MOCK_PROJECTS } from '../model/outside-mag-mock-projects'
 import { OutsideMagSearchToolbar } from './outside-mag-search-toolbar'

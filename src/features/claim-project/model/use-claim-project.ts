@@ -6,13 +6,13 @@ import { invalidateManagersDirectory } from '@/entities/manager'
 import type { Project } from '@/entities/project'
 import { projectToApiListRow } from '@/entities/project'
 import { useProjectsPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsPartialUpdate'
-import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
 import {
+  invalidateProjectAfterTransition,
   patchProjectInMatchingCaches,
   restoreQueryCaches,
   snapshotTransitionCaches,
   type QueryCacheSnapshot,
-} from '@/shared/api/projects-kanban'
+} from '@/shared/api'
 import { toast } from '@/shared/ui/toast'
 
 import { buildClaimRequest } from '../lib/build-claim-request'

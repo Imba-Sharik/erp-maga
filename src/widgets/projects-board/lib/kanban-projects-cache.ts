@@ -20,4 +20,4 @@ export {
   snapshotOutsideMagListCaches,
   snapshotProjectsListCaches,
   snapshotTransitionCaches,
-} from '@/shared/api/projects-kanban'
+} from '@/shared/api'

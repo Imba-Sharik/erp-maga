@@ -11,7 +11,7 @@ import {
   restoreQueryCaches,
   snapshotTransitionCaches,
   type QueryCacheSnapshot,
-} from '@/shared/api/projects-kanban'
+} from '@/shared/api'
 
 import { getDeleteProjectErrorMessage } from '../lib/get-delete-project-error-message'
 

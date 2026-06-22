@@ -4,7 +4,7 @@ import { PROJECTS_SORT_DEFAULT, type Project } from '@/entities/project'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useClaimProject } from '@/features/claim-project'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { useDebouncedValue } from '@/shared/hooks'
 
 import { buildKanbanListParams } from '../lib/build-kanban-list-params'
 import type { BoardListParams } from '../lib/kanban-board-query'

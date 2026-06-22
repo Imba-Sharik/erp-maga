@@ -9,7 +9,7 @@ import {
   restoreKanbanCaches,
   snapshotKanbanCaches,
   type KanbanCacheSnapshot,
-} from '@/shared/api/projects-kanban'
+} from '@/shared/api'
 
 export interface OptimisticKanbanStageMoveInput {
   /** Проект с уже обновлённым `stage` (= `toApiStage`). */

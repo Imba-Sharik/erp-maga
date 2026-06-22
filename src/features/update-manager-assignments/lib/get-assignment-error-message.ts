@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import type { ResponseErrorConfig } from '@/shared/api/client'
+import type { ResponseErrorConfig } from '@/shared/api'
 
 const SAVE_FALLBACK = 'Не удалось сохранить привязки'
 

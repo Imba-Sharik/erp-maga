@@ -5,7 +5,7 @@ import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsContr
 import { projectsOutOfMagListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsOutOfMagList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import type { PaginatedOutOfMagProjectList } from '@/shared/api/generated/types/PaginatedOutOfMagProjectList'
-import { invalidateKanbanBoardQueries } from '@/shared/api/projects-kanban'
+import { invalidateKanbanBoardQueries } from '../projects-kanban'
 
 const OUTSIDE_MAG_TABLE_QUERY_KEY = ['projects-out-of-mag-table'] as const
 

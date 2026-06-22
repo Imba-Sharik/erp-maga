@@ -5,4 +5,4 @@ export {
   isKanbanBoardQueryKey,
   kanbanColumnMatchesProjectStage,
   kanbanColumnQueryKey,
-} from '@/shared/api/projects-kanban'
+} from '@/shared/api'

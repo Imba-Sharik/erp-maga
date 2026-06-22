@@ -2,12 +2,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import type { StageDocumentType } from '@/entities/stage-document-files'
-import type { ResponseConfig } from '@/shared/api/client'
+import { invalidateProjectAfterTransition, type ResponseConfig } from '@/shared/api'
 import { useProjectsDocumentFileCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsDocumentFileCreate'
 import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
-
-import { invalidateProjectAfterTransition } from '@/shared/api/project-transition/invalidate-project-queries'
 
 import { getDocumentUploadErrorMessage } from '../lib/get-document-upload-error-message'
 

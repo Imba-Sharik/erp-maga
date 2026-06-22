@@ -7,8 +7,8 @@ import { useProjectsCreate } from '@/shared/api/generated/hooks/projectsControll
 import type { Project } from '@/shared/api/generated/types/Project'
 import type { ProjectCreateRequest } from '@/shared/api/generated/types/ProjectCreateRequest'
 import type { ProjectHallItem } from '@/shared/api/generated/types/ProjectHallItem'
-import { getEventTypeLabelById } from '@/shared/constants/event-type-options'
-import { toIsoLocalDay } from '@/shared/lib/date/to-iso-local-day'
+import { getEventTypeLabelById } from '@/shared/constants'
+import { toIsoLocalDay } from '@/shared/lib/date'
 
 import { buildOptimisticProject } from '../lib/build-optimistic-project'
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'

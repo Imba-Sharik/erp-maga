@@ -3,10 +3,7 @@ import { useCallback, useMemo } from 'react'
 
 import { invalidateManagersDirectory } from '@/entities/manager'
 import { useProjectsPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsPartialUpdate'
-import {
-  invalidateProjectAfterTransition,
-  invalidateProjectsListQueries,
-} from '@/shared/api/project-transition/invalidate-project-queries'
+import { invalidateProjectAfterTransition, invalidateProjectsListQueries } from '@/shared/api'
 
 import { buildChangeManagerRequest } from '../lib/build-change-manager-request'
 import { getChangeManagerErrorMessage } from '../lib/get-change-manager-error-message'

@@ -1,7 +1,7 @@
 import { ExternalLinkIcon, RefreshCwIcon, SendIcon } from 'lucide-react'
 import { useState } from 'react'
 
-import { formatDateTime } from '@/shared/lib/date/format-date-time'
+import { formatDateTime } from '@/shared/lib/date'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 
