@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
+import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Collapsible, CollapsibleContent } from '@/shared/ui/collapsible'

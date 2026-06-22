@@ -7,7 +7,7 @@ import type {
 } from '@/entities/project-article'
 import { useStageHasDraftHighlight } from '@/entities/stage-draft'
 import type { StageRecord } from '@/features/advance-stage'
-import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
+import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 
 import { StagePassedBonus } from './stage-passed-bonus'
 import { StagePassedExpenses } from './stage-passed-expenses'

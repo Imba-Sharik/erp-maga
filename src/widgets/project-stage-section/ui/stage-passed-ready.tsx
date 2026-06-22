@@ -5,7 +5,7 @@ import type {
   ProjectArticles,
 } from '@/entities/project-article'
 import type { StageRecord } from '@/features/advance-stage'
-import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
+import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 
 import { FinanceBlockWithBackline } from './finance-block-with-backline'
 

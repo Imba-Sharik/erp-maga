@@ -6,7 +6,7 @@ import type {
 } from '@/entities/project-article'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
-import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
+import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 
 import { canEditStage } from '../lib/stage-permissions'
 import { ExpensesCommentField, FinanceBlockWithBackline } from './finance-block-with-backline'

@@ -18,7 +18,7 @@ import {
 import type { ProjectStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
-import type { StagePresentationConfig } from '@/widgets/project-detail/lib/stage-presentation'
+import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { Input } from '@/shared/ui/input'
 
