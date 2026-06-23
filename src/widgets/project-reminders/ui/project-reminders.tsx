@@ -12,16 +12,23 @@ import { Button } from '@/shared/ui/button'
 
 interface ProjectRemindersProps {
   projectId: number
-  /** Может ли текущая роль создавать/править напоминания */
-  editable?: boolean
+  /** Показывать кнопку «Добавить напоминание». */
+  canCreate?: boolean
+  /** Можно ли редактировать/удалять конкретное напоминание (своё — да). */
+  canEditReminder?: (reminder: Reminder) => boolean
 }
 
 /**
  * Таб «Напоминания» внутри проекта. Менеджер вносит события по проекту,
- * чтобы получать уведомления в ЕРП и (опционально) в Telegram.
+ * чтобы получать уведомления в ЕРП и (опционально) в Telegram. Руководитель
+ * видит и менеджерские напоминания, но правит только свои.
  * Данные — на бэке (`/reminders/?project=`), привязка через `project_id`.
  */
-export function ProjectReminders({ projectId, editable = true }: ProjectRemindersProps) {
+export function ProjectReminders({
+  projectId,
+  canCreate = true,
+  canEditReminder,
+}: ProjectRemindersProps) {
   const { data: reminders, isLoading, isError } = useProjectRemindersList(projectId)
 
   const [createOpen, setCreateOpen] = useState(false)
@@ -44,7 +51,7 @@ export function ProjectReminders({ projectId, editable = true }: ProjectReminder
         <p className="text-sm text-[#ACACAC]">
           События по проекту с уведомлением в ЕРП и Telegram
         </p>
-        {editable ? (
+        {canCreate ? (
           <Button
             type="button"
             className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
@@ -75,7 +82,7 @@ export function ProjectReminders({ projectId, editable = true }: ProjectReminder
             <ReminderCard
               key={reminder.id}
               reminder={reminder}
-              editable={editable && !reminder.sentAt}
+              editable={(canEditReminder?.(reminder) ?? false) && !reminder.sentAt}
               onEdit={setEditTarget}
               onDelete={setDeleteTarget}
             />

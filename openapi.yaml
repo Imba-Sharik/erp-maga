@@ -2280,8 +2280,12 @@ paths:
   /api/v1/reminders/:
     get:
       operationId: reminders_list
-      description: Личные напоминания менеджера MAG. `date=YYYY-MM-DD` фильтрует записи
-        выбранного дня; `project=<id>` — напоминания, привязанные к проекту.
+      description: |-
+        **Менеджер MAG:** видит только свои напоминания.
+
+        **Руководитель / администратор:** видит напоминания всех менеджеров и свои собственные. Фильтр `manager=<id>` (можно несколько через запятую: `manager=1,2`) ограничивает выборку конкретными менеджерами.
+
+        `date=YYYY-MM-DD` фильтрует записи выбранного дня; `project=<id>` — напоминания, привязанные к проекту.
       summary: Список напоминаний
       parameters:
       - in: query
@@ -2296,6 +2300,12 @@ paths:
           type: integer
         description: Количество записей на страницу (по умолчанию 10, макс. 200).
       - in: query
+        name: manager
+        schema:
+          type: string
+        description: 'Фильтр по менеджеру: один или несколько ID через запятую (`manager=1,2`).
+          Доступен только руководителю и администратору.'
+      - in: query
         name: offset
         schema:
           type: integer
@@ -2304,7 +2314,7 @@ paths:
         name: project
         schema:
           type: integer
-        description: ID проекта (только свои напоминания с этой привязкой).
+        description: ID проекта — напоминания, привязанные к этому проекту.
       tags:
       - reminders
       security:
@@ -2330,7 +2340,14 @@ paths:
           description: ''
     post:
       operationId: reminders_create
-      description: Доступно только менеджеру MAG; владелец берётся из текущего пользователя.
+      description: |-
+        Доступно менеджеру MAG, руководителю и администратору.
+
+        **Менеджер:** создаёт напоминание для себя (`manager_id` игнорируется).
+
+        **Руководитель / администратор:** создаёт напоминание для себя или, указав `manager_id`, для конкретного менеджера. В последнем случае менеджер увидит напоминание в своём списке; руководитель видит его через общий список (без фильтра или с `manager=<id>`).
+
+        Менеджер **не видит** напоминания, созданные руководителем для себя (без `manager_id`); `user_id` в ответе показывает фактического владельца.
       summary: Создать напоминание
       tags:
       - reminders
@@ -2470,9 +2487,10 @@ paths:
   /api/v1/reminders/calendar/:
     get:
       operationId: reminders_calendar_retrieve
-      description: Период задаётся парой `year`+`month` или `date_after`+`date_before`.
-        Дополнительно `date=YYYY-MM-DD` сужает выборку до одного дня внутри периода.
-        `project=<id>` — только напоминания, привязанные к проекту.
+      description: |-
+        Период задаётся парой `year`+`month` или `date_after`+`date_before`. Дополнительно `date=YYYY-MM-DD` сужает выборку до одного дня внутри периода. `project=<id>` — только напоминания, привязанные к проекту.
+
+        **Руководитель / администратор:** видит напоминания всех менеджеров; фильтр `manager=<id>` (или `manager=1,2`) ограничивает выборку.
       summary: Календарь напоминаний за месяц или период
       parameters:
       - in: query
@@ -2493,6 +2511,12 @@ paths:
           type: string
           format: date
         description: Конец произвольного периода.
+      - in: query
+        name: manager
+        schema:
+          type: string
+        description: 'Фильтр по менеджеру: один или несколько ID через запятую. Доступен
+          только руководителю и администратору.'
       - in: query
         name: month
         schema:
@@ -3920,6 +3944,13 @@ components:
         project_id:
           type: integer
           nullable: true
+        manager_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: 'Только для руководителя/администратора: создать напоминание
+            от имени менеджера. Менеджер увидит его в своём списке; у руководителя
+            оно тоже отображается.'
         name:
           type: string
           minLength: 1
@@ -5901,6 +5932,13 @@ components:
         project_id:
           type: integer
           nullable: true
+        manager_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: 'Только для руководителя/администратора: создать напоминание
+            от имени менеджера. Менеджер увидит его в своём списке; у руководителя
+            оно тоже отображается.'
         name:
           type: string
           minLength: 1

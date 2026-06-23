@@ -21,6 +21,8 @@ import { ConfirmDeleteMeetingDialog } from '@/features/delete-meeting'
 import { CreateMeetingDialog } from '@/features/create-meeting'
 import { EditMeetingDialog } from '@/features/edit-meeting'
 import {
+  canCreateReminder,
+  canModifyReminder,
   CreateReminderDialog,
   DeleteReminderDialog,
   EditReminderDialog,
@@ -33,7 +35,6 @@ import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
 import { ReminderDayPanel } from '@/widgets/reminder-day-panel'
 
 import { canCreateMeeting, canModifyMeeting } from '../lib/can-modify-meeting'
-import { canCreateReminder, canModifyReminder } from '../lib/can-modify-reminder'
 
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 

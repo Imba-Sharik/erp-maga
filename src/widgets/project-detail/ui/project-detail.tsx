@@ -9,6 +9,7 @@ import {
 } from '@/entities/project'
 import { stageDraftActions } from '@/entities/stage-draft'
 import { useStageFlow } from '@/features/advance-stage'
+import { canCreateReminder, canModifyReminder } from '@/features/manage-reminders'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import { useProjectTab } from '@/features/project-tabs'
 import { ProjectActivityLog } from '@/widgets/project-activity-log'
@@ -23,6 +24,7 @@ import { ProjectReadOnlyBanner } from './project-read-only-banner'
 
 export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   const currentUser = useCurrentUser()
+  const ownerId = Number(currentUser.id) || null
   const [outsideMagOpen, setOutsideMagOpen] = useState(false)
   const readOnly = resolveProjectReadOnly(project)
   // Баннер «ведёт другой менеджер» уместен только для занятого проекта. Свободный
@@ -65,11 +67,14 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
           ) : tab === 'reminders' ? (
             <ProjectReminders
               projectId={Number(project.id)}
-              // Руководитель может оставлять напоминания в любом проекте (ERP-187),
-              // в т.ч. read-only; менеджер/админ — только в редактируемом.
-              editable={
-                currentUser.role === 'director' ||
-                (!readOnly && (currentUser.role === 'manager' || currentUser.role === 'admin'))
+              // Руководитель/админ ведут напоминания в любом проекте (ERP-187), в т.ч.
+              // read-only; менеджер — только в редактируемом. Править/удалять — лишь свои.
+              canCreate={
+                canCreateReminder(currentUser.role) &&
+                (currentUser.role !== 'manager' || !readOnly)
+              }
+              canEditReminder={(reminder) =>
+                canModifyReminder({ role: currentUser.role, ownerId, reminder })
               }
             />
           ) : (

@@ -1,9 +1,9 @@
 import type { Reminder } from '@/entities/reminder'
 import type { UserRole } from '@/entities/user-role'
 
-/** Создавать напоминания могут менеджер и руководитель (ERP-187). */
+/** Создавать напоминания могут менеджер, руководитель и администратор (ERP-187). */
 export function canCreateReminder(role: UserRole): boolean {
-  return role === 'manager' || role === 'director'
+  return role === 'manager' || role === 'director' || role === 'admin'
 }
 
 export interface CanModifyReminderArgs {
@@ -20,6 +20,7 @@ export interface CanModifyReminderArgs {
  */
 export function canModifyReminder({ role, ownerId, reminder }: CanModifyReminderArgs): boolean {
   if (role === 'manager') return true
-  if (role === 'director') return ownerId != null && reminder.managerId === ownerId
+  if (role === 'director' || role === 'admin')
+    return ownerId != null && reminder.managerId === ownerId
   return false
 }

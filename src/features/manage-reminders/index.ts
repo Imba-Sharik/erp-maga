@@ -4,6 +4,9 @@ export type { ReminderFormDialogProps } from './ui/reminder-form-dialog'
 export { ConfirmDeleteReminderDialog } from './ui/confirm-delete-reminder-dialog'
 export type { ConfirmDeleteReminderDialogProps } from './ui/confirm-delete-reminder-dialog'
 
+// Права на напоминания по роли (создание + правка своих)
+export { canCreateReminder, canModifyReminder } from './lib/reminder-permissions'
+
 // Проектные напоминания (бэкенд /reminders/ c project_id)
 export { useProjectReminders } from './model/use-project-reminders'
 

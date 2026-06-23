@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Reminder } from '@/entities/reminder'
 
-import { canCreateReminder, canModifyReminder } from './can-modify-reminder'
+import { canCreateReminder, canModifyReminder } from './reminder-permissions'
 
 function reminder(managerId: number): Reminder {
   return {
@@ -24,8 +24,8 @@ describe('canCreateReminder', () => {
     expect(canCreateReminder('director')).toBe(true)
   })
 
-  it('запрещает админу и бухгалтеру', () => {
-    expect(canCreateReminder('admin')).toBe(false)
+  it('разрешает админу, запрещает бухгалтеру', () => {
+    expect(canCreateReminder('admin')).toBe(true)
     expect(canCreateReminder('accountant')).toBe(false)
   })
 })
@@ -49,8 +49,12 @@ describe('canModifyReminder', () => {
     )
   })
 
-  it('прочие роли не правят напоминания', () => {
-    expect(canModifyReminder({ role: 'admin', ownerId: 7, reminder: reminder(7) })).toBe(false)
+  it('админ правит только своё напоминание', () => {
+    expect(canModifyReminder({ role: 'admin', ownerId: 7, reminder: reminder(7) })).toBe(true)
+    expect(canModifyReminder({ role: 'admin', ownerId: 7, reminder: reminder(8) })).toBe(false)
+  })
+
+  it('бухгалтер не правит напоминания', () => {
     expect(canModifyReminder({ role: 'accountant', ownerId: 7, reminder: reminder(7) })).toBe(false)
   })
 })
