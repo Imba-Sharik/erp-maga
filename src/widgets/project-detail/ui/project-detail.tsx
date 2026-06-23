@@ -62,11 +62,14 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
             <ProjectActivityLog projectId={Number(project.id)} />
           ) : tab === 'documents' ? (
             <ProjectDocuments project={project} getRecord={flow.getRecord} />
-          ) : tab === 'reminders' && currentUser.role !== 'director' ? (
+          ) : tab === 'reminders' ? (
             <ProjectReminders
               projectId={Number(project.id)}
+              // Руководитель может оставлять напоминания в любом проекте (ERP-187),
+              // в т.ч. read-only; менеджер/админ — только в редактируемом.
               editable={
-                !readOnly && (currentUser.role === 'manager' || currentUser.role === 'admin')
+                currentUser.role === 'director' ||
+                (!readOnly && (currentUser.role === 'manager' || currentUser.role === 'admin'))
               }
             />
           ) : (
