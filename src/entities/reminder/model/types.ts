@@ -1,5 +1,7 @@
 export interface Reminder {
   id: number
+  /** Владелец напоминания (user_id с бэка). Нужен для фильтра по менеджеру у Руководителя. */
+  managerId: number
   title: string
   comment: string
   /** Время в формате HH:mm */

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FolderOpen, Pencil, Trash2 } from 'lucide-react'
+import { FolderOpen, Pencil, Trash2, User } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 import type { Reminder } from '../model/types'
@@ -7,6 +7,8 @@ import type { Reminder } from '../model/types'
 interface ReminderCardProps {
   reminder: Reminder
   editable?: boolean
+  /** Имя отв. менеджера — показываем Руководителю (видит напоминания разных менеджеров). */
+  managerName?: string
   onEdit?: (reminder: Reminder) => void
   onDelete?: (reminder: Reminder) => void
   /** Ссылка на проект, к которому привязано напоминание (показываем в календаре). */
@@ -18,6 +20,7 @@ interface ReminderCardProps {
 export function ReminderCard({
   reminder,
   editable = false,
+  managerName,
   onEdit,
   onDelete,
   projectHref,
@@ -77,6 +80,12 @@ export function ReminderCard({
       {reminder.comment ? (
         <p className="text-sm wrap-break-word whitespace-pre-wrap text-[#454545]">
           {reminder.comment}
+        </p>
+      ) : null}
+      {managerName ? (
+        <p className="flex items-center justify-end gap-1 text-xs text-[#848484]">
+          <User className="size-3 shrink-0" />
+          <span className="truncate">{managerName}</span>
         </p>
       ) : null}
     </article>

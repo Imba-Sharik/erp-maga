@@ -20,6 +20,8 @@ interface ReminderDayPanelProps {
   selectedDate: Date | null
   remindersByDay: RemindersByDay
   editable?: boolean
+  /** Резолвер имени отв. менеджера по id (для Руководителя). */
+  resolveManagerName?: (managerId: number) => string | undefined
   maxHeightPx?: number
   /** Заменяет заголовок панели (напр. табы Встречи/Напоминания). */
   titleSlot?: ReactNode
@@ -32,6 +34,7 @@ export function ReminderDayPanel({
   selectedDate,
   remindersByDay,
   editable = false,
+  resolveManagerName,
   maxHeightPx,
   titleSlot,
   onAddReminder,
@@ -124,6 +127,7 @@ export function ReminderDayPanel({
                       key={reminder.id}
                       reminder={reminder}
                       editable={editable && !reminder.sentAt}
+                      managerName={resolveManagerName?.(reminder.managerId)}
                       projectHref={
                         reminder.projectId != null
                           ? `/projects/${reminder.projectId}`

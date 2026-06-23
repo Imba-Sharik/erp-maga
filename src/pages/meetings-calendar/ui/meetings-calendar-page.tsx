@@ -29,7 +29,6 @@ import { toDayKey } from '@/shared/lib/date'
 import { useElementSize } from '@/shared/hooks'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { CombinedCalendar } from '@/widgets/combined-calendar'
-import { MeetingCalendar } from '@/widgets/meeting-calendar'
 import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
 import { ReminderDayPanel } from '@/widgets/reminder-day-panel'
 
@@ -54,9 +53,10 @@ export function MeetingsCalendarPage() {
   const showManagerFilter = role === 'director' || role === 'admin'
   // Создавать встречи могут менеджер и руководитель (ERP-183).
   const meetingsCreatable = canCreateMeeting(role)
-  // Логика напоминаний — только у менеджера. Руководитель/админ видят встречи (с фильтром по менеджеру).
+  // Создание/редактирование напоминаний — пока только у менеджера (см. editable).
   const editable = role === 'manager'
-  const showReminders = role === 'manager'
+  // Напоминания видят и менеджер (свои), и Руководитель/админ (менеджеров, с фильтром по менеджеру).
+  const showReminders = role === 'manager' || showManagerFilter
   // id текущего пользователя — владельца создаваемых/правимых встреч.
   const ownerId = parseManagerId(currentUser.id)
   const canEditMeeting = useCallback(
@@ -104,6 +104,17 @@ export function MeetingsCalendarPage() {
     [magManagerIds],
   )
 
+  // Имя отв. менеджера по id — показываем на карточках только Руководителю/админу.
+  const managerNameById = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const option of managerFilterOptions) map.set(Number(option.value), option.label)
+    return map
+  }, [managerFilterOptions])
+  const resolveManagerName = useCallback(
+    (managerId: number) => managerNameById.get(managerId),
+    [managerNameById],
+  )
+
   const { dateFrom, dateTo } = useMemo(() => {
     const gridStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 })
     const gridEnd = endOfWeek(endOfMonth(visibleMonth), { weekStartsOn: 1 })
@@ -142,7 +153,16 @@ export function MeetingsCalendarPage() {
     isLoading: remindersLoading,
     isFetching: remindersFetching,
   } = useRemindersCalendarList(reminderQueryParams, { enabled: showReminders })
-  const remindersByDay = useMemo(() => groupRemindersByDay(reminderData ?? []), [reminderData])
+
+  // Руководитель видит напоминания менеджеров; при выборе менеджера(ов) — только их
+  // (фильтра по менеджеру в API нет, поэтому фильтруем по managerId на клиенте).
+  const visibleReminders = useMemo(() => {
+    const all = reminderData ?? []
+    if (!showManagerFilter || selectedManagerIds.size === 0) return all
+    return all.filter((reminder) => selectedManagerIds.has(reminder.managerId))
+  }, [reminderData, showManagerFilter, selectedManagerIds])
+
+  const remindersByDay = useMemo(() => groupRemindersByDay(visibleReminders), [visibleReminders])
   const totalRemindersThisMonth = useMemo(
     () => countRemindersInMonth(remindersByDay, visibleMonth),
     [remindersByDay, visibleMonth],
@@ -188,39 +208,25 @@ export function MeetingsCalendarPage() {
 
       <div className="grid gap-6 @min-[1400px]/main:grid-cols-[minmax(0,1fr)_minmax(360px,540px)] @min-[1400px]/main:items-start @min-[1400px]/main:gap-10">
         <div ref={calendarRef} className="min-h-0 min-w-0">
-          {showReminders ? (
-            <CombinedCalendar
-              visibleMonth={visibleMonth}
-              selectedDate={selectedDate}
-              today={today}
-              meetingsByDay={meetingsByDay}
-              remindersByDay={remindersByDay}
-              onChangeMonth={setVisibleMonth}
-              onSelectDate={handleSelectDate}
-              totalMeetings={totalThisMonth}
-              totalReminders={totalRemindersThisMonth}
-              isLoading={isLoading || remindersLoading}
-              isFetching={isFetching || remindersFetching}
-            />
-          ) : (
-            <MeetingCalendar
-              visibleMonth={visibleMonth}
-              selectedDate={selectedDate}
-              today={today}
-              meetingsByDay={meetingsByDay}
-              onChangeMonth={setVisibleMonth}
-              onSelectDate={handleSelectDate}
-              showManagerFilter={showManagerFilter}
-              magManagerIds={magManagerIds}
-              onChangeMagManagerIds={setMagManagerIds}
-              managerFilterOptions={managerFilterOptions}
-              managersSelectLoading={managersSelectLoading}
-              managersSelectError={managersSelectError}
-              totalThisMonth={totalThisMonth}
-              isLoading={isLoading}
-              isFetching={isFetching}
-            />
-          )}
+          <CombinedCalendar
+            visibleMonth={visibleMonth}
+            selectedDate={selectedDate}
+            today={today}
+            meetingsByDay={meetingsByDay}
+            remindersByDay={remindersByDay}
+            onChangeMonth={setVisibleMonth}
+            onSelectDate={handleSelectDate}
+            showManagerFilter={showManagerFilter}
+            magManagerIds={magManagerIds}
+            onChangeMagManagerIds={setMagManagerIds}
+            managerFilterOptions={managerFilterOptions}
+            managersSelectLoading={managersSelectLoading}
+            managersSelectError={managersSelectError}
+            totalMeetings={totalThisMonth}
+            totalReminders={totalRemindersThisMonth}
+            isLoading={isLoading || remindersLoading}
+            isFetching={isFetching || remindersFetching}
+          />
         </div>
         <div className="min-h-0 min-w-0">
           {showReminders && panelTab === 'reminders' ? (
@@ -228,6 +234,7 @@ export function MeetingsCalendarPage() {
               selectedDate={selectedDate}
               remindersByDay={remindersByDay}
               editable={editable}
+              resolveManagerName={showManagerFilter ? resolveManagerName : undefined}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
               onAddReminder={() => setReminderCreateOpen(true)}
@@ -240,6 +247,7 @@ export function MeetingsCalendarPage() {
               meetingsByDay={meetingsByDay}
               canCreate={meetingsCreatable}
               canEditMeeting={canEditMeeting}
+              resolveManagerName={showManagerFilter ? resolveManagerName : undefined}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
               onAddMeeting={() => setCreateOpen(true)}

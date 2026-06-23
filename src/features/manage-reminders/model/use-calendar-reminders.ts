@@ -44,6 +44,8 @@ export function useCreateReminder({ queryParams, onSuccess }: UseCreateReminderO
         const parsed = parseBusinessDatetime(data.reminder_datetime)
         const optimistic: Reminder = {
           id: optimisticId,
+          // владелец перезатрётся реальным user_id из ответа (fromReminder) на onSuccess
+          managerId: 0,
           title: data.name,
           comment: data.comment ?? '',
           date: parsed?.date ?? '',
