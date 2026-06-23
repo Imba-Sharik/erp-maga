@@ -12,6 +12,7 @@ export type { StageDocumentFieldVariant } from '@/entities/project-document'
 export { getStageDocumentFieldVariant } from '@/entities/project-document'
 export type {
   Project,
+  ProjectAssistantManager,
   ProjectEconomics,
   ProjectStage,
   PreprojectStage,
@@ -39,6 +40,7 @@ export {
   mapBackendCalendarProject,
   mapBackendCalendarProjects,
 } from './lib/from-backend'
+export type { ChangeManagersRequest } from './model/manager-assignment'
 export { projectToApiListRow } from './lib/project-to-api-list-row'
 export { resolveProjectReadOnly } from './lib/project-edit-access'
 export { getOutsideMagReasonLabel } from './lib/outside-mag-reason'
