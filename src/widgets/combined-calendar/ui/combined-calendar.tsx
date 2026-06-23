@@ -4,7 +4,12 @@ import { MeetingCountBadge, pluralMeetings, type MeetingsByDay } from '@/entitie
 import { pluralReminders, ReminderCountBadge, type RemindersByDay } from '@/entities/reminder'
 import { toDayKey } from '@/shared/lib/date'
 import { cn } from '@/shared/lib/utils'
+import type { SelectOption } from '@/shared/ui/clearable-select'
+import { MultiSelect } from '@/shared/ui/multi-select'
 import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
+
+const SELECT_BASE =
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
 interface CombinedCalendarProps {
   visibleMonth: Date
@@ -16,6 +21,13 @@ interface CombinedCalendarProps {
   onSelectDate: (date: Date) => void
   /** Слот слева в тулбаре (переключатель режима) */
   leading?: ReactNode
+  /** Мульти-фильтр по менеджерам (Руководитель/админ). Пустой выбор — все менеджеры. */
+  showManagerFilter?: boolean
+  magManagerIds?: string[]
+  onChangeMagManagerIds?: (values: string[]) => void
+  managerFilterOptions?: readonly SelectOption[]
+  managersSelectLoading?: boolean
+  managersSelectError?: boolean
   totalMeetings: number
   totalReminders: number
   isLoading?: boolean
@@ -31,6 +43,12 @@ export function CombinedCalendar({
   onChangeMonth,
   onSelectDate,
   leading,
+  showManagerFilter = false,
+  magManagerIds = [],
+  onChangeMagManagerIds,
+  managerFilterOptions = [],
+  managersSelectLoading = false,
+  managersSelectError = false,
   totalMeetings,
   totalReminders,
   isLoading = false,
@@ -41,23 +59,40 @@ export function CombinedCalendar({
     [selectedDate],
   )
 
+  const managerSelectDisabled = managersSelectLoading || managersSelectError
+
   return (
     <div className="@container/calendar flex min-w-0 flex-col gap-4 overflow-x-hidden">
-      <div className="flex min-w-0 flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:items-center @min-[880px]/calendar:justify-between @min-[880px]/calendar:gap-2.5">
+      {/* Один ряд: слот/селект менеджера слева, год/месяц справа (порог 560px). */}
+      <div className="flex min-w-0 flex-col gap-3 @min-[560px]/calendar:flex-row @min-[560px]/calendar:flex-wrap @min-[560px]/calendar:items-center @min-[560px]/calendar:gap-2.5">
         {leading ? <div className="min-w-0">{leading}</div> : null}
-        <div className="flex min-w-0 items-center gap-2.5 @min-[880px]/calendar:ml-auto @min-[880px]/calendar:justify-end">
+
+        {showManagerFilter && onChangeMagManagerIds ? (
+          <div className="w-full min-w-0 @min-[560px]/calendar:max-w-[320px] @min-[560px]/calendar:flex-1">
+            <MultiSelect
+              placeholder="Отв. менеджер"
+              values={magManagerIds}
+              options={managerFilterOptions}
+              onChange={onChangeMagManagerIds}
+              triggerClassName={SELECT_BASE}
+              disabled={managerSelectDisabled}
+            />
+          </div>
+        ) : null}
+
+        <div className="flex min-w-0 items-center gap-2.5 @min-[560px]/calendar:ml-auto @min-[560px]/calendar:justify-end">
           <Loader2
             aria-hidden={!isFetching}
             aria-label={isFetching ? 'Загрузка' : undefined}
             className={cn(
-              'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity @min-[880px]/calendar:block',
+              'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity @min-[560px]/calendar:block',
               isFetching ? 'animate-spin opacity-100' : 'opacity-0',
             )}
           />
           <MonthYearNavigator
             visibleMonth={visibleMonth}
             onChangeMonth={onChangeMonth}
-            compactBreakpoint="880px"
+            compactBreakpoint="560px"
             grouped={false}
           />
         </div>
