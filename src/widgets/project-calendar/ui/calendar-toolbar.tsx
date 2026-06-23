@@ -19,8 +19,9 @@ const TOOLBAR_LAYOUT = {
       'flex min-w-0 w-full flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:items-center @min-[880px]/calendar:gap-2.5',
     searchRow:
       'flex w-full min-w-0 items-center gap-2 @min-[880px]/calendar:max-w-[300px] @min-[880px]/calendar:flex-1 @min-[880px]/calendar:basis-[240px]',
+    // Стек-режим (<880px): фильтры авто-упаковываются по ширине, а не жёстко по 2 в ряд.
     filtersRow:
-      'grid min-w-0 w-full grid-cols-2 gap-2.5 @min-[880px]/calendar:flex @min-[880px]/calendar:flex-1 @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:justify-end @min-[880px]/calendar:basis-[520px]',
+      'grid min-w-0 w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 @min-[880px]/calendar:flex @min-[880px]/calendar:flex-1 @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:justify-end @min-[880px]/calendar:basis-[520px]',
     managerMobileHide: '@min-[880px]/calendar:hidden',
     managerDesktopShow: 'hidden @min-[880px]/calendar:block',
     compactBreakpoint: '880px' as const,
@@ -31,8 +32,10 @@ const TOOLBAR_LAYOUT = {
       'flex min-w-0 w-full flex-col gap-3 @min-[1040px]/calendar:flex-row @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:items-center @min-[1040px]/calendar:gap-2.5',
     searchRow:
       'flex w-full min-w-0 items-center gap-2 @min-[1040px]/calendar:max-w-[300px] @min-[1040px]/calendar:flex-1 @min-[1040px]/calendar:basis-[240px]',
+    // Стек-режим (<1040px): фильтры авто-упаковываются по ширине, а не жёстко по 2 в ряд
+    // (у Руководителя зал/LOFT/статус/год/месяц укладываются в одну строку вместо четырёх).
     filtersRow:
-      'grid min-w-0 w-full grid-cols-2 gap-2.5 @min-[1040px]/calendar:flex @min-[1040px]/calendar:flex-1 @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:justify-end @min-[1040px]/calendar:basis-[520px]',
+      'grid min-w-0 w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 @min-[1040px]/calendar:flex @min-[1040px]/calendar:flex-1 @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:justify-end @min-[1040px]/calendar:basis-[520px]',
     managerMobileHide: '@min-[1040px]/calendar:hidden',
     managerDesktopShow: 'hidden @min-[1040px]/calendar:block',
     compactBreakpoint: '1040px' as const,
