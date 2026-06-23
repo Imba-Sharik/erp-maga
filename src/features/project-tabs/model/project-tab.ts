@@ -1,7 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
 
-import { useUserRole } from '@/entities/user-role'
-
 export type ProjectTabKey = 'data' | 'economics' | 'documents' | 'actions' | 'reminders'
 
 export const PROJECT_TABS: { key: ProjectTabKey; label: string; mobileLabel: string }[] = [
@@ -14,10 +12,9 @@ export const PROJECT_TABS: { key: ProjectTabKey; label: string; mobileLabel: str
 
 const DEFAULT_TAB: ProjectTabKey = 'data'
 
-/** У руководителя нет логики напоминаний — таб скрыт. */
+/** Все табы доступны всем ролям (Руководитель тоже ведёт напоминания — ERP-187). */
 export function useProjectTabsForRole() {
-  const role = useUserRole()
-  return PROJECT_TABS.filter((t) => t.key !== 'reminders' || role !== 'director')
+  return PROJECT_TABS
 }
 
 export function useProjectTab(): [ProjectTabKey, (next: ProjectTabKey) => void] {

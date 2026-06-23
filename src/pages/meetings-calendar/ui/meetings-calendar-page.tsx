@@ -21,6 +21,8 @@ import { ConfirmDeleteMeetingDialog } from '@/features/delete-meeting'
 import { CreateMeetingDialog } from '@/features/create-meeting'
 import { EditMeetingDialog } from '@/features/edit-meeting'
 import {
+  canCreateReminder,
+  canModifyReminder,
   CreateReminderDialog,
   DeleteReminderDialog,
   EditReminderDialog,
@@ -53,14 +55,18 @@ export function MeetingsCalendarPage() {
   const showManagerFilter = role === 'director' || role === 'admin'
   // Создавать встречи могут менеджер и руководитель (ERP-183).
   const meetingsCreatable = canCreateMeeting(role)
-  // Создание/редактирование напоминаний — пока только у менеджера (см. editable).
-  const editable = role === 'manager'
   // Напоминания видят и менеджер (свои), и Руководитель/админ (менеджеров, с фильтром по менеджеру).
   const showReminders = role === 'manager' || showManagerFilter
-  // id текущего пользователя — владельца создаваемых/правимых встреч.
+  // Создавать напоминания могут менеджер и руководитель (ERP-187); править/удалять — только свои.
+  const remindersCreatable = canCreateReminder(role)
+  // id текущего пользователя — владельца создаваемых/правимых встреч и напоминаний.
   const ownerId = parseManagerId(currentUser.id)
   const canEditMeeting = useCallback(
     (meeting: Meeting) => canModifyMeeting({ role, ownerId, meeting }),
+    [role, ownerId],
+  )
+  const canEditReminder = useCallback(
+    (reminder: Reminder) => canModifyReminder({ role, ownerId, reminder }),
     [role, ownerId],
   )
 
@@ -105,14 +111,18 @@ export function MeetingsCalendarPage() {
   )
 
   // Имя отв. менеджера по id — показываем на карточках только Руководителю/админу.
+  // Свои записи (владелец = текущий пользователь) помечаем «Вы».
   const managerNameById = useMemo(() => {
     const map = new Map<number, string>()
     for (const option of managerFilterOptions) map.set(Number(option.value), option.label)
     return map
   }, [managerFilterOptions])
   const resolveManagerName = useCallback(
-    (managerId: number) => managerNameById.get(managerId),
-    [managerNameById],
+    (managerId: number) => {
+      if (ownerId != null && managerId === ownerId) return 'Вы'
+      return managerNameById.get(managerId)
+    },
+    [managerNameById, ownerId],
   )
 
   const { dateFrom, dateTo } = useMemo(() => {
@@ -233,7 +243,8 @@ export function MeetingsCalendarPage() {
             <ReminderDayPanel
               selectedDate={selectedDate}
               remindersByDay={remindersByDay}
-              editable={editable}
+              canCreate={remindersCreatable}
+              canEditReminder={canEditReminder}
               resolveManagerName={showManagerFilter ? resolveManagerName : undefined}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
@@ -284,7 +295,7 @@ export function MeetingsCalendarPage() {
 
       {showReminders ? (
         <>
-          {editable && selectedDateKey ? (
+          {remindersCreatable && selectedDateKey ? (
             <CreateReminderDialog
               open={reminderCreateOpen}
               onOpenChange={setReminderCreateOpen}
