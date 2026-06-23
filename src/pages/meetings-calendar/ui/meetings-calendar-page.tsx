@@ -131,7 +131,7 @@ export function MeetingsCalendarPage() {
     data: reminderData,
     isLoading: remindersLoading,
     isFetching: remindersFetching,
-  } = useRemindersCalendarList(reminderQueryParams)
+  } = useRemindersCalendarList(reminderQueryParams, { enabled: showReminders })
   const remindersByDay = useMemo(() => groupRemindersByDay(reminderData ?? []), [reminderData])
   const totalRemindersThisMonth = useMemo(
     () => countRemindersInMonth(remindersByDay, visibleMonth),
