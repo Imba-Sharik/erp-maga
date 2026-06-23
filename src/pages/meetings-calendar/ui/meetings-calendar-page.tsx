@@ -104,6 +104,17 @@ export function MeetingsCalendarPage() {
     [magManagerIds],
   )
 
+  // Имя отв. менеджера по id — показываем на карточках только Руководителю/админу.
+  const managerNameById = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const option of managerFilterOptions) map.set(Number(option.value), option.label)
+    return map
+  }, [managerFilterOptions])
+  const resolveManagerName = useCallback(
+    (managerId: number) => managerNameById.get(managerId),
+    [managerNameById],
+  )
+
   const { dateFrom, dateTo } = useMemo(() => {
     const gridStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 })
     const gridEnd = endOfWeek(endOfMonth(visibleMonth), { weekStartsOn: 1 })
@@ -223,6 +234,7 @@ export function MeetingsCalendarPage() {
               selectedDate={selectedDate}
               remindersByDay={remindersByDay}
               editable={editable}
+              resolveManagerName={showManagerFilter ? resolveManagerName : undefined}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
               onAddReminder={() => setReminderCreateOpen(true)}
@@ -235,6 +247,7 @@ export function MeetingsCalendarPage() {
               meetingsByDay={meetingsByDay}
               canCreate={meetingsCreatable}
               canEditMeeting={canEditMeeting}
+              resolveManagerName={showManagerFilter ? resolveManagerName : undefined}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
               onAddMeeting={() => setCreateOpen(true)}

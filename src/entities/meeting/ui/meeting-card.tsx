@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, User } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { formatMeetingVenueLine } from '../lib/format-meeting-venue'
@@ -7,6 +7,8 @@ import type { Meeting } from '../model/types'
 interface MeetingCardProps {
   meeting: Meeting
   editable?: boolean
+  /** Имя отв. менеджера — показываем Руководителю (видит встречи разных менеджеров). */
+  managerName?: string
   onEdit?: (meeting: Meeting) => void
   onDelete?: (meeting: Meeting) => void
   className?: string
@@ -15,6 +17,7 @@ interface MeetingCardProps {
 export function MeetingCard({
   meeting,
   editable = false,
+  managerName,
   onEdit,
   onDelete,
   className,
@@ -60,6 +63,12 @@ export function MeetingCard({
         ) : null}
       </div>
       <p className="text-sm wrap-break-word whitespace-pre-wrap text-[#454545]">{meeting.comment}</p>
+      {managerName ? (
+        <p className="flex items-center justify-end gap-1 text-xs text-[#848484]">
+          <User className="size-3 shrink-0" />
+          <span className="truncate">{managerName}</span>
+        </p>
+      ) : null}
     </article>
   )
 }

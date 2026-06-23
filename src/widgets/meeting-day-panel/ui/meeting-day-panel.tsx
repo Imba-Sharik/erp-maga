@@ -20,6 +20,8 @@ interface MeetingDayPanelProps {
   canCreate?: boolean
   /** Можно ли редактировать/удалять конкретную встречу (своя — да). */
   canEditMeeting?: (meeting: Meeting) => boolean
+  /** Резолвер имени отв. менеджера по id (для Руководителя). */
+  resolveManagerName?: (managerId: number) => string | undefined
   maxHeightPx?: number
   /** Заменяет заголовок панели (напр. табы Встречи/Напоминания). */
   titleSlot?: ReactNode
@@ -33,6 +35,7 @@ export function MeetingDayPanel({
   meetingsByDay,
   canCreate = false,
   canEditMeeting,
+  resolveManagerName,
   maxHeightPx,
   titleSlot,
   onAddMeeting,
@@ -99,6 +102,7 @@ export function MeetingDayPanel({
                       key={meeting.id}
                       meeting={meeting}
                       editable={canEditMeeting?.(meeting) ?? false}
+                      managerName={resolveManagerName?.(meeting.managerId)}
                       onEdit={onEditMeeting}
                       onDelete={onDeleteMeeting}
                     />
