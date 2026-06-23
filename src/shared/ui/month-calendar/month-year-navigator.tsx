@@ -35,6 +35,12 @@ const MONTH_SELECT_TRIGGER =
   '[&_[data-slot=select-value]]:w-full [&_[data-slot=select-value]]:justify-center'
 
 const LAYOUT = {
+  compact: {
+    triggerYear: `${SELECT_BASE} @min-[560px]/calendar:w-fit @min-[560px]/calendar:min-w-20 @min-[560px]/calendar:flex-none`,
+    monthNav:
+      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+      '@min-[560px]/calendar:w-fit @min-[560px]/calendar:min-w-28 @min-[560px]/calendar:flex-none',
+  },
   default: {
     triggerYear: `${SELECT_BASE} @min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-20 @min-[880px]/calendar:flex-none`,
     monthNav:
@@ -52,7 +58,7 @@ const LAYOUT = {
 interface MonthYearNavigatorProps {
   visibleMonth: Date
   onChangeMonth: (date: Date) => void
-  compactBreakpoint?: '880px' | '1040px'
+  compactBreakpoint?: '560px' | '880px' | '1040px'
   className?: string
   /**
    * В `filtersRow` календаря проектов год и месяц — отдельные ячейки grid (2 колонки на mobile).
@@ -68,7 +74,12 @@ export function MonthYearNavigator({
   className,
   grouped = true,
 }: MonthYearNavigatorProps) {
-  const layout = compactBreakpoint === '1040px' ? LAYOUT.wide : LAYOUT.default
+  const layout =
+    compactBreakpoint === '1040px'
+      ? LAYOUT.wide
+      : compactBreakpoint === '560px'
+        ? LAYOUT.compact
+        : LAYOUT.default
   const monthIndex = getMonth(visibleMonth)
   const year = getYear(visibleMonth)
 

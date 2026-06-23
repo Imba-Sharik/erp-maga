@@ -66,12 +66,14 @@ export function MeetingCalendar({
 
   return (
     <div className="@container/calendar flex min-w-0 flex-col gap-4 overflow-x-hidden">
-      {/* Один ряд (как в календаре проектов): селект менеджера слева, год/месяц справа. */}
-      <div className="flex min-w-0 flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:items-center @min-[880px]/calendar:gap-2.5">
+      {/* Один ряд (как в календаре проектов): селект менеджера слева, год/месяц справа.
+          Контролов всего два — порог одной строки низкий (560px), чтобы влезало
+          и на узкой колонке. */}
+      <div className="flex min-w-0 flex-col gap-3 @min-[560px]/calendar:flex-row @min-[560px]/calendar:flex-wrap @min-[560px]/calendar:items-center @min-[560px]/calendar:gap-2.5">
         {leading ? <div className="min-w-0">{leading}</div> : null}
 
         {showManagerFilter && onChangeMagManagerIds ? (
-          <div className="w-full min-w-0 @min-[880px]/calendar:max-w-[320px] @min-[880px]/calendar:flex-1">
+          <div className="w-full min-w-0 @min-[560px]/calendar:max-w-[320px] @min-[560px]/calendar:flex-1">
             <MultiSelect
               placeholder="Отв. менеджер"
               values={magManagerIds}
@@ -83,19 +85,19 @@ export function MeetingCalendar({
           </div>
         ) : null}
 
-        <div className="flex min-w-0 items-center gap-2.5 @min-[880px]/calendar:ml-auto @min-[880px]/calendar:justify-end">
+        <div className="flex min-w-0 items-center gap-2.5 @min-[560px]/calendar:ml-auto @min-[560px]/calendar:justify-end">
           <Loader2
             aria-hidden={!isFetching}
             aria-label={isFetching ? 'Загрузка встреч' : undefined}
             className={cn(
-              'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity @min-[880px]/calendar:block',
+              'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity @min-[560px]/calendar:block',
               isFetching ? 'animate-spin opacity-100' : 'opacity-0',
             )}
           />
           <MonthYearNavigator
             visibleMonth={visibleMonth}
             onChangeMonth={onChangeMonth}
-            compactBreakpoint="880px"
+            compactBreakpoint="560px"
             grouped={false}
           />
         </div>
