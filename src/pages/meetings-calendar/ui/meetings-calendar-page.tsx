@@ -110,14 +110,18 @@ export function MeetingsCalendarPage() {
   )
 
   // Имя отв. менеджера по id — показываем на карточках только Руководителю/админу.
+  // Свои записи (владелец = текущий пользователь) помечаем «Вы».
   const managerNameById = useMemo(() => {
     const map = new Map<number, string>()
     for (const option of managerFilterOptions) map.set(Number(option.value), option.label)
     return map
   }, [managerFilterOptions])
   const resolveManagerName = useCallback(
-    (managerId: number) => managerNameById.get(managerId),
-    [managerNameById],
+    (managerId: number) => {
+      if (ownerId != null && managerId === ownerId) return 'Вы'
+      return managerNameById.get(managerId)
+    },
+    [managerNameById, ownerId],
   )
 
   const { dateFrom, dateTo } = useMemo(() => {
