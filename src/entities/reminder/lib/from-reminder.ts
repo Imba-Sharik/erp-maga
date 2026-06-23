@@ -42,6 +42,8 @@ export function extractRemindersList(data: { results?: unknown } | undefined): A
 export function reminderToApiStub(reminder: Reminder): ApiReminder {
   return {
     id: reminder.id,
+    // readOnly-поле с бэка; в оптимистичном стабе не используется (fromReminder его игнорирует), перезатрётся при рефетче
+    user_id: 0,
     project_id: reminder.projectId ?? null,
     name: reminder.title,
     comment: reminder.comment,
