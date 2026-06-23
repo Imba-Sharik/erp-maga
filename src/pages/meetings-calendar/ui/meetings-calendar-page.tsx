@@ -70,7 +70,8 @@ export function MeetingsCalendarPage() {
 
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [magManagerId, setMagManagerId] = useState<string | null>(null)
+  // Множественный выбор менеджеров (только director/admin). Пустой массив — все менеджеры.
+  const [magManagerIds, setMagManagerIds] = useState<string[]>([])
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Meeting | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Meeting | null>(null)
@@ -79,11 +80,19 @@ export function MeetingsCalendarPage() {
   const [reminderEditTarget, setReminderEditTarget] = useState<Reminder | null>(null)
   const [reminderDeleteTarget, setReminderDeleteTarget] = useState<Reminder | null>(null)
 
-  const filterManagerId = useMemo((): number | null => {
-    if (showManagerFilter) return parseManagerId(magManagerId)
+  // Бэк фильтрует только по одному менеджеру, поэтому для руководителя тянем все
+  // встречи (manager не передаём) и фильтруем по выбранным id на клиенте.
+  // Менеджер всегда скоупится на себя серверным фильтром.
+  const queryManagerId = useMemo((): number | null => {
+    if (showManagerFilter) return null
     const parsed = parseManagerId(currentUser.id)
     return parsed ?? 1
-  }, [showManagerFilter, magManagerId, currentUser.id])
+  }, [showManagerFilter, currentUser.id])
+
+  const selectedManagerIds = useMemo(
+    () => new Set(magManagerIds.map(Number).filter((id) => Number.isFinite(id))),
+    [magManagerIds],
+  )
 
   const { dateFrom, dateTo } = useMemo(() => {
     const gridStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 })
@@ -95,13 +104,19 @@ export function MeetingsCalendarPage() {
   }, [visibleMonth])
 
   const queryParams: ListMeetingsParams = useMemo(
-    () => ({ dateFrom, dateTo, managerId: filterManagerId }),
-    [dateFrom, dateTo, filterManagerId],
+    () => ({ dateFrom, dateTo, managerId: queryManagerId }),
+    [dateFrom, dateTo, queryManagerId],
   )
 
   const { data, isLoading, isFetching } = useMeetingsCalendarList(queryParams)
 
-  const meetingsByDay = useMemo(() => groupMeetingsByDay(data ?? []), [data])
+  const visibleMeetings = useMemo(() => {
+    const all = data ?? []
+    if (!showManagerFilter || selectedManagerIds.size === 0) return all
+    return all.filter((meeting) => selectedManagerIds.has(meeting.managerId))
+  }, [data, showManagerFilter, selectedManagerIds])
+
+  const meetingsByDay = useMemo(() => groupMeetingsByDay(visibleMeetings), [visibleMeetings])
   const totalThisMonth = useMemo(
     () => countMeetingsInMonth(meetingsByDay, visibleMonth),
     [meetingsByDay, visibleMonth],
@@ -128,7 +143,7 @@ export function MeetingsCalendarPage() {
   }, [])
 
   const selectedDateKey = selectedDate ? toDayKey(selectedDate) : null
-  const createManagerId = filterManagerId ?? 1
+  const createManagerId = queryManagerId ?? 1
 
   const pageRef = useRef<HTMLDivElement>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
@@ -185,8 +200,8 @@ export function MeetingsCalendarPage() {
               onChangeMonth={setVisibleMonth}
               onSelectDate={handleSelectDate}
               showManagerFilter={showManagerFilter}
-              magManagerId={magManagerId}
-              onChangeMagManager={setMagManagerId}
+              magManagerIds={magManagerIds}
+              onChangeMagManagerIds={setMagManagerIds}
               managerFilterOptions={managerFilterOptions}
               managersSelectLoading={managersSelectLoading}
               managersSelectError={managersSelectError}

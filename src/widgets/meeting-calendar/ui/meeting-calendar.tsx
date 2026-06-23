@@ -3,7 +3,8 @@ import { Loader2 } from 'lucide-react'
 import { MeetingCountBadge, pluralMeetings, type MeetingsByDay } from '@/entities/meeting'
 import { toDayKey } from '@/shared/lib/date'
 import { cn } from '@/shared/lib/utils'
-import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
+import type { SelectOption } from '@/shared/ui/clearable-select'
+import { MultiSelect } from '@/shared/ui/multi-select'
 import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
@@ -17,8 +18,9 @@ interface MeetingCalendarProps {
   onChangeMonth: (date: Date) => void
   onSelectDate: (date: Date) => void
   showManagerFilter?: boolean
-  magManagerId?: string | null
-  onChangeMagManager?: (value: string | null) => void
+  /** Выбранные id менеджеров. Пустой массив — все менеджеры. */
+  magManagerIds?: string[]
+  onChangeMagManagerIds?: (values: string[]) => void
   managerFilterOptions?: readonly SelectOption[]
   managersSelectLoading?: boolean
   managersSelectError?: boolean
@@ -45,8 +47,8 @@ export function MeetingCalendar({
   onChangeMonth,
   onSelectDate,
   showManagerFilter = false,
-  magManagerId = null,
-  onChangeMagManager,
+  magManagerIds = [],
+  onChangeMagManagerIds,
   managerFilterOptions = [],
   managersSelectLoading = false,
   managersSelectError = false,
@@ -68,13 +70,13 @@ export function MeetingCalendar({
       <div className="flex min-w-0 flex-col gap-3 @min-[880px]/calendar:flex-row @min-[880px]/calendar:flex-wrap @min-[880px]/calendar:items-center @min-[880px]/calendar:gap-2.5">
         {leading ? <div className="min-w-0">{leading}</div> : null}
 
-        {showManagerFilter && onChangeMagManager ? (
+        {showManagerFilter && onChangeMagManagerIds ? (
           <div className="w-full min-w-0 @min-[880px]/calendar:max-w-[320px] @min-[880px]/calendar:flex-1">
-            <ClearableSelect
+            <MultiSelect
               placeholder="Отв. менеджер"
-              value={magManagerId}
+              values={magManagerIds}
               options={managerFilterOptions}
-              onChange={onChangeMagManager}
+              onChange={onChangeMagManagerIds}
               triggerClassName={SELECT_BASE}
               disabled={managerSelectDisabled}
             />
