@@ -16,7 +16,10 @@ import { MeetingDayPanelHeader } from './meeting-day-panel-header'
 interface MeetingDayPanelProps {
   selectedDate: Date | null
   meetingsByDay: MeetingsByDay
-  editable?: boolean
+  /** Показывать кнопку «Добавить встречу». */
+  canCreate?: boolean
+  /** Можно ли редактировать/удалять конкретную встречу (своя — да). */
+  canEditMeeting?: (meeting: Meeting) => boolean
   maxHeightPx?: number
   /** Заменяет заголовок панели (напр. табы Встречи/Напоминания). */
   titleSlot?: ReactNode
@@ -28,7 +31,8 @@ interface MeetingDayPanelProps {
 export function MeetingDayPanel({
   selectedDate,
   meetingsByDay,
-  editable = false,
+  canCreate = false,
+  canEditMeeting,
   maxHeightPx,
   titleSlot,
   onAddMeeting,
@@ -74,7 +78,7 @@ export function MeetingDayPanel({
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <DatePill date={selectedDate} />
-                {editable ? (
+                {canCreate ? (
                   <Button
                     type="button"
                     className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
@@ -94,7 +98,7 @@ export function MeetingDayPanel({
                     <MeetingCard
                       key={meeting.id}
                       meeting={meeting}
-                      editable={editable}
+                      editable={canEditMeeting?.(meeting) ?? false}
                       onEdit={onEditMeeting}
                       onDelete={onDeleteMeeting}
                     />

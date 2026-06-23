@@ -8,6 +8,7 @@ import {
   type Meeting,
   type MeetingFormValues,
 } from '@/entities/meeting'
+import { useUserRole } from '@/entities/user-role'
 import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
@@ -36,6 +37,7 @@ export function EditMeetingDialog({
   meeting,
   queryParams,
 }: EditMeetingDialogProps) {
+  const role = useUserRole()
   const form = useForm<MeetingFormValues>({
     resolver: zodResolver(meetingFormSchema),
     defaultValues: EMPTY_VALUES,
@@ -60,7 +62,8 @@ export function EditMeetingDialog({
     }
   }, [meeting, open, form])
 
-  const assignment = useLoftHallAssignment(form, { assigned: true })
+  // Менеджеру доступны только закреплённые залы; руководителю — весь каталог (ERP-183).
+  const assignment = useLoftHallAssignment(form, { assigned: role === 'manager' })
 
   const {
     update,

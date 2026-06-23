@@ -33,6 +33,8 @@ import { MeetingCalendar } from '@/widgets/meeting-calendar'
 import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
 import { ReminderDayPanel } from '@/widgets/reminder-day-panel'
 
+import { canCreateMeeting, canModifyMeeting } from '../lib/can-modify-meeting'
+
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
 type PanelTab = 'meetings' | 'reminders'
@@ -50,9 +52,17 @@ export function MeetingsCalendarPage() {
   const role = useUserRole()
   const currentUser = useCurrentUser()
   const showManagerFilter = role === 'director' || role === 'admin'
-  const editable = role === 'manager'
+  // Создавать встречи могут менеджер и руководитель (ERP-183).
+  const meetingsCreatable = canCreateMeeting(role)
   // Логика напоминаний — только у менеджера. Руководитель/админ видят встречи (с фильтром по менеджеру).
+  const editable = role === 'manager'
   const showReminders = role === 'manager'
+  // id текущего пользователя — владельца создаваемых/правимых встреч.
+  const ownerId = parseManagerId(currentUser.id)
+  const canEditMeeting = useCallback(
+    (meeting: Meeting) => canModifyMeeting({ role, ownerId, meeting }),
+    [role, ownerId],
+  )
 
   // Таб справа фильтрует список (встречи/напоминания); по умолчанию — встречи.
   const [panelTab, setPanelTab] = useState<PanelTab>('meetings')
@@ -143,7 +153,8 @@ export function MeetingsCalendarPage() {
   }, [])
 
   const selectedDateKey = selectedDate ? toDayKey(selectedDate) : null
-  const createManagerId = queryManagerId ?? 1
+  // Владелец оптимистичной встречи = текущий пользователь (менеджер или руководитель).
+  const createManagerId = ownerId ?? 1
 
   const pageRef = useRef<HTMLDivElement>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
@@ -227,7 +238,8 @@ export function MeetingsCalendarPage() {
             <MeetingDayPanel
               selectedDate={selectedDate}
               meetingsByDay={meetingsByDay}
-              editable={editable}
+              canCreate={meetingsCreatable}
+              canEditMeeting={canEditMeeting}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
               onAddMeeting={() => setCreateOpen(true)}
@@ -238,7 +250,7 @@ export function MeetingsCalendarPage() {
         </div>
       </div>
 
-      {editable && selectedDate && selectedDateKey ? (
+      {meetingsCreatable && selectedDate && selectedDateKey ? (
         <CreateMeetingDialog
           open={createOpen}
           onOpenChange={setCreateOpen}
