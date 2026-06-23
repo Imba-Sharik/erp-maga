@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
 import {
@@ -16,12 +17,14 @@ interface ProjectsKanbanProps {
   listParams: BoardListParams
   onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
+  renderAssistantMenu?: (project: Project) => ReactNode
 }
 
 export function ProjectsKanban({
   listParams,
   onClaimProject,
   onMoveOutsideMag,
+  renderAssistantMenu,
 }: ProjectsKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
@@ -44,6 +47,7 @@ export function ProjectsKanban({
               listParams={listParams}
               onClaimProject={onClaimProject}
               onMoveOutsideMag={onMoveOutsideMag}
+              renderAssistantMenu={renderAssistantMenu}
             />
           ))}
         </div>
@@ -57,11 +61,13 @@ function ProjectsKanbanColumnItem({
   listParams,
   onClaimProject,
   onMoveOutsideMag,
+  renderAssistantMenu,
 }: {
   stage: PreprojectStage
   listParams: BoardListParams
   onClaimProject?: (project: Project) => void
   onMoveOutsideMag?: (project: Project) => void
+  renderAssistantMenu?: (project: Project) => ReactNode
 }) {
   return (
     <KanbanColumnWithQuery
@@ -72,6 +78,7 @@ function ProjectsKanbanColumnItem({
       listParams={listParams}
       onClaimProject={onClaimProject}
       onMoveOutsideMag={onMoveOutsideMag}
+      renderAssistantMenu={renderAssistantMenu}
     />
   )
 }
