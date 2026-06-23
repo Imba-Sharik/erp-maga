@@ -5803,6 +5803,10 @@ components:
         id:
           type: integer
           readOnly: true
+        user_id:
+          type: integer
+          title: Менеджер
+          readOnly: true
         project_id:
           type: integer
           nullable: true
@@ -5859,6 +5863,7 @@ components:
       - reminder_time
       - sent_at
       - updated_at
+      - user_id
     ReminderCalendarResponse:
       type: object
       properties:
