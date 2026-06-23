@@ -150,6 +150,8 @@ paths:
         Одно назначение: `{hall, manager, loft?}`.
 
         Несколько залов: `{manager, hall_ids: [...], loft?}` — создаёт связку на каждый зал; `loft` опционален.
+
+        Сразу после создания пересчитывается `mag_manager` у проектов на затронутых залах (0→1: авто-назначение в пул, 1→2: снятие незаконтаченных и т.д.). Audit — по каждому проекту; менеджерам — одно сводное async-уведомление (`Матрица залов: …`) после commit.
       summary: Создать назначение менеджера (одно или bulk)
       tags:
       - halls
@@ -185,6 +187,10 @@ paths:
         Удаляет записи матрицы по их `id` (HallManagerAssignment).
 
         Тело запроса (JSON): `{"ids": [101, 102]}`.
+
+        Каскад: если менеджер больше не покрывает залы проекта — снимается с `mag_manager` (данные pipeline сохраняются), пишется audit `field_change` / `mag_manager`. Менеджер получает **сводное** async-уведомление (`Матрица залов: снято ведение N проектов`), не по одному на проект.
+
+        Дополнительно пересчитывается `mag_manager` по матрице для проектов на затронутых залах (2→1: авто-назначение оставшемуся единственному, 1→0 и т.д.).
 
         OpenAPI 3.0 не описывает requestBody для DELETE — схема выше в описании.
       summary: Удалить несколько назначений
@@ -260,6 +266,8 @@ paths:
           description: ''
     patch:
       operationId: halls_manager_assignments_partial_update
+      description: При смене `manager` на строке матрицы сразу пересчитывается `mag_manager`
+        у проектов на затронутых залах (как при POST/DELETE).
       summary: Изменить назначение
       parameters:
       - in: path
@@ -291,6 +299,9 @@ paths:
           description: ''
     delete:
       operationId: halls_manager_assignments_destroy
+      description: Удаляет привязку менеджера к залу. Каскадно снимает менеджера с
+        проектов, где он больше не покрывает залы (audit + уведомление), и пересчитывает
+        `mag_manager` по матрице для проектов на зале — как при bulk DELETE.
       summary: Удалить назначение
       parameters:
       - in: path
@@ -373,7 +384,7 @@ paths:
         **Суммы (all-time, без `out_of_mag_scope`):**
         - `sales_total` — сумма продаж (subtotal статей, без налога);
         - `net_profit_total` — чистая прибыль из расчёта бонуса, без строки «налог»;
-        - `final_bonus_total` — итоговый бонус (`approved_bonus` или `total_bonus` расчёта).
+        - `final_bonus_total` — итоговый бонус (`approved_bonus` или `total_bonus` расчёта); считается по **`BonusCalculation.recipient`** (получатель на момент расчёта), даже если с проекта позже сняли `mag_manager`.
 
         **Фильтр по площадке (опционально):** `project_id` (приоритет) или `hall_id` + `loft_id` — только менеджеры с привязкой к залу/лофту проекта (для ручного назначения ответственного). Правило: при `loft_id` — привязка `(hall, loft)` или `(hall, null)`; без `loft_id` — только `(hall, null)`.
 
@@ -2020,7 +2031,7 @@ paths:
 
         Без пагинации. Проекты в стадии `out_of_mag_scope` не возвращаются (см. `GET /projects/out-of-mag/`).
 
-        **Доступ:** manager_mag — только свои проекты; lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
+        **Доступ:** manager_mag — проекты по залам из матрицы (включая невзятые и взятые коллегой); lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
 
         В `results`: event_type, event_type_label, plum_event_status, plum_event_status_label, is_from_plum, client_company, phone, halls[] — залы проекта (внутренние hall_id / loft_id MAG; данные из каталога и ProjectEventHall). При отсутствии зала в каталоге — sync_error на проекте.
       summary: 'Календарь: проекты за месяц / период'
@@ -5803,6 +5814,10 @@ components:
         id:
           type: integer
           readOnly: true
+        user_id:
+          type: integer
+          title: Менеджер
+          readOnly: true
         project_id:
           type: integer
           nullable: true
@@ -5859,6 +5874,7 @@ components:
       - reminder_time
       - sent_at
       - updated_at
+      - user_id
     ReminderCalendarResponse:
       type: object
       properties:
