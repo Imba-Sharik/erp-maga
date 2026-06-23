@@ -19,7 +19,10 @@ import { DatePill } from '@/shared/ui/date-pill'
 interface ReminderDayPanelProps {
   selectedDate: Date | null
   remindersByDay: RemindersByDay
-  editable?: boolean
+  /** Показывать кнопку «Добавить напоминание». */
+  canCreate?: boolean
+  /** Можно ли редактировать/удалять конкретное напоминание (своё — да). */
+  canEditReminder?: (reminder: Reminder) => boolean
   /** Резолвер имени отв. менеджера по id (для Руководителя). */
   resolveManagerName?: (managerId: number) => string | undefined
   maxHeightPx?: number
@@ -33,7 +36,8 @@ interface ReminderDayPanelProps {
 export function ReminderDayPanel({
   selectedDate,
   remindersByDay,
-  editable = false,
+  canCreate = false,
+  canEditReminder,
   resolveManagerName,
   maxHeightPx,
   titleSlot,
@@ -106,7 +110,7 @@ export function ReminderDayPanel({
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <DatePill date={selectedDate} />
-                {editable ? (
+                {canCreate ? (
                   <Button
                     type="button"
                     className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
@@ -126,7 +130,7 @@ export function ReminderDayPanel({
                     <ReminderCard
                       key={reminder.id}
                       reminder={reminder}
-                      editable={editable && !reminder.sentAt}
+                      editable={(canEditReminder?.(reminder) ?? false) && !reminder.sentAt}
                       managerName={resolveManagerName?.(reminder.managerId)}
                       projectHref={
                         reminder.projectId != null
