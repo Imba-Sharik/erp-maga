@@ -175,8 +175,8 @@ export function ProjectPipelineCard({
         ) : (
           <ProjectTelegramLink phone={project.phone} onClick={stop} />
         )}
-        {/* Бейджи менеджеров всегда снизу (1–2 строки); дата обновления — напротив. */}
-        <div className="mt-1 flex items-start justify-between gap-2">
+        {/* Бейджи менеджеров всегда снизу (1–2 строки); дата обновления — в правом нижнем углу. */}
+        <div className="mt-1 flex items-end justify-between gap-2">
           <ProjectManagerBadge project={project} className="min-w-0 shrink" />
           <span className="text-2xs shrink-0 text-[#ACACAC]">
             {formatRelativeUpdateLabel(project.updatedAt)}

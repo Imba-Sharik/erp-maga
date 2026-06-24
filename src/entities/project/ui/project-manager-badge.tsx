@@ -13,8 +13,8 @@ interface ProjectManagerBadgeProps {
 }
 
 /**
- * Бейджи менеджеров проекта (ERP-189): «Ведущий мен.» и (при наличии)
- * «Вспомогат. мен.». Цвет ведущего сигналит «своё/чужое» только менеджеру; вся
+ * Бейджи менеджеров проекта (ERP-189): «Ведущий» и (при наличии)
+ * «Вспомогательный». Цвет ведущего сигналит «своё/чужое» только менеджеру; вся
  * логика тонов — в `resolveManagerBadges`.
  */
 export function ProjectManagerBadge({ project, className }: ProjectManagerBadgeProps) {
@@ -28,7 +28,7 @@ export function ProjectManagerBadge({ project, className }: ProjectManagerBadgeP
   })
 
   return (
-    <div className={cn('flex min-w-0 flex-col items-start gap-0.5', className)}>
+    <div className={cn('flex min-w-0 flex-col items-start gap-1.5', className)}>
       {rows.map((row) => (
         <Badge
           key={row.kind}
