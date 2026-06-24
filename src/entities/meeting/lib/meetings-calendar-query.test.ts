@@ -13,7 +13,7 @@ describe('listMeetingsParamsToApi', () => {
     ).toEqual({
       date_after: '2026-05-26',
       date_before: '2026-07-06',
-      manager: 5,
+      manager: [5],
     })
   })
 
