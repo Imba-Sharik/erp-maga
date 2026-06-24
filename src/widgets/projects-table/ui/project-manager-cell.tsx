@@ -1,71 +1,108 @@
-import { useMemo } from 'react'
-import { CheckIcon } from 'lucide-react'
+import { useState } from 'react'
+import { Star, UserPlus } from 'lucide-react'
 
+import { MANAGER_HALL_ASSIGNMENT_HINT, type ManagerSelectOption } from '@/entities/manager'
+import type { Project } from '@/entities/project'
+import {
+  getLeadAssistantsErrorMessage,
+  resolveLeadAssistantsState,
+  setLead,
+  toggleAssistant,
+  type LeadAssistantsSelection,
+} from '@/features/change-project-manager'
 import { PenIcon } from '@/shared/assets'
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
-
 import { GridTableCell } from '@/shared/ui/grid-table'
 
-import {
-  buildManagerSelectOptions,
-  MANAGER_HALL_ASSIGNMENT_HINT,
-  type ManagerSelectOption,
-} from '@/entities/manager'
-import {
-  UNASSIGN_PROJECT_MANAGER_ID,
-  UNASSIGN_PROJECT_MANAGER_LABEL,
-} from '@/features/change-project-manager'
 import { TABLE_EMPTY } from './table-row-cells'
 
 export interface ProjectManagerCellProps {
-  manager: string
+  /** Проект — источник исходного выбора (ведущий + вспомогательные) и имени. */
+  project: Project
+  editable?: boolean
+  /** Менеджеры по залам проекта (грузятся для редактируемой строки). */
   directoryOptions: ManagerSelectOption[]
   optionsLoading?: boolean
   optionsError?: boolean
   showHallAssignmentHint?: boolean
-  isEditing: boolean
-  onStartEdit: () => void
-  onAssign: (managerId: string) => void
-  onCancelEdit: () => void
-  assignDisabled?: boolean
-  editable?: boolean
+  isOpen: boolean
+  isPending?: boolean
+  errorMessage?: string | null
+  onOpenChange: (open: boolean) => void
+  /** Применить выбор (ведущий + вспомогательные). */
+  onApply: (selection: LeadAssistantsSelection) => void
+  onClearError?: () => void
 }
 
 function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
   e.stopPropagation()
 }
 
+function initialSelection(project: Project): LeadAssistantsSelection {
+  return {
+    leadId: project.leadManagerId ?? null,
+    assistantIds: (project.assistantManagers ?? []).map((a) => a.id),
+  }
+}
+
+/**
+ * Инлайн-назначение менеджеров Руководителем в таблицах (ERP-189). У каждого менеджера
+ * две кнопки: ★ жёлтая — ведущий (только один), красная — вспомогательный. Активная ★
+ * блокирует красную у того же менеджера; ведущий и вспомогательный — взаимоисключающи.
+ * Изменения применяются по «Готово». Нельзя оставить только вспомогательных без ведущего.
+ */
 export function ProjectManagerCell({
-  manager,
+  project,
+  editable = true,
   directoryOptions,
   optionsLoading = false,
   optionsError = false,
   showHallAssignmentHint = false,
-  isEditing,
-  onStartEdit,
-  onAssign,
-  onCancelEdit,
-  assignDisabled = false,
-  editable = true,
+  isOpen,
+  isPending = false,
+  errorMessage = null,
+  onOpenChange,
+  onApply,
+  onClearError,
 }: ProjectManagerCellProps) {
-  const selectOptions = useMemo(
-    () => buildManagerSelectOptions(directoryOptions, manager),
-    [directoryOptions, manager],
-  )
-  const displayName = manager || TABLE_EMPTY
-  const canUnassign = Boolean(manager)
-  const assignableOptions = selectOptions.filter((option) => !option.id.startsWith('name:'))
+  const displayName = project.manager || TABLE_EMPTY
+  const initial = initialSelection(project)
+  const [draft, setDraft] = useState<LeadAssistantsSelection>(initial)
+
+  // Сброс черновика при открытии (adjust state during render).
+  const [wasOpen, setWasOpen] = useState(isOpen)
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen)
+    if (isOpen) setDraft(initialSelection(project))
+  }
+
+  const assignableOptions = showHallAssignmentHint
+    ? []
+    : directoryOptions.filter((o) => !o.id.startsWith('name:'))
+  const state = resolveLeadAssistantsState({ assignableOptions, selection: draft, initial })
+
+  const handleStar = (id: string) => {
+    onClearError?.()
+    setDraft((d) => (d.leadId === id ? setLead(d, null) : setLead(d, id)))
+  }
+  const handleRed = (id: string) => {
+    onClearError?.()
+    setDraft((d) => toggleAssistant(d, id))
+  }
+  const handleApply = () => {
+    if (state.canApply) onApply(draft)
+  }
 
   const handleOpenChange = (open: boolean) => {
-    if (open) onStartEdit()
-    else onCancelEdit()
+    if (!open) onClearError?.()
+    onOpenChange(open)
   }
 
   return (
@@ -73,75 +110,121 @@ export function ProjectManagerCell({
       <GridTableCell>
         <span className="flex w-full min-w-0 items-center gap-1.5">
           {editable && (
-            <DropdownMenu open={isEditing} onOpenChange={handleOpenChange}>
+            <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-xs"
                   className="shrink-0 text-[#BCBCBC] hover:text-[#454545] data-[state=open]:text-[#454545]"
-                  aria-label="Сменить ответственного менеджера"
+                  aria-label="Назначить менеджеров"
+                  title="Назначить менеджеров"
                   onClick={stopRowNavigation}
-                  disabled={assignDisabled}
                 >
                   <PenIcon className="size-3 shrink-0 [&_path]:fill-current" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-60 min-w-48">
-                {optionsLoading ? (
-                  <DropdownMenuItem disabled className="text-[#ACACAC]">
-                    Загрузка…
-                  </DropdownMenuItem>
-                ) : optionsError ? (
-                  <DropdownMenuItem disabled className="text-destructive">
-                    Не удалось загрузить менеджеров
-                  </DropdownMenuItem>
-                ) : (
+              <DropdownMenuContent
+                align="start"
+                className="max-h-72 max-w-[18rem] min-w-64 p-0"
+                onCloseAutoFocus={(e) => e.preventDefault()}
+              >
+                <div className="max-h-52 overflow-y-auto p-1">
+                  {optionsLoading ? (
+                    <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Загрузка…</p>
+                  ) : optionsError ? (
+                    <p className="text-destructive px-2 py-1.5 text-sm">
+                      Не удалось загрузить менеджеров
+                    </p>
+                  ) : showHallAssignmentHint ? (
+                    <p className="max-w-60 px-2 py-1.5 text-sm whitespace-normal text-[#ACACAC]">
+                      {MANAGER_HALL_ASSIGNMENT_HINT}
+                    </p>
+                  ) : assignableOptions.length === 0 ? (
+                    <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
+                  ) : (
+                    assignableOptions.map((option) => {
+                      const isLead = draft.leadId === option.id
+                      const isAssistant = draft.assistantIds.includes(option.id)
+                      return (
+                        <div
+                          key={option.id}
+                          className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm"
+                        >
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            aria-label="Сделать ведущим"
+                            title="Ведущий менеджер"
+                            aria-pressed={isLead}
+                            onClick={() => handleStar(option.id)}
+                            className="shrink-0 disabled:opacity-40"
+                          >
+                            <Star
+                              className={cn(
+                                'size-4',
+                                isLead ? 'fill-amber-400 text-amber-500' : 'text-[#C7C7C7]',
+                              )}
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isPending || isLead}
+                            aria-label="Сделать вспомогательным"
+                            title="Вспомогательный менеджер"
+                            aria-pressed={isAssistant}
+                            onClick={() => handleRed(option.id)}
+                            className="shrink-0 disabled:opacity-40"
+                          >
+                            <UserPlus
+                              className={cn(
+                                'size-4',
+                                isAssistant ? 'text-red-500' : 'text-[#C7C7C7]',
+                              )}
+                            />
+                          </button>
+                          <span className="min-w-0 truncate" title={option.fullName}>
+                            {option.fullName}
+                          </span>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+                {!optionsLoading && !optionsError && !showHallAssignmentHint ? (
                   <>
-                    {canUnassign ? (
-                      <DropdownMenuItem
-                        className="text-[#454545]"
-                        disabled={assignDisabled}
+                    <DropdownMenuSeparator />
+                    <div className="flex flex-col gap-1.5 p-1.5">
+                      {state.errorKey ? (
+                        <p className="text-destructive px-0.5 text-sm wrap-break-word whitespace-normal">
+                          {getLeadAssistantsErrorMessage(state.errorKey)}
+                        </p>
+                      ) : null}
+                      {errorMessage ? (
+                        <p className="text-destructive px-0.5 text-sm wrap-break-word whitespace-normal">
+                          {errorMessage}
+                        </p>
+                      ) : null}
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-8 w-full rounded-[8px]"
+                        disabled={isPending || !state.canApply}
                         onClick={(e) => {
                           e.stopPropagation()
-                          onAssign(UNASSIGN_PROJECT_MANAGER_ID)
+                          handleApply()
                         }}
                       >
-                        {UNASSIGN_PROJECT_MANAGER_LABEL}
-                      </DropdownMenuItem>
-                    ) : null}
-                    {showHallAssignmentHint ? (
-                      <DropdownMenuItem
-                        disabled
-                        className="max-w-56 whitespace-normal text-[#ACACAC]"
-                      >
-                        {MANAGER_HALL_ASSIGNMENT_HINT}
-                      </DropdownMenuItem>
-                    ) : (
-                      assignableOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option.id}
-                          className="justify-between gap-2"
-                          disabled={assignDisabled}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onAssign(option.id)
-                          }}
-                        >
-                          <span className="min-w-0 truncate">{option.fullName}</span>
-                          {option.fullName === manager && (
-                            <CheckIcon className="size-3.5 shrink-0 text-[#454545]" aria-hidden />
-                          )}
-                        </DropdownMenuItem>
-                      ))
-                    )}
+                        {isPending ? 'Сохранение…' : 'Готово'}
+                      </Button>
+                    </div>
                   </>
-                )}
+                ) : null}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
           <span
-            className={cn('min-w-0 truncate text-[#ACACAC]', isEditing && 'text-[#454545]')}
+            className={cn('min-w-0 truncate text-[#ACACAC]', isOpen && 'text-[#454545]')}
             title={displayName}
           >
             {displayName}

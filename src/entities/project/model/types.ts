@@ -46,6 +46,13 @@ export interface ProjectEconomics {
   bonusApprovedTotal: number | null
 }
 
+/** Вспомогательный менеджер проекта (ERP-189): получает право редактирования, без ответственности. */
+export interface ProjectAssistantManager {
+  /** id менеджера строкой — как `ManagerSelectOption.id`. */
+  id: string
+  fullName: string
+}
+
 export interface Project {
   id: string
   title: string
@@ -59,7 +66,15 @@ export interface Project {
    * вместо пары «loft · hall», если задана.
    */
   hallLoft?: string
+  /** Имя ВЕДУЩЕГО менеджера (`mag_manager.full_name`). */
   manager: string
+  /**
+   * id ведущего менеджера (`mag_manager.id` строкой, как `ManagerSelectOption.id`).
+   * `null`, если проект в пуле. ERP-189.
+   */
+  leadManagerId?: string | null
+  /** Вспомогательные менеджеры проекта (ERP-189): `id` — user id, `fullName` — имя. */
+  assistantManagers?: ProjectAssistantManager[]
   /**
    * Менеджер может «Взять проект» из пула (`can_claim`): он привязан к залу,
    * а `mag_manager` пуст. Источник — `ProjectManagerAccess` на бэке.

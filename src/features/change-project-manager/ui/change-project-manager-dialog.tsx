@@ -1,13 +1,11 @@
-import { useMemo } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod'
+import { useMemo, useState } from 'react'
 
 import {
-  buildManagerSelectOptions,
   MANAGER_HALL_ASSIGNMENT_HINT,
   useManagersDirectory,
+  type ManagerSelectOption,
 } from '@/entities/manager'
+import type { Project, ProjectAssistantManager } from '@/entities/project'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -17,47 +15,49 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
+import { MultiSelect, type MultiSelectOption } from '@/shared/ui/multi-select'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
-import { useChangeProjectManager } from '../model/use-change-project-manager'
 import {
-  isUnassignProjectManagerId,
+  getLeadAssistantsErrorMessage,
+  resolveLeadAssistantsState,
+  setLead,
+  type LeadAssistantsSelection,
+} from '../lib/lead-assistants-form'
+import {
   UNASSIGN_PROJECT_MANAGER_ID,
   UNASSIGN_PROJECT_MANAGER_LABEL,
 } from '../lib/unassign-project-manager'
+import { useChangeProjectManagers } from '../model/use-change-project-managers'
 
 const TRIGGER_CLASS =
   'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
 
-const formSchema = z.object({
-  managerId: z.string().min(1, { message: 'Выберите менеджера' }),
-})
-
-type FormValues = z.infer<typeof formSchema>
-
 export interface ChangeProjectManagerDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  projectId: string
-  projectTitle?: string
-  currentManager: string
+  /** Проект, чьих менеджеров меняем (null — диалог закрыт). */
+  project: Project | null
 }
 
+/**
+ * Назначение менеджеров руководителем (ERP-189): два селекта — «Ведущий» (один) и
+ * «Вспомогательные» (мультиселект). Менеджер, выбранный в одном селекте, в другом
+ * заблокирован. Применить нельзя, если вспомогательные есть, а ведущий не выбран.
+ */
 export function ChangeProjectManagerDialog({
   open,
   onOpenChange,
-  projectId,
-  projectTitle,
-  currentManager,
+  project,
 }: ChangeProjectManagerDialogProps) {
   const projectIdNumber = useMemo(() => {
-    const id = Number(projectId)
+    if (!project) return undefined
+    const id = Number(project.id)
     return Number.isFinite(id) ? id : undefined
-  }, [projectId])
+  }, [project])
 
   const {
-    selectOptions: managerOptions,
+    selectOptions: directoryOptions,
     isOptionsLoading: isManagersLoading,
     isError: isManagersError,
     showHallAssignmentHint,
@@ -66,128 +66,150 @@ export function ChangeProjectManagerDialog({
     { enabled: open && projectIdNumber !== undefined },
   )
 
-  const selectOptions = useMemo(
-    () => buildManagerSelectOptions(managerOptions, currentManager),
-    [managerOptions, currentManager],
+  const assignableOptions = useMemo<ManagerSelectOption[]>(
+    () => (showHallAssignmentHint ? [] : directoryOptions.filter((o) => !o.id.startsWith('name:'))),
+    [directoryOptions, showHallAssignmentHint],
   )
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {} as Partial<FormValues>,
-  })
-  const selectedManagerId = useWatch({ control: form.control, name: 'managerId' })
+  const initial = useMemo<LeadAssistantsSelection>(
+    () => ({
+      leadId: project?.leadManagerId ?? null,
+      assistantIds: (project?.assistantManagers ?? []).map((a) => a.id),
+    }),
+    [project],
+  )
 
-  const { submit, isPending, isError, errorMessage, reset } = useChangeProjectManager({
-    onSuccess: () => {
-      onOpenChange(false)
-      form.reset()
-      reset()
-    },
-  })
+  const [selection, setSelection] = useState<LeadAssistantsSelection>(initial)
 
-  const handleSubmit = (values: FormValues) => {
-    submit({ projectId, managerId: values.managerId })
+  // Сброс выбора к исходному при открытии/смене проекта (adjust state during render,
+  // см. https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const resetKey = `${open}|${project?.id ?? ''}`
+  const [appliedResetKey, setAppliedResetKey] = useState(resetKey)
+  if (resetKey !== appliedResetKey) {
+    setAppliedResetKey(resetKey)
+    setSelection(initial)
   }
 
-  const canUnassign = Boolean(currentManager)
-  const selectDisabled =
-    isManagersLoading || isManagersError || (showHallAssignmentHint && !canUnassign)
-  const assignableOptions = showHallAssignmentHint
-    ? []
-    : selectOptions.filter((option) => !option.id.startsWith('name:'))
+  const { submit, isPending, isError, errorMessage, reset } = useChangeProjectManagers({
+    onSuccess: () => onOpenChange(false),
+  })
+
+  const state = resolveLeadAssistantsState({ assignableOptions, selection, initial })
+
+  const optionName = (id: string | null): string =>
+    id ? (assignableOptions.find((o) => o.id === id)?.fullName ?? '') : ''
+
+  const selectsDisabled = isManagersLoading || isManagersError || showHallAssignmentHint
+
+  const assistantOptions: MultiSelectOption[] = state.assistantOptions.map((o) => ({
+    value: o.id,
+    label: o.fullName,
+    disabled: o.disabled,
+  }))
+
+  const handleClose = (next: boolean) => {
+    onOpenChange(next)
+    if (!next) reset()
+  }
+
+  const handleApply = () => {
+    if (!project || !state.canApply) return
+    const assistants: ProjectAssistantManager[] = selection.assistantIds.map((id) => ({
+      id,
+      fullName: optionName(id),
+    }))
+    submit({
+      project,
+      leadId: selection.leadId,
+      leadName: optionName(selection.leadId),
+      assistants,
+    })
+  }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        onOpenChange(next)
-        if (!next) {
-          form.reset()
-          reset()
-        }
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Сменить менеджера</DialogTitle>
-          {projectTitle ? (
-            <DialogDescription>
-              Проект: {projectTitle}
-              {currentManager ? (
-                <>
-                  <br />
-                  Текущий менеджер: {currentManager}
-                </>
-              ) : null}
-            </DialogDescription>
-          ) : currentManager ? (
-            <DialogDescription>Текущий менеджер: {currentManager}</DialogDescription>
-          ) : null}
+          <DialogTitle className="font-heading text-[#1B1A17]">Сменить менеджеров</DialogTitle>
+          {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
-            <FormField
-              control={form.control}
-              name="managerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Менеджер MAG</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={selectDisabled}
-                    >
-                      <SelectTrigger className={TRIGGER_CLASS}>
-                        <SelectValue placeholder="Выберите менеджера" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {canUnassign ? (
-                          <SelectItem value={UNASSIGN_PROJECT_MANAGER_ID}>
-                            {UNASSIGN_PROJECT_MANAGER_LABEL}
-                          </SelectItem>
-                        ) : null}
-                        {assignableOptions.map((option) => (
-                          <SelectItem key={option.id} value={option.id}>
-                            {option.fullName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-[#1B1A17]">Ведущий менеджер</span>
+            <Select
+              value={selection.leadId ?? ''}
+              onValueChange={(value) =>
+                setSelection((s) =>
+                  setLead(s, value === UNASSIGN_PROJECT_MANAGER_ID ? null : value),
+                )
+              }
+              disabled={selectsDisabled}
+            >
+              <SelectTrigger className={TRIGGER_CLASS}>
+                <SelectValue placeholder="Выберите ведущего" />
+              </SelectTrigger>
+              <SelectContent>
+                {selection.leadId ? (
+                  <SelectItem value={UNASSIGN_PROJECT_MANAGER_ID}>
+                    {UNASSIGN_PROJECT_MANAGER_LABEL}
+                  </SelectItem>
+                ) : null}
+                {state.leadOptions.map((o) => (
+                  <SelectItem key={o.id} value={o.id} disabled={o.disabled}>
+                    {o.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-[#1B1A17]">Вспомогательные менеджеры</span>
+            <MultiSelect
+              values={selection.assistantIds}
+              onChange={(values) => setSelection((s) => ({ ...s, assistantIds: values }))}
+              options={assistantOptions}
+              placeholder="Выберите вспомогательных"
+              triggerClassName={TRIGGER_CLASS}
+              disabled={selectsDisabled}
             />
-            {isError && errorMessage ? (
-              <p className="text-destructive text-sm">{errorMessage}</p>
-            ) : null}
-            {isManagersError ? (
-              <p className="text-destructive text-sm">Не удалось загрузить список менеджеров</p>
-            ) : showHallAssignmentHint ? (
-              <p className="text-muted-foreground text-sm">{MANAGER_HALL_ASSIGNMENT_HINT}</p>
-            ) : null}
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-[10px]"
-                onClick={() => onOpenChange(false)}
-                disabled={isPending}
-              >
-                Отмена
-              </Button>
-              <Button
-                type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
-                disabled={isPending || selectDisabled}
-              >
-                {isUnassignProjectManagerId(selectedManagerId) ? 'Снять' : 'Сменить'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+
+          {state.errorKey ? (
+            <p className="text-destructive text-sm">
+              {getLeadAssistantsErrorMessage(state.errorKey)}
+            </p>
+          ) : null}
+          {isError && errorMessage ? (
+            <p className="text-destructive text-sm">{errorMessage}</p>
+          ) : null}
+          {isManagersError ? (
+            <p className="text-destructive text-sm">Не удалось загрузить список менеджеров</p>
+          ) : showHallAssignmentHint ? (
+            <p className="text-muted-foreground text-sm">{MANAGER_HALL_ASSIGNMENT_HINT}</p>
+          ) : null}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-[10px]"
+              onClick={() => handleClose(false)}
+              disabled={isPending}
+            >
+              Отмена
+            </Button>
+            <Button
+              type="button"
+              className="rounded-[10px] bg-black text-white hover:bg-black/90"
+              onClick={handleApply}
+              disabled={!state.canApply || isPending}
+            >
+              {isPending ? 'Сохранение…' : 'Применить'}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

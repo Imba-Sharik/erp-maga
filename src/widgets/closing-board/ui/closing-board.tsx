@@ -1,11 +1,24 @@
 import { useMemo, useState } from 'react'
 
-import { PROJECTS_SORT_DEFAULT, type Project, type ProjectBackOrigin } from '@/entities/project'
+import {
+  PROJECTS_SORT_DEFAULT,
+  type Project,
+  type ProjectAssistantManager,
+  type ProjectBackOrigin,
+} from '@/entities/project'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue } from '@/shared/hooks'
-import { ChangeManagerButton, ChangeProjectManagerDialog } from '@/features/change-project-manager'
+import {
+  ChangeProjectManagerDialog,
+  useChangeProjectManagers,
+} from '@/features/change-project-manager'
+import {
+  AssistantManagerDialog,
+  AssistantMenuItems,
+  type AssistantDialogMode,
+} from '@/features/manage-assistant-managers'
 import { DeleteProjectButton } from '@/features/delete-project'
 import { buildKanbanListParams } from '@/features/kanban-board'
 import type { BoardListParams } from '@/shared/api'
@@ -47,6 +60,16 @@ export function ClosingBoard({
   const role = useUserRole()
   const [archiveMode, setArchiveMode] = useState(false)
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
+  const [assistantTarget, setAssistantTarget] = useState<{
+    project: Project
+    mode: AssistantDialogMode
+    assistant?: ProjectAssistantManager
+  } | null>(null)
+  const {
+    submit: applyManagers,
+    isPending: isApplyingAssistant,
+    errorMessage: assistantError,
+  } = useChangeProjectManagers({ onSuccess: () => setAssistantTarget(null) })
 
   const {
     managers,
@@ -202,7 +225,7 @@ export function ClosingBoard({
           isFetchingNextPage={archiveQuery.isFetchingNextPage}
           onLoadMore={archiveQuery.fetchNextPage}
           backOrigin={backOrigin}
-          managerEditable={canChangeManager}
+          managerEditable={canChangeManager && role === 'director'}
           renderRowAction={
             onDeleteProject
               ? (project) => (
@@ -229,14 +252,7 @@ export function ClosingBoard({
           isFetchingNextPage={activeTableQuery.isFetchingNextPage}
           onLoadMore={activeTableQuery.fetchNextPage}
           backOrigin={backOrigin}
-          managerEditable={false}
-          renderRowAction={
-            canChangeManager && role === 'director'
-              ? (project) => (
-                  <ChangeManagerButton onRequestChange={() => setChangeManagerTarget(project)} />
-                )
-              : undefined
-          }
+          managerEditable={canChangeManager && role === 'director'}
         />
       ) : (
         <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -247,6 +263,13 @@ export function ClosingBoard({
               canChangeManager && role === 'director' ? setChangeManagerTarget : undefined
             }
             onDeleteProject={onDeleteProject}
+            renderAssistantMenu={(project) => (
+              <AssistantMenuItems
+                project={project}
+                onAdd={() => setAssistantTarget({ project, mode: 'add' })}
+                onEdit={(assistant) => setAssistantTarget({ project, mode: 'edit', assistant })}
+              />
+            )}
           />
         </div>
       )}
@@ -256,9 +279,29 @@ export function ClosingBoard({
         onOpenChange={(open) => {
           if (!open) setChangeManagerTarget(null)
         }}
-        projectId={changeManagerTarget?.id ?? ''}
-        projectTitle={changeManagerTarget?.title}
-        currentManager={changeManagerTarget?.manager ?? ''}
+        project={changeManagerTarget}
+      />
+
+      <AssistantManagerDialog
+        open={assistantTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setAssistantTarget(null)
+        }}
+        project={assistantTarget?.project ?? null}
+        mode={assistantTarget?.mode ?? 'add'}
+        editingAssistant={assistantTarget?.assistant ?? null}
+        isPending={isApplyingAssistant}
+        errorMessage={assistantError}
+        onApply={(assistants) => {
+          const target = assistantTarget?.project
+          if (!target) return
+          applyManagers({
+            project: target,
+            leadId: target.leadManagerId ?? null,
+            leadName: target.manager,
+            assistants,
+          })
+        }}
       />
     </div>
   )

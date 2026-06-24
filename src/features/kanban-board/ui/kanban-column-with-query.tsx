@@ -18,6 +18,7 @@ interface KanbanColumnWithQueryBaseProps {
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
+  renderAssistantMenu?: (project: Project) => ReactNode
 }
 
 interface PreprojectKanbanColumnProps extends KanbanColumnWithQueryBaseProps {
@@ -49,6 +50,7 @@ export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
     onMoveOutsideMag: props.onMoveOutsideMag,
     onChangeManager: props.onChangeManager,
     onDeleteProject: props.onDeleteProject,
+    renderAssistantMenu: props.renderAssistantMenu,
   }
 
   const accentClassName =

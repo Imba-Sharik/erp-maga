@@ -10,6 +10,7 @@ import { mapBackendArticles } from '@/entities/project-article'
 import { mapBackendDocumentFile, type StageDocumentFile } from '@/entities/project-document'
 import type { StageDocumentType } from '@/entities/stage-document-file'
 
+import { mapAssistantManagers } from './map-assistant-managers'
 import { projectVenueFieldsFromHalls } from './map-project-halls'
 import {
   parsePlumEventStatusCode,
@@ -132,6 +133,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
 
   const raw = b as BackendProject & BackendProjectListExtras
   const economics = mapEconomics(raw)
+  const assistantManagers = mapAssistantManagers(raw.assistant_managers)
 
   const lastActiveStage = b.last_active_stage ? STAGE_MAP[b.last_active_stage] : undefined
   const venue = projectVenueFieldsFromHalls(b.halls)
@@ -147,6 +149,8 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     hall: venue.hall,
     ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
     manager: b.mag_manager?.full_name ?? '',
+    leadManagerId: b.mag_manager ? String(b.mag_manager.id) : null,
+    ...(assistantManagers.length ? { assistantManagers } : {}),
     canClaim: Boolean(b.can_claim),
     canEdit: Boolean(b.can_edit),
     isReadOnly: Boolean(b.is_read_only),

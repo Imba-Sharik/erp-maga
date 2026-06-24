@@ -9,8 +9,21 @@ import { invalidateKanbanBoardQueries } from '../projects-kanban'
 
 const OUTSIDE_MAG_TABLE_QUERY_KEY = ['projects-out-of-mag-table'] as const
 
+// Таблицы проектов используют собственные корневые ключи (не сгенерированный
+// `[{ url: '/api/v1/projects/' }]`), поэтому их нужно инвалидировать явно — иначе после
+// мутации (смена менеджера, переход этапа) строки не обновятся до перезагрузки. Корни:
+// `['projects-table', …]` — «Все проекты» + архив закрытия (use-projects-table-query,
+// use-closing-archive-query); `['projects-closing-active-table', …]` — активное закрытие;
+// `['requests-table', …]` — запросы бухгалтера.
+const PROJECTS_TABLE_QUERY_KEY = ['projects-table'] as const
+const CLOSING_ACTIVE_TABLE_QUERY_KEY = ['projects-closing-active-table'] as const
+const REQUESTS_TABLE_QUERY_KEY = ['requests-table'] as const
+
 export function invalidateProjectsListQueries(queryClient: QueryClient): void {
   queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+  queryClient.invalidateQueries({ queryKey: PROJECTS_TABLE_QUERY_KEY })
+  queryClient.invalidateQueries({ queryKey: CLOSING_ACTIVE_TABLE_QUERY_KEY })
+  queryClient.invalidateQueries({ queryKey: REQUESTS_TABLE_QUERY_KEY })
 }
 
 export function invalidateOutsideMagQueries(queryClient: QueryClient): void {

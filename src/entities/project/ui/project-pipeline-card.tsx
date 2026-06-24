@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react'
 import { Link2, MoreVertical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
 import { formatRelativeUpdateLabel } from '@/shared/lib/date'
 import { Card } from '@/shared/ui/card'
 import { stageCardBorderClass } from '@/entities/stage-draft'
+import { useCurrentUser } from '@/entities/current-user'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { projectDetailPath } from '../lib/project-detail-path'
+import { isProjectLeadManager } from '../lib/resolve-manager-role'
 import type { Project, ProjectBackOrigin } from '../model/types'
 import { ProjectManagerBadge } from './project-manager-badge'
 import { ProjectPlumStatusLine } from './project-plum-status-line'
@@ -26,6 +29,11 @@ interface ProjectPipelineCardProps {
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
+  /**
+   * Пункты меню «вспомогательные менеджеры» для ведущего (ERP-189). Инжектится
+   * бордом (feature), т.к. entities не зависит от features/роли/справочника.
+   */
+  renderAssistantMenu?: (project: Project) => ReactNode
 }
 
 /**
@@ -45,15 +53,23 @@ export function ProjectPipelineCard({
   onMoveOutsideMag,
   onChangeManager,
   onDeleteProject,
+  renderAssistantMenu,
 }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
+  const currentUser = useCurrentUser()
   const goToDetail = () =>
     navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
   const canClaim = Boolean(onClaimProject && project.canClaim)
   // Проект, который пользователь не ведёт (read-only), не предлагает действий ведения.
   const canMoveOutsideMag = Boolean(onMoveOutsideMag && !project.isReadOnly)
-  const hasMenu = Boolean(canClaim || canMoveOutsideMag || onChangeManager || onDeleteProject)
+  // Меню вспомогательных доступно только ведущему менеджеру (ERP-189).
+  const assistantMenu = renderAssistantMenu?.(project)
+  const canManageAssistants =
+    Boolean(renderAssistantMenu) && isProjectLeadManager(project, currentUser.id)
+  const hasMenu = Boolean(
+    canClaim || canMoveOutsideMag || onChangeManager || onDeleteProject || canManageAssistants,
+  )
 
   const handleBodyKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -112,6 +128,7 @@ export function ProjectPipelineCard({
                   Вне контура MAG
                 </DropdownMenuItem>
               ) : null}
+              {canManageAssistants ? assistantMenu : null}
               {onDeleteProject ? (
                 <DropdownMenuItem variant="destructive" onSelect={() => onDeleteProject(project)}>
                   Удалить
@@ -158,8 +175,8 @@ export function ProjectPipelineCard({
         ) : (
           <ProjectTelegramLink phone={project.phone} onClick={stop} />
         )}
-        {/* Бейдж ведущего менеджера всегда снизу; дата обновления — напротив него. */}
-        <div className="mt-1 flex items-center justify-between gap-2">
+        {/* Бейджи менеджеров всегда снизу (1–2 строки); дата обновления — напротив. */}
+        <div className="mt-1 flex items-start justify-between gap-2">
           <ProjectManagerBadge project={project} className="min-w-0 shrink" />
           <span className="text-2xs shrink-0 text-[#ACACAC]">
             {formatRelativeUpdateLabel(project.updatedAt)}

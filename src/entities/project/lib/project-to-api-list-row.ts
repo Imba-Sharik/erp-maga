@@ -51,7 +51,14 @@ export function projectToApiListRow(project: Project): ApiProject {
     can_claim: project.canClaim,
     can_edit: project.canEdit,
     is_read_only: project.isReadOnly,
-    mag_manager: project.manager ? { id: 0, full_name: project.manager, email: '' } : null,
+    mag_manager: project.leadManagerId
+      ? { id: Number(project.leadManagerId), full_name: project.manager, email: '' }
+      : null,
+    assistant_managers: (project.assistantManagers ?? []).map((a) => ({
+      id: Number(a.id),
+      manager_id: Number(a.id),
+      full_name: a.fullName,
+    })),
     client_company: project.company,
     phone: project.phone,
     email: project.email,

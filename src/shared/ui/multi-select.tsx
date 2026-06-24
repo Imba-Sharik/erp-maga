@@ -12,6 +12,8 @@ import {
 export type MultiSelectOption = {
   value: string
   label: string
+  /** Заблокированная опция: чекбокс недоступен, лейбл приглушён. */
+  disabled?: boolean
 }
 
 export type MultiSelectOptionGroup = {
@@ -28,7 +30,9 @@ export function keyedOptionsToMultiSelect(options: readonly KeyedOption[]): Mult
   return options.map((option) => ({ value: option.key, label: option.label }))
 }
 
-export function keyedGroupsToMultiSelect(groups: readonly KeyedOptionGroup[]): MultiSelectOptionGroup[] {
+export function keyedGroupsToMultiSelect(
+  groups: readonly KeyedOptionGroup[],
+): MultiSelectOptionGroup[] {
   return groups.map((group) => ({
     label: group.label,
     options: keyedOptionsToMultiSelect(group.options),
@@ -94,7 +98,7 @@ export function MultiSelect({
         type="button"
         disabled={disabled}
         className={cn(
-          'flex h-9 w-full min-w-0 items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          'border-input focus-visible:border-ring focus-visible:ring-ring/50 flex h-9 w-full min-w-0 items-center justify-between gap-2 overflow-hidden rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
           triggerClassName,
         )}
       >
@@ -131,6 +135,7 @@ export function MultiSelect({
                 <DropdownMenuCheckboxItem
                   key={option.value}
                   checked={values.includes(option.value)}
+                  disabled={option.disabled}
                   onCheckedChange={(checked) => toggle(option.value, checked === true)}
                   onSelect={(e) => e.preventDefault()}
                 >
@@ -144,6 +149,7 @@ export function MultiSelect({
             <DropdownMenuCheckboxItem
               key={option.value}
               checked={values.includes(option.value)}
+              disabled={option.disabled}
               onCheckedChange={(checked) => toggle(option.value, checked === true)}
               onSelect={(e) => e.preventDefault()}
             >

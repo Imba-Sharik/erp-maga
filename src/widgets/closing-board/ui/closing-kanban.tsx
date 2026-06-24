@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
 import {
@@ -16,6 +17,7 @@ interface ClosingKanbanProps {
   backOrigin: { to: string; label: string }
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
+  renderAssistantMenu?: (project: Project) => ReactNode
 }
 
 export function ClosingKanban({
@@ -23,6 +25,7 @@ export function ClosingKanban({
   backOrigin,
   onChangeManager,
   onDeleteProject,
+  renderAssistantMenu,
 }: ClosingKanbanProps) {
   return (
     <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
@@ -46,6 +49,7 @@ export function ClosingKanban({
               backOrigin={backOrigin}
               onChangeManager={onChangeManager}
               onDeleteProject={onDeleteProject}
+              renderAssistantMenu={renderAssistantMenu}
             />
           ))}
         </div>
@@ -60,12 +64,14 @@ function ClosingKanbanColumnItem({
   backOrigin,
   onChangeManager,
   onDeleteProject,
+  renderAssistantMenu,
 }: {
   stage: ClosingStage
   listParams: BoardListParams
   backOrigin: { to: string; label: string }
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
+  renderAssistantMenu?: (project: Project) => ReactNode
 }) {
   return (
     <KanbanColumnWithQuery
@@ -77,6 +83,7 @@ function ClosingKanbanColumnItem({
       backOrigin={backOrigin}
       onChangeManager={onChangeManager}
       onDeleteProject={onDeleteProject}
+      renderAssistantMenu={renderAssistantMenu}
     />
   )
 }

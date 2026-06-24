@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
@@ -33,6 +33,7 @@ export interface PipelineKanbanColumnProps {
   onMoveOutsideMag?: (project: Project) => void
   onChangeManager?: (project: Project) => void
   onDeleteProject?: (project: Project) => void
+  renderAssistantMenu?: (project: Project) => ReactNode
 }
 
 export function PipelineKanbanColumn({
@@ -48,6 +49,7 @@ export function PipelineKanbanColumn({
   onMoveOutsideMag,
   onChangeManager,
   onDeleteProject,
+  renderAssistantMenu,
 }: PipelineKanbanColumnProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
   const drafts = useStageDrafts()
@@ -105,6 +107,7 @@ export function PipelineKanbanColumn({
                   onMoveOutsideMag={onMoveOutsideMag}
                   onChangeManager={onChangeManager}
                   onDeleteProject={onDeleteProject}
+                  renderAssistantMenu={renderAssistantMenu}
                 />
               ))}
               {showMoreButton && (

@@ -9,6 +9,7 @@ import {
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
+import type { LeadAssistantsSelection } from '@/features/change-project-manager'
 import { stageRowHighlightClass, useProjectDraftHighlight } from '@/entities/stage-draft'
 import { GridTableCell, GridTableRow, GridTableRowActionCell } from '@/shared/ui/grid-table'
 
@@ -30,10 +31,6 @@ import {
   ProjectStageTableCell,
   ProjectTitleCell,
 } from './table-row-cells'
-
-function stopRowNavigation(e: React.MouseEvent | React.PointerEvent) {
-  e.stopPropagation()
-}
 
 function handleRowKeyDown(e: KeyboardEvent<HTMLDivElement>, goToDetail: () => void) {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -71,16 +68,17 @@ function ProjectTableNavRow({
 }
 
 export interface ProjectsTableRowManagerProps {
+  managerEditable?: boolean
   directoryOptions: ManagerSelectOption[]
   assignmentOptionsLoading?: boolean
   assignmentOptionsError?: boolean
   showHallAssignmentHint?: boolean
-  managerEditable?: boolean
   isEditingManager: boolean
-  onStartEditManager: () => void
-  onAssignManager: (managerId: string) => void
-  onCancelEditManager: () => void
-  assignDisabled?: boolean
+  isApplyingManager?: boolean
+  assignErrorMessage?: string | null
+  onManagerOpenChange: (open: boolean) => void
+  onApplyManagers: (selection: LeadAssistantsSelection) => void
+  onClearManagerError?: () => void
 }
 
 interface ProjectsTableRowProps extends ProjectsTableRowManagerProps {
@@ -95,16 +93,17 @@ export function ProjectsTableRow({
   columnView,
   backOrigin,
   renderRowAction,
+  managerEditable = true,
   directoryOptions,
   assignmentOptionsLoading = false,
   assignmentOptionsError = false,
   showHallAssignmentHint = false,
-  managerEditable = true,
   isEditingManager,
-  onStartEditManager,
-  onAssignManager,
-  onCancelEditManager,
-  assignDisabled,
+  isApplyingManager = false,
+  assignErrorMessage = null,
+  onManagerOpenChange,
+  onApplyManagers,
+  onClearManagerError,
 }: ProjectsTableRowProps) {
   const navigate = useNavigate()
   const hasDraft = useProjectDraftHighlight(project.id)
@@ -114,17 +113,18 @@ export function ProjectsTableRow({
     navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
 
   const managerCellProps: ProjectManagerCellProps = {
-    manager: project.manager,
+    project,
+    editable: managerEditable,
     directoryOptions,
     optionsLoading: assignmentOptionsLoading,
     optionsError: assignmentOptionsError,
     showHallAssignmentHint,
-    editable: managerEditable,
-    isEditing: isEditingManager,
-    onStartEdit: onStartEditManager,
-    onAssign: onAssignManager,
-    onCancelEdit: onCancelEditManager,
-    assignDisabled,
+    isOpen: isEditingManager,
+    isPending: isApplyingManager,
+    errorMessage: assignErrorMessage,
+    onOpenChange: onManagerOpenChange,
+    onApply: onApplyManagers,
+    onClearError: onClearManagerError,
   }
 
   if (columnView === 'outside-mag') {
@@ -186,22 +186,7 @@ export function ProjectsTableRow({
           <ProjectLoftCell project={project} />
           <ProjectPlumStatusTableCell project={project} />
           <GridTableCell muted>{formatTableDate(project.date)}</GridTableCell>
-          <GridTableCell muted>
-            <span className="flex w-full min-w-0 items-center gap-1.5">
-              {renderRowAction ? (
-                <span
-                  className="shrink-0"
-                  onClick={stopRowNavigation}
-                  onPointerDown={stopRowNavigation}
-                >
-                  {renderRowAction(project)}
-                </span>
-              ) : null}
-              <span className="min-w-0 truncate" title={project.manager || '—'}>
-                {project.manager || '—'}
-              </span>
-            </span>
-          </GridTableCell>
+          <ProjectManagerCell {...managerCellProps} />
           <GridTableCell muted>{project.type || '—'}</GridTableCell>
           <GridTableCell muted>{project.company || '—'}</GridTableCell>
           <GridTableCell muted>{project.phone || '—'}</GridTableCell>

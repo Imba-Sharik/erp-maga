@@ -1,13 +1,16 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 
+import { useManagersDirectory } from '@/entities/manager'
 import {
   ALL_STAGE_LABELS,
   ALL_STAGE_ORDER,
   type Project,
   type ProjectBackOrigin,
 } from '@/entities/project'
-import { useManagersDirectory } from '@/entities/manager'
-import { useChangeProjectManager } from '@/features/change-project-manager'
+import {
+  useChangeProjectManagers,
+  type LeadAssistantsSelection,
+} from '@/features/change-project-manager'
 import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select'
 import {
   GridTableHeaderCell,
@@ -86,6 +89,9 @@ export function ProjectsTableView({
   const gridTemplate = getTableGridTemplate(columnView, { withActions })
   const minWidth = getTableMinWidth(columnView, { withActions })
   const skeletonColumnCount = TABLE_COLUMN_COUNT[columnView] + (withActions ? 1 : 0)
+
+  // Назначение менеджеров Руководителем (ERP-189): одна строка редактируется за раз,
+  // справочник грузится по её проекту, применение — через общий useChangeProjectManagers.
   const [editingManagerProjectId, setEditingManagerProjectId] = useState<string | null>(null)
 
   const editingProjectId = useMemo(() => {
@@ -104,23 +110,44 @@ export function ProjectsTableView({
     { enabled: editingProjectId !== undefined },
   )
 
-  const { submit: assignManager, isPending: isAssigningManager } = useChangeProjectManager({
-    onSuccess: () => setEditingManagerProjectId(null),
-  })
+  const editingProject = useMemo(
+    () => projects.find((p) => p.id === editingManagerProjectId) ?? null,
+    [projects, editingManagerProjectId],
+  )
 
-  const handleStartEditManager = useCallback((projectId: string) => {
-    setEditingManagerProjectId(projectId)
-  }, [])
+  const {
+    submit: applyManagers,
+    isPending: isAssigningManager,
+    isError: isAssignError,
+    errorMessage: assignErrorMessage,
+    reset: resetAssign,
+  } = useChangeProjectManagers({ onSuccess: () => setEditingManagerProjectId(null) })
 
-  const handleCancelEditManager = useCallback(() => {
-    setEditingManagerProjectId(null)
-  }, [])
+  const resolveName = useCallback(
+    (id: string | null) =>
+      id ? (assignmentDirectoryOptions.find((o) => o.id === id)?.fullName ?? '') : '',
+    [assignmentDirectoryOptions],
+  )
 
-  const handleAssignManager = useCallback(
-    (projectId: string, managerId: string) => {
-      assignManager({ projectId, managerId })
+  const handleApplyManagers = useCallback(
+    (selection: LeadAssistantsSelection) => {
+      if (!editingProject) return
+      applyManagers({
+        project: editingProject,
+        leadId: selection.leadId,
+        leadName: resolveName(selection.leadId),
+        assistants: selection.assistantIds.map((id) => ({ id, fullName: resolveName(id) })),
+      })
     },
-    [assignManager],
+    [applyManagers, editingProject, resolveName],
+  )
+
+  const handleManagerOpenChange = useCallback(
+    (projectId: string, open: boolean) => {
+      resetAssign()
+      setEditingManagerProjectId(open ? projectId : null)
+    },
+    [resetAssign],
   )
 
   const header =
@@ -210,33 +237,29 @@ export function ProjectsTableView({
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={onLoadMore}
       >
-        {projects.map((project) => (
-          <ProjectsTableRow
-            key={project.id}
-            project={project}
-            columnView={columnView}
-            backOrigin={backOrigin}
-            renderRowAction={renderRowAction}
-            directoryOptions={
-              editingManagerProjectId === project.id ? assignmentDirectoryOptions : []
-            }
-            assignmentOptionsLoading={
-              editingManagerProjectId === project.id ? isAssignmentManagersLoading : false
-            }
-            assignmentOptionsError={
-              editingManagerProjectId === project.id ? isAssignmentManagersError : false
-            }
-            showHallAssignmentHint={
-              editingManagerProjectId === project.id ? showAssignmentHallHint : false
-            }
-            managerEditable={managerEditable}
-            isEditingManager={editingManagerProjectId === project.id}
-            onStartEditManager={() => handleStartEditManager(project.id)}
-            onAssignManager={(managerId) => handleAssignManager(project.id, managerId)}
-            onCancelEditManager={handleCancelEditManager}
-            assignDisabled={isAssigningManager}
-          />
-        ))}
+        {projects.map((project) => {
+          const isEditing = editingManagerProjectId === project.id
+          return (
+            <ProjectsTableRow
+              key={project.id}
+              project={project}
+              columnView={columnView}
+              backOrigin={backOrigin}
+              renderRowAction={renderRowAction}
+              managerEditable={managerEditable}
+              directoryOptions={isEditing ? assignmentDirectoryOptions : []}
+              assignmentOptionsLoading={isEditing ? isAssignmentManagersLoading : false}
+              assignmentOptionsError={isEditing ? isAssignmentManagersError : false}
+              showHallAssignmentHint={isEditing ? showAssignmentHallHint : false}
+              isEditingManager={isEditing}
+              isApplyingManager={isEditing && isAssigningManager}
+              assignErrorMessage={isEditing && isAssignError ? assignErrorMessage : null}
+              onManagerOpenChange={(open) => handleManagerOpenChange(project.id, open)}
+              onApplyManagers={handleApplyManagers}
+              onClearManagerError={resetAssign}
+            />
+          )
+        })}
       </GridTableView>
     </GridTableViewport>
   )

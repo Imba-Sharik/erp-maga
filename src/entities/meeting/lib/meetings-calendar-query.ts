@@ -14,7 +14,7 @@ export function listMeetingsParamsToApi(
   return {
     date_after: params.dateFrom,
     date_before: params.dateTo,
-    ...(params.managerId != null ? { manager: params.managerId } : {}),
+    ...(params.managerId != null ? { manager: [params.managerId] } : {}),
   }
 }
 
