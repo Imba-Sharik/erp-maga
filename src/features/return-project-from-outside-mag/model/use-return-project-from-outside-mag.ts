@@ -12,6 +12,7 @@ import {
   useProjectTransition,
   type QueryCacheSnapshot,
 } from '@/shared/api'
+import { toast } from '@/shared/ui/toast'
 
 import { buildReturnFromOutsideMagBody } from '../lib/build-return-from-outside-mag-body'
 
@@ -59,10 +60,14 @@ export function useReturnProjectFromOutsideMag({
         projectId,
         buildReturnFromOutsideMagBody(input.targetStage) as unknown as ProjectTransitionRequest,
         {
-          onSuccess: () => onSuccess?.(),
+          onSuccess: () => {
+            toast.success('Проект возвращён в воронку')
+            onSuccess?.()
+          },
           onError: () => {
             restoreQueryCaches(queryClient, cacheSnapshot)
             transition.reset()
+            toast.error('Не удалось вернуть проект в воронку')
           },
         },
       )

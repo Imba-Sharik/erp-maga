@@ -10,17 +10,17 @@ const base: ResolveManagerBadgesInput = {
 }
 
 describe('resolveManagerBadges', () => {
-  it('менеджер-владелец → строка «Ведущий мен.» зелёная (managerSelf)', () => {
+  it('менеджер-владелец → строка «Ведущий» зелёная (managerSelf)', () => {
     const [lead] = resolveManagerBadges({ ...base, isLeadManager: true })
     expect(lead).toMatchObject({ kind: 'lead', variant: 'managerSelf' })
   })
 
-  it('менеджер-не-владелец → «Ведущий мен.» жёлтая (warning)', () => {
+  it('менеджер-не-владелец → «Ведущий» жёлтая (warning)', () => {
     const [lead] = resolveManagerBadges({ ...base, isLeadManager: false })
     expect(lead.variant).toBe('warning')
   })
 
-  it('не-менеджер (director) → «Ведущий мен.» нейтральная (серая)', () => {
+  it('не-менеджер (director) → «Ведущий» нейтральная (серая)', () => {
     const [lead] = resolveManagerBadges({ ...base, isManager: false, isLeadManager: true })
     expect(lead.variant).toBe('managerNeutral')
   })
@@ -39,19 +39,22 @@ describe('resolveManagerBadges', () => {
     expect(resolveManagerBadges(base)).toHaveLength(1)
   })
 
-  it('со вспомогательными — две строки', () => {
-    expect(resolveManagerBadges({ ...base, assistantNames: ['Петров'] })).toHaveLength(2)
+  it('каждый вспомогательный — отдельная строка', () => {
+    expect(
+      resolveManagerBadges({ ...base, assistantNames: ['Петров', 'Сидоров'] }),
+    ).toHaveLength(3)
   })
 
-  it('подпись ведущего с именем; вспомогательные через запятую', () => {
+  it('подпись ведущего с именем; каждый вспомогательный отдельной плашкой', () => {
     const rows = resolveManagerBadges({ ...base, assistantNames: ['Петров', 'Сидоров'] })
-    expect(rows[0].text).toBe('Ведущий мен.: Иванов Иван')
-    expect(rows[1].text).toBe('Вспомогат. мен.: Петров, Сидоров')
+    expect(rows[0].text).toBe('Ведущий: Иванов Иван')
+    expect(rows[1].text).toBe('Вспом.: Петров')
+    expect(rows[2].text).toBe('Вспом.: Сидоров')
   })
 
   it('лид не назначен → «—», нейтральная даже у менеджера', () => {
     const [lead] = resolveManagerBadges({ ...base, isLeadManager: true, leadName: '' })
-    expect(lead.text).toBe('Ведущий мен.: —')
+    expect(lead.text).toBe('Ведущий: —')
     expect(lead.variant).toBe('managerNeutral')
   })
 

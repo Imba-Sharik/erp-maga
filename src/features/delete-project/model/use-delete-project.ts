@@ -12,6 +12,7 @@ import {
   snapshotTransitionCaches,
   type QueryCacheSnapshot,
 } from '@/shared/api'
+import { toast } from '@/shared/ui/toast'
 
 import { getDeleteProjectErrorMessage } from '../lib/get-delete-project-error-message'
 
@@ -59,10 +60,14 @@ export function useDeleteProject({ onSuccess }: UseDeleteProjectOptions = {}) {
       mutation.mutate(
         { id: projectId },
         {
-          onSuccess: () => onSuccess?.(),
-          onError: () => {
+          onSuccess: () => {
+            toast.success('Проект удалён')
+            onSuccess?.()
+          },
+          onError: (error) => {
             restoreQueryCaches(queryClient, listSnapshot)
             restoreQueryCaches(queryClient, tableSnapshot)
+            toast.error(getDeleteProjectErrorMessage(error))
           },
         },
       )

@@ -20,7 +20,7 @@ export function Toaster() {
           toast:
             'flex w-full items-center gap-3 rounded-[15px] border border-[#E9E6DD] bg-white p-4 font-sans text-sm text-[#454545] shadow-[0_8px_30px_rgba(0,0,0,0.12)]',
           content: 'flex min-w-0 flex-col gap-0.5',
-          title: 'truncate font-medium text-[#454545]',
+          title: 'font-medium break-words text-[#454545]',
           description: 'text-xs text-[#ACACAC]',
           icon: 'flex shrink-0 items-center [&>svg]:size-5 [&_[data-icon]]:text-funnel-preproject',
           success: '[&_[data-icon]]:text-funnel-preproject',

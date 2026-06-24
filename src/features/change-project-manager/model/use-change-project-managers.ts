@@ -8,6 +8,7 @@ import { projectsAssistantManagerAdd } from '@/shared/api/generated/clients/proj
 import { projectsAssistantManagerBulkRemove } from '@/shared/api/generated/clients/projectsController/projectsAssistantManagerBulkRemove'
 import { projectsPartialUpdate } from '@/shared/api/generated/clients/projectsController/projectsPartialUpdate'
 import { invalidateProjectAfterTransition, patchProjectInMatchingCaches } from '@/shared/api'
+import { toast } from '@/shared/ui/toast'
 
 import { diffAssistantManagers } from '../lib/diff-assistant-managers'
 import { getChangeManagerErrorMessage } from '../lib/get-change-manager-error-message'
@@ -30,6 +31,21 @@ interface ChangeManagersVariables {
   leadChanged: boolean
   toAdd: number[]
   toRemove: number[]
+}
+
+/** Текст успеха под то, что реально поменялось: ведущий, вспомогательные или оба. */
+function changeManagersSuccessMessage({
+  leadChanged,
+  magManagerId,
+  toAdd,
+  toRemove,
+}: ChangeManagersVariables): string {
+  const assistantsChanged = toAdd.length > 0 || toRemove.length > 0
+  if (leadChanged && !assistantsChanged) {
+    return magManagerId === null ? 'Ведущий менеджер снят' : 'Ведущий менеджер назначен'
+  }
+  if (!leadChanged && assistantsChanged) return 'Вспомогательные менеджеры обновлены'
+  return 'Менеджеры обновлены'
 }
 
 /**
@@ -68,8 +84,13 @@ export function useChangeProjectManagers({ onSuccess }: UseChangeProjectManagers
       invalidateProjectAfterTransition(queryClient, variables.projectId)
       invalidateManagersDirectory(queryClient)
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      toast.success(changeManagersSuccessMessage(variables))
       onSuccess?.()
+    },
+    onError: (error) => {
+      // Серия неатомарна — часть шагов могла примениться; рефетч из onSettled сверит истину.
+      toast.error(getChangeManagerErrorMessage(error))
     },
   })
 

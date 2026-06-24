@@ -10,6 +10,7 @@ import {
   useProjectTransition,
   type QueryCacheSnapshot,
 } from '@/shared/api'
+import { toast } from '@/shared/ui/toast'
 
 import { buildOutsideMagTransitionBody } from '../lib/build-outside-mag-transition-body'
 
@@ -44,10 +45,14 @@ export function useMoveProjectOutsideMag({ onSuccess }: UseMoveProjectOutsideMag
       })
 
       transition.submit(projectId, buildOutsideMagTransitionBody(input.reason), {
-        onSuccess: () => onSuccess?.(),
+        onSuccess: () => {
+          toast.success('Проект перемещён во «Вне контура MAG»')
+          onSuccess?.()
+        },
         onError: () => {
           restoreQueryCaches(queryClient, cacheSnapshot)
           transition.reset()
+          toast.error('Не удалось переместить проект во «Вне контура MAG»')
         },
       })
     },

@@ -1,5 +1,5 @@
-const LEAD_LABEL = 'Ведущий мен.'
-const ASSISTANT_LABEL = 'Вспомогат. мен.'
+const LEAD_LABEL = 'Ведущий'
+const ASSISTANT_LABEL = 'Вспом.'
 const EMPTY = '—'
 
 /** Тон бейджа: зелёный (свой), жёлтый (чужой ведущий), серый (нейтрально). */
@@ -25,9 +25,9 @@ export interface ResolveManagerBadgesInput {
 
 /**
  * Бейджи менеджеров карточки (ERP-189). Две строки:
- * - «Ведущий мен.»: зелёная если ведущий — текущий пользователь, жёлтая если другой,
+ * - «Ведущий»: зелёная если ведущий — текущий пользователь, жёлтая если другой,
  *   серая для не-менеджера или непривязанного проекта.
- * - «Вспомогат. мен.»: ВСЕГДА серая; показывается только при наличии вспомогательных.
+ * - «Вспом.»: ВСЕГДА серая; по строке на каждого вспомогательного.
  */
 export function resolveManagerBadges({
   isManager,
@@ -42,10 +42,11 @@ export function resolveManagerBadges({
     { kind: 'lead', text: `${LEAD_LABEL}: ${leadName || EMPTY}`, variant: leadVariant },
   ]
 
-  if (assistantNames.length > 0) {
+  // Каждый вспомогательный — отдельной плашкой, как ведущий.
+  for (const name of assistantNames) {
     rows.push({
       kind: 'assistant',
-      text: `${ASSISTANT_LABEL}: ${assistantNames.join(', ')}`,
+      text: `${ASSISTANT_LABEL}: ${name}`,
       variant: 'managerNeutral',
     })
   }

@@ -9,6 +9,7 @@ import type { ProjectCreateRequest } from '@/shared/api/generated/types/ProjectC
 import type { ProjectHallItem } from '@/shared/api/generated/types/ProjectHallItem'
 import { getEventTypeLabelById } from '@/shared/constants'
 import { toIsoLocalDay } from '@/shared/lib/date'
+import { toast } from '@/shared/ui/toast'
 
 import { buildOptimisticProject } from '../lib/build-optimistic-project'
 import type { CreateProjectFormValues } from '../lib/create-project-form-values'
@@ -88,6 +89,7 @@ export function useCreateProject({ magManager, magManagerId, onCreated }: UseCre
           removeCreatedProjectFromQueries(queryClient, context.optimistic)
         }
         prependCreatedProjectToQueries(queryClient, created)
+        toast.success('Проект создан')
         onCreated?.(created)
       },
       onError: (_error, _variables, context) => {
