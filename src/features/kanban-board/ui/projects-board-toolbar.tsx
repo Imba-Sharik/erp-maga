@@ -4,13 +4,13 @@ import { useUserRole } from '@/entities/user-role'
 import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-import { cn } from '@/shared/lib/utils'
 
 const TRIGGER_CLASS =
   'h-10! w-full min-w-[calc(50%-4px)] flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs data-placeholder:text-[#BCBCBC] @4xl:w-41.5 @4xl:min-w-0 @4xl:flex-none @4xl:text-sm'
 
-// Сортировка: подписи длиннее («По дате мероприятия»), нужен селект пошире.
-const SORT_TRIGGER_CLASS = cn(TRIGGER_CLASS, '@4xl:w-52')
+// Слот сортировки: на мобиле занимает половину ряда (как фильтры), на десктопе шире —
+// внутри помимо селекта ещё стрелка направления и подписи длиннее («По дате мероприятия»).
+const SORT_SLOT_CLASS = 'min-w-[calc(50%-4px)] flex-1 @4xl:min-w-0 @4xl:w-64 @4xl:flex-none'
 
 interface ProjectsBoardToolbarProps {
   search: string
@@ -103,11 +103,7 @@ export function ProjectsBoardToolbar({
             : 'flex min-w-0 flex-1 flex-wrap items-center gap-2 @4xl:flex-none @4xl:gap-2.5'
         }
       >
-        <ProjectsSortSelect
-          value={sort}
-          onChange={onChangeSort}
-          triggerClassName={SORT_TRIGGER_CLASS}
-        />
+        <ProjectsSortSelect value={sort} onChange={onChangeSort} className={SORT_SLOT_CLASS} />
         {showCityFilter ? (
           <VenueFilterSelect
             filter="city"

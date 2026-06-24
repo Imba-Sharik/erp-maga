@@ -100,10 +100,12 @@ export type {
   PlumEventStatusFilterValues,
 } from './lib/plum-event-status-catalog'
 export {
-  PROJECTS_SORT_BY_CREATED,
-  PROJECTS_SORT_BY_EVENT_DATE,
   PROJECTS_SORT_DEFAULT,
+  PROJECTS_SORT_FIELD_CREATED,
+  PROJECTS_SORT_FIELD_EVENT_DATE,
   PROJECTS_SORT_OPTIONS,
+  buildProjectsSortValue,
+  parseProjectsSort,
 } from './lib/projects-sort-catalog'
 export { ProjectCard } from './ui/project-card'
 export { ProjectCountBadge } from './ui/project-count-badge'
