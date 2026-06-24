@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+// import { Loader2 } from 'lucide-react'
 import { PlumEventStatusFilterSelect } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { useLoftHallFilter, VenueFilterMultiSelect, VenueFilterSelect } from '@/entities/venue'
@@ -27,18 +27,20 @@ const TOOLBAR_LAYOUT = {
     compactBreakpoint: '880px' as const,
   },
   withManagerFilter: {
-    triggerBase: `${SELECT_BASE} @min-[1040px]/calendar:w-fit @min-[1040px]/calendar:min-w-32 @min-[1040px]/calendar:flex-none`,
+    triggerBase: `${SELECT_BASE} @min-[1200px]/calendar:w-fit @min-[1200px]/calendar:min-w-32 @min-[1200px]/calendar:flex-none`,
     toolbar:
-      'flex min-w-0 w-full flex-col gap-3 @min-[1040px]/calendar:flex-row @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:items-center @min-[1040px]/calendar:gap-2.5',
+      'flex min-w-0 w-full flex-col gap-3 @min-[1200px]/calendar:flex-row @min-[1200px]/calendar:flex-wrap @min-[1200px]/calendar:items-center @min-[1200px]/calendar:gap-2.5',
     searchRow:
-      'flex w-full min-w-0 items-center gap-2 @min-[1040px]/calendar:max-w-[300px] @min-[1040px]/calendar:flex-1 @min-[1040px]/calendar:basis-[240px]',
-    // Стек-режим (<1040px): фильтры авто-упаковываются по ширине, а не жёстко по 2 в ряд
+      'flex w-full min-w-0 items-center gap-2 @min-[1200px]/calendar:max-w-[300px] @min-[1200px]/calendar:flex-1 @min-[1200px]/calendar:basis-[240px]',
+    // Стек-режим (<1200px): фильтры авто-упаковываются по ширине, а не жёстко по 2 в ряд
     // (у Руководителя зал/LOFT/статус/год/месяц укладываются в одну строку вместо четырёх).
+    // Side-by-side с поиском включаем только с 1200px — раньше 6 контролов не влезали
+    // в один ряд, навигатор месяца переносился, а поиск зависал по центру (ERP-193).
     filtersRow:
-      'grid min-w-0 w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 @min-[1040px]/calendar:flex @min-[1040px]/calendar:flex-1 @min-[1040px]/calendar:flex-wrap @min-[1040px]/calendar:justify-end @min-[1040px]/calendar:basis-[520px]',
-    managerMobileHide: '@min-[1040px]/calendar:hidden',
-    managerDesktopShow: 'hidden @min-[1040px]/calendar:block',
-    compactBreakpoint: '1040px' as const,
+      'grid min-w-0 w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 @min-[1200px]/calendar:flex @min-[1200px]/calendar:flex-1 @min-[1200px]/calendar:flex-wrap @min-[1200px]/calendar:justify-end @min-[1200px]/calendar:basis-[520px]',
+    managerMobileHide: '@min-[1200px]/calendar:hidden',
+    managerDesktopShow: 'hidden @min-[1200px]/calendar:block',
+    compactBreakpoint: '1200px' as const,
   },
 } as const
 
@@ -114,7 +116,6 @@ export function CalendarToolbar({
   venueSelectDisabled = false,
   plumEventStatus,
   onChangePlumEventStatus,
-  isFetching = false,
 }: CalendarToolbarProps) {
   const layout = showManagerFilter ? TOOLBAR_LAYOUT.withManagerFilter : TOOLBAR_LAYOUT.default
   const isMobile = useIsMobile()
@@ -160,15 +161,15 @@ export function CalendarToolbar({
             showManagerFilter ? 'flex-1' : 'w-full',
           )}
         />
-        {managerFilter}
-        <Loader2
+        {/* <Loader2
           aria-hidden={!isFetching}
           aria-label={isFetching ? 'Загрузка проектов' : undefined}
           className={cn(
             'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity xl:block',
             isFetching ? 'animate-spin opacity-100' : 'opacity-0',
           )}
-        />
+        /> */}
+        {managerFilter}
       </div>
 
       <div className={layout.filtersRow}>
