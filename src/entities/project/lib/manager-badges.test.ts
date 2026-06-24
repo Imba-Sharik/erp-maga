@@ -39,21 +39,17 @@ describe('resolveManagerBadges', () => {
     expect(resolveManagerBadges(base)).toHaveLength(1)
   })
 
-  it('со вспомогательными — две строки', () => {
-    expect(resolveManagerBadges({ ...base, assistantNames: ['Петров'] })).toHaveLength(2)
+  it('каждый вспомогательный — отдельная строка', () => {
+    expect(
+      resolveManagerBadges({ ...base, assistantNames: ['Петров', 'Сидоров'] }),
+    ).toHaveLength(3)
   })
 
-  it('подпись ведущего с именем; вспомогательные через запятую', () => {
+  it('подпись ведущего с именем; каждый вспомогательный отдельной плашкой', () => {
     const rows = resolveManagerBadges({ ...base, assistantNames: ['Петров', 'Сидоров'] })
     expect(rows[0].text).toBe('Ведущий: Иванов Иван')
-    expect(rows[1].text).toBe('Вспомогательные: Петров, Сидоров')
-  })
-
-  it('один вспомогательный → «Вспомогательный», несколько → «Вспомогательные»', () => {
-    const [, one] = resolveManagerBadges({ ...base, assistantNames: ['Петров'] })
-    expect(one.text).toBe('Вспомогательный: Петров')
-    const [, many] = resolveManagerBadges({ ...base, assistantNames: ['Петров', 'Сидоров'] })
-    expect(many.text).toBe('Вспомогательные: Петров, Сидоров')
+    expect(rows[1].text).toBe('Вспом.: Петров')
+    expect(rows[2].text).toBe('Вспом.: Сидоров')
   })
 
   it('лид не назначен → «—», нейтральная даже у менеджера', () => {
