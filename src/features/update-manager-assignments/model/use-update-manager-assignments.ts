@@ -10,6 +10,7 @@ import {
 } from '@/entities/manager'
 import { hallsManagerAssignmentsBulkDestroy } from '@/shared/api/generated/clients/hallsController/hallsManagerAssignmentsBulkDestroy'
 import { useHallsManagerAssignmentsCreate } from '@/shared/api/generated/hooks/hallsController/useHallsManagerAssignmentsCreate'
+import { toast } from '@/shared/ui/toast'
 
 import { getAssignmentErrorMessage } from '../lib/get-assignment-error-message'
 
@@ -73,6 +74,7 @@ export function useUpdateManagerAssignments() {
             data: { manager: managerId, hall_ids: toAdd },
           })
         }
+        toast.success('Залы менеджера обновлены')
         return { ok: true }
       } catch (error) {
         const errorMessage = getAssignmentErrorMessage(error)

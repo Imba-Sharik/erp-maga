@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 
 import { invalidateManagersDirectory } from '@/entities/manager'
 import { useUsersPartialUpdate } from '@/shared/api/generated/hooks/usersController/useUsersPartialUpdate'
+import { toast } from '@/shared/ui/toast'
 
 interface UseDeactivateManagerOptions {
   onSuccess?: () => void
@@ -15,7 +16,11 @@ export function useDeactivateManager({ onSuccess }: UseDeactivateManagerOptions 
     mutation: {
       onSuccess: () => {
         invalidateManagersDirectory(queryClient)
+        toast.success('Менеджер деактивирован')
         onSuccess?.()
+      },
+      onError: () => {
+        toast.error('Не удалось деактивировать менеджера')
       },
     },
   })
