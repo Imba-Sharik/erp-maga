@@ -1,8 +1,8 @@
 import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 import type { SelectOption } from '@/shared/ui/clearable-select'
 
-/** Сортировка проектов по дате мероприятия (сначала поздние). */
-export const PROJECTS_SORT_BY_EVENT_DATE = '-event_date'
+/** Сортировка проектов по дате мероприятия (сначала ранние). */
+export const PROJECTS_SORT_BY_EVENT_DATE = 'event_date'
 /** Сортировка по дате создания — текущее поведение по умолчанию. */
 export const PROJECTS_SORT_BY_CREATED = PROJECTS_LIST_DEFAULT_ORDERING
 
