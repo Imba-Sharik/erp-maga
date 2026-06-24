@@ -11,21 +11,23 @@ describe('mapAssistantManagers', () => {
     expect(mapAssistantManagers(null)).toEqual([])
   })
 
-  it('приводит id к строке и берёт full_name', () => {
-    expect(mapAssistantManagers([{ id: 7, full_name: 'Петров Пётр' }])).toEqual([
+  it('берёт идентичность из manager_id (user id), а не из id строки связи', () => {
+    expect(mapAssistantManagers([{ id: 99, manager_id: 7, full_name: 'Петров Пётр' }])).toEqual([
       { id: '7', fullName: 'Петров Пётр' },
     ])
   })
 
   it('подставляет пустое имя при отсутствии full_name', () => {
-    expect(mapAssistantManagers([{ id: 3 }])).toEqual([{ id: '3', fullName: '' }])
-    expect(mapAssistantManagers([{ id: 4, full_name: null }])).toEqual([{ id: '4', fullName: '' }])
+    expect(mapAssistantManagers([{ id: 10, manager_id: 3 }])).toEqual([{ id: '3', fullName: '' }])
+    expect(mapAssistantManagers([{ id: 11, manager_id: 4, full_name: null }])).toEqual([
+      { id: '4', fullName: '' },
+    ])
   })
 
   it('сохраняет порядок элементов', () => {
     const result = mapAssistantManagers([
-      { id: 2, full_name: 'Бирюков' },
-      { id: 1, full_name: 'Аникин' },
+      { id: 20, manager_id: 2, full_name: 'Бирюков' },
+      { id: 21, manager_id: 1, full_name: 'Аникин' },
     ])
     expect(result.map((m) => m.id)).toEqual(['2', '1'])
   })
@@ -33,8 +35,8 @@ describe('mapAssistantManagers', () => {
   it('маппит несколько элементов', () => {
     expect(
       mapAssistantManagers([
-        { id: 1, full_name: 'Аникин' },
-        { id: 2, full_name: 'Бирюков' },
+        { id: 30, manager_id: 1, full_name: 'Аникин' },
+        { id: 31, manager_id: 2, full_name: 'Бирюков' },
       ]),
     ).toHaveLength(2)
   })

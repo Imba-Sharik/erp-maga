@@ -1,6 +1,7 @@
 import { PenIcon } from '@/shared/assets'
+import { useCurrentUser } from '@/entities/current-user'
 import { useManagersDirectory } from '@/entities/manager'
-import type { Project } from '@/entities/project'
+import { isProjectLeadManager, type Project } from '@/entities/project'
 import { DropdownMenuItem } from '@/shared/ui/dropdown-menu'
 
 import {
@@ -24,7 +25,8 @@ export interface AssistantMenuItemsProps {
  * кого добавить). Для не-ведущего ничего не рендерит.
  */
 export function AssistantMenuItems({ project, onAdd, onEdit }: AssistantMenuItemsProps) {
-  const isLead = Boolean(project.isLeadManager)
+  const currentUser = useCurrentUser()
+  const isLead = isProjectLeadManager(project, currentUser.id)
   const projectIdNumber = Number(project.id)
   const hasProjectId = Number.isFinite(projectIdNumber)
 

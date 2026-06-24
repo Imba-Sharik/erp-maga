@@ -1,4 +1,3 @@
-import type { ChangeManagersRequest } from '@/entities/project'
 import type { ManagerSelectOption } from '@/entities/manager'
 
 /** Текущий выбор в модалке руководителя: один ведущий + набор вспомогательных. */
@@ -100,25 +99,6 @@ export function toggleAssistant(
     assistantIds: has
       ? selection.assistantIds.filter((x) => x !== id)
       : [...selection.assistantIds, id],
-  }
-}
-
-function parseManagerId(id: string): number {
-  const value = Number(id)
-  if (!Number.isFinite(value)) throw new Error('Invalid manager id')
-  return value
-}
-
-/**
- * Собрать payload (ERP-189). `mag_manager_id=null` при пустом ведущем; синтетические
- * `name:*`/нечисловые id — ошибка (в селекты не должны попадать).
- */
-export function buildChangeManagersRequest(
-  selection: LeadAssistantsSelection,
-): ChangeManagersRequest {
-  return {
-    mag_manager_id: selection.leadId ? parseManagerId(selection.leadId) : null,
-    assistant_manager_ids: selection.assistantIds.map(parseManagerId),
   }
 }
 

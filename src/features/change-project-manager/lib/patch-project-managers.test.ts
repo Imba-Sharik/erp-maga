@@ -42,34 +42,14 @@ describe('patchProjectManagers', () => {
     expect(result).toMatchObject({ manager: 'Иванов', leadManagerId: '1' })
   })
 
-  it('isLeadManager=true, если ведущий — текущий пользователь', () => {
-    const result = patchProjectManagers(makeProject(), {
-      leadId: '9',
-      leadName: 'Я',
-      assistants: [],
-      currentUserId: '9',
-    })
-    expect(result.isLeadManager).toBe(true)
-  })
-
-  it('isLeadManager=false, если ведущий — другой', () => {
-    const result = patchProjectManagers(makeProject(), {
-      leadId: '1',
-      leadName: 'Иванов',
-      assistants: [],
-      currentUserId: '9',
-    })
-    expect(result.isLeadManager).toBe(false)
-  })
-
-  it('isAssistantManager=true, если пользователь среди вспомогательных', () => {
+  it('кладёт вспомогательных в assistantManagers (роль выводится на UI, не флагом)', () => {
     const result = patchProjectManagers(makeProject(), {
       leadId: '1',
       leadName: 'Иванов',
       assistants: [{ id: '9', fullName: 'Я' }],
       currentUserId: '9',
     })
-    expect(result.isAssistantManager).toBe(true)
+    expect(result.assistantManagers).toEqual([{ id: '9', fullName: 'Я' }])
   })
 
   it('canEdit=true для ведущего', () => {

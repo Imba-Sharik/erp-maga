@@ -1,23 +1,16 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import { useCurrentUser } from '@/entities/current-user'
 import { invalidateManagersDirectory } from '@/entities/manager'
 import { projectToApiListRow, type Project, type ProjectAssistantManager } from '@/entities/project'
-import { useProjectsPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsPartialUpdate'
-import {
-  invalidateProjectAfterTransition,
-  patchProjectInMatchingCaches,
-  restoreQueryCaches,
-  snapshotTransitionCaches,
-  type QueryCacheSnapshot,
-} from '@/shared/api'
+import { projectsAssistantManagerAdd } from '@/shared/api/generated/clients/projectsController/projectsAssistantManagerAdd'
+import { projectsAssistantManagerBulkRemove } from '@/shared/api/generated/clients/projectsController/projectsAssistantManagerBulkRemove'
+import { projectsPartialUpdate } from '@/shared/api/generated/clients/projectsController/projectsPartialUpdate'
+import { invalidateProjectAfterTransition, patchProjectInMatchingCaches } from '@/shared/api'
 
+import { diffAssistantManagers } from '../lib/diff-assistant-managers'
 import { getChangeManagerErrorMessage } from '../lib/get-change-manager-error-message'
-import {
-  buildChangeManagersRequest,
-  type LeadAssistantsSelection,
-} from '../lib/lead-assistants-form'
 import { patchProjectManagers } from '../lib/patch-project-managers'
 
 export interface ChangeProjectManagersInput {
@@ -31,42 +24,75 @@ interface UseChangeProjectManagersOptions {
   onSuccess?: () => void
 }
 
+interface ChangeManagersVariables {
+  projectId: number
+  magManagerId: number | null
+  leadChanged: boolean
+  toAdd: number[]
+  toRemove: number[]
+}
+
 /**
  * Назначение ведущего + вспомогательных менеджеров (ERP-189).
  *
- * Бэк пока хранит только ведущего, поэтому на сервер уходит ТОЛЬКО `mag_manager_id`,
- * а вспомогательные применяются оптимистично в кэше (см. patchProjectManagers).
- * Списки НЕ инвалидируем: рефетч затёр бы вспомогательных (бэк их не возвращает) —
- * оптимистичное состояние держим до конца сессии. При ошибке кэш откатывается.
- *
- * TODO(ERP-189): когда бэк примет `assistant_manager_ids` — слать
- * `buildChangeManagersRequest(selection)` целиком и вернуть обычную инвалидацию списков.
+ * Бэк хранит вспомогательных через bulk-ручки, поэтому submit раскладывается максимум в 3
+ * запроса: PATCH ведущего (если сменился) → bulk-remove снятых → bulk-add добавленных.
+ * Порядок важен: бэк отклоняет добавление текущего `mag_manager` в ассистенты, поэтому ведущий
+ * финализируется раньше add (новый ведущий уже убран формой из набора ассистентов).
+ * После завершения серии — обычная инвалидация (бэк теперь отдаёт `assistant_managers`,
+ * рефетч = истина). Оптимистичный патч — лишь для мгновенного отклика; ошибку примиряет рефетч.
  */
 export function useChangeProjectManagers({ onSuccess }: UseChangeProjectManagersOptions = {}) {
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
-  const mutation = useProjectsPartialUpdate()
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      projectId,
+      magManagerId,
+      leadChanged,
+      toAdd,
+      toRemove,
+    }: ChangeManagersVariables) => {
+      if (leadChanged) {
+        await projectsPartialUpdate(projectId, { mag_manager_id: magManagerId })
+      }
+      if (toRemove.length > 0) {
+        await projectsAssistantManagerBulkRemove(projectId, { manager_ids: toRemove })
+      }
+      if (toAdd.length > 0) {
+        await projectsAssistantManagerAdd(projectId, { manager_ids: toAdd })
+      }
+    },
+    onSettled: (_data, _error, variables) => {
+      invalidateProjectAfterTransition(queryClient, variables.projectId)
+      invalidateManagersDirectory(queryClient)
+    },
+    onSuccess: () => {
+      onSuccess?.()
+    },
+  })
 
   const submit = useCallback(
     ({ project, leadId, leadName, assistants }: ChangeProjectManagersInput) => {
       const projectId = Number(project.id)
       if (!Number.isFinite(projectId)) return
 
-      const selection: LeadAssistantsSelection = {
-        leadId,
-        assistantIds: assistants.map((a) => a.id),
-      }
-      // Невалидный id (в т.ч. синтетический `name:`) — buildChangeManagersRequest бросит.
-      let request: ReturnType<typeof buildChangeManagersRequest>
-      try {
-        request = buildChangeManagersRequest(selection)
-      } catch {
+      const magManagerId = leadId ? Number(leadId) : null
+      // Синтетический id ведущего (`name:`) нельзя отправить на бэк.
+      if (leadId !== null && magManagerId !== null && !Number.isFinite(magManagerId)) return
+
+      const leadChanged = (project.leadManagerId ?? null) !== (leadId ?? null)
+      const { toAdd, toRemove } = diffAssistantManagers(
+        (project.assistantManagers ?? []).map((a) => a.id),
+        assistants.map((a) => a.id),
+      )
+
+      if (!leadChanged && toAdd.length === 0 && toRemove.length === 0) {
+        onSuccess?.()
         return
       }
 
-      const snapshot: QueryCacheSnapshot = snapshotTransitionCaches(queryClient, {
-        projectsList: true,
-      })
       const optimistic = patchProjectManagers(project, {
         leadId,
         leadName,
@@ -75,19 +101,7 @@ export function useChangeProjectManagers({ onSuccess }: UseChangeProjectManagers
       })
       patchProjectInMatchingCaches(queryClient, projectToApiListRow(optimistic))
 
-      mutation.mutate(
-        { id: projectId, data: { mag_manager_id: request.mag_manager_id } },
-        {
-          onSuccess: () => {
-            invalidateProjectAfterTransition(queryClient, projectId)
-            invalidateManagersDirectory(queryClient)
-            onSuccess?.()
-          },
-          onError: () => {
-            restoreQueryCaches(queryClient, snapshot)
-          },
-        },
-      )
+      mutation.mutate({ projectId, magManagerId, leadChanged, toAdd, toRemove })
     },
     [currentUser.id, mutation, onSuccess, queryClient],
   )

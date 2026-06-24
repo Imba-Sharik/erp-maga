@@ -3,7 +3,6 @@ export type { ChangeProjectManagerDialogProps } from './ui/change-project-manage
 export { useChangeProjectManagers } from './model/use-change-project-managers'
 export type { ChangeProjectManagersInput } from './model/use-change-project-managers'
 export {
-  buildChangeManagersRequest,
   getLeadAssistantsErrorMessage,
   resolveLeadAssistantsState,
   setLead,

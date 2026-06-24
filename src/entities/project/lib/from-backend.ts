@@ -10,13 +10,12 @@ import { mapBackendArticles } from '@/entities/project-article'
 import { mapBackendDocumentFile, type StageDocumentFile } from '@/entities/project-document'
 import type { StageDocumentType } from '@/entities/stage-document-file'
 
-import { mapAssistantManagers, type RawAssistantManager } from './map-assistant-managers'
+import { mapAssistantManagers } from './map-assistant-managers'
 import { projectVenueFieldsFromHalls } from './map-project-halls'
 import {
   parsePlumEventStatusCode,
   plumEventStatusLabel as labelByPlumStatusCode,
 } from './plum-event-status-catalog'
-import { resolveIsLeadManager } from './resolve-is-lead-manager'
 import type {
   Project,
   ProjectDetail,
@@ -34,10 +33,6 @@ type BackendProjectListExtras = {
   bonus_calculated_total?: number
   bonus_approved_total?: number
   is_from_plum?: boolean
-  // ERP-189: вспомогательные менеджеры. Бэк ещё не отдаёт — degrade в пусто/false.
-  assistant_managers?: readonly RawAssistantManager[]
-  is_lead_manager?: boolean
-  is_assistant_manager?: boolean
 }
 
 function mapPlumEventStatusLabel(raw: string | undefined): string | null {
@@ -156,8 +151,6 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     manager: b.mag_manager?.full_name ?? '',
     leadManagerId: b.mag_manager ? String(b.mag_manager.id) : null,
     ...(assistantManagers.length ? { assistantManagers } : {}),
-    isLeadManager: resolveIsLeadManager(raw),
-    isAssistantManager: Boolean(raw.is_assistant_manager),
     canClaim: Boolean(b.can_claim),
     canEdit: Boolean(b.can_edit),
     isReadOnly: Boolean(b.is_read_only),

@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/utils'
 import { formatRelativeUpdateLabel } from '@/shared/lib/date'
 import { Card } from '@/shared/ui/card'
 import { stageCardBorderClass } from '@/entities/stage-draft'
+import { useCurrentUser } from '@/entities/current-user'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { projectDetailPath } from '../lib/project-detail-path'
+import { isProjectLeadManager } from '../lib/resolve-manager-role'
 import type { Project, ProjectBackOrigin } from '../model/types'
 import { ProjectManagerBadge } from './project-manager-badge'
 import { ProjectPlumStatusLine } from './project-plum-status-line'
@@ -54,6 +56,7 @@ export function ProjectPipelineCard({
   renderAssistantMenu,
 }: ProjectPipelineCardProps) {
   const navigate = useNavigate()
+  const currentUser = useCurrentUser()
   const goToDetail = () =>
     navigate(projectDetailPath(project.id, backOrigin), { state: backOrigin })
   const stop = (e: React.MouseEvent) => e.stopPropagation()
@@ -62,7 +65,8 @@ export function ProjectPipelineCard({
   const canMoveOutsideMag = Boolean(onMoveOutsideMag && !project.isReadOnly)
   // Меню вспомогательных доступно только ведущему менеджеру (ERP-189).
   const assistantMenu = renderAssistantMenu?.(project)
-  const canManageAssistants = Boolean(renderAssistantMenu && project.isLeadManager)
+  const canManageAssistants =
+    Boolean(renderAssistantMenu) && isProjectLeadManager(project, currentUser.id)
   const hasMenu = Boolean(
     canClaim || canMoveOutsideMag || onChangeManager || onDeleteProject || canManageAssistants,
   )

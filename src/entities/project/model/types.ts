@@ -73,16 +73,8 @@ export interface Project {
    * `null`, если проект в пуле. ERP-189.
    */
   leadManagerId?: string | null
-  /** Вспомогательные менеджеры проекта (ERP-189). Пусто, пока бэк не отдаёт поле. */
+  /** Вспомогательные менеджеры проекта (ERP-189): `id` — user id, `fullName` — имя. */
   assistantManagers?: ProjectAssistantManager[]
-  /**
-   * Текущий пользователь — ВЕДУЩИЙ менеджер проекта (ERP-189). Управляет цветом
-   * бейджа «Ведущий мен.» (зелёный/жёлтый). Намеренно НЕ выводится из `canEdit`,
-   * т.к. `canEdit` теперь true и у вспомогательного менеджера.
-   */
-  isLeadManager?: boolean
-  /** Текущий пользователь — ВСПОМОГАТЕЛЬНЫЙ менеджер проекта (ERP-189). */
-  isAssistantManager?: boolean
   /**
    * Менеджер может «Взять проект» из пула (`can_claim`): он привязан к залу,
    * а `mag_manager` пуст. Источник — `ProjectManagerAccess` на бэке.

@@ -40,8 +40,8 @@ export {
   mapBackendCalendarProject,
   mapBackendCalendarProjects,
 } from './lib/from-backend'
-export type { ChangeManagersRequest } from './model/manager-assignment'
 export { projectToApiListRow } from './lib/project-to-api-list-row'
+export { isProjectLeadManager, isProjectAssistantManager } from './lib/resolve-manager-role'
 export { resolveProjectReadOnly } from './lib/project-edit-access'
 export { getOutsideMagReasonLabel } from './lib/outside-mag-reason'
 export { PREPROJECT_STAGE_TO_API, preprojectStageToApi } from './lib/preproject-stage-api'

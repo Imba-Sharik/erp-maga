@@ -11,10 +11,11 @@ export interface ProjectManagersPatch {
 }
 
 /**
- * Оптимистичное состояние проекта после назначения менеджеров (ERP-189). Бэк пока не
- * хранит вспомогательных, поэтому патчим локальный кэш для отображения в рамках сессии.
- * `canEdit` НЕ понижаем (директор/прочие сохраняют доступ) — только повышаем, если
- * текущий пользователь стал ведущим или вспомогательным. Не мутирует вход.
+ * Оптимистичное состояние проекта после назначения менеджеров (ERP-189) — мгновенный
+ * отклик до рефетча. Роль «я ведущий/вспомогательный» выводится на UI из `leadManagerId`/
+ * `assistantManagers`, поэтому здесь отдельные флаги не пишем. `currentUserId` нужен лишь
+ * чтобы поднять `canEdit`, если текущий пользователь стал ведущим/вспомогательным
+ * (понижать `canEdit` нельзя — директор/прочие сохраняют доступ). Не мутирует вход.
  */
 export function patchProjectManagers(project: Project, next: ProjectManagersPatch): Project {
   const isLead = next.leadId != null && next.leadId === next.currentUserId
@@ -24,8 +25,6 @@ export function patchProjectManagers(project: Project, next: ProjectManagersPatc
     manager: next.leadName,
     leadManagerId: next.leadId,
     assistantManagers: next.assistants,
-    isLeadManager: isLead,
-    isAssistantManager: isAssistant,
     canEdit: project.canEdit || isLead || isAssistant,
   }
 }

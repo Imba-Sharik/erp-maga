@@ -1,8 +1,10 @@
+import { useCurrentUser } from '@/entities/current-user'
 import { useUserRole } from '@/entities/user-role'
 import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
 
 import { resolveManagerBadges } from '../lib/manager-badges'
+import { isProjectLeadManager } from '../lib/resolve-manager-role'
 import type { Project } from '../model/types'
 
 interface ProjectManagerBadgeProps {
@@ -17,9 +19,10 @@ interface ProjectManagerBadgeProps {
  */
 export function ProjectManagerBadge({ project, className }: ProjectManagerBadgeProps) {
   const isManager = useUserRole() === 'manager'
+  const currentUser = useCurrentUser()
   const rows = resolveManagerBadges({
     isManager,
-    isLeadManager: Boolean(project.isLeadManager),
+    isLeadManager: isProjectLeadManager(project, currentUser.id),
     leadName: project.manager,
     assistantNames: (project.assistantManagers ?? []).map((a) => a.fullName),
   })

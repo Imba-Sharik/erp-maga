@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import type { ManagerSelectOption } from '@/entities/manager'
 
 import {
-  buildChangeManagersRequest,
   getLeadAssistantsErrorMessage,
   resolveLeadAssistantsState,
   setLead,
@@ -155,40 +154,6 @@ describe('setLead', () => {
     const selection: LeadAssistantsSelection = { leadId: '1', assistantIds: ['2'] }
     setLead(selection, '2')
     expect(selection.assistantIds).toEqual(['2'])
-  })
-})
-
-describe('buildChangeManagersRequest', () => {
-  it('mag_manager_id=null при пустом ведущем', () => {
-    expect(buildChangeManagersRequest(EMPTY).mag_manager_id).toBeNull()
-  })
-
-  it('числовой mag_manager_id', () => {
-    expect(buildChangeManagersRequest({ leadId: '5', assistantIds: [] }).mag_manager_id).toBe(5)
-  })
-
-  it('assistant_manager_ids — числа в исходном порядке', () => {
-    expect(
-      buildChangeManagersRequest({ leadId: '1', assistantIds: ['3', '2'] }).assistant_manager_ids,
-    ).toEqual([3, 2])
-  })
-
-  it('пустой массив без вспомогательных', () => {
-    expect(
-      buildChangeManagersRequest({ leadId: '1', assistantIds: [] }).assistant_manager_ids,
-    ).toEqual([])
-  })
-
-  it('бросает на нечисловом id ведущего', () => {
-    expect(() => buildChangeManagersRequest({ leadId: 'name:Иванов', assistantIds: [] })).toThrow(
-      'Invalid manager id',
-    )
-  })
-
-  it('бросает на синтетическом name:* среди вспомогательных', () => {
-    expect(() =>
-      buildChangeManagersRequest({ leadId: '1', assistantIds: ['name:Петров'] }),
-    ).toThrow('Invalid manager id')
   })
 })
 
