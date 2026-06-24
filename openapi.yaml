@@ -499,9 +499,14 @@ paths:
       - in: query
         name: manager
         schema:
-          type: integer
-        description: ID менеджера MAG. Доступно lead/admin; менеджер всегда видит
-          только себя.
+          type: array
+          items:
+            type: integer
+        description: Один или несколько ID менеджеров через запятую (например `?manager=1,2`).
+          Доступно руководителю и администратору; менеджер MAG всегда видит только
+          свои встречи.
+        explode: false
+        style: form
       - in: query
         name: offset
         schema:
@@ -703,9 +708,14 @@ paths:
       - in: query
         name: manager
         schema:
-          type: integer
-        description: ID менеджера MAG. Доступно lead/admin; менеджер всегда видит
-          только себя.
+          type: array
+          items:
+            type: integer
+        description: Один или несколько ID менеджеров через запятую (например `?manager=1,2`).
+          Доступно руководителю и администратору; менеджер MAG всегда видит только
+          свои встречи.
+        explode: false
+        style: form
       - in: query
         name: month
         schema:
@@ -799,10 +809,11 @@ paths:
         archived_only (true — только архив). По умолчанию проекты в стадии archived
         не возвращаются. Пагинация: limit, offset (LimitOffset, по умолчанию limit=10).
         В элементе списка: halls[] (внутренние hall_id/loft_id MAG), `mag_manager`
-        — объект `{id, full_name, email}` или null (назначенный в MAG); для MAG_MANAGER:
-        `can_claim` (кнопка «Взять»), `can_edit`, `is_read_only`; `plum_mag_manager`
-        — текст из Plum (справочно). sync_error — предупреждение синка (напр. зал
-        не в каталоге).'
+        — объект `{id, full_name, email}` или null (назначенный в MAG); `assistant_managers[]`
+        — вспомогательные менеджеры проекта; для MAG_MANAGER: `can_claim` (кнопка
+        «Взять»), `can_edit` (true для основного или вспомогательного), `is_read_only`;
+        `plum_mag_manager` — текст из Plum (справочно). sync_error — предупреждение
+        синка (напр. зал не в каталоге).'
       summary: Список проектов
       parameters:
       - in: query
@@ -1113,6 +1124,158 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+  /api/v1/projects/{id}/assistant-managers/:
+    post:
+      operationId: projects_assistant_manager_add
+      description: |-
+        Добавляет одного или нескольких вспомогательных менеджеров к проекту. Для single add передайте `manager_id`, для bulk add — `manager_ids[]`.
+
+        **Права:** основной менеджер проекта (`mag_manager`), руководитель (`lead`), администратор.
+
+        **Ограничения:**
+        - Менеджер должен покрывать хотя бы один зал проекта через матрицу назначений.
+        - Нельзя добавить основного менеджера проекта.
+        - Нельзя добавить одного менеджера повторно.
+        - Проект не должен быть в стадии `closed`, `archived`, `out_of_mag_scope`.
+
+        Bulk add выполняется all-or-nothing: если один ID не проходит проверку, не добавляется никто.
+
+        Вспомогательный менеджер появляется в поле `assistant_managers[]` ответа проекта, получает `can_edit=true` и может выполнять те же переходы, что основной менеджер (кроме переходов, запрещённых для MAG_MANAGER). Бонусы остаются на основном `mag_manager`/`BonusCalculation.recipient`.
+
+        После добавления менеджер получает уведомление (ERP + Telegram, если привязан).
+      summary: Добавить вспомогательного менеджера
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/_AssistantManagerAddRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/_AssistantManagerAddRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/_AssistantManagerAddRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantManagerAddResponse'
+          description: 'Single add возвращает объект manager. Bulk add возвращает
+            объект `{ results: [...] }`.'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Проект не найден
+  /api/v1/projects/{id}/assistant-managers/{manager_id}/:
+    delete:
+      operationId: projects_assistant_manager_remove
+      description: |-
+        Удаляет вспомогательного менеджера с проекта.
+
+        **Права:** основной менеджер проекта (`mag_manager`), руководитель (`lead`), администратор.
+
+        Если у менеджера снимается зал в матрице и он больше не покрывает проект, такая связь удаляется автоматически. Если основной менеджер теряет покрытие, первый подходящий вспомогательный может быть повышен до `mag_manager`.
+
+        После снятия менеджер получает уведомление (ERP + Telegram, если привязан).
+      summary: Снять вспомогательного менеджера
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: manager_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Менеджер снят
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Проект или менеджер не найден
+  /api/v1/projects/{id}/assistant-managers/bulk-remove/:
+    post:
+      operationId: projects_assistant_manager_bulk_remove
+      description: |-
+        Удаляет нескольких вспомогательных менеджеров с проекта.
+
+        **Права:** основной менеджер проекта (`mag_manager`), руководитель (`lead`), администратор.
+
+        Операция all-or-nothing: если один manager_id не является вспомогательным для проекта, никто не удаляется.
+
+        После снятия каждый менеджер получает уведомление (ERP + Telegram, если привязан).
+      summary: Снять нескольких вспомогательных менеджеров
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/_AssistantManagerBulkRemoveRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/_AssistantManagerBulkRemoveRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/_AssistantManagerBulkRemoveRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Менеджеры сняты
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Проект не найден
   /api/v1/projects/{id}/audit-log/:
     get:
       operationId: projects_audit_log_list
@@ -2293,7 +2456,7 @@ paths:
         schema:
           type: string
           format: date
-        description: Дата выбранного дня.
+        description: Дата выбранного дня (YYYY-MM-DD).
       - in: query
         name: limit
         schema:
@@ -2302,9 +2465,14 @@ paths:
       - in: query
         name: manager
         schema:
-          type: string
-        description: 'Фильтр по менеджеру: один или несколько ID через запятую (`manager=1,2`).
-          Доступен только руководителю и администратору.'
+          type: array
+          items:
+            type: integer
+        description: Один или несколько ID пользователей через запятую (например `?manager=1,2`).
+          Доступно руководителю и администратору; менеджер MAG всегда видит только
+          свои напоминания.
+        explode: false
+        style: form
       - in: query
         name: offset
         schema:
@@ -2314,7 +2482,7 @@ paths:
         name: project
         schema:
           type: integer
-        description: ID проекта — напоминания, привязанные к этому проекту.
+        description: ID проекта — только напоминания, привязанные к этому проекту.
       tags:
       - reminders
       security:
@@ -2514,9 +2682,14 @@ paths:
       - in: query
         name: manager
         schema:
-          type: string
-        description: 'Фильтр по менеджеру: один или несколько ID через запятую. Доступен
-          только руководителю и администратору.'
+          type: array
+          items:
+            type: integer
+        description: Один или несколько ID пользователей через запятую (например `?manager=1,2`).
+          Доступно руководителю и администратору; менеджер MAG всегда видит только
+          свои напоминания.
+        explode: false
+        style: form
       - in: query
         name: month
         schema:
@@ -2526,7 +2699,7 @@ paths:
         name: project
         schema:
           type: integer
-        description: ID проекта.
+        description: ID проекта — только напоминания, привязанные к этому проекту.
       - in: query
         name: year
         schema:
@@ -2756,6 +2929,28 @@ components:
       required:
       - code
       - label
+    AssistantManagerAddResponse:
+      oneOf:
+      - $ref: '#/components/schemas/_AssistantManagerResponse'
+      - $ref: '#/components/schemas/_AssistantManagerBulkResponse'
+    AssistantManagerBrief:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        manager_id:
+          type: integer
+          title: Вспомогательный менеджер
+          readOnly: true
+          description: ID вспомогательного MAG-менеджера проекта.
+        full_name:
+          type: string
+          readOnly: true
+      required:
+      - full_name
+      - id
+      - manager_id
     BacklineCreatedSchema:
       type: object
       properties:
@@ -3309,6 +3504,8 @@ components:
           - documents_re_requested
           - documents_reuploaded
           - reminder_due
+          - assistant_manager_assigned
+          - assistant_manager_unassigned
           - other
           type: string
           description: |-
@@ -3322,8 +3519,10 @@ components:
             * `documents_re_requested` - Повторный запрос документов
             * `documents_reuploaded` - Документы прикреплены повторно
             * `reminder_due` - Напоминание
+            * `assistant_manager_assigned` - Назначен вспомогательным менеджером
+            * `assistant_manager_unassigned` - Снят как вспомогательный менеджер
             * `other` - Прочее
-          x-spec-enum-id: 1d005612a26c9a11
+          x-spec-enum-id: ddc93a4d4db8f2b9
           readOnly: true
           title: Тип события
         title:
@@ -3498,6 +3697,11 @@ components:
           - $ref: '#/components/schemas/MagManagerBrief'
           nullable: true
           readOnly: true
+        assistant_managers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantManagerBrief'
+          readOnly: true
         can_claim:
           type: boolean
           readOnly: true
@@ -3505,11 +3709,13 @@ components:
         can_edit:
           type: boolean
           readOnly: true
-          description: Менеджер ведёт проект (mag_manager_id == user.id).
+          description: 'Пользователь может редактировать проект: lead — всегда true;
+            MAG_MANAGER — если он основной mag_manager или есть в assistant_managers.'
         is_read_only:
           type: boolean
           readOnly: true
-          description: Менеджер видит проект, но не ведёт (пул или чужой claim).
+          description: MAG_MANAGER видит проект, но не может редактировать (пул/чужой
+            claim/нет роли вспомогательного).
         sales_total:
           type: number
           format: double
@@ -3641,6 +3847,7 @@ components:
           nullable: true
           readOnly: true
       required:
+      - assistant_managers
       - can_claim
       - can_edit
       - city
@@ -4119,11 +4326,12 @@ components:
             self).
         can_edit:
           type: boolean
-          description: 'Агрегат прав редактирования: lead — всегда true; менеджер
-            — только владелец.'
+          description: 'Агрегат прав редактирования: lead — всегда true; MAG_MANAGER
+            — если он основной mag_manager или вспомогательный менеджер проекта.'
         is_read_only:
           type: boolean
-          description: Менеджер видит проект, но не ведёт его (пул или чужой claim).
+          description: MAG_MANAGER видит проект, но не может редактировать (пул/чужой
+            claim/нет роли вспомогательного).
         data_rejected:
           type: boolean
         was_not_ready_for_event:
@@ -4280,6 +4488,11 @@ components:
           - $ref: '#/components/schemas/MagManagerBrief'
           nullable: true
           readOnly: true
+        assistant_managers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantManagerBrief'
+          readOnly: true
         can_claim:
           type: boolean
           readOnly: true
@@ -4287,11 +4500,13 @@ components:
         can_edit:
           type: boolean
           readOnly: true
-          description: Менеджер ведёт проект (mag_manager_id == user.id).
+          description: 'Пользователь может редактировать проект: lead — всегда true;
+            MAG_MANAGER — если он основной mag_manager или есть в assistant_managers.'
         is_read_only:
           type: boolean
           readOnly: true
-          description: Менеджер видит проект, но не ведёт (пул или чужой claim).
+          description: MAG_MANAGER видит проект, но не может редактировать (пул/чужой
+            claim/нет роли вспомогательного).
         sales_total:
           type: number
           format: double
@@ -4405,6 +4620,7 @@ components:
           format: date-time
           readOnly: true
       required:
+      - assistant_managers
       - can_claim
       - can_edit
       - city
@@ -4885,6 +5101,11 @@ components:
           - $ref: '#/components/schemas/MagManagerBrief'
           nullable: true
           readOnly: true
+        assistant_managers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantManagerBrief'
+          readOnly: true
         can_claim:
           type: boolean
           readOnly: true
@@ -4892,11 +5113,13 @@ components:
         can_edit:
           type: boolean
           readOnly: true
-          description: Менеджер ведёт проект (mag_manager_id == user.id).
+          description: 'Пользователь может редактировать проект: lead — всегда true;
+            MAG_MANAGER — если он основной mag_manager или есть в assistant_managers.'
         is_read_only:
           type: boolean
           readOnly: true
-          description: Менеджер видит проект, но не ведёт (пул или чужой claim).
+          description: MAG_MANAGER видит проект, но не может редактировать (пул/чужой
+            claim/нет роли вспомогательного).
         sales_total:
           type: number
           format: double
@@ -5359,6 +5582,7 @@ components:
       required:
       - archived_at
       - articles
+      - assistant_managers
       - bonus_approved_at
       - bonus_approved_by
       - bonus_approved_total
@@ -6313,6 +6537,58 @@ components:
       - telegram_username
       - updated_at
       - username
+    _AssistantManagerAddRequest:
+      type: object
+      properties:
+        manager_id:
+          type: integer
+          description: ID менеджера MAG, которого нужно добавить как вспомогательного
+        manager_ids:
+          type: array
+          items:
+            type: integer
+          description: ID менеджеров MAG для bulk-добавления. Передавайте либо manager_id,
+            либо manager_ids.
+    _AssistantManagerBulkRemoveRequest:
+      type: object
+      properties:
+        manager_ids:
+          type: array
+          items:
+            type: integer
+          description: ID вспомогательных менеджеров, которых нужно снять с проекта
+      required:
+      - manager_ids
+    _AssistantManagerBulkResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/_AssistantManagerResponse'
+      required:
+      - results
+    _AssistantManagerResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        manager_id:
+          type: integer
+        manager_email:
+          type: string
+          format: email
+        manager_full_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - id
+      - manager_email
+      - manager_full_name
+      - manager_id
     WsNotificationPayload:
       type: object
       required:
