@@ -20,17 +20,21 @@ export function NotificationDaySection({ notifications, onRead }: NotificationDa
   return (
     <Collapsible defaultOpen asChild>
       <section className="flex flex-col gap-2">
-        <div className="flex items-center gap-1.5 px-1">
-          <h2 className="text-xs font-semibold tracking-wide text-[#ACACAC] uppercase">
-            {formatNotificationDayHeader(latest.createdAt)}
-          </h2>
-          {collapsible && (
+        <div className="px-1">
+          {collapsible ? (
             <CollapsibleTrigger
               aria-label={`Свернуть уведомления (ещё ${rest.length})`}
-              className="group flex items-center rounded-md text-[#ACACAC] transition-colors hover:text-[#6B6B6B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              className="group focus-visible:ring-ring/40 flex items-center gap-1.5 rounded-md py-1 text-[#ACACAC] transition-colors hover:text-[#6B6B6B] focus-visible:ring-2 focus-visible:outline-none"
             >
+              <h2 className="text-xs font-semibold tracking-wide uppercase">
+                {formatNotificationDayHeader(latest.createdAt)}
+              </h2>
               <ChevronDown className="size-4 transition-transform group-data-[state=closed]:-rotate-90" />
             </CollapsibleTrigger>
+          ) : (
+            <h2 className="py-1 text-xs font-semibold tracking-wide text-[#ACACAC] uppercase">
+              {formatNotificationDayHeader(latest.createdAt)}
+            </h2>
           )}
         </div>
 
