@@ -29,7 +29,9 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   const readOnly = resolveProjectReadOnly(project)
   // Баннер «ведёт другой менеджер» уместен только для занятого проекта. Свободный
   // (из пула, без назначения) тоже read-only, но его никто не ведёт — баннер не нужен.
-  const showReadOnlyBanner = readOnly && Boolean(project.manager)
+  // Руководителю (director) баннер не показываем (ERP-197): он и так открывает любой
+  // проект в режиме просмотра, и подпись про «другого менеджера» для него — лишний шум.
+  const showReadOnlyBanner = readOnly && Boolean(project.manager) && currentUser.role !== 'director'
   const showOutsideMagButton =
     STAGE_FUNNEL[project.stage] === 'pre_project' && !isOutsideMagStage(project.stage) && !readOnly
 
@@ -70,8 +72,7 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
               // Руководитель/админ ведут напоминания в любом проекте (ERP-187), в т.ч.
               // read-only; менеджер — только в редактируемом. Править/удалять — лишь свои.
               canCreate={
-                canCreateReminder(currentUser.role) &&
-                (currentUser.role !== 'manager' || !readOnly)
+                canCreateReminder(currentUser.role) && (currentUser.role !== 'manager' || !readOnly)
               }
               canEditReminder={(reminder) =>
                 canModifyReminder({ role: currentUser.role, ownerId, reminder })
