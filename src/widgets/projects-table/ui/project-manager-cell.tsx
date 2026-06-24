@@ -126,7 +126,7 @@ export function ProjectManagerCell({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="max-h-72 min-w-64 p-0"
+                className="max-h-72 max-w-[18rem] min-w-64 p-0"
                 onCloseAutoFocus={(e) => e.preventDefault()}
               >
                 <div className="max-h-52 overflow-y-auto p-1">
@@ -196,12 +196,14 @@ export function ProjectManagerCell({
                     <DropdownMenuSeparator />
                     <div className="flex flex-col gap-1.5 p-1.5">
                       {state.errorKey ? (
-                        <p className="text-destructive px-0.5 text-sm">
+                        <p className="text-destructive px-0.5 text-sm wrap-break-word whitespace-normal">
                           {getLeadAssistantsErrorMessage(state.errorKey)}
                         </p>
                       ) : null}
                       {errorMessage ? (
-                        <p className="text-destructive px-0.5 text-sm">{errorMessage}</p>
+                        <p className="text-destructive px-0.5 text-sm wrap-break-word whitespace-normal">
+                          {errorMessage}
+                        </p>
                       ) : null}
                       <Button
                         type="button"
