@@ -172,6 +172,15 @@ export function useStageFlow({
 
   const isCurrent = useCallback((stage: ProjectStage) => stage === currentStage, [currentStage])
 
+  // Сервер может сменить этап в обход локального flow — например, откат на предыдущий
+  // этап (отдельный эндпоинт пишет свежий ProjectDetail в кэш, но не зовёт
+  // applyAdvanceLocally). Подхватываем серверный этап, чтобы секция переключилась без
+  // перезагрузки. Для advance безопасно: к приходу свежих данных currentStage уже равен
+  // новому initialStage (выставлен оптимистично) — эффект становится no-op.
+  useEffect(() => {
+    setCurrentStage(initialStage)
+  }, [initialStage])
+
   const getRecord = useCallback((stage: ProjectStage) => records[stage], [records])
 
   const applyAdvanceLocally = useCallback(
