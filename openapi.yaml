@@ -537,8 +537,8 @@ paths:
           description: ''
     post:
       operationId: meetings_create
-      description: Доступно только менеджеру MAG; владелец встречи берётся из текущего
-        пользователя. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
+      description: Доступно менеджеру MAG и руководителю; владелец встречи берётся
+        из текущего пользователя. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
       summary: Создать встречу
       tags:
       - meetings
@@ -680,7 +680,9 @@ paths:
   /api/v1/meetings/calendar/:
     get:
       operationId: meetings_calendar_retrieve
-      description: Фильтры `loft` и `hall` — по привязанным залам встречи.
+      description: Фильтры `loft` и `hall` — по привязанным залам встречи. Поле `reminders`
+        содержит напоминания за тот же период для руководителя; для остальных ролей
+        возвращается пустой список.
       summary: Календарь встреч за месяц или период
       parameters:
       - in: query
@@ -1177,7 +1179,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PipelineError'
+                $ref: '#/components/schemas/ValidationErrorResponse'
           description: ''
         '403':
           content:
@@ -1217,6 +1219,12 @@ paths:
       responses:
         '204':
           description: Менеджер снят
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+          description: ''
         '403':
           content:
             application/json:
@@ -1266,7 +1274,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PipelineError'
+                $ref: '#/components/schemas/ValidationErrorResponse'
           description: ''
         '403':
           content:
@@ -1282,13 +1290,37 @@ paths:
       description: |-
         Полный audit-log (§28 ТЗ) для блока «Лог действий» в карточке проекта.
 
-        Каждая запись: кто (user), когда (created_at), действие (action_type / action_label), поле (field_name), старое/новое (old_value / new_value), источник (source: user | system | plum), доп. данные (metadata).
+        Каждая запись: кто (user), когда (created_at), действие (action_type / action_label), поле (field_name), старое/новое (old_value / new_value), этап на момент действия (stage), источник (source: user | system | plum), доп. данные (metadata). Для перехода A → B поле `stage` содержит A, а from/to остаются в `old_value` / `new_value`.
 
-        Типы action_type: stage_change, field_change, plum_sync, project_created, out_of_mag, out_of_mag_return, bonus_manual_change, data_rejected, data_confirmed, project_deleted, other.
+        Типы action_type: stage_change, field_change, plum_sync, project_created, out_of_mag, out_of_mag_return, bonus_manual_change, data_rejected, data_confirmed, stage_rollback, project_deleted, other.
 
         Пагинация: limit, offset (ответ: count, next, previous, results).
       summary: Лог действий по проекту
       parameters:
+      - in: query
+        name: action_type
+        schema:
+          type: string
+          enum:
+          - bonus_manual_change
+          - data_confirmed
+          - data_rejected
+          - field_change
+          - other
+          - out_of_mag
+          - out_of_mag_return
+          - plum_sync
+          - project_created
+          - project_deleted
+          - stage_change
+          - stage_rollback
+        description: Фильтр по типу действия audit-log
+      - in: query
+        name: field_name
+        schema:
+          type: string
+        description: Фильтр по имени изменённого поля, например `mag_manager` или
+          `assistant_managers`
       - in: path
         name: id
         schema:
@@ -1300,10 +1332,36 @@ paths:
           type: integer
         description: Размер страницы (по умолчанию 10, макс. 200)
       - in: query
+        name: manager_id
+        schema:
+          type: integer
+        description: Фильтр по `metadata.manager_id` для записей о вспомогательных
+          менеджерах
+      - in: query
         name: offset
         schema:
           type: integer
         description: Смещение для пагинации
+      - in: query
+        name: operation
+        schema:
+          type: string
+        description: Фильтр по `metadata.operation`, например `add` или `remove` для
+          assistant_managers
+      - in: query
+        name: source
+        schema:
+          type: string
+          enum:
+          - plum
+          - system
+          - user
+        description: 'Фильтр по источнику записи: user, system или plum'
+      - in: query
+        name: user
+        schema:
+          type: integer
+        description: Фильтр по ID пользователя, который выполнил действие
       tags:
       - projects
       security:
@@ -1577,6 +1635,9 @@ paths:
   /api/v1/projects/{id}/documents/:
     patch:
       operationId: projects_documents_partial_update
+      description: Подтверждение/повторный запрос закрывающих документов. Доступно
+        только бухгалтерии (`accountant`). Руководитель не подтверждает закрывающие
+        документы.
       summary: Обновить статусы документов
       parameters:
       - in: path
@@ -1784,6 +1845,64 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+  /api/v1/projects/{id}/rollback-stage/:
+    post:
+      operationId: projects_rollback_stage_create
+      description: Отдельное действие отката, доступное только руководителю. Система
+        сама определяет предыдущий этап по текущей стадии проекта. Для `event_held
+        → ready_to_event` обязательно передать новую `event_date`; для остальных откатов
+        тело может быть пустым.
+      summary: Откатить проект на предыдущий этап
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRollbackStageRequest'
+            examples:
+              ОткатБезPayload:
+                value: {}
+                summary: Откат без payload
+              EventHeld→ReadyToEvent:
+                value:
+                  event_date: '2026-07-15'
+                summary: event_held → ready_to_event
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRollbackStageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRollbackStageRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '404':
+          description: Проект не найден
   /api/v1/projects/{id}/sales/:
     get:
       operationId: projects_sales_retrieve
@@ -2511,7 +2630,7 @@ paths:
       description: |-
         Доступно менеджеру MAG, руководителю и администратору.
 
-        **Менеджер:** создаёт напоминание для себя (`manager_id` игнорируется).
+        **Менеджер:** создаёт напоминание для себя; `manager_id` запрещён и вернёт 400.
 
         **Руководитель / администратор:** создаёт напоминание для себя или, указав `manager_id`, для конкретного менеджера. В последнем случае менеджер увидит напоминание в своём списке; руководитель видит его через общий список (без фильтра или с `manager=<id>`).
 
@@ -3411,10 +3530,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Meeting'
+        reminders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reminder'
+          description: Напоминания за тот же период. Заполняется для lead; для остальных
+            ролей — пустой список.
       required:
       - count
       - period_end
       - period_start
+      - reminders
       - results
     MeetingCreateRequest:
       type: object
@@ -3598,6 +3724,11 @@ components:
           format: date
           readOnly: true
           title: Дата мероприятия
+        event_date_locked:
+          type: boolean
+          readOnly: true
+          title: Дата мероприятия зафиксирована вручную
+          description: Если True, Plum-sync не перезаписывает event_date
         halls:
           type: array
           items:
@@ -3854,6 +3985,7 @@ components:
       - city_labels
       - created_at
       - event_date
+      - event_date_locked
       - event_format
       - event_format_label
       - event_name
@@ -4389,6 +4521,11 @@ components:
           format: date
           readOnly: true
           title: Дата мероприятия
+        event_date_locked:
+          type: boolean
+          readOnly: true
+          title: Дата мероприятия зафиксирована вручную
+          description: Если True, Plum-sync не перезаписывает event_date
         halls:
           type: array
           items:
@@ -4627,6 +4764,7 @@ components:
       - city_labels
       - created_at
       - event_date
+      - event_date_locked
       - event_format
       - event_format_label
       - event_name
@@ -4729,6 +4867,7 @@ components:
         action_type:
           enum:
           - stage_change
+          - stage_rollback
           - field_change
           - plum_sync
           - project_created
@@ -4742,6 +4881,7 @@ components:
           type: string
           description: |-
             * `stage_change` - Смена стадии
+            * `stage_rollback` - Откат стадии
             * `field_change` - Изменение поля
             * `plum_sync` - Синхронизация Plum
             * `project_created` - Создание проекта
@@ -4752,7 +4892,7 @@ components:
             * `data_confirmed` - Данные подтверждены
             * `project_deleted` - Удаление проекта
             * `other` - Прочее
-          x-spec-enum-id: 9a482cfa3154e2b4
+          x-spec-enum-id: c9b2ed54e2a98a2d
           readOnly: true
           title: Тип действия
         action_label:
@@ -4770,6 +4910,45 @@ components:
           type: string
           readOnly: true
           title: Новое значение
+        stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          - null
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+          readOnly: true
+          nullable: true
+          title: Этап на момент действия
         source:
           enum:
           - user
@@ -4802,6 +4981,7 @@ components:
       - new_value
       - old_value
       - source
+      - stage
       - user
     ProjectCalendarItemSchema:
       type: object
@@ -5002,6 +5182,11 @@ components:
           format: date
           readOnly: true
           title: Дата мероприятия
+        event_date_locked:
+          type: boolean
+          readOnly: true
+          title: Дата мероприятия зафиксирована вручную
+          description: Если True, Plum-sync не перезаписывает event_date
         halls:
           type: array
           items:
@@ -5624,6 +5809,7 @@ components:
       - documents_confirmed_set_by
       - email
       - event_date
+      - event_date_locked
       - event_format
       - event_format_label
       - event_held_at
@@ -5811,6 +5997,12 @@ components:
       - hall_name
       - loft_id
       - loft_name
+    ProjectRollbackStageRequest:
+      type: object
+      properties:
+        event_date:
+          type: string
+          format: date
     ProjectTransitionRequest:
       type: object
       description: |-
@@ -5880,7 +6072,7 @@ components:
           type: string
           x-spec-enum-id: 69e1ee0236235aae
           description: |-
-            Alias для to_stage (обязателен при return_from_out_of_mag)
+            Alias для to_stage. При return_from_out_of_mag обязателен и задаёт стадию возврата: только предпроектный этап не позже last_active_stage.
 
             * `plum_request` - Заявка из Plum
             * `primary_contact_done` - Первичный контакт выполнен
@@ -6422,9 +6614,15 @@ components:
           type: integer
         full_name:
           type: string
+        role:
+          type: string
+        frontend_role:
+          type: string
       required:
+      - frontend_role
       - full_name
       - id
+      - role
     UserList:
       type: object
       properties:
@@ -6537,6 +6735,25 @@ components:
       - telegram_username
       - updated_at
       - username
+    ValidationErrorResponse:
+      type: object
+      properties:
+        non_field_errors:
+          type: array
+          items:
+            type: string
+        manager_id:
+          type: array
+          items:
+            type: string
+        manager_ids:
+          type: array
+          items:
+            type: string
+        project:
+          type: array
+          items:
+            type: string
     _AssistantManagerAddRequest:
       type: object
       properties:

@@ -22,6 +22,7 @@ const EMPTY_API_ROW_FIELDS = {
   event_format: null,
   event_format_label: '',
   contact_person: '',
+  event_date_locked: false,
   sales_total: 0,
   net_profit_ex_tax: 0,
   final_bonus: 0,

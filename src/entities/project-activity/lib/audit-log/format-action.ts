@@ -1,8 +1,14 @@
 import type { ProjectAuditLog } from '@/shared/api/generated/types/ProjectAuditLog'
 
 import { formatBonusManualChange, formatFieldChange, formatStageChange } from './formatters'
-import { hasAuditValue } from './format-values'
+import { formatStageValue, hasAuditValue } from './format-values'
 import type { AuditLogFormatContext } from './types'
+
+/** Добавляет к фразе контекст этапа на момент действия: «… · этап «Расходы внесены»». */
+function withStageSuffix(action: string, stage: ProjectAuditLog['stage']): string {
+  if (!stage) return action
+  return `${action} · этап «${formatStageValue(stage)}»`
+}
 
 /**
  * Человекочитаемое описание действия из полей audit-log (OpenAPI §28):
@@ -17,7 +23,7 @@ export function formatAuditLogAction(entry: ProjectAuditLog, ctx?: AuditLogForma
       return entry.action_label
 
     case 'field_change':
-      return formatFieldChange(entry, ctx)
+      return withStageSuffix(formatFieldChange(entry, ctx), entry.stage)
 
     case 'bonus_manual_change':
       if (hasAuditValue(entry.old_value) || hasAuditValue(entry.new_value)) {

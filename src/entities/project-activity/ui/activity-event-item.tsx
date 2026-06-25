@@ -11,12 +11,11 @@ interface ActivityEventItemProps {
 
 export function ActivityEventItem({ event }: ActivityEventItemProps) {
   const { actorRole, actorName, action, at, dotColor } = event
-  const rolePrefix = actorRole ? `${USER_ROLE_LABELS[actorRole]} ` : ''
-  const headline = actorName
-    ? `${rolePrefix}${actorName}: ${action}`
-    : actorRole
-      ? `${USER_ROLE_LABELS[actorRole]}: ${action}`
-      : action
+  // Субъект действия — роль + имя ответственного («Руководитель Иван Петров: …»).
+  // Если чего-то нет (system/plum/старые записи) — показываем то, что есть.
+  const roleLabel = actorRole ? USER_ROLE_LABELS[actorRole] : ''
+  const subject = [roleLabel, actorName].filter(Boolean).join(' ')
+  const headline = subject ? `${subject}: ${action}` : action
 
   return (
     <div className="flex items-start gap-3 px-5 py-3.5">
