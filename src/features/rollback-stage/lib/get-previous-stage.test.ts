@@ -24,7 +24,7 @@ describe('getPreviousStage', () => {
     expect(getPreviousStage('out_of_mag_scope')).toBeNull()
   })
 
-  it('archived → closed (последний в порядке)', () => {
-    expect(getPreviousStage('archived')).toBe('closed')
+  it('archived → null (ТЗ §4.3: архив не откатываем)', () => {
+    expect(getPreviousStage('archived')).toBeNull()
   })
 })
