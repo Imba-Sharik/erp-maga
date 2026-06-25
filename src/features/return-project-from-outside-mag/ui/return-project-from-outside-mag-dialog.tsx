@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -20,6 +21,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 
+import { getAllowedReturnStages } from '../lib/get-allowed-return-stages'
 import { useReturnProjectFromOutsideMag } from '../model/use-return-project-from-outside-mag'
 
 const TRIGGER_CLASS =
@@ -63,8 +65,25 @@ export function ReturnProjectFromOutsideMagDialog({
     },
   })
 
+  const allowedStages = useMemo(
+    () => getAllowedReturnStages(project?.lastActiveStage),
+    [project?.lastActiveStage],
+  )
+
+  // Диалог всегда смонтирован — при смене проекта сбрасываем выбор и ошибку,
+  // иначе выбранный ранее (теперь недоступный) этап остался бы в значении формы.
+  useEffect(() => {
+    form.reset()
+    reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id])
+
   const handleSubmit = (values: FormValues) => {
     if (!project) return
+    if (!allowedStages.includes(values.targetStage)) {
+      form.setError('targetStage', { message: 'Этот этап недоступен для возврата' })
+      return
+    }
     submit({ project, targetStage: values.targetStage })
   }
 
@@ -102,7 +121,11 @@ export function ReturnProjectFromOutsideMagDialog({
                       </SelectTrigger>
                       <SelectContent>
                         {PRE_PROJECT_STAGES.map((stage) => (
-                          <SelectItem key={stage} value={stage}>
+                          <SelectItem
+                            key={stage}
+                            value={stage}
+                            disabled={!allowedStages.includes(stage)}
+                          >
                             {STAGE_LABELS[stage]}
                           </SelectItem>
                         ))}

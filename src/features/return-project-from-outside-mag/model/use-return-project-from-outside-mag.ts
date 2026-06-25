@@ -65,9 +65,9 @@ export function useReturnProjectFromOutsideMag({
             onSuccess?.()
           },
           onError: () => {
+            // Откатываем оптимистичный перенос; ошибку (PipelineError.detail) показываем inline
+            // в диалоге через transition.errorMessage — без reset() и без общего toast.
             restoreQueryCaches(queryClient, cacheSnapshot)
-            transition.reset()
-            toast.error('Не удалось вернуть проект в воронку')
           },
         },
       )
