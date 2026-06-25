@@ -71,7 +71,7 @@ export function StageSectionSkipped({
         hasDraftHighlight ? stageBlockBorderClass(true) : 'border-dashed border-[#C7C7C7]',
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
         <StageStatusHeader
           statusLabel="Этап пропущен:"
           title={ALL_STAGE_LABELS[stage]}
@@ -79,15 +79,17 @@ export function StageSectionSkipped({
           statusClassName="font-medium text-[#6B6B6B]"
         />
         {canEdit ? (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setEditing(true)}
-            className="h-[38px] rounded-[10px] border-[#B1B1B1] bg-white px-4 text-sm"
-          >
-            <Pencil className="size-3.5" />
-            Заполнить
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditing(true)}
+              className="h-[38px] rounded-[10px] border-[#B1B1B1] bg-white px-4 text-sm"
+            >
+              <Pencil className="size-3.5" />
+              Заполнить
+            </Button>
+          </div>
         ) : null}
       </div>
     </div>

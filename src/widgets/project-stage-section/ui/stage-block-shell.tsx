@@ -65,7 +65,7 @@ export function StageBlockShell({
       )}
     >
       {(showHeaderRow || showAdvance || headerActions) && (
-        <div className="flex flex-col items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
+        <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
           {showHeaderRow ? headerContent : null}
           {headerActions || showAdvance ? (
             <div className="flex flex-wrap items-center justify-end gap-2.5">

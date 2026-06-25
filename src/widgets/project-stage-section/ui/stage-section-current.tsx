@@ -440,7 +440,7 @@ export function StageSectionCurrent({
         stageBlockBorderClass(hasDraftHighlight),
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
         <StageStatusHeader
           statusLabel={headerLabel}
           title={ALL_STAGE_LABELS[stage]}
