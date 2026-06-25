@@ -1,0 +1,122 @@
+import { useState } from 'react'
+
+import { ALL_STAGE_LABELS, type ProjectDetail } from '@/entities/project'
+import { Button } from '@/shared/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog'
+import { DateField } from '@/shared/ui/date-field'
+
+import { getPreviousStage } from '../lib/get-previous-stage'
+import { getRollbackWarning } from '../lib/get-rollback-warning'
+import { isEventDatePassed } from '../lib/is-event-date-passed'
+import { useRollbackStage } from '../model/use-rollback-stage'
+
+export interface ConfirmRollbackStageDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  project: ProjectDetail
+}
+
+/**
+ * Destructive-подтверждение отката на предыдущий этап (ERP-208). Свежий показ на
+ * каждый клик — предупреждение о стирании данных появляется каждую итерацию.
+ *
+ * Спец-случай отката с `event_held` при прошедшей дате (ERP-209): добавляется поле
+ * фактической даты мероприятия — редактируемое для ручных проектов и readonly для
+ * PLUM; изменённое значение уходит в тело перехода.
+ */
+export function ConfirmRollbackStageDialog({
+  open,
+  onOpenChange,
+  project,
+}: ConfirmRollbackStageDialogProps) {
+  const previousStage = getPreviousStage(project.stage)
+  const showEventDate = project.stage === 'event_held' && isEventDatePassed(project)
+  const dateEditable = showEventDate && project.isFromPlum === false
+  const [eventDate, setEventDate] = useState(project.date ?? '')
+
+  const { submit, isPending, isError, errorMessage, notice, reset } = useRollbackStage({
+    onSuccess: () => onOpenChange(false),
+  })
+
+  const handleOpenChange = (next: boolean) => {
+    onOpenChange(next)
+    // Диалог смонтирован постоянно — при закрытии сбрасываем поле, чтобы отменённое
+    // редактирование даты не «прилипло» к следующему открытию.
+    if (!next) {
+      setEventDate(project.date ?? '')
+      reset()
+    }
+  }
+
+  const handleConfirm = () => {
+    submit({ project, eventDate: dateEditable ? eventDate : undefined })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md" showCloseButton>
+        <DialogHeader>
+          <DialogTitle className="font-heading text-[#1B1A17]">
+            Вернуть на предыдущий этап?
+          </DialogTitle>
+          <DialogDescription>
+            {getRollbackWarning(project.stage)}
+            {previousStage ? ` Проект вернётся на этап «${ALL_STAGE_LABELS[previousStage]}».` : ''}
+          </DialogDescription>
+        </DialogHeader>
+
+        {showEventDate ? (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-[#454545]">Фактическая дата мероприятия</span>
+            {dateEditable ? (
+              <DateField value={eventDate} onChange={setEventDate} />
+            ) : (
+              <>
+                <DateField
+                  value={eventDate}
+                  onChange={() => {}}
+                  className="pointer-events-none opacity-60"
+                />
+                <p className="text-xs text-[#ACACAC]">
+                  Системную дату PLUM-проекта вручную не правим.
+                </p>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {isError && errorMessage ? (
+          <p className="text-destructive text-sm">{errorMessage}</p>
+        ) : null}
+        {notice ? <p className="text-sm text-[#9A6700]">{notice}</p> : null}
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-[10px]"
+            onClick={() => handleOpenChange(false)}
+            disabled={isPending}
+          >
+            Отмена
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            className="rounded-[10px]"
+            onClick={handleConfirm}
+            disabled={isPending || !previousStage}
+          >
+            {isPending ? 'Возврат…' : showEventDate ? 'Сохранить и вернуть' : 'Вернуть назад'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
