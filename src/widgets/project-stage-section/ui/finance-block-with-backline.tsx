@@ -15,9 +15,10 @@ import {
   type FinanceAspect,
   type ProjectArticles,
 } from '@/entities/project-article'
-import type { ProjectStage } from '@/entities/project'
+import type { ProjectDetail, ProjectStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
+import { RollbackStageButton } from '@/features/rollback-stage'
 import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { Input } from '@/shared/ui/input'
@@ -189,6 +190,7 @@ function SubsectionHeader({ title }: { title: string }) {
 
 interface FinanceBlockWithBacklineProps {
   presentation: StagePresentationConfig
+  project: ProjectDetail
   stage: ProjectStage
   headerTitle: string
   headerColorClass: string
@@ -209,6 +211,7 @@ interface FinanceBlockWithBacklineProps {
 
 export function FinanceBlockWithBackline({
   presentation,
+  project,
   stage,
   headerTitle,
   headerColorClass,
@@ -281,6 +284,11 @@ export function FinanceBlockWithBackline({
       headerColorClass={headerColorClass}
       hasDraftHighlight={hasDraftHighlight}
       onAdvance={handleAdvance}
+      headerActions={
+        isCurrent ? (
+          <RollbackStageButton project={project} readOnly={presentation.readOnly} />
+        ) : undefined
+      }
     >
       <div className="flex flex-col gap-5">
         <Collapsible defaultOpen className="flex flex-col">

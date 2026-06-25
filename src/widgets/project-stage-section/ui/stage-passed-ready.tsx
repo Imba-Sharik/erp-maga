@@ -1,3 +1,4 @@
+import type { ProjectDetail } from '@/entities/project'
 import type {
   ArticleBlock,
   ArticleKind,
@@ -11,6 +12,7 @@ import { FinanceBlockWithBackline } from './finance-block-with-backline'
 
 interface StagePassedReadyProps {
   presentation: StagePresentationConfig
+  project: ProjectDetail
   isCurrent?: boolean
   record?: StageRecord
   hasDraftHighlight?: boolean

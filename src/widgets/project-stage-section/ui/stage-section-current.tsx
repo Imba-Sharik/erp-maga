@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/ui/form'
@@ -26,7 +26,7 @@ import {
 import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
-import { ConfirmRollbackStageDialog, getPreviousStage } from '@/features/rollback-stage'
+import { getPreviousStage, RollbackStageButton } from '@/features/rollback-stage'
 import { useUpdateDocumentStatus } from '@/features/update-document-status'
 import { cn } from '@/shared/lib/utils'
 
@@ -124,9 +124,8 @@ export function StageSectionCurrent({
   const isMountRef = useRef(true)
 
   // ERP-208: откат на предыдущий этап — только Руководитель и только если этап не первый.
-  const [rollbackOpen, setRollbackOpen] = useState(false)
-  const previousStage = getPreviousStage(stage)
-  const canRollback = role === 'director' && !readOnly && previousStage !== null
+  // Сама кнопка/диалог — в RollbackStageButton; здесь только условие показа ряда кнопок.
+  const canRollback = role === 'director' && !readOnly && getPreviousStage(stage) !== null
 
   useEffect(() => {
     isMountRef.current = false
@@ -471,17 +470,7 @@ export function StageSectionCurrent({
               </>
             ) : (
               <>
-                {canRollback ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setRollbackOpen(true)}
-                    className="h-[38px] rounded-[10px] border-[#B1B1B1] px-4 text-sm"
-                  >
-                    <ArrowLeft className="size-3.5" />
-                    Предыдущий этап
-                  </Button>
-                ) : null}
+                <RollbackStageButton project={project} readOnly={readOnly} />
                 {canAdvance && stage !== 'closed' ? (
                   <Button
                     type="button"
@@ -507,13 +496,6 @@ export function StageSectionCurrent({
           </div>
         </form>
       </Form>
-      {canRollback ? (
-        <ConfirmRollbackStageDialog
-          open={rollbackOpen}
-          onOpenChange={setRollbackOpen}
-          project={project}
-        />
-      ) : null}
     </div>
   )
 }
