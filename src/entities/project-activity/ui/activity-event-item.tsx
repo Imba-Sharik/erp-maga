@@ -11,12 +11,10 @@ interface ActivityEventItemProps {
 
 export function ActivityEventItem({ event }: ActivityEventItemProps) {
   const { actorRole, actorName, action, at, dotColor } = event
-  const rolePrefix = actorRole ? `${USER_ROLE_LABELS[actorRole]} ` : ''
-  const headline = actorName
-    ? `${rolePrefix}${actorName}: ${action}`
-    : actorRole
-      ? `${USER_ROLE_LABELS[actorRole]}: ${action}`
-      : action
+  // По ТЗ субъект действия — роль («Руководитель изменил …»), а не имя человека.
+  // Имя остаётся фолбэком, когда роль не пришла (system/plum/старые записи).
+  const subject = actorRole ? USER_ROLE_LABELS[actorRole] : actorName
+  const headline = subject ? `${subject}: ${action}` : action
 
   return (
     <div className="flex items-start gap-3 px-5 py-3.5">
