@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight } from 'lucide-react'
-import { useEffect, useMemo, useRef } from 'react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/ui/form'
@@ -26,6 +26,7 @@ import {
 import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
+import { ConfirmRollbackStageDialog, getPreviousStage } from '@/features/rollback-stage'
 import { useUpdateDocumentStatus } from '@/features/update-document-status'
 import { cn } from '@/shared/lib/utils'
 
@@ -121,6 +122,11 @@ export function StageSectionCurrent({
   const currentUser = useCurrentUser()
   const { update: updateDocumentStatus } = useUpdateDocumentStatus()
   const isMountRef = useRef(true)
+
+  // ERP-208: откат на предыдущий этап — только Руководитель и только если этап не первый.
+  const [rollbackOpen, setRollbackOpen] = useState(false)
+  const previousStage = getPreviousStage(stage)
+  const canRollback = role === 'director' && !readOnly && previousStage !== null
 
   useEffect(() => {
     isMountRef.current = false
@@ -441,7 +447,7 @@ export function StageSectionCurrent({
           title={ALL_STAGE_LABELS[stage]}
           titleClassName={funnelColor}
         />
-        {canAdvance && stage !== 'closed' ? (
+        {canRollback || (canAdvance && stage !== 'closed') ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             {editingMode ? (
               <>
@@ -464,14 +470,29 @@ export function StageSectionCurrent({
                 </Button>
               </>
             ) : (
-              <Button
-                type="button"
-                onClick={handleAdvance}
-                className="h-[38px] rounded-[10px] px-4 text-sm"
-              >
-                {advanceLabel}
-                <ArrowRight className="size-3.5" />
-              </Button>
+              <>
+                {canRollback ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setRollbackOpen(true)}
+                    className="h-[38px] rounded-[10px] border-[#B1B1B1] px-4 text-sm"
+                  >
+                    <ArrowLeft className="size-3.5" />
+                    Предыдущий этап
+                  </Button>
+                ) : null}
+                {canAdvance && stage !== 'closed' ? (
+                  <Button
+                    type="button"
+                    onClick={handleAdvance}
+                    className="h-[38px] rounded-[10px] px-4 text-sm"
+                  >
+                    {advanceLabel}
+                    <ArrowRight className="size-3.5" />
+                  </Button>
+                ) : null}
+              </>
             )}
           </div>
         ) : null}
@@ -486,6 +507,13 @@ export function StageSectionCurrent({
           </div>
         </form>
       </Form>
+      {canRollback ? (
+        <ConfirmRollbackStageDialog
+          open={rollbackOpen}
+          onOpenChange={setRollbackOpen}
+          project={project}
+        />
+      ) : null}
     </div>
   )
 }
