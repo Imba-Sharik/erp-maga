@@ -11,9 +11,10 @@ interface ActivityEventItemProps {
 
 export function ActivityEventItem({ event }: ActivityEventItemProps) {
   const { actorRole, actorName, action, at, dotColor } = event
-  // По ТЗ субъект действия — роль («Руководитель изменил …»), а не имя человека.
-  // Имя остаётся фолбэком, когда роль не пришла (system/plum/старые записи).
-  const subject = actorRole ? USER_ROLE_LABELS[actorRole] : actorName
+  // Субъект действия — роль + имя ответственного («Руководитель Иван Петров: …»).
+  // Если чего-то нет (system/plum/старые записи) — показываем то, что есть.
+  const roleLabel = actorRole ? USER_ROLE_LABELS[actorRole] : ''
+  const subject = [roleLabel, actorName].filter(Boolean).join(' ')
   const headline = subject ? `${subject}: ${action}` : action
 
   return (
