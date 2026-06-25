@@ -1290,7 +1290,7 @@ paths:
       description: |-
         Полный audit-log (§28 ТЗ) для блока «Лог действий» в карточке проекта.
 
-        Каждая запись: кто (user), когда (created_at), действие (action_type / action_label), поле (field_name), старое/новое (old_value / new_value), источник (source: user | system | plum), доп. данные (metadata).
+        Каждая запись: кто (user), когда (created_at), действие (action_type / action_label), поле (field_name), старое/новое (old_value / new_value), этап на момент действия (stage), источник (source: user | system | plum), доп. данные (metadata). Для перехода A → B поле `stage` содержит A, а from/to остаются в `old_value` / `new_value`.
 
         Типы action_type: stage_change, field_change, plum_sync, project_created, out_of_mag, out_of_mag_return, bonus_manual_change, data_rejected, data_confirmed, stage_rollback, project_deleted, other.
 
@@ -1371,7 +1371,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedProjectAuditLogListPaginatedList'
+                $ref: '#/components/schemas/PaginatedProjectAuditLogList'
           description: ''
         '403':
           content:
@@ -4068,7 +4068,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OutOfMagProject'
-    PaginatedProjectAuditLogListPaginatedList:
+    PaginatedProjectAuditLogList:
       type: object
       required:
       - count
@@ -4090,7 +4090,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/ProjectAuditLogListPaginated'
+            $ref: '#/components/schemas/ProjectAuditLog'
     PaginatedProjectList:
       type: object
       required:
@@ -4910,6 +4910,45 @@ components:
           type: string
           readOnly: true
           title: Новое значение
+        stage:
+          enum:
+          - plum_request
+          - primary_contact_done
+          - calculation_prepared
+          - contract_signed
+          - ready_to_event
+          - event_held
+          - expenses_entered
+          - documents_confirmed
+          - feedback_received
+          - data_confirmed
+          - bonus_calculated
+          - bonus_approved
+          - closed
+          - archived
+          - out_of_mag_scope
+          - null
+          type: string
+          description: |-
+            * `plum_request` - Заявка из Plum
+            * `primary_contact_done` - Первичный контакт выполнен
+            * `calculation_prepared` - Расчёт подготовлен
+            * `contract_signed` - Договор подписан
+            * `ready_to_event` - Готов к проведению
+            * `event_held` - Мероприятие проведено
+            * `expenses_entered` - Расходы внесены
+            * `documents_confirmed` - Документы подтверждены
+            * `feedback_received` - Обратная связь по проекту получена
+            * `data_confirmed` - Данные подтверждены
+            * `bonus_calculated` - Бонус рассчитан
+            * `bonus_approved` - Бонус утверждён
+            * `closed` - Проект закрыт
+            * `archived` - Архив
+            * `out_of_mag_scope` - Вне контура MAG
+          x-spec-enum-id: 25e705ebe72e127b
+          readOnly: true
+          nullable: true
+          title: Этап на момент действия
         source:
           enum:
           - user
@@ -4942,29 +4981,8 @@ components:
       - new_value
       - old_value
       - source
+      - stage
       - user
-    ProjectAuditLogListPaginated:
-      type: object
-      properties:
-        count:
-          type: integer
-        next:
-          type: string
-          format: uri
-          nullable: true
-        previous:
-          type: string
-          format: uri
-          nullable: true
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProjectAuditLog'
-      required:
-      - count
-      - next
-      - previous
-      - results
     ProjectCalendarItemSchema:
       type: object
       properties:

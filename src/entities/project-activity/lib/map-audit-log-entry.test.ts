@@ -13,6 +13,7 @@ function makeEntry(overrides: Partial<ProjectAuditLog>): ProjectAuditLog {
     field_name: 'tax_rate',
     old_value: '10',
     new_value: '20',
+    stage: 'expenses_entered',
     source: 'user',
     metadata: null,
     user: { id: 7, full_name: 'Иван Петров', role: 'lead', frontend_role: 'director' },

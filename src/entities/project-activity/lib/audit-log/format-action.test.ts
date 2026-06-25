@@ -13,6 +13,7 @@ function makeEntry(overrides: Partial<ProjectAuditLog>): ProjectAuditLog {
     field_name: '',
     old_value: '',
     new_value: '',
+    stage: null,
     source: 'user',
     metadata: null,
     user: null,
@@ -98,5 +99,20 @@ describe('formatAuditLogAction', () => {
     )
 
     expect(action).toBe('изменил «номер договора»: «001» → «002»')
+  })
+
+  it('добавляет к правке поля контекст этапа', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'tax_rate',
+        old_value: '10',
+        new_value: '20',
+        stage: 'expenses_entered',
+      }),
+    )
+
+    expect(action).toBe('изменил «налог»: «10» → «20» · этап «Расходы внесены»')
   })
 })
