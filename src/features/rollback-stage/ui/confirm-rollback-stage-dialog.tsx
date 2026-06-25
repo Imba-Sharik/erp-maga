@@ -37,11 +37,14 @@ export function ConfirmRollbackStageDialog({
   project,
 }: ConfirmRollbackStageDialogProps) {
   const previousStage = getPreviousStage(project.stage)
-  const showEventDate = project.stage === 'event_held' && isEventDatePassed(project)
+  // Откат с event_held → ready_to_event требует event_date (бэк). Поле редактирования
+  // показываем только при прошедшей дате (ERP-209); значение шлём для любого event_held.
+  const isEventHeld = project.stage === 'event_held'
+  const showEventDate = isEventHeld && isEventDatePassed(project)
   const dateEditable = showEventDate && project.isFromPlum === false
   const [eventDate, setEventDate] = useState(project.date ?? '')
 
-  const { submit, isPending, isError, errorMessage, notice, reset } = useRollbackStage({
+  const { submit, isPending, isError, errorMessage, reset } = useRollbackStage({
     onSuccess: () => onOpenChange(false),
   })
 
@@ -56,7 +59,7 @@ export function ConfirmRollbackStageDialog({
   }
 
   const handleConfirm = () => {
-    submit({ project, eventDate: dateEditable ? eventDate : undefined })
+    submit({ project, eventDate: isEventHeld ? eventDate : undefined })
   }
 
   return (
@@ -95,7 +98,6 @@ export function ConfirmRollbackStageDialog({
         {isError && errorMessage ? (
           <p className="text-destructive text-sm">{errorMessage}</p>
         ) : null}
-        {notice ? <p className="text-sm text-[#9A6700]">{notice}</p> : null}
         <DialogFooter>
           <Button
             type="button"
@@ -111,7 +113,7 @@ export function ConfirmRollbackStageDialog({
             variant="destructive"
             className="rounded-[10px]"
             onClick={handleConfirm}
-            disabled={isPending || !previousStage}
+            disabled={isPending || !previousStage || (isEventHeld && !eventDate)}
           >
             {isPending ? 'Возврат…' : showEventDate ? 'Сохранить и вернуть' : 'Вернуть назад'}
           </Button>

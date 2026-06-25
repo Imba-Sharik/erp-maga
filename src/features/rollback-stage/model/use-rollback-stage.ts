@@ -1,20 +1,17 @@
-import { useCallback, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 import type { Project } from '@/entities/project'
-import { useProjectTransition } from '@/shared/api'
-import type { ProjectTransitionRequest } from '@/shared/api/generated/types/ProjectTransitionRequest'
+import { getTransitionErrorMessage, invalidateProjectAfterTransition } from '@/shared/api'
+import { useProjectsRollbackStageCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsRollbackStageCreate'
+import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { toast } from '@/shared/ui/toast'
 
-import { ROLLBACK_TRANSITION_READY, buildRollbackStageBody } from '../lib/build-rollback-stage-body'
-import { getPreviousStage } from '../lib/get-previous-stage'
-
-const STUB_NOTICE =
-  'Откат пока заглушён: интерфейс и логика готовы, но тело перехода ждёт контракта бэка ' +
-  '(ERP-199). Реальный переход включается флагом ROLLBACK_TRANSITION_READY.'
+import { buildRollbackStageBody } from '../lib/build-rollback-stage-body'
 
 export interface RollbackStageInput {
   project: Project
-  /** Новая фактическая дата мероприятия (ERP-209) — уходит в тело при откате с `event_held`. */
+  /** Новая фактическая дата мероприятия (ERP-209) — для отката с `event_held`. */
   eventDate?: string
 }
 
@@ -23,59 +20,42 @@ interface UseRollbackStageOptions {
 }
 
 /**
- * Откат проекта на предыдущий этап (ERP-208/209) по образцу
- * `useReturnProjectFromOutsideMag`. Пока `ROLLBACK_TRANSITION_READY === false`
- * реальный запрос не уходит — `submit` лишь выставляет inline-уведомление.
+ * Откат проекта на предыдущий этап (ERP-208/209): `POST /projects/{id}/rollback-stage/`.
+ * Предыдущий этап определяет бэк; ответ — `ProjectDetail`, которым обновляем кэш.
  */
 export function useRollbackStage({ onSuccess }: UseRollbackStageOptions = {}) {
-  const transition = useProjectTransition({
-    fallbackErrorMessage: 'Не удалось вернуть проект на предыдущий этап',
-  })
-  const [notice, setNotice] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const mutation = useProjectsRollbackStageCreate()
 
   const submit = useCallback(
     (input: RollbackStageInput) => {
-      const { project, eventDate } = input
-      if (!getPreviousStage(project.stage)) return
-
-      // Заглушка: контракт тела перехода для отката бэком не подтверждён (ERP-199).
-      // UI и логика собраны, но настоящий запрос не уходит, пока флаг выключен.
-      if (!ROLLBACK_TRANSITION_READY) {
-        setNotice(STUB_NOTICE)
-        return
-      }
-
-      const projectId = Number(project.id)
+      const projectId = Number(input.project.id)
       if (!Number.isFinite(projectId)) return
 
-      // `useProjectTransition` сам кладёт detail в кэш и инвалидирует связанные
-      // запросы. Оптимистичный перенос карточки в канбане можно добавить здесь,
-      // когда бэк подтвердит контракт (по образцу use-return-project-from-outside-mag).
-      transition.submit(
-        projectId,
-        buildRollbackStageBody(project, { eventDate }) as unknown as ProjectTransitionRequest,
+      mutation.mutate(
+        { id: projectId, data: buildRollbackStageBody({ eventDate: input.eventDate }) },
         {
-          onSuccess: () => {
+          onSuccess: (detail) => {
+            queryClient.setQueryData(projectsRetrieveQueryKey(projectId), detail)
+            invalidateProjectAfterTransition(queryClient, projectId)
             toast.success('Проект возвращён на предыдущий этап')
             onSuccess?.()
           },
         },
       )
     },
-    [onSuccess, transition],
+    [mutation, queryClient, onSuccess],
   )
 
-  const reset = useCallback(() => {
-    setNotice(null)
-    transition.reset()
-  }, [transition])
+  const errorMessage = mutation.isError
+    ? getTransitionErrorMessage(mutation.error, 'Не удалось вернуть проект на предыдущий этап')
+    : null
 
   return {
     submit,
-    isPending: transition.isPending,
-    isError: transition.isError,
-    errorMessage: transition.errorMessage,
-    notice,
-    reset,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    errorMessage,
+    reset: mutation.reset,
   }
 }
