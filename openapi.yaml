@@ -1297,6 +1297,30 @@ paths:
         Пагинация: limit, offset (ответ: count, next, previous, results).
       summary: Лог действий по проекту
       parameters:
+      - in: query
+        name: action_type
+        schema:
+          type: string
+          enum:
+          - bonus_manual_change
+          - data_confirmed
+          - data_rejected
+          - field_change
+          - other
+          - out_of_mag
+          - out_of_mag_return
+          - plum_sync
+          - project_created
+          - project_deleted
+          - stage_change
+          - stage_rollback
+        description: Фильтр по типу действия audit-log
+      - in: query
+        name: field_name
+        schema:
+          type: string
+        description: Фильтр по имени изменённого поля, например `mag_manager` или
+          `assistant_managers`
       - in: path
         name: id
         schema:
@@ -1308,10 +1332,36 @@ paths:
           type: integer
         description: Размер страницы (по умолчанию 10, макс. 200)
       - in: query
+        name: manager_id
+        schema:
+          type: integer
+        description: Фильтр по `metadata.manager_id` для записей о вспомогательных
+          менеджерах
+      - in: query
         name: offset
         schema:
           type: integer
         description: Смещение для пагинации
+      - in: query
+        name: operation
+        schema:
+          type: string
+        description: Фильтр по `metadata.operation`, например `add` или `remove` для
+          assistant_managers
+      - in: query
+        name: source
+        schema:
+          type: string
+          enum:
+          - plum
+          - system
+          - user
+        description: 'Фильтр по источнику записи: user, system или plum'
+      - in: query
+        name: user
+        schema:
+          type: integer
+        description: Фильтр по ID пользователя, который выполнил действие
       tags:
       - projects
       security:
@@ -1585,6 +1635,9 @@ paths:
   /api/v1/projects/{id}/documents/:
     patch:
       operationId: projects_documents_partial_update
+      description: Подтверждение/повторный запрос закрывающих документов. Доступно
+        только бухгалтерии (`accountant`). Руководитель не подтверждает закрывающие
+        документы.
       summary: Обновить статусы документов
       parameters:
       - in: path
