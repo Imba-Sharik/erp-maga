@@ -300,34 +300,38 @@ export function StageSectionPassed({
           stageBlockBorderClass(hasDraftHighlight),
         )}
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
           <StageStatusHeader
             statusLabel={isCurrent ? 'Текущий этап:' : 'Этап пройден:'}
             title={ALL_STAGE_LABELS[stage]}
             titleClassName={funnelColor}
             collapsible
           />
-          {isCurrent && canAdvance && (
-            <Button
-              type="button"
-              onClick={() => onAdvance?.(values)}
-              className="h-[38px] rounded-[10px] px-4 text-sm"
-            >
-              Следующий этап
-              <ArrowRight className="size-3.5" />
-            </Button>
-          )}
-          {showEditButton && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setEditing(true)}
-              className="h-[38px] rounded-[10px] border-[#B1B1B1] bg-white px-4 text-sm"
-            >
-              <Pencil className="size-3.5" />
-              Редактировать
-            </Button>
-          )}
+          {(isCurrent && canAdvance) || showEditButton ? (
+            <div className="flex flex-wrap items-center justify-end gap-2.5">
+              {isCurrent && canAdvance && (
+                <Button
+                  type="button"
+                  onClick={() => onAdvance?.(values)}
+                  className="h-[38px] rounded-[10px] px-4 text-sm"
+                >
+                  Следующий этап
+                  <ArrowRight className="size-3.5" />
+                </Button>
+              )}
+              {showEditButton && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditing(true)}
+                  className="h-[38px] rounded-[10px] border-[#B1B1B1] bg-white px-4 text-sm"
+                >
+                  <Pencil className="size-3.5" />
+                  Редактировать
+                </Button>
+              )}
+            </div>
+          ) : null}
         </div>
         <CollapsibleContent className="flex flex-col gap-4 pt-4">
           <div className="h-px w-full bg-[#F0F0F0]" />

@@ -22,6 +22,8 @@ interface StageBlockShellProps {
   headerColorClass?: string
   hasDraftHighlight?: boolean
   onAdvance?: () => void
+  /** Доп. действия в шапке слева от «Следующий этап» (напр. «Предыдущий этап»). */
+  headerActions?: ReactNode
   children: ReactNode
 }
 
@@ -33,6 +35,7 @@ export function StageBlockShell({
   headerColorClass = 'text-[#454545]',
   hasDraftHighlight,
   onAdvance,
+  headerActions,
   children,
 }: StageBlockShellProps) {
   const showHeaderRow = shell.showStageHeader
@@ -61,18 +64,23 @@ export function StageBlockShell({
         stageBlockBorderClass(hasDraftHighlight),
       )}
     >
-      {(showHeaderRow || showAdvance) && (
-        <div className="flex flex-col items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
+      {(showHeaderRow || showAdvance || headerActions) && (
+        <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
           {showHeaderRow ? headerContent : null}
-          {showAdvance ? (
-            <Button
-              type="button"
-              onClick={() => onAdvance?.()}
-              className="h-[38px] rounded-[10px] px-4"
-            >
-              <span className="text-xs @xl:text-sm">Следующий этап</span>
-              <ArrowRight className="size-3.5" />
-            </Button>
+          {headerActions || showAdvance ? (
+            <div className="flex flex-wrap items-center justify-end gap-2.5">
+              {headerActions}
+              {showAdvance ? (
+                <Button
+                  type="button"
+                  onClick={() => onAdvance?.()}
+                  className="h-[38px] rounded-[10px] px-4"
+                >
+                  <span className="text-xs @xl:text-sm">Следующий этап</span>
+                  <ArrowRight className="size-3.5" />
+                </Button>
+              ) : null}
+            </div>
           ) : null}
         </div>
       )}

@@ -1,7 +1,8 @@
 import { ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
 
 import { useUserRole } from '@/entities/user-role'
-import type { StageFormData } from '@/entities/project'
+import type { ProjectDetail, StageFormData } from '@/entities/project'
+import { RollbackStageButton } from '@/features/rollback-stage'
 import {
   ARTICLE_LABELS,
   BACKLINE_ARTICLE_KINDS,
@@ -114,6 +115,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
 
 interface StagePassedBonusProps {
   presentation: StagePresentationConfig
+  project: ProjectDetail
   isCurrent?: boolean
   articles: ProjectArticles
   /** Запись этапа 9 (`data_confirmed`) — оттуда берём «Кто подтвердил». */
@@ -125,6 +127,7 @@ interface StagePassedBonusProps {
 
 export function StagePassedBonus({
   presentation,
+  project,
   isCurrent = false,
   articles,
   dataConfirmedRecord,
@@ -163,6 +166,11 @@ export function StagePassedBonus({
       headerColorClass="text-funnel-closing"
       hasDraftHighlight={hasDraftHighlight}
       onAdvance={() => onAdvance?.()}
+      headerActions={
+        isCurrent ? (
+          <RollbackStageButton project={project} readOnly={presentation.readOnly} />
+        ) : undefined
+      }
     >
       <Collapsible defaultOpen className="flex flex-col">
         <CollapsibleTrigger className="group flex items-center gap-1.5 text-start text-sm">

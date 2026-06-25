@@ -69,6 +69,7 @@ export function ProjectStageSection({
 
   const financeProps = {
     presentation,
+    project,
     articles,
     taxRate,
     onArticleChange,
@@ -124,6 +125,7 @@ export function ProjectStageSection({
       <StageSectionDraftFrame hasDraftHighlight={hasDraftHighlight}>
         <StagePassedBonus
           presentation={presentation}
+          project={project}
           isCurrent={isCurrent}
           articles={articles}
           hasDraftHighlight={hasDraftHighlight}
