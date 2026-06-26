@@ -41,8 +41,10 @@ export function ConfirmRollbackStageDialog({
   // показываем только при прошедшей дате (ERP-209); значение шлём для любого event_held.
   const isEventHeld = project.stage === 'event_held'
   const showEventDate = isEventHeld && isEventDatePassed(project)
-  const dateEditable = showEventDate && project.isFromPlum === false
   const [eventDate, setEventDate] = useState(project.date ?? '')
+  // Бэк требует дату «сегодня или позже» — пока поле пусто или дата прошедшая, гасим
+  // подтверждение, чтобы не ловить ошибку валидации на сервере.
+  const eventDateInvalid = isEventHeld && (!eventDate || isEventDatePassed({ date: eventDate }))
 
   const { submit, isPending, isError, errorMessage, reset } = useRollbackStage({
     onSuccess: () => onOpenChange(false),
@@ -78,20 +80,10 @@ export function ConfirmRollbackStageDialog({
         {showEventDate ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-[#454545]">Фактическая дата мероприятия</span>
-            {dateEditable ? (
-              <DateField value={eventDate} onChange={setEventDate} />
-            ) : (
-              <>
-                <DateField
-                  value={eventDate}
-                  onChange={() => {}}
-                  className="pointer-events-none opacity-60"
-                />
-                <p className="text-xs text-[#ACACAC]">
-                  Системную дату PLUM-проекта вручную не правим.
-                </p>
-              </>
-            )}
+            <DateField value={eventDate} onChange={setEventDate} />
+            <p className="text-xs text-[#ACACAC]">
+              Дата мероприятия прошла — укажите новую (сегодня или позже).
+            </p>
           </div>
         ) : null}
 
@@ -113,7 +105,7 @@ export function ConfirmRollbackStageDialog({
             variant="destructive"
             className="rounded-[10px]"
             onClick={handleConfirm}
-            disabled={isPending || !previousStage || (isEventHeld && !eventDate)}
+            disabled={isPending || !previousStage || eventDateInvalid}
           >
             {isPending ? 'Возврат…' : showEventDate ? 'Сохранить и вернуть' : 'Вернуть назад'}
           </Button>
