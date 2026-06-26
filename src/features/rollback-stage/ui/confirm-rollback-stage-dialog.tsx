@@ -40,7 +40,9 @@ export function ConfirmRollbackStageDialog({
   // Откат с event_held → ready_to_event требует event_date (бэк). Поле редактирования
   // показываем только при прошедшей дате (ERP-209); значение шлём для любого event_held.
   const isEventHeld = project.stage === 'event_held'
-  const showEventDate = isEventHeld && isEventDatePassed(project)
+  // Бэк требует новую дату «сегодня или позже» при откате с event_held. Поле показываем,
+  // когда дата прошла (ERP-209) ИЛИ её вовсе нет — иначе откат не сделать (вводить негде).
+  const showEventDate = isEventHeld && (isEventDatePassed(project) || !project.date)
   const [eventDate, setEventDate] = useState(project.date ?? '')
   // Бэк требует дату «сегодня или позже» — пока поле пусто или дата прошедшая, гасим
   // подтверждение, чтобы не ловить ошибку валидации на сервере.
