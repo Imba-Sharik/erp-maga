@@ -1,6 +1,5 @@
 // import { Loader2 } from 'lucide-react'
 import { PlumEventStatusFilterSelect } from '@/entities/project'
-import { useUserRole } from '@/entities/user-role'
 import { useLoftHallFilter, VenueFilterMultiSelect, VenueFilterSelect } from '@/entities/venue'
 import { useIsMobile } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
@@ -119,15 +118,15 @@ export function CalendarToolbar({
 }: CalendarToolbarProps) {
   const layout = showManagerFilter ? TOOLBAR_LAYOUT.withManagerFilter : TOOLBAR_LAYOUT.default
   const isMobile = useIsMobile()
-  const role = useUserRole()
-  const isManagerRole = role === 'manager'
+  // ERP-217: каталог площадок не ограничиваем по текущему пользователю — режим как у
+  // руководителя. Сужение по выбранному менеджеру приходит через `restrictToHallIds`.
   const {
     loftOptions,
     hallOptions,
     showLoftFilter,
     selectDisabled: catalogDisabled,
     shouldResetHall,
-  } = useLoftHallFilter(loft, { assigned: isManagerRole, restrictToHallIds })
+  } = useLoftHallFilter(loft, { assigned: false, restrictToHallIds })
   const selectDisabled = catalogDisabled || venueSelectDisabled
   const handleChangeLoft = (next: string | null) => {
     onChangeLoft(next)
