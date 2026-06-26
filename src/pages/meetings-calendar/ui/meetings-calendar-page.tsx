@@ -41,7 +41,7 @@ const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 type PanelTab = 'meetings' | 'reminders'
 
 const PANEL_TAB_CLASS =
-  'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10 cursor-pointer rounded-[10px] border border-[#B1B1B1] bg-white px-4 py-1.5 text-sm font-normal text-[#454545] data-[state=active]:border-transparent data-[state=active]:shadow-none'
+  'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10 cursor-pointer rounded-[10px] border border-border-strong bg-white px-4 py-1.5 text-sm font-normal text-foreground-soft data-[state=active]:border-transparent data-[state=active]:shadow-none'
 
 function parseManagerId(value: string | null | undefined): number | null {
   if (!value) return null
@@ -210,8 +210,8 @@ export function MeetingsCalendarPage() {
   return (
     <div ref={pageRef} className="flex flex-col gap-6">
       <header className="flex flex-col gap-1.5">
-        <h1 className="font-heading font-bold text-[#1B1A17]">Календарь встреч</h1>
-        <p className="hidden max-w-160 text-sm text-[#ACACAC] md:block">
+        <h1 className="font-heading text-foreground font-bold">Календарь встреч</h1>
+        <p className="text-muted-foreground hidden max-w-160 text-sm md:block">
           Расписание встреч менеджеров
         </p>
       </header>

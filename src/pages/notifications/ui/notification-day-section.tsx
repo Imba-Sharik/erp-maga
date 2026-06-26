@@ -24,7 +24,7 @@ export function NotificationDaySection({ notifications, onRead }: NotificationDa
           {collapsible ? (
             <CollapsibleTrigger
               aria-label={`Свернуть уведомления (ещё ${rest.length})`}
-              className="group focus-visible:ring-ring/40 flex items-center gap-1.5 rounded-md py-1 text-[#ACACAC] transition-colors hover:text-[#6B6B6B] focus-visible:ring-2 focus-visible:outline-none"
+              className="group focus-visible:ring-ring/40 text-muted-foreground hover:text-foreground-soft flex items-center gap-1.5 rounded-md py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <h2 className="text-xs font-semibold tracking-wide uppercase">
                 {formatNotificationDayHeader(latest.createdAt)}
@@ -32,17 +32,17 @@ export function NotificationDaySection({ notifications, onRead }: NotificationDa
               <ChevronDown className="size-4 transition-transform group-data-[state=closed]:-rotate-90" />
             </CollapsibleTrigger>
           ) : (
-            <h2 className="py-1 text-xs font-semibold tracking-wide text-[#ACACAC] uppercase">
+            <h2 className="text-muted-foreground py-1 text-xs font-semibold tracking-wide uppercase">
               {formatNotificationDayHeader(latest.createdAt)}
             </h2>
           )}
         </div>
 
-        <div className="overflow-hidden rounded-[14px] border border-[#E9E6DD] bg-white">
+        <div className="border-border overflow-hidden rounded-[14px] border bg-white">
           <NotificationItem notification={latest} onRead={onRead} showDateLabel={false} />
           {collapsible && (
             <CollapsibleContent>
-              <div className="divide-y divide-[#F0F0F0] border-t border-[#F0F0F0]">
+              <div className="divide-surface-divider border-surface-divider divide-y border-t">
                 {rest.map((n) => (
                   <NotificationItem
                     key={n.id}

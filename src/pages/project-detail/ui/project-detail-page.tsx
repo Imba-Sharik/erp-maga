@@ -34,7 +34,7 @@ export function ProjectDetailPage() {
   useBreadcrumb([{ label: back.label, to: back.to }, { label: project?.title ?? id ?? '' }])
 
   if (isLoading) {
-    return <p className="text-sm text-[#ACACAC]">Загружаем проект…</p>
+    return <p className="text-muted-foreground text-sm">Загружаем проект…</p>
   }
   if (isError || !project) {
     return (
