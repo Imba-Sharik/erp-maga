@@ -17,7 +17,7 @@ import { buildAssistantCandidates } from '../lib/assistant-menu'
 import { applyAssistantSelection, type AssistantDialogMode } from '../lib/assistant-set'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'h-10 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 /** Спец-значение «Снять вспомогательного» в режиме замены. */
 const REMOVE_ASSISTANT_ID = '__remove_assistant__'
@@ -166,7 +166,7 @@ export function AssistantManagerDialog({
             </Button>
             <Button
               type="button"
-              className="rounded-[10px] bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
               onClick={handleApply}
               disabled={!canApply || isPending}
             >

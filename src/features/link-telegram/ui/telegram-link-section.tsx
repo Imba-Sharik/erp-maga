@@ -26,7 +26,7 @@ export function TelegramLinkSection() {
 
   return (
     <>
-      <section className="border-border overflow-hidden rounded-[14px] border bg-white">
+      <section className="border-border bg-card overflow-hidden rounded-[14px] border">
         <div className="border-surface-divider flex items-start gap-4 border-b px-5 py-4">
           <div className="bg-info-surface flex size-10 shrink-0 items-center justify-center rounded-full">
             <SendIcon className="text-info size-5" aria-hidden />

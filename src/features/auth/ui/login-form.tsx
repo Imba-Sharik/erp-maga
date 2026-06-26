@@ -16,7 +16,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 const FIELD_CLASS =
-  'h-11 rounded-[10px] border-border-medium bg-white placeholder:text-muted-foreground'
+  'h-11 rounded-[10px] border-border-medium bg-card placeholder:text-muted-foreground'
 
 export function LoginForm() {
   const { login, isPending, isError } = useLogin()
@@ -80,7 +80,7 @@ export function LoginForm() {
 
           <Button
             type="submit"
-            className="h-11 w-full rounded-[10px] bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 w-full rounded-[10px]"
             disabled={isPending}
           >
             {isPending ? 'Вход…' : 'Войти'}

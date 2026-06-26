@@ -25,7 +25,7 @@ import { getAllowedReturnStages } from '../lib/get-allowed-return-stages'
 import { useReturnProjectFromOutsideMag } from '../model/use-return-project-from-outside-mag'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'h-10 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 const stageValues = [
   'plum_request',
@@ -151,7 +151,7 @@ export function ReturnProjectFromOutsideMagDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending || !project}
               >
                 Вернуть

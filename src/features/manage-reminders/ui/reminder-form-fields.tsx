@@ -133,7 +133,7 @@ export function ReminderFormFields({
           <Button
             type="button"
             variant="outline"
-            className="border-warning-border text-warning hover:bg-warning-surface h-9 w-fit rounded-[10px] bg-white"
+            className="border-warning-border text-warning hover:bg-warning-surface bg-card h-9 w-fit rounded-[10px]"
             disabled={linkPending}
             onClick={() => void requestLink()}
           >

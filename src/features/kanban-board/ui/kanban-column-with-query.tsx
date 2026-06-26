@@ -68,7 +68,7 @@ export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
   if (query.isError) {
     return (
       <KanbanColumnPlaceholder title={title} accentClassName={accentClassName}>
-        <p className="text-xs text-red-600">Не удалось загрузить колонку.</p>
+        <p className="text-error text-xs">Не удалось загрузить колонку.</p>
       </KanbanColumnPlaceholder>
     )
   }

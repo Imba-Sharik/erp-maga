@@ -22,7 +22,7 @@ import { useUpdateMeeting } from '../model/use-update-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
-const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-white'
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-card'
 
 export interface EditMeetingDialogProps {
   open: boolean
@@ -174,7 +174,7 @@ export function EditMeetingDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending || !meeting}
               >
                 {isPending ? 'Сохранение…' : 'Сохранить'}

@@ -25,7 +25,7 @@ import { resolvePrimaryHallVenueIds } from '../lib/resolve-primary-hall-venue-id
 import { useCreateProject } from '../model/use-create-project'
 
 const TRIGGER_CLASS =
-  'h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 const formSchema = z
   .object({
@@ -119,7 +119,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                     <Input
                       {...field}
                       placeholder="Например, Корпоратив Acme"
-                      className="border-border-strong placeholder:text-disabled-foreground h-10! rounded-[10px] bg-white"
+                      className="border-border-strong placeholder:text-disabled-foreground bg-card h-10! rounded-[10px]"
                       autoComplete="off"
                     />
                   </FormControl>
@@ -193,7 +193,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending}
               >
                 {isPending ? 'Создание…' : 'Создать'}

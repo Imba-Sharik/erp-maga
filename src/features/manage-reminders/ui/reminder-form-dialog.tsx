@@ -107,7 +107,7 @@ export function ReminderFormDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending}
               >
                 {isPending ? 'Сохранение…' : 'Сохранить'}

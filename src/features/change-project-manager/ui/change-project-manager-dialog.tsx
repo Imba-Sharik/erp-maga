@@ -31,7 +31,7 @@ import {
 import { useChangeProjectManagers } from '../model/use-change-project-managers'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'h-10 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 export interface ChangeProjectManagerDialogProps {
   open: boolean
@@ -202,7 +202,7 @@ export function ChangeProjectManagerDialog({
             </Button>
             <Button
               type="button"
-              className="rounded-[10px] bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
               onClick={handleApply}
               disabled={!state.canApply || isPending}
             >

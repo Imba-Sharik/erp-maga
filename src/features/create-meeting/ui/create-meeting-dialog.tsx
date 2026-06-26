@@ -29,7 +29,7 @@ import { useCreateMeeting } from '../model/use-create-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
-const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-white'
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-card'
 
 function formatDayLabel(iso: string): string | null {
   const d = parseISO(iso)
@@ -177,7 +177,7 @@ export function CreateMeetingDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending}
               >
                 {isPending ? 'Сохранение…' : 'Сохранить'}

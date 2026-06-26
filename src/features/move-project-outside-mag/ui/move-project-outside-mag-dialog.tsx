@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useMoveProjectOutsideMag } from '../model/use-move-project-outside-mag'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'h-10 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 const reasonValues = ['event_cancelled', 'other_rental', 'no_equipment'] as const
 
@@ -126,7 +126,7 @@ export function MoveProjectOutsideMagDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending || !project}
               >
                 Перевести
