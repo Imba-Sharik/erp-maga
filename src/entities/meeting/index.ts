@@ -12,8 +12,8 @@ export {
   formatMeetingVenueLine,
   meetingHallsForHallIds,
 } from './lib/format-meeting-venue'
-export { meetingFormSchema } from './lib/meeting-form-schema'
-export type { MeetingFormValues } from './lib/meeting-form-schema'
+export { meetingFormSchema, meetingCreateFormSchema } from './lib/meeting-form-schema'
+export type { MeetingFormValues, MeetingCreateFormValues } from './lib/meeting-form-schema'
 export { pluralMeetings } from './lib/plural'
 export { groupMeetingsByDay, countMeetingsInMonth, getMeetingsForDate } from './lib/schedule'
 export {

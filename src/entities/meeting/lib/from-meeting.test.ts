@@ -11,6 +11,7 @@ describe('fromMeeting', () => {
         type: 'meeting',
         comment: 'Обсудить детали',
         meeting_datetime: '2026-06-10T14:30:00+03:00',
+        meeting_end_datetime: '2026-06-10T15:30:00+03:00',
         meeting_date: '2026-06-10',
         meeting_time: '14:30',
         halls: [
@@ -44,6 +45,7 @@ describe('fromMeeting', () => {
         type: null,
         comment: 'Тест',
         meeting_datetime: '2026-06-10T11:30:00Z',
+        meeting_end_datetime: null,
         meeting_date: '2026-06-10',
         meeting_time: '11:30',
         halls: [],
@@ -65,6 +67,7 @@ describe('fromMeeting', () => {
         type: null,
         comment: 'Детали',
         meeting_datetime: '2026-06-10T14:30:00+03:00',
+        meeting_end_datetime: null,
         meeting_date: '2026-06-10',
         meeting_time: '14:30',
         halls: [],

@@ -3509,6 +3509,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+        meeting_end_datetime:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
         meeting_date:
           type: string
           readOnly: true
@@ -3540,6 +3545,7 @@ components:
       - manager
       - meeting_date
       - meeting_datetime
+      - meeting_end_datetime
       - meeting_time
       - name
       - type
@@ -3601,6 +3607,9 @@ components:
         meeting_datetime:
           type: string
           format: date-time
+        meeting_end_datetime:
+          type: string
+          format: date-time
         hall_ids:
           type: array
           items:
@@ -3618,6 +3627,7 @@ components:
       - comment
       - hall_ids
       - meeting_datetime
+      - meeting_end_datetime
       - name
       - type
     MeetingHall:
@@ -4321,6 +4331,9 @@ components:
             * `out_of_office` - Отсутствие в офисе
           x-spec-enum-id: ae5747c411205727
         meeting_datetime:
+          type: string
+          format: date-time
+        meeting_end_datetime:
           type: string
           format: date-time
         hall_ids:

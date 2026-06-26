@@ -11,6 +11,7 @@ import {
 import { mergeDates, removeDates } from '@/shared/ui/month-calendar'
 import { filterCalendarProjects } from '@/widgets/project-calendar'
 import type { PaintMode } from '@/shared/ui/month-calendar'
+import { useCurrentUser } from '@/entities/current-user'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import {
   countProjectsInMonth,
@@ -34,13 +35,30 @@ function parseMagManagerId(magManagerId: string | null): number | undefined {
 
 export function CalendarPage() {
   const role = useUserRole()
-  const showManagerFilter = role === 'director' || role === 'admin'
+  const currentUser = useCurrentUser()
+  // ERP-217: фильтр «Отв. менеджер» доступен и менеджеру (режим просмотра как у руководителя).
+  // По умолчанию выбран он сам (видит свои); может очистить → все или выбрать другого менеджера.
+  const isManagerRole = role === 'manager'
+  const showManagerFilter = role === 'director' || role === 'admin' || isManagerRole
   const {
     managers,
-    filterOptions: managerFilterOptions,
+    filterOptions: baseManagerOptions,
     isLoading: managersSelectLoading,
     isError: managersSelectError,
   } = useManagersDirectory()
+
+  // Свой mag-manager id — дефолт селекта для менеджера (строка, как value у опций директории).
+  const ownManagerId = useMemo(() => {
+    const id = Number(currentUser.id)
+    return Number.isFinite(id) && id > 0 ? String(id) : null
+  }, [currentUser.id])
+
+  // Гарантируем наличие собственного пункта (директория может не вернуть его менеджеру).
+  const managerFilterOptions = useMemo(() => {
+    if (!isManagerRole || !ownManagerId) return baseManagerOptions
+    if (baseManagerOptions.some((o) => o.value === ownManagerId)) return baseManagerOptions
+    return [{ value: ownManagerId, label: currentUser.displayName }, ...baseManagerOptions]
+  }, [baseManagerOptions, isManagerRole, ownManagerId, currentUser.displayName])
   const { today, visibleMonth: initialVisibleMonth } = useMemo(() => {
     const now = new Date()
     return {
@@ -53,7 +71,12 @@ export function CalendarPage() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [loft, setLoft] = useState<string | null>(null)
   const [hall, setHall] = useState<string[]>([])
-  const [magManagerId, setMagManagerId] = useState<string | null>(null)
+  // undefined — не трогали (берём дефолт по роли); null — явно «все»; строка — выбранный менеджер.
+  const [magManagerSelection, setMagManagerSelection] = useState<string | null | undefined>(
+    undefined,
+  )
+  const magManagerId =
+    magManagerSelection === undefined ? (isManagerRole ? ownManagerId : null) : magManagerSelection
   const [projectSearch, setProjectSearch] = useState('')
   const [plumEventStatus, setPlumEventStatus] = useState<string[]>([])
 
@@ -79,7 +102,7 @@ export function CalendarPage() {
   })
 
   const handleChangeMagManager = useCallback((value: string | null) => {
-    setMagManagerId(value)
+    setMagManagerSelection(value)
     setHall([])
     setLoft(null)
   }, [])

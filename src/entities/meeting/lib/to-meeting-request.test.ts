@@ -20,6 +20,7 @@ describe('to-meeting-request', () => {
           eventType: 'meeting',
           comment: 'Комментарий',
           time: '09:15',
+          endTime: '10:45',
           lofts: ['1'],
           halls: ['10', '11'],
         },
@@ -30,6 +31,7 @@ describe('to-meeting-request', () => {
       type: 'meeting',
       comment: 'Комментарий',
       meeting_datetime: '2026-06-12T09:15:00+03:00',
+      meeting_end_datetime: '2026-06-12T10:45:00+03:00',
       hall_ids: [10, 11],
     })
   })

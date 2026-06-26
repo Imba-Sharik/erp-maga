@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { meetingFormSchema } from './meeting-form-schema'
+import { meetingCreateFormSchema, meetingFormSchema } from './meeting-form-schema'
 
 describe('meetingFormSchema', () => {
   it('отклоняет пустые поля', () => {
@@ -70,5 +70,39 @@ describe('meetingFormSchema', () => {
       expect(result.error.issues.some((issue) => issue.path[0] === 'lofts')).toBe(true)
       expect(result.error.issues.some((issue) => issue.path[0] === 'halls')).toBe(true)
     }
+  })
+})
+
+describe('meetingCreateFormSchema', () => {
+  const base = {
+    title: 'Встреча',
+    eventType: 'meeting',
+    comment: 'Комментарий',
+    lofts: ['1'],
+    halls: ['10'],
+  }
+
+  it('требует время окончания', () => {
+    const result = meetingCreateFormSchema.safeParse({ ...base, time: '14:30', endTime: '' })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path[0] === 'endTime')).toBe(true)
+    }
+  })
+
+  it('принимает валидный промежуток', () => {
+    const result = meetingCreateFormSchema.safeParse({ ...base, time: '14:30', endTime: '15:30' })
+    expect(result.success).toBe(true)
+  })
+
+  it('отклоняет окончание раньше или равное началу', () => {
+    const earlier = meetingCreateFormSchema.safeParse({ ...base, time: '14:30', endTime: '14:00' })
+    expect(earlier.success).toBe(false)
+    if (!earlier.success) {
+      expect(earlier.error.issues.some((issue) => issue.path[0] === 'endTime')).toBe(true)
+    }
+
+    const equal = meetingCreateFormSchema.safeParse({ ...base, time: '14:30', endTime: '14:30' })
+    expect(equal.success).toBe(false)
   })
 })

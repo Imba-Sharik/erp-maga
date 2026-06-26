@@ -43,6 +43,7 @@ export function meetingToApiStub(meeting: Meeting): ApiMeeting {
     meeting_time: meeting.time,
     meeting_date: meeting.date,
     meeting_datetime: buildBusinessDatetime(meeting.date, meeting.time),
+    meeting_end_datetime: null,
     halls: meeting.halls.map((hall) => ({
       hall_id: hall.hallId,
       hall_name: hall.hallName,
