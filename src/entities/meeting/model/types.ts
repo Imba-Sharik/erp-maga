@@ -8,6 +8,8 @@ export interface MeetingHall {
 export interface Meeting {
   id: number
   title: string
+  /** Тип события (ERP-215): meeting/installation/event/day_off/vacation/out_of_office; '' если не задан. */
+  eventType: string
   comment: string
   /** Время в формате HH:mm */
   time: string

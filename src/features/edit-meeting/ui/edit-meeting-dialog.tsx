@@ -13,6 +13,7 @@ import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venu
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
+import { EventTypeSelect } from '@/shared/ui/event-type-select'
 import { Input } from '@/shared/ui/input'
 import { RequiredLabel } from '@/shared/ui/required-label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -20,7 +21,14 @@ import { TimeField } from '@/shared/ui/time-field'
 
 import { useUpdateMeeting } from '../model/use-update-meeting'
 
-const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
+const EMPTY_VALUES: MeetingFormValues = {
+  title: '',
+  eventType: '',
+  comment: '',
+  time: '',
+  lofts: [],
+  halls: [],
+}
 
 const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-card'
 
@@ -54,6 +62,7 @@ export function EditMeetingDialog({
       ]
       form.reset({
         title: meeting.title,
+        eventType: meeting.eventType,
         comment: meeting.comment,
         time: meeting.time,
         lofts: loftIds,
@@ -109,6 +118,25 @@ export function EditMeetingDialog({
                       {...field}
                       className="border-border-strong h-10 rounded-[10px]"
                       placeholder="Введите название"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="eventType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    <RequiredLabel label="Тип события" required />
+                  </FormLabel>
+                  <FormControl>
+                    <EventTypeSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      triggerClassName={TRIGGER_CLASS}
                     />
                   </FormControl>
                   <FormMessage />

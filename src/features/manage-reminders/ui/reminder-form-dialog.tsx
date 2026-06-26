@@ -33,7 +33,14 @@ export interface ReminderFormDialogProps {
 }
 
 function makeDefaults(defaultDate: string): ReminderFormValues {
-  return { title: '', comment: '', date: defaultDate, time: '', notifyTelegram: false }
+  return {
+    title: '',
+    eventType: '',
+    comment: '',
+    date: defaultDate,
+    time: '',
+    notifyTelegram: false,
+  }
 }
 
 function formatDayLabel(iso: string): string | null {
@@ -71,6 +78,7 @@ export function ReminderFormDialog({
       reminder
         ? {
             title: reminder.title,
+            eventType: reminder.eventType,
             comment: reminder.comment,
             date: reminder.date,
             time: reminder.time,

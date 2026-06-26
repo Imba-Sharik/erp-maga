@@ -47,6 +47,7 @@ export function useCreateReminder({ queryParams, onSuccess }: UseCreateReminderO
           // владелец перезатрётся реальным user_id из ответа (fromReminder) на onSuccess
           managerId: 0,
           title: data.name,
+          eventType: data.type ?? '',
           comment: data.comment ?? '',
           date: parsed?.date ?? '',
           time: parsed?.time ?? '00:00',
@@ -106,6 +107,7 @@ export function useUpdateReminder({ queryParams, reminder, onSuccess }: UseUpdat
         const optimistic: Reminder = {
           ...reminder,
           title: data.name ?? reminder.title,
+          eventType: data.type ?? reminder.eventType,
           comment: data.comment ?? reminder.comment,
           date: parsed?.date ?? reminder.date,
           time: parsed?.time ?? reminder.time,

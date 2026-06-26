@@ -20,6 +20,7 @@ export function fromMeeting(api: ApiMeeting): Meeting {
   return {
     id: api.id,
     title: api.name,
+    eventType: api.type ?? '',
     comment: api.comment,
     time,
     date,
@@ -37,6 +38,7 @@ export function meetingToApiStub(meeting: Meeting): ApiMeeting {
   return {
     id: meeting.id,
     name: meeting.title,
+    type: (meeting.eventType || null) as ApiMeeting['type'],
     comment: meeting.comment,
     meeting_time: meeting.time,
     meeting_date: meeting.date,

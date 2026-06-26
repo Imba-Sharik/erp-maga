@@ -10,6 +10,7 @@ export function toReminderCreateRequest(
 ): ReminderCreateUpdateRequest {
   return {
     name: values.title,
+    type: values.eventType as ReminderCreateUpdateRequest['type'],
     comment: values.comment,
     reminder_datetime: buildBusinessDatetime(values.date, values.time),
     is_telegram_reminder: values.notifyTelegram,
@@ -22,6 +23,7 @@ export function toReminderUpdateRequest(
 ): PatchedReminderCreateUpdateRequest {
   return {
     name: values.title,
+    type: values.eventType as PatchedReminderCreateUpdateRequest['type'],
     comment: values.comment,
     reminder_datetime: buildBusinessDatetime(values.date, values.time),
     is_telegram_reminder: values.notifyTelegram,

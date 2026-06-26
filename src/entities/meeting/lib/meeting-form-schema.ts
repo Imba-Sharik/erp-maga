@@ -26,6 +26,7 @@ function refineHalls(data: { halls: string[] }, ctx: z.RefinementCtx) {
 export const meetingFormSchema = z
   .object({
     title: z.string().trim().min(1, 'Обязательное поле'),
+    eventType: z.string().min(1, 'Выберите тип события'),
     comment: z.string().trim().min(1, 'Обязательное поле'),
     time: timeField,
     lofts: z.array(z.string()),
@@ -43,6 +44,7 @@ export type MeetingFormValues = z.infer<typeof meetingFormSchema>
 export const meetingCreateFormSchema = z
   .object({
     title: z.string().trim().min(1, 'Обязательное поле'),
+    eventType: z.string().min(1, 'Выберите тип события'),
     comment: z.string().trim().min(1, 'Обязательное поле'),
     time: timeField,
     endTime: timeField,

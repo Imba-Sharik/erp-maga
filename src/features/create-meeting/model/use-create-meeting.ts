@@ -40,6 +40,7 @@ export function useCreateMeeting({
         const optimistic: Meeting = {
           id: optimisticId,
           title: data.name,
+          eventType: data.type ?? '',
           comment: data.comment,
           time: parsed?.time ?? '00:00',
           date: parsed?.date ?? date,
@@ -65,7 +66,6 @@ export function useCreateMeeting({
   })
 
   const create = useCallback(
-    // endTime пока не отправляем — на бэке нет поля окончания (см. toMeetingCreateRequest).
     (values: MeetingCreateFormValues) => {
       mutation.mutate({ data: toMeetingCreateRequest(values, date) })
     },

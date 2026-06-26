@@ -8,6 +8,7 @@ describe('fromMeeting', () => {
       fromMeeting({
         id: 42,
         name: 'Созвон с клиентом',
+        type: 'meeting',
         comment: 'Обсудить детали',
         meeting_datetime: '2026-06-10T14:30:00+03:00',
         meeting_end_datetime: '2026-06-10T15:30:00+03:00',
@@ -24,6 +25,7 @@ describe('fromMeeting', () => {
     ).toEqual({
       id: 42,
       title: 'Созвон с клиентом',
+      eventType: 'meeting',
       comment: 'Обсудить детали',
       time: '14:30',
       date: '2026-06-10',
@@ -40,6 +42,7 @@ describe('fromMeeting', () => {
       fromMeeting({
         id: 1,
         name: 'Встреча',
+        type: null,
         comment: 'Тест',
         meeting_datetime: '2026-06-10T11:30:00Z',
         meeting_end_datetime: null,
@@ -61,6 +64,7 @@ describe('fromMeeting', () => {
       {
         id: 42,
         name: 'Созвон',
+        type: null,
         comment: 'Детали',
         meeting_datetime: '2026-06-10T14:30:00+03:00',
         meeting_end_datetime: null,

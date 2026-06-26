@@ -33,6 +33,7 @@ export function useUpdateMeeting({ queryParams, meeting, onSuccess }: UseUpdateM
         const optimistic: Meeting = {
           ...meeting,
           title: data.name ?? meeting.title,
+          eventType: data.type ?? meeting.eventType,
           comment: data.comment ?? meeting.comment,
           time: data.meeting_datetime ? formatBusinessTime(data.meeting_datetime) : meeting.time,
           halls:

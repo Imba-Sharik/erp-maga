@@ -14,6 +14,7 @@ export function toMeetingCreateRequest(
 ): MeetingCreateRequest {
   return {
     name: values.title,
+    type: values.eventType as MeetingCreateRequest['type'],
     comment: values.comment,
     meeting_datetime: buildBusinessDatetime(date, values.time),
     meeting_end_datetime: buildBusinessDatetime(date, values.endTime),
@@ -27,6 +28,7 @@ export function toMeetingUpdateRequest(
 ): PatchedMeetingCreateUpdateRequest {
   return {
     name: values.title,
+    type: values.eventType as PatchedMeetingCreateUpdateRequest['type'],
     comment: values.comment,
     meeting_datetime: buildBusinessDatetime(meeting.date, values.time),
     hall_ids: values.halls.map(Number),

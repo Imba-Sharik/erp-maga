@@ -17,6 +17,7 @@ describe('to-meeting-request', () => {
       toMeetingCreateRequest(
         {
           title: 'Встреча',
+          eventType: 'meeting',
           comment: 'Комментарий',
           time: '09:15',
           endTime: '10:45',
@@ -27,6 +28,7 @@ describe('to-meeting-request', () => {
       ),
     ).toEqual({
       name: 'Встреча',
+      type: 'meeting',
       comment: 'Комментарий',
       meeting_datetime: '2026-06-12T09:15:00+03:00',
       meeting_end_datetime: '2026-06-12T10:45:00+03:00',
@@ -38,6 +40,7 @@ describe('to-meeting-request', () => {
     const meeting: Meeting = {
       id: 1,
       title: 'Старая',
+      eventType: 'meeting',
       comment: 'Старый коммент',
       time: '10:00',
       date: '2026-06-15',
@@ -49,6 +52,7 @@ describe('to-meeting-request', () => {
       toMeetingUpdateRequest(
         {
           title: 'Новая',
+          eventType: 'meeting',
           comment: 'Новый коммент',
           time: '11:45',
           lofts: ['1'],
@@ -58,6 +62,7 @@ describe('to-meeting-request', () => {
       ),
     ).toEqual({
       name: 'Новая',
+      type: 'meeting',
       comment: 'Новый коммент',
       meeting_datetime: '2026-06-15T11:45:00+03:00',
       hall_ids: [10, 11],

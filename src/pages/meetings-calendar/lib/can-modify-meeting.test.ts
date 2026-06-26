@@ -8,6 +8,7 @@ function meeting(managerId: number): Meeting {
   return {
     id: 1,
     title: 'Встреча',
+    eventType: 'meeting',
     comment: 'Комментарий',
     time: '14:30',
     date: '2026-06-10',

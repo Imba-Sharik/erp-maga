@@ -9,6 +9,7 @@ function reminder(managerId: number): Reminder {
     id: 1,
     managerId,
     title: 'Напоминание',
+    eventType: 'meeting',
     comment: 'Комментарий',
     time: '14:30',
     date: '2026-06-10',

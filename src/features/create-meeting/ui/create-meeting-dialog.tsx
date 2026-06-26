@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
+import { EventTypeSelect } from '@/shared/ui/event-type-select'
 import { Input } from '@/shared/ui/input'
 import { RequiredLabel } from '@/shared/ui/required-label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -29,6 +30,7 @@ import { useCreateMeeting } from '../model/use-create-meeting'
 
 const EMPTY_VALUES: MeetingCreateFormValues = {
   title: '',
+  eventType: '',
   comment: '',
   time: '',
   endTime: '',
@@ -119,6 +121,25 @@ export function CreateMeetingDialog({
                       {...field}
                       className="border-border-strong h-10 rounded-[10px]"
                       placeholder="Введите название"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="eventType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    <RequiredLabel label="Тип события" required />
+                  </FormLabel>
+                  <FormControl>
+                    <EventTypeSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      triggerClassName={TRIGGER_CLASS}
                     />
                   </FormControl>
                   <FormMessage />
