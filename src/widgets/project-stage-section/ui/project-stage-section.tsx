@@ -26,6 +26,8 @@ interface ProjectStageSectionProps {
   isSkipped?: boolean
   record: StageRecord | undefined
   onAdvance: (values?: Partial<StageFormData>) => void
+  /** Переход уже выполняется — гасим кнопки «Следующий этап». */
+  isAdvancing?: boolean
   onPatchValues: (patch: Partial<StageFormData>) => void
   /**
    * Поправить поля произвольного этапа задним числом — используется и для
@@ -55,6 +57,7 @@ export function ProjectStageSection({
   isSkipped = false,
   record,
   onAdvance,
+  isAdvancing,
   onPatchValues,
   onPatchStageValues,
   articles,
@@ -76,6 +79,7 @@ export function ProjectStageSection({
     onTaxRateChange,
     onToggleBackline,
     onAdvance: () => onAdvance(),
+    isAdvancing,
   }
 
   // Пропущенный этап — отдельная вёрстка с возможностью дозаполнить.
@@ -132,6 +136,7 @@ export function ProjectStageSection({
           dataConfirmedRecord={getRecord('data_confirmed')}
           onArticleChange={onArticleChange}
           onAdvance={onAdvance}
+          isAdvancing={isAdvancing}
         />
       </StageSectionDraftFrame>
     )
@@ -149,6 +154,7 @@ export function ProjectStageSection({
           hasDraftHighlight={hasDraftHighlight}
           readOnly={readOnly}
           onAdvance={onAdvance}
+          isAdvancing={isAdvancing}
           onPatchValues={onPatchValues}
         />
       </StageSectionDraftFrame>

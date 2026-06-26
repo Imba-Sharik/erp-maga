@@ -26,7 +26,7 @@ import {
 import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
-import { getPreviousStage, RollbackStageButton } from '@/features/rollback-stage'
+import { canRollbackProject, RollbackStageButton } from '@/features/rollback-stage'
 import { useUpdateDocumentStatus } from '@/features/update-document-status'
 import { cn } from '@/shared/lib/utils'
 
@@ -72,6 +72,8 @@ interface StageSectionCurrentProps {
   record?: StageRecord
   articles?: ProjectArticles
   onAdvance?: (values: Partial<StageFormData>) => void
+  /** Переход уже выполняется — гасит кнопку «Следующий этап». */
+  isAdvancing?: boolean
   onPatchValues?: (patch: Partial<StageFormData>) => void
   /**
    * Режим инлайн-редактирования прошлого этапа:
@@ -93,6 +95,7 @@ export function StageSectionCurrent({
   record,
   articles,
   onAdvance,
+  isAdvancing = false,
   onPatchValues,
   editingMode,
   hasDraftHighlight,
@@ -125,7 +128,7 @@ export function StageSectionCurrent({
 
   // ERP-208: откат на предыдущий этап — только Руководитель и только если этап не первый.
   // Сама кнопка/диалог — в RollbackStageButton; здесь только условие показа ряда кнопок.
-  const canRollback = role === 'director' && !readOnly && getPreviousStage(stage) !== null
+  const canRollback = canRollbackProject(stage, role, readOnly)
 
   useEffect(() => {
     isMountRef.current = false
@@ -475,6 +478,7 @@ export function StageSectionCurrent({
                   <Button
                     type="button"
                     onClick={handleAdvance}
+                    disabled={isAdvancing}
                     className="h-[38px] rounded-[10px] px-4 text-sm"
                   >
                     {advanceLabel}

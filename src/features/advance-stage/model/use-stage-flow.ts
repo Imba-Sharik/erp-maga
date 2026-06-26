@@ -14,11 +14,13 @@ import {
 } from '@/entities/project-article'
 import { pickDocumentStageValues } from '@/entities/project-document'
 import { stageDraftActions } from '@/entities/stage-draft'
+import { getTransitionErrorMessage, invalidateProjectAfterTransition } from '@/shared/api'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { useProjectsClientPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsClientPartialUpdate'
 import { useProjectsContractPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsContractPartialUpdate'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
+import { toast } from '@/shared/ui/toast'
 
 import { buildClientPatchBody, mapClientBlockToFormData } from '../lib/to-client-patch-body'
 import { buildContractPatchBody, mapContractBlockToFormData } from '../lib/to-contract-patch-body'
@@ -165,6 +167,9 @@ export function useStageFlow({
 
   // Финансы трогали в этой сессии — гейт для сохранения черновика (не на маунте).
   const financeDirtyRef = useRef(false)
+  // Синхронный гейт от дабл-кликов: `isPending` — снимок прошлого рендера и не успевает
+  // обновиться между двумя кликами в одном тике, поэтому держим флаг в ref.
+  const advancingRef = useRef(false)
 
   const currentIndex = ALL_STAGE_ORDER.indexOf(currentStage)
 
@@ -227,6 +232,8 @@ export function useStageFlow({
 
   const advance = useCallback(
     (values?: Partial<StageFormData>) => {
+      // Защита от повторных кликов: пока идёт переход, новый запрос не шлём.
+      if (transitionMutation.isPending || advancingRef.current) return
       const nextIndex = currentIndex + 1
       const next = ALL_STAGE_ORDER[nextIndex]
       if (!next) return
@@ -244,19 +251,30 @@ export function useStageFlow({
         taxRate,
       })
 
+      // «Не приняты» на data_confirmed — бэк это no-op (этап остаётся data_confirmed).
+      // Оптимистично НЕ двигаем, иначе локально проштампуем data_confirmed завершённым и
+      // заведём фантомный bonus_calculated; полагаемся на серверный ProjectDetail.
+      const isNoopReject =
+        currentStage === 'data_confirmed' && values?.dataConfirmedStatus === 'rejected'
+
+      advancingRef.current = true
       transitionMutation.mutate(
         { id: projectId, data: body },
         {
-          onSuccess: () => {
-            applyAdvanceLocally(next, values)
-            queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
-            // List-ключ — префикс с любыми query-параметрами; передаём только url-часть,
-            // чтобы матчнулись все варианты (канбан, календарь по разным месяцам).
-            queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+          onSuccess: (detail) => {
+            // Сервер — источник правды о результирующем этапе (как в use-rollback-stage):
+            // пишем свежий ProjectDetail в кэш, а sync-эффект подхватывает реальный этап.
+            queryClient.setQueryData(projectsRetrieveQueryKey(projectId), detail)
+            if (!isNoopReject) applyAdvanceLocally(next, values)
+            invalidateProjectAfterTransition(queryClient, projectId)
             void queryClient.invalidateQueries({ queryKey: notificationsListQueryKey() })
           },
-          // Ошибку наверх пробрасываем через mutation.error — UI пока её не показывает,
-          // но `isAdvancing` снимет блокировку кнопки, и пользователь сможет ретрайнуть.
+          onError: (error) => {
+            toast.error(getTransitionErrorMessage(error, 'Не удалось перейти на следующий этап'))
+          },
+          onSettled: () => {
+            advancingRef.current = false
+          },
         },
       )
     },

@@ -122,6 +122,7 @@ interface StagePassedBonusProps {
   dataConfirmedRecord?: StageRecord
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onAdvance?: (values?: Partial<StageFormData>) => void
+  isAdvancing?: boolean
   hasDraftHighlight?: boolean
 }
 
@@ -133,6 +134,7 @@ export function StagePassedBonus({
   dataConfirmedRecord,
   onArticleChange,
   onAdvance,
+  isAdvancing,
   hasDraftHighlight,
 }: StagePassedBonusProps) {
   const role = useUserRole()
@@ -166,6 +168,7 @@ export function StagePassedBonus({
       headerColorClass="text-funnel-closing"
       hasDraftHighlight={hasDraftHighlight}
       onAdvance={() => onAdvance?.()}
+      isAdvancing={isAdvancing}
       headerActions={
         isCurrent ? (
           <RollbackStageButton project={project} readOnly={presentation.readOnly} />
