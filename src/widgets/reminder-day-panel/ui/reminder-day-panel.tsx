@@ -113,7 +113,7 @@ export function ReminderDayPanel({
                 {canCreate ? (
                   <Button
                     type="button"
-                    className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-[10px]"
                     onClick={onAddReminder}
                   >
                     <Plus className="size-4" />

@@ -8,7 +8,7 @@ import { MultiSelect } from '@/shared/ui/multi-select'
 import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
-  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 interface MeetingCalendarProps {
   visibleMonth: Date

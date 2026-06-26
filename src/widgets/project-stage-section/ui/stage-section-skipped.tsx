@@ -84,7 +84,7 @@ export function StageSectionSkipped({
               type="button"
               variant="outline"
               onClick={() => setEditing(true)}
-              className="border-border-strong h-[38px] rounded-[10px] bg-white px-4 text-sm"
+              className="border-border-strong bg-card h-[38px] rounded-[10px] px-4 text-sm"
             >
               <Pencil className="size-3.5" />
               Заполнить

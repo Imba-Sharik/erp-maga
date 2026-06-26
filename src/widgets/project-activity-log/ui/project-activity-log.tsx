@@ -23,7 +23,7 @@ export function ProjectActivityLog({ projectId, enabled = true }: ProjectActivit
   }
 
   if (isError) {
-    return <p className="text-sm text-red-600">Не удалось загрузить лог действий.</p>
+    return <p className="text-error text-sm">Не удалось загрузить лог действий.</p>
   }
 
   if (events.length === 0) {
@@ -36,7 +36,7 @@ export function ProjectActivityLog({ projectId, enabled = true }: ProjectActivit
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="divide-surface-divider border-border divide-y overflow-hidden rounded-[14px] border bg-white">
+      <div className="divide-surface-divider border-border bg-card divide-y overflow-hidden rounded-[14px] border">
         {events.map((event) => (
           <ActivityEventItem key={event.id} event={event} />
         ))}

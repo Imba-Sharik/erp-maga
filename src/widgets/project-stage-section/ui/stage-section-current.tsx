@@ -439,7 +439,7 @@ export function StageSectionCurrent({
   return (
     <div
       className={cn(
-        '@container flex w-full flex-col gap-4 rounded-[15px] border bg-white p-2.5 @xl:p-5',
+        'bg-card @container flex w-full flex-col gap-4 rounded-[15px] border p-2.5 @xl:p-5',
         stageBlockBorderClass(hasDraftHighlight),
       )}
     >

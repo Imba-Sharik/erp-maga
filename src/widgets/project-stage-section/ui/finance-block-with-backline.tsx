@@ -102,7 +102,7 @@ function PercentInput({
         onCommit(parsePercentDraft(draft))
       }}
       onChange={(e) => setDraft(sanitizePercentInput(e.target.value))}
-      className="border-border-strong h-9 rounded-[10px] bg-white text-sm"
+      className="border-border-strong bg-card h-9 rounded-[10px] text-sm"
     />
   )
 }
@@ -380,7 +380,7 @@ export function FinanceBlockWithBackline({
                       <button
                         type="button"
                         onClick={onToggleBackline}
-                        className="inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                        className="border-error-border bg-card text-error hover:bg-error-surface inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium transition-colors"
                       >
                         <Trash2 className="size-3.5" />
                         Удалить бэклайн
@@ -423,7 +423,7 @@ export function ExpensesCommentField({ canEdit }: { canEdit: boolean }) {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="—"
-          className="border-border-strong h-9 rounded-[10px] bg-white text-sm"
+          className="border-border-strong bg-card h-9 rounded-[10px] text-sm"
         />
       ) : (
         <StageReadonlyBox value={comment || '—'} source="system" />

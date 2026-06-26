@@ -296,7 +296,7 @@ export function StageSectionPassed({
     <Collapsible defaultOpen className="w-full">
       <div
         className={cn(
-          '@container flex flex-col rounded-[15px] border bg-white p-2.5 @xl:p-5',
+          'bg-card @container flex flex-col rounded-[15px] border p-2.5 @xl:p-5',
           stageBlockBorderClass(hasDraftHighlight),
         )}
       >
@@ -324,7 +324,7 @@ export function StageSectionPassed({
                   type="button"
                   variant="outline"
                   onClick={() => setEditing(true)}
-                  className="border-border-strong h-[38px] rounded-[10px] bg-white px-4 text-sm"
+                  className="border-border-strong bg-card h-[38px] rounded-[10px] px-4 text-sm"
                 >
                   <Pencil className="size-3.5" />
                   Редактировать

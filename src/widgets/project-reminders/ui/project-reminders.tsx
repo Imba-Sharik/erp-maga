@@ -63,7 +63,7 @@ export function ProjectReminders({
         {canCreate ? (
           <Button
             type="button"
-            className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-[10px]"
             onClick={() => setCreateOpen(true)}
           >
             <Plus className="size-4" />
@@ -73,16 +73,16 @@ export function ProjectReminders({
       </div>
 
       {isLoading ? (
-        <div className="border-border text-muted-foreground flex items-center justify-center gap-2 rounded-[14px] border bg-white px-5 py-8 text-sm">
+        <div className="border-border text-muted-foreground bg-card flex items-center justify-center gap-2 rounded-[14px] border px-5 py-8 text-sm">
           <Loader2 className="size-4 animate-spin" />
           Загрузка…
         </div>
       ) : isError ? (
-        <div className="border-border text-error rounded-[14px] border bg-white px-5 py-8 text-center text-sm">
+        <div className="border-border text-error bg-card rounded-[14px] border px-5 py-8 text-center text-sm">
           Не удалось загрузить напоминания
         </div>
       ) : !reminders || reminders.length === 0 ? (
-        <div className="border-border text-muted-foreground rounded-[14px] border bg-white px-5 py-8 text-center text-sm">
+        <div className="border-border text-muted-foreground bg-card rounded-[14px] border px-5 py-8 text-center text-sm">
           По этому проекту пока нет напоминаний
         </div>
       ) : (

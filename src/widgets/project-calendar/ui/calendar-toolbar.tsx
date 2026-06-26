@@ -9,7 +9,7 @@ import { SearchBar } from '@/shared/ui/search-bar'
 import { MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
-  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 /** С фильтром менеджера горизонтальный ряд не помещается при открытом сайдбаре и двухколоночной сетке. */
 const TOOLBAR_LAYOUT = {

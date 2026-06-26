@@ -63,7 +63,7 @@ export function StageBlockShell({
   const card = (
     <div
       className={cn(
-        '@container flex flex-col rounded-[15px] border bg-white p-2.5 @xl:p-5',
+        'bg-card @container flex flex-col rounded-[15px] border p-2.5 @xl:p-5',
         stageBlockBorderClass(hasDraftHighlight),
       )}
     >

@@ -19,7 +19,7 @@ const COLUMN_VIEW_OPTIONS: { value: ClosingColumnView; label: string }[] = [
 ]
 
 const COLUMN_VIEW_TRIGGER =
-  'h-10! min-w-0 flex-1 rounded-[10px] border-border-strong bg-white text-xs @3xl:w-55 @3xl:flex-none @3xl:text-sm'
+  'h-10! min-w-0 flex-1 rounded-[10px] border-border-strong bg-card text-xs @3xl:w-55 @3xl:flex-none @3xl:text-sm'
 
 interface ClosingBoardToolbarKanbanProps {
   archiveMode: false
@@ -104,7 +104,7 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
             placeholder="Поиск проектов"
             value={props.search}
             onChange={(e) => props.onChangeSearch(e.target.value)}
-            className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
+            className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pr-1.5 pl-7 text-xs placeholder:text-xs @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
           />
         </div>
 

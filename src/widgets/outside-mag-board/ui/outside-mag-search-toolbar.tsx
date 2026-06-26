@@ -17,7 +17,7 @@ export function OutsideMagSearchToolbar({ search, onChangeSearch }: OutsideMagSe
           placeholder="Поиск проектов"
           value={search}
           onChange={(e) => onChangeSearch(e.target.value)}
-          className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pl-9"
+          className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pl-9"
         />
       </div>
     </div>

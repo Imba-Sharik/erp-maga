@@ -22,7 +22,7 @@ export function ClosingViewToggle({ value, onChange, className }: ClosingViewTog
       role="group"
       aria-label="Вид отображения"
       className={cn(
-        'border-border-strong flex h-10 shrink-0 items-center gap-1 rounded-[10px] border bg-white p-1',
+        'border-border-strong bg-card flex h-10 shrink-0 items-center gap-1 rounded-[10px] border p-1',
         className,
       )}
     >

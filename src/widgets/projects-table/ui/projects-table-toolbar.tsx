@@ -13,7 +13,7 @@ const DEFAULT_COLUMN_VIEW_OPTIONS: { value: ProjectsTableColumnView; label: stri
 ]
 
 const COLUMN_VIEW_TRIGGER =
-  'h-10! w-full max-w-50 flex-1 rounded-[10px] border-border-strong bg-white text-xs @3xl:w-55 @3xl:max-w-none @3xl:flex-none @3xl:text-sm'
+  'h-10! w-full max-w-50 flex-1 rounded-[10px] border-border-strong bg-card text-xs @3xl:w-55 @3xl:max-w-none @3xl:flex-none @3xl:text-sm'
 
 interface ProjectsTableToolbarProps {
   search: string
@@ -49,7 +49,7 @@ export function ProjectsTableToolbar({
               placeholder="Поиск проектов"
               value={search}
               onChange={(e) => onChangeSearch(e.target.value)}
-              className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
+              className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pr-1.5 pl-7 text-xs placeholder:text-xs @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
             />
           </div>
           {onAddProject && (
@@ -57,7 +57,7 @@ export function ProjectsTableToolbar({
               type="button"
               onClick={onAddProject}
               aria-label="Добавить проект"
-              className="size-10 shrink-0 rounded-[10px] bg-black p-0 text-lg leading-none text-white hover:bg-black/90 @3xl:hidden"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 size-10 shrink-0 rounded-[10px] p-0 text-lg leading-none @3xl:hidden"
             >
               +
             </Button>

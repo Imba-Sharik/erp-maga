@@ -92,7 +92,7 @@ export function AppSidebar() {
                       asChild
                       tooltip={item.title}
                       isActive={isActive}
-                      className="hover:text-sidebar-accent-foreground data-[active=true]:border-border-strong border border-transparent data-[active=true]:bg-white data-[active=true]:font-normal"
+                      className="hover:text-sidebar-accent-foreground data-[active=true]:border-border-strong data-[active=true]:bg-card border border-transparent data-[active=true]:font-normal"
                     >
                       <Link to={item.url} onClick={handleNavClick}>
                         <div

@@ -63,7 +63,7 @@ export function RequestsTable({ variant }: RequestsTableProps) {
           placeholder="Поиск проектов"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pl-9"
+          className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pl-9"
         />
       </div>
       <ProjectsTableView

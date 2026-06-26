@@ -11,7 +11,7 @@ interface ProjectDocumentsProps {
 }
 
 const cardClassName =
-  '@container flex flex-col gap-4 overflow-hidden rounded-[14px] border border-border bg-white p-2.5 @xl:p-5'
+  '@container flex flex-col gap-4 overflow-hidden rounded-[14px] border border-border bg-card p-2.5 @xl:p-5'
 
 export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) {
   const estimateFileName = getRecord('calculation_prepared')?.values?.estimateFileName ?? ''

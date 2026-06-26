@@ -164,7 +164,7 @@ export function ProjectManagerCell({
                               className={cn(
                                 'size-4',
                                 isLead
-                                  ? 'fill-amber-400 text-amber-500'
+                                  ? 'fill-warning-solid text-warning-solid'
                                   : 'text-disabled-foreground',
                               )}
                             />
@@ -181,7 +181,7 @@ export function ProjectManagerCell({
                             <UserPlus
                               className={cn(
                                 'size-4',
-                                isAssistant ? 'text-red-500' : 'text-disabled-foreground',
+                                isAssistant ? 'text-error' : 'text-disabled-foreground',
                               )}
                             />
                           </button>
