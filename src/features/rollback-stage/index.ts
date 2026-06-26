@@ -3,3 +3,4 @@ export type { ConfirmRollbackStageDialogProps } from './ui/confirm-rollback-stag
 export { RollbackStageButton } from './ui/rollback-stage-button'
 export type { RollbackStageButtonProps } from './ui/rollback-stage-button'
 export { getPreviousStage } from './lib/get-previous-stage'
+export { canRollbackProject } from './lib/can-rollback-project'

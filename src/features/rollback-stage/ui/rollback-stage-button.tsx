@@ -5,7 +5,7 @@ import type { ProjectDetail } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { Button } from '@/shared/ui/button'
 
-import { getPreviousStage } from '../lib/get-previous-stage'
+import { canRollbackProject } from '../lib/can-rollback-project'
 import { ConfirmRollbackStageDialog } from './confirm-rollback-stage-dialog'
 
 export interface RollbackStageButtonProps {
@@ -22,10 +22,8 @@ export interface RollbackStageButtonProps {
 export function RollbackStageButton({ project, readOnly = false }: RollbackStageButtonProps) {
   const role = useUserRole()
   const [open, setOpen] = useState(false)
-  const previousStage = getPreviousStage(project.stage)
-  const canRollback = role === 'director' && !readOnly && previousStage !== null
 
-  if (!canRollback) return null
+  if (!canRollbackProject(project.stage, role, readOnly)) return null
 
   return (
     <>
