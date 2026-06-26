@@ -8,7 +8,7 @@ import {
   toMeetingCreateRequest,
   type ListMeetingsParams,
   type Meeting,
-  type MeetingFormValues,
+  type MeetingCreateFormValues,
 } from '@/entities/meeting'
 import { useMeetingsCreate } from '@/shared/api/generated/hooks/meetingsController/useMeetingsCreate'
 import { parseBusinessDatetime } from '@/shared/lib/date'
@@ -65,7 +65,8 @@ export function useCreateMeeting({
   })
 
   const create = useCallback(
-    (values: MeetingFormValues) => {
+    // endTime пока не отправляем — на бэке нет поля окончания (см. toMeetingCreateRequest).
+    (values: MeetingCreateFormValues) => {
       mutation.mutate({ data: toMeetingCreateRequest(values, date) })
     },
     [mutation, date],

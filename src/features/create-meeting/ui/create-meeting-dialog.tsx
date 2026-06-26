@@ -4,9 +4,9 @@ import { format, isValid, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 import {
-  meetingFormSchema,
+  meetingCreateFormSchema,
   type ListMeetingsParams,
-  type MeetingFormValues,
+  type MeetingCreateFormValues,
 } from '@/entities/meeting'
 import { useUserRole } from '@/entities/user-role'
 import { LoftHallAssignmentFields, useLoftHallAssignment } from '@/entities/venue'
@@ -27,7 +27,14 @@ import { TimeField } from '@/shared/ui/time-field'
 
 import { useCreateMeeting } from '../model/use-create-meeting'
 
-const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
+const EMPTY_VALUES: MeetingCreateFormValues = {
+  title: '',
+  comment: '',
+  time: '',
+  endTime: '',
+  lofts: [],
+  halls: [],
+}
 
 const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-card'
 
@@ -52,8 +59,8 @@ export function CreateMeetingDialog({
   queryParams,
 }: CreateMeetingDialogProps) {
   const role = useUserRole()
-  const form = useForm<MeetingFormValues>({
-    resolver: zodResolver(meetingFormSchema),
+  const form = useForm<MeetingCreateFormValues>({
+    resolver: zodResolver(meetingCreateFormSchema),
     defaultValues: EMPTY_VALUES,
     mode: 'onSubmit',
   })
@@ -147,21 +154,38 @@ export function CreateMeetingDialog({
               loftLabel="Лофт"
               hallLabel="Зал"
             />
-            <FormField
-              control={form.control}
-              name="time"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <RequiredLabel label="Время встречи" required />
-                  </FormLabel>
-                  <FormControl>
-                    <TimeField value={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>
+                      <RequiredLabel label="Время начала" required />
+                    </FormLabel>
+                    <FormControl>
+                      <TimeField value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endTime"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>
+                      <RequiredLabel label="Время окончания" required />
+                    </FormLabel>
+                    <FormControl>
+                      <TimeField value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             {isError && errorMessage ? (
               <p className="text-destructive text-sm">{errorMessage}</p>
             ) : null}
