@@ -41,7 +41,7 @@ const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 type PanelTab = 'meetings' | 'reminders'
 
 const PANEL_TAB_CLASS =
-  'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10 cursor-pointer rounded-[10px] border border-border-strong bg-white px-4 py-1.5 text-sm font-normal text-foreground-soft data-[state=active]:border-transparent data-[state=active]:shadow-none'
+  'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10 cursor-pointer rounded-[10px] border border-border-strong bg-card px-4 py-1.5 text-sm font-normal text-foreground-soft data-[state=active]:border-transparent data-[state=active]:shadow-none'
 
 function parseManagerId(value: string | null | undefined): number | null {
   if (!value) return null

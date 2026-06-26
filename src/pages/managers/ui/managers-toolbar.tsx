@@ -4,7 +4,7 @@ import { useLoftHallFilter, VenueFilterSelect } from '@/entities/venue'
 import { Input } from '@/shared/ui/input'
 
 const TRIGGER_CLASS =
-  'h-10! min-w-0 flex-1 rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground lg:w-41.5 lg:flex-none'
+  'h-10! min-w-0 flex-1 rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground lg:w-41.5 lg:flex-none'
 
 interface ManagersToolbarProps {
   search: string
@@ -38,7 +38,7 @@ export function ManagersToolbar({
           placeholder="Поиск менеджеров"
           value={search}
           onChange={(e) => onChangeSearch(e.target.value)}
-          className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pl-9"
+          className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pl-9"
         />
       </div>
 

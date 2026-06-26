@@ -38,7 +38,7 @@ export function NotificationDaySection({ notifications, onRead }: NotificationDa
           )}
         </div>
 
-        <div className="border-border overflow-hidden rounded-[14px] border bg-white">
+        <div className="border-border bg-card overflow-hidden rounded-[14px] border">
           <NotificationItem notification={latest} onRead={onRead} showDateLabel={false} />
           {collapsible && (
             <CollapsibleContent>

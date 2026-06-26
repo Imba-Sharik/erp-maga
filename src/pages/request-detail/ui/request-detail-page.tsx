@@ -37,7 +37,7 @@ export function RequestDetailPage() {
     return <p className="text-muted-foreground text-sm">Загружаем проект…</p>
   }
   if (isError || !project) {
-    return <p className="text-sm text-red-600">Не удалось загрузить проект (id {id}).</p>
+    return <p className="text-error text-sm">Не удалось загрузить проект (id {id}).</p>
   }
 
   // key — пересоздать useStageFlow при переходе между проектами.

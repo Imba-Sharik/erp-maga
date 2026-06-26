@@ -24,7 +24,7 @@ export function LoginPage() {
         <span className="text-foreground text-base font-bold">ERP MAG</span>
       </div>
 
-      <div className="border-border flex w-full max-w-90 flex-col gap-5 rounded-2xl border bg-white p-8">
+      <div className="border-border bg-card flex w-full max-w-90 flex-col gap-5 rounded-2xl border p-8">
         <LoginForm />
         {IS_DEV && (
           <>

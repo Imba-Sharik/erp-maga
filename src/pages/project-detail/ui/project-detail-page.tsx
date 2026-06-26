@@ -38,7 +38,7 @@ export function ProjectDetailPage() {
   }
   if (isError || !project) {
     return (
-      <p className="text-sm text-red-600">
+      <p className="text-error text-sm">
         Не удалось загрузить проект (id {id}). Возможно, его стадия вне воронки MAG.
       </p>
     )
