@@ -2,24 +2,21 @@ import type { MeetingCreateRequest } from '@/shared/api/generated/types/MeetingC
 import type { PatchedMeetingCreateUpdateRequest } from '@/shared/api/generated/types/PatchedMeetingCreateUpdateRequest'
 import { buildBusinessDatetime } from '@/shared/lib/date'
 
-import type { MeetingFormValues } from './meeting-form-schema'
+import type { MeetingCreateFormValues, MeetingFormValues } from './meeting-form-schema'
 import type { Meeting } from '../model/types'
 
 export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date'
 
-/**
- * Форма создания собирает и время окончания (`endTime`), но бэк хранит только
- * `meeting_datetime` (начало) — поэтому в запрос уходит лишь начало. Когда на
- * бэке появится поле окончания, добавляем его сюда из `values.endTime`.
- */
+/** Создание встречи: начало (`time`) и обязательное окончание (`endTime`) → ISO МСК. */
 export function toMeetingCreateRequest(
-  values: MeetingFormValues,
+  values: MeetingCreateFormValues,
   date: string,
 ): MeetingCreateRequest {
   return {
     name: values.title,
     comment: values.comment,
     meeting_datetime: buildBusinessDatetime(date, values.time),
+    meeting_end_datetime: buildBusinessDatetime(date, values.endTime),
     hall_ids: values.halls.map(Number),
   }
 }

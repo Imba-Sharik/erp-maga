@@ -538,7 +538,8 @@ paths:
     post:
       operationId: meetings_create
       description: Доступно менеджеру MAG и руководителю; владелец встречи берётся
-        из текущего пользователя. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
+        из текущего пользователя. `meeting_datetime` — время начала, `meeting_end_datetime`
+        — обязательное время окончания. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
       summary: Создать встречу
       tags:
       - meetings
@@ -607,7 +608,9 @@ paths:
           description: Встреча не найдена
     patch:
       operationId: meetings_partial_update
-      description: Доступно только менеджеру-владельцу встречи. `hall_ids` опционально
+      description: Доступно только менеджеру-владельцу встречи. `meeting_datetime`
+        — время начала, `meeting_end_datetime` — время окончания; при изменении одного
+        из полей интервал валидируется с текущим значением второго. `hall_ids` опционально
         на PATCH.
       summary: Изменить встречу
       parameters:
@@ -3481,6 +3484,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+        meeting_end_datetime:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
         meeting_date:
           type: string
           readOnly: true
@@ -3512,6 +3520,7 @@ components:
       - manager
       - meeting_date
       - meeting_datetime
+      - meeting_end_datetime
       - meeting_time
       - name
       - updated_at
@@ -3555,6 +3564,9 @@ components:
         meeting_datetime:
           type: string
           format: date-time
+        meeting_end_datetime:
+          type: string
+          format: date-time
         hall_ids:
           type: array
           items:
@@ -3572,6 +3584,7 @@ components:
       - comment
       - hall_ids
       - meeting_datetime
+      - meeting_end_datetime
       - name
     MeetingHall:
       type: object
@@ -4257,6 +4270,9 @@ components:
           type: string
           minLength: 1
         meeting_datetime:
+          type: string
+          format: date-time
+        meeting_end_datetime:
           type: string
           format: date-time
         hall_ids:

@@ -37,12 +37,8 @@ export type MeetingFormValues = z.infer<typeof meetingFormSchema>
 
 /**
  * Создание встречи: помимо времени начала (`time`) — обязательное время
- * окончания (`endTime`), окончание должно быть строго позже начала.
- *
- * Бэк пока хранит только `meeting_datetime` (начало), поэтому `endTime`
- * собирается формой, но в запрос не уходит — см. `toMeetingCreateRequest`
- * и `CreateMeetingDialog`. Когда на бэке появится поле окончания, маппинг
- * дополняется, а UI уже готов.
+ * окончания (`endTime`), окончание должно быть строго позже начала. Оба уходят
+ * на бэк (`meeting_datetime` / `meeting_end_datetime`) — см. `toMeetingCreateRequest`.
  */
 export const meetingCreateFormSchema = z
   .object({
