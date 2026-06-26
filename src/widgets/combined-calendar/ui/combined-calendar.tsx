@@ -9,7 +9,7 @@ import { MultiSelect } from '@/shared/ui/multi-select'
 import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
-  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 interface CombinedCalendarProps {
   visibleMonth: Date
@@ -85,7 +85,7 @@ export function CombinedCalendar({
             aria-hidden={!isFetching}
             aria-label={isFetching ? 'Загрузка' : undefined}
             className={cn(
-              'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity @min-[560px]/calendar:block',
+              'text-muted-foreground hidden size-4 shrink-0 transition-opacity @min-[560px]/calendar:block',
               isFetching ? 'animate-spin opacity-100' : 'opacity-0',
             )}
           />
@@ -121,7 +121,7 @@ export function CombinedCalendar({
           isLoading={isLoading}
           enablePaintSelect={false}
         />
-        <p className="pt-2 text-right text-xs text-[#ACACAC] sm:pt-4 sm:text-sm">
+        <p className="text-muted-foreground pt-2 text-right text-xs sm:pt-4 sm:text-sm">
           {totalMeetings} {pluralMeetings(totalMeetings)} · {totalReminders}{' '}
           {pluralReminders(totalReminders)} в этом месяце
         </p>

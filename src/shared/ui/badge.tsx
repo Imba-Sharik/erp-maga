@@ -1,51 +1,49 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import * as React from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { Slot } from 'radix-ui'
 
-import { cn } from "@/shared/lib/utils"
+import { cn } from '@/shared/lib/utils'
 
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
+  'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3',
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-        secondary:
-          "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+        default: 'bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
         destructive:
-          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+          'bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90',
         outline:
-          "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 [a&]:hover:underline",
-        success: "border-[#B7E4BE] bg-[#E8FBEB] text-[#295935]",
-        info: "border-[#B7CCE4] bg-[#E9ECFF] text-[#4B61B9]",
-        warning: "border-[#E4D3B7] bg-[#FBF4E8] text-[#AA8540]",
+          'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 [a&]:hover:underline',
+        success: 'border-success-border bg-success-surface text-success-foreground',
+        info: 'border-info-border bg-info-surface text-info',
+        warning: 'border-warning-border bg-warning-surface text-warning',
         // Тон ведущего менеджера: текст под стать заливке (как у `warning`).
         // Зелёный — проект ведёт текущий менеджер, серый — нейтрально/не назначен.
-        managerSelf: "border-[#B7E4BE] bg-[#E8FBEB] text-[#3E9E57]",
-        managerNeutral: "border-[#C7C7C7] bg-[#EBEBEB] text-[#767676]",
+        managerSelf: 'border-success-border bg-success-surface text-success',
+        managerNeutral: 'border-border-medium bg-chip-surface text-foreground-soft',
         funnelPreproject:
-          "border-funnel-preproject/35 bg-funnel-preproject/10 text-funnel-preproject [a&]:hover:bg-funnel-preproject/15",
+          'border-funnel-preproject/35 bg-funnel-preproject/10 text-funnel-preproject [a&]:hover:bg-funnel-preproject/15',
         funnelClosing:
-          "border-funnel-closing/35 bg-funnel-closing/10 text-funnel-closing [a&]:hover:bg-funnel-closing/15",
-        counter: "border-[#C7C7C7] bg-[#EBEBEB] text-[#1B1A17]",
+          'border-funnel-closing/35 bg-funnel-closing/10 text-funnel-closing [a&]:hover:bg-funnel-closing/15',
+        counter: 'border-border-medium bg-chip-surface text-foreground',
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: 'default',
     },
-  }
+  },
 )
 
 function Badge({
   className,
-  variant = "default",
+  variant = 'default',
   asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot.Root : "span"
+}: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : 'span'
 
   return (
     <Comp

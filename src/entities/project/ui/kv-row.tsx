@@ -22,7 +22,9 @@ export function KvRow({ label, value, valueClassName }: KvRowProps) {
   return (
     <div className="flex items-center justify-between gap-3 py-3 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn('text-right font-medium text-[#1B1A17]', valueClassName)}>{display}</span>
+      <span className={cn('text-foreground text-right font-medium', valueClassName)}>
+        {display}
+      </span>
     </div>
   )
 }

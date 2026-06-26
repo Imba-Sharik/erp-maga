@@ -114,12 +114,12 @@
  * При маленьком `--os-size` и `--os-handle-perpendicular-size` <100% поперёк остаётся субпиксель — «нитка». */
 .os-scrollbar {
   --os-size: 8px;
-  --os-track-bg: #e5e5e5;
-  --os-track-bg-hover: #e5e5e5;
-  --os-track-bg-active: #e5e5e5;
-  --os-handle-bg: #b0b0b0;
-  --os-handle-bg-hover: #7a7a7a;
-  --os-handle-bg-active: #7a7a7a;
+  --os-track-bg: var(--neutral-100);
+  --os-track-bg-hover: var(--neutral-100);
+  --os-track-bg-active: var(--neutral-100);
+  --os-handle-bg: var(--neutral-400);
+  --os-handle-bg-hover: var(--neutral-600);
+  --os-handle-bg-active: var(--neutral-600);
   --os-handle-perpendicular-size: 100%;
   --os-handle-perpendicular-size-hover: 100%;
   --os-handle-perpendicular-size-active: 100%;
@@ -235,7 +235,7 @@
  * -------------------------------------------------------------------------- */
 .native-os-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #b0b0b0 transparent;
+  scrollbar-color: var(--neutral-400) transparent;
 }
 
 .native-os-scrollbar::-webkit-scrollbar {
@@ -249,9 +249,9 @@
 
 .native-os-scrollbar::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background-color: #b0b0b0;
+  background-color: var(--neutral-400);
 }
 
 .native-os-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #7a7a7a;
+  background-color: var(--neutral-600);
 }

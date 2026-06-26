@@ -21,14 +21,14 @@ export const ScheduleDaySection = memo(function ScheduleDaySection({
   onRemoveSelectedDay,
 }: ScheduleDaySectionProps) {
   return (
-    <section className="border-b border-[#E8E8E8] pb-5 last:border-b-0 last:pb-0">
+    <section className="border-border border-b pb-5 last:border-b-0 last:pb-0">
       <div className="mb-2.5 flex items-center gap-1.5">
         <DatePill date={date} />
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
-          className="shrink-0 text-[#ACACAC] hover:text-[#1B1A17]"
+          className="text-muted-foreground hover:text-foreground shrink-0"
           aria-label="Снять выделение с этого дня"
           onClick={() => onRemoveSelectedDay(date)}
         >
@@ -36,7 +36,7 @@ export const ScheduleDaySection = memo(function ScheduleDaySection({
         </Button>
       </div>
       {projects.length === 0 ? (
-        <p className="px-1 py-2 text-sm text-[#ACACAC]">На этот день проектов нет</p>
+        <p className="text-muted-foreground px-1 py-2 text-sm">На этот день проектов нет</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {projects.map((p) => (

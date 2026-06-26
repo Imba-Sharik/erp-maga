@@ -38,12 +38,12 @@ export function ConfirmDeleteMeetingDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Удалить встречу?</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Удалить встречу?</DialogTitle>
           <DialogDescription>
             Встреча будет удалена из календаря. Это действие нельзя отменить.
           </DialogDescription>
           {meeting?.title ? (
-            <p className="text-sm text-[#454545]">Встреча: {meeting.title}</p>
+            <p className="text-foreground-soft text-sm">Встреча: {meeting.title}</p>
           ) : null}
         </DialogHeader>
         {isError && errorMessage ? (

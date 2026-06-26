@@ -19,7 +19,7 @@ export function PlumDataCard({ project }: { project: ProjectDetail }) {
     <ProjectAsideCard
       title="Данные из PLUM"
       badge={
-        <Badge variant="secondary" className="text-2xs text-[#B0B0B0]">
+        <Badge variant="secondary" className="text-2xs text-muted-foreground">
           Read-only
         </Badge>
       }

@@ -10,7 +10,7 @@ export function ProjectTelegramLink({ phone, onClick }: ProjectTelegramLinkProps
   if (!url) return null
 
   return (
-    <p className="text-xs text-[#ACACAC]">
+    <p className="text-muted-foreground text-xs">
       <a
         href={url}
         target="_blank"

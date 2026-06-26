@@ -67,8 +67,8 @@ export function StageSectionSkipped({
   return (
     <div
       className={cn(
-        '@container flex w-full flex-col rounded-[15px] border bg-[#FAF9F6] p-2.5 @xl:p-5',
-        hasDraftHighlight ? stageBlockBorderClass(true) : 'border-dashed border-[#C7C7C7]',
+        'bg-surface-subtle @container flex w-full flex-col rounded-[15px] border p-2.5 @xl:p-5',
+        hasDraftHighlight ? stageBlockBorderClass(true) : 'border-border-medium border-dashed',
       )}
     >
       <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
@@ -76,7 +76,7 @@ export function StageSectionSkipped({
           statusLabel="Этап пропущен:"
           title={ALL_STAGE_LABELS[stage]}
           titleClassName={funnelColor}
-          statusClassName="font-medium text-[#6B6B6B]"
+          statusClassName="font-medium text-foreground-soft"
         />
         {canEdit ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
@@ -84,7 +84,7 @@ export function StageSectionSkipped({
               type="button"
               variant="outline"
               onClick={() => setEditing(true)}
-              className="h-[38px] rounded-[10px] border-[#B1B1B1] bg-white px-4 text-sm"
+              className="border-border-strong bg-card h-[38px] rounded-[10px] px-4 text-sm"
             >
               <Pencil className="size-3.5" />
               Заполнить

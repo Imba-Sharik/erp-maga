@@ -56,7 +56,7 @@ export function AssistantMenuItems({ project, onAdd, onEdit }: AssistantMenuItem
           onSelect={() => onEdit(assistant)}
         >
           <span className="min-w-0 truncate">{assistant.fullName}</span>
-          <PenIcon className="size-3 shrink-0 text-[#ACACAC] [&_path]:fill-current" />
+          <PenIcon className="text-muted-foreground size-3 shrink-0 [&_path]:fill-current" />
         </DropdownMenuItem>
       ))}
       {showAdd ? <DropdownMenuItem onSelect={onAdd}>+ Вспомогательный</DropdownMenuItem> : null}

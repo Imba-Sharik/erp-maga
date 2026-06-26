@@ -14,7 +14,7 @@ export function ProjectCountBadge({ count }: { count: number }) {
         '@max-[560px]/calendar:text-3xs',
       )}
     >
-      <span className="size-1.5 shrink-0 rounded-full bg-[#848484] max-md:hidden" />
+      <span className="bg-muted-foreground size-1.5 shrink-0 rounded-full max-md:hidden" />
       <span className="hidden @[700px]:inline">
         {count} {pluralProjects(count)}
       </span>

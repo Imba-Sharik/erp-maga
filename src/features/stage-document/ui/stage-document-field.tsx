@@ -155,7 +155,7 @@ export function StageDocumentField({
           {uploadError}
         </p>
       ) : uploadSuccess ? (
-        <p className="text-sm text-[#2E7D32]" role="status">
+        <p className="text-success-foreground text-sm" role="status">
           {uploadSuccess}
         </p>
       ) : null}

@@ -35,17 +35,21 @@ export function ProjectCard({ project, backOrigin }: ProjectCardProps) {
           goToDetail()
         }
       }}
-      className="focus-visible:ring-ring/50 cursor-pointer gap-1.5 border-[#D3D3D3] bg-[#F9F9F9] p-2.5 shadow-none transition-colors hover:border-[#B1B1B1] focus-visible:ring-2 focus-visible:outline-none"
+      className="focus-visible:ring-ring/50 border-border-medium bg-surface-subtle hover:border-border-strong cursor-pointer gap-1.5 p-2.5 shadow-none transition-colors focus-visible:ring-2 focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold text-[#1B1A17]">{project.title}</h3>
+        <h3 className="text-foreground text-sm font-semibold">{project.title}</h3>
         <ProjectStageBadge stage={project.stage} />
       </div>
-      {venueLabel && <p className="text-xs text-[#ACACAC]">{venueLabel}</p>}
-      {project.type && <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>}
-      {project.company && <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>}
+      {venueLabel && <p className="text-muted-foreground text-xs">{venueLabel}</p>}
+      {project.type && (
+        <p className="text-muted-foreground text-xs">Тип мероприятия: {project.type}</p>
+      )}
+      {project.company && (
+        <p className="text-muted-foreground text-xs">Компания: {project.company}</p>
+      )}
       {project.phone && (
-        <p className="text-xs text-[#ACACAC]">
+        <p className="text-muted-foreground text-xs">
           Телефон: <span className="text-funnel-preproject">{project.phone}</span>
         </p>
       )}

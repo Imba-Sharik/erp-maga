@@ -102,7 +102,7 @@ function PercentInput({
         onCommit(parsePercentDraft(draft))
       }}
       onChange={(e) => setDraft(sanitizePercentInput(e.target.value))}
-      className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
+      className="border-border-strong bg-card h-9 rounded-[10px] text-sm"
     />
   )
 }
@@ -182,7 +182,7 @@ function ActionField({ children }: { children: ReactNode }) {
 function SubsectionHeader({ title }: { title: string }) {
   return (
     <CollapsibleTrigger className="group flex items-center gap-1.5 text-start text-sm">
-      <span className="font-medium text-[#454545]">{title}</span>
+      <span className="text-foreground-soft font-medium">{title}</span>
       <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
     </CollapsibleTrigger>
   )
@@ -346,7 +346,7 @@ export function FinanceBlockWithBackline({
                       <button
                         type="button"
                         onClick={onToggleBackline}
-                        className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border bg-[#E9ECFF] px-3 text-sm font-medium"
+                        className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 bg-info-surface inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
                       >
                         <Plus className="size-3.5" />
                         Добавить бэклайн
@@ -380,7 +380,7 @@ export function FinanceBlockWithBackline({
                       <button
                         type="button"
                         onClick={onToggleBackline}
-                        className="inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border border-red-300 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                        className="border-error-border bg-card text-error hover:bg-error-surface inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium transition-colors"
                       >
                         <Trash2 className="size-3.5" />
                         Удалить бэклайн
@@ -394,7 +394,7 @@ export function FinanceBlockWithBackline({
         )}
 
         <div className="flex flex-col gap-4">
-          <span className="text-sm font-medium text-[#454545]">Информация</span>
+          <span className="text-foreground-soft text-sm font-medium">Информация</span>
           <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">
             {infoExtras}
             <SimpleField
@@ -423,7 +423,7 @@ export function ExpensesCommentField({ canEdit }: { canEdit: boolean }) {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="—"
-          className="h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm"
+          className="border-border-strong bg-card h-9 rounded-[10px] text-sm"
         />
       ) : (
         <StageReadonlyBox value={comment || '—'} source="system" />

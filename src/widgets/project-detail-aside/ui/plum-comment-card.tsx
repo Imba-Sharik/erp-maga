@@ -16,7 +16,7 @@ function formatDate(value: string | undefined) {
 export function PlumCommentCard({ project }: { project: ProjectDetail }) {
   return (
     <ProjectAsideCard title="Комментарий из PLUM">
-      <p className="pt-2.5 pb-3 text-sm text-[#454545]">
+      <p className="text-foreground-soft pt-2.5 pb-3 text-sm">
         {project.plumComment?.trim() ? project.plumComment : '—'}
       </p>
       <KvRow label="Синхронизировано" value={formatDate(project.plumSyncedAt)} />

@@ -35,26 +35,35 @@ export function ProjectReminders({
   const [editTarget, setEditTarget] = useState<Reminder | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null)
 
-  const { create, update, remove, isCreating, isUpdating, isDeleting, createError, updateError, deleteError } =
-    useProjectReminders({
-      projectId,
-      onCreated: () => setCreateOpen(false),
-      onUpdated: () => setEditTarget(null),
-      onDeleted: () => setDeleteTarget(null),
-    })
+  const {
+    create,
+    update,
+    remove,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    createError,
+    updateError,
+    deleteError,
+  } = useProjectReminders({
+    projectId,
+    onCreated: () => setCreateOpen(false),
+    onUpdated: () => setEditTarget(null),
+    onDeleted: () => setDeleteTarget(null),
+  })
 
   const today = format(new Date(), 'yyyy-MM-dd')
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-[#ACACAC]">
+        <p className="text-muted-foreground text-sm">
           События по проекту с уведомлением в ЕРП и Telegram
         </p>
         {canCreate ? (
           <Button
             type="button"
-            className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-[10px]"
             onClick={() => setCreateOpen(true)}
           >
             <Plus className="size-4" />
@@ -64,16 +73,16 @@ export function ProjectReminders({
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center gap-2 rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-sm text-[#ACACAC]">
+        <div className="border-border text-muted-foreground bg-card flex items-center justify-center gap-2 rounded-[14px] border px-5 py-8 text-sm">
           <Loader2 className="size-4 animate-spin" />
           Загрузка…
         </div>
       ) : isError ? (
-        <div className="rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-center text-sm text-[#D25252]">
+        <div className="border-border text-error bg-card rounded-[14px] border px-5 py-8 text-center text-sm">
           Не удалось загрузить напоминания
         </div>
       ) : !reminders || reminders.length === 0 ? (
-        <div className="rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-center text-sm text-[#ACACAC]">
+        <div className="border-border text-muted-foreground bg-card rounded-[14px] border px-5 py-8 text-center text-sm">
           По этому проекту пока нет напоминаний
         </div>
       ) : (

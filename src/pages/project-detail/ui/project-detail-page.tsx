@@ -34,11 +34,11 @@ export function ProjectDetailPage() {
   useBreadcrumb([{ label: back.label, to: back.to }, { label: project?.title ?? id ?? '' }])
 
   if (isLoading) {
-    return <p className="text-sm text-[#ACACAC]">Загружаем проект…</p>
+    return <p className="text-muted-foreground text-sm">Загружаем проект…</p>
   }
   if (isError || !project) {
     return (
-      <p className="text-sm text-red-600">
+      <p className="text-error text-sm">
         Не удалось загрузить проект (id {id}). Возможно, его стадия вне воронки MAG.
       </p>
     )

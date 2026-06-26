@@ -39,32 +39,32 @@ export function MonthDayCell({
       onPointerEnter={onPointerEnter}
       aria-selected={isSelected}
       className={cn(
-        'flex w-full cursor-pointer touch-none flex-col bg-white',
+        'bg-card flex w-full cursor-pointer touch-none flex-col',
         '@min-[1101px]/calendar:min-h-16 @min-[1101px]/calendar:md:min-h-24',
         '@max-[1100px]/calendar:aspect-square @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:overflow-hidden',
-        outOfMonth && 'bg-[#F3F3F3]',
-        colIdx < 6 && 'border-r border-[#D3D3D3]',
-        !isLastRow && 'border-b border-[#D3D3D3]',
+        outOfMonth && 'bg-surface-muted',
+        colIdx < 6 && 'border-border-medium border-r',
+        !isLastRow && 'border-border-medium border-b',
       )}
     >
       <div
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
           '@max-[560px]/calendar:gap-1 @max-[560px]/calendar:p-1',
-          isSelected && 'bg-linear-to-br from-white to-[#D9D9D9]',
+          isSelected && 'to-border-medium from-card bg-linear-to-br',
         )}
       >
         <span className="relative inline-flex shrink-0 items-center justify-center max-sm:ml-0.5">
           {isToday && (
             <span
-              className="pointer-events-none absolute top-1/2 left-1/2 h-5.5 w-5.5 min-w-5.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#424242] @max-[560px]/calendar:h-4 @max-[560px]/calendar:w-4 @max-[560px]/calendar:min-w-4 @max-[400px]/calendar:h-3.5 @max-[400px]/calendar:w-3.5 @max-[400px]/calendar:min-w-3.5"
+              className="bg-foreground-soft pointer-events-none absolute top-1/2 left-1/2 h-5.5 w-5.5 min-w-5.5 -translate-x-1/2 -translate-y-1/2 rounded-full @max-[560px]/calendar:h-4 @max-[560px]/calendar:w-4 @max-[560px]/calendar:min-w-4 @max-[400px]/calendar:h-3.5 @max-[400px]/calendar:w-3.5 @max-[400px]/calendar:min-w-3.5"
               aria-hidden
             />
           )}
           <span
             className={cn(
               '@max-[560px]/calendar:text-3xs relative z-10 text-sm leading-none',
-              isToday ? 'text-white' : 'text-[#1B1A17]',
+              isToday ? 'text-white' : 'text-foreground',
             )}
           >
             {dayNum}
@@ -74,7 +74,7 @@ export function MonthDayCell({
           {isLoading && !outOfMonth ? (
             <span
               className={cn(
-                'pointer-events-none shrink-0 animate-pulse rounded-full bg-[#EBEBEB]',
+                'bg-chip-surface pointer-events-none shrink-0 animate-pulse rounded-full',
                 'max-md:aspect-square max-md:size-4 max-md:@max-[400px]/calendar:size-3.5',
                 'md:inline-block md:h-5 md:w-10',
               )}

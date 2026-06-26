@@ -248,7 +248,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn('hover:text-sidebar-accent-foreground! size-7 text-[#3C3C3C]', className)}
+      className={cn('hover:text-sidebar-accent-foreground! text-foreground-soft size-7', className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

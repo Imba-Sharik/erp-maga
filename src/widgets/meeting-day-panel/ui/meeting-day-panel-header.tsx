@@ -20,9 +20,9 @@ export function MeetingDayPanelHeader({
   return (
     <div className="flex min-h-10 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       {titleSlot ?? (
-        <h2 className="font-heading leading-none font-bold text-[#1B1A17]">Встречи</h2>
+        <h2 className="font-heading text-foreground leading-none font-bold">Встречи</h2>
       )}
-      {subtitle ? <span className="text-sm text-[#ACACAC]">{subtitle}</span> : null}
+      {subtitle ? <span className="text-muted-foreground text-sm">{subtitle}</span> : null}
     </div>
   )
 }

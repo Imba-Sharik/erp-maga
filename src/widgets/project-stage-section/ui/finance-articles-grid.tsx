@@ -11,7 +11,7 @@ const GRID_ROW = [
 ] as const
 
 const MOBILE_SUMMARY_SEPARATOR =
-  'border-t border-[#F0F0F0] pt-4 mt-1 @[640px]:border-0 @[640px]:pt-0 @[640px]:mt-0'
+  'border-t border-surface-divider pt-4 mt-1 @[640px]:border-0 @[640px]:pt-0 @[640px]:mt-0'
 
 function summaryCellClass(rowIndex: number, withSeparator: boolean) {
   return cn(

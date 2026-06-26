@@ -84,7 +84,7 @@ export function ReminderFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">
+          <DialogTitle className="font-heading text-foreground">
             {isEdit ? 'Редактировать напоминание' : 'Добавить напоминание'}
           </DialogTitle>
           {dayLabel ? <DialogDescription>На {dayLabel}</DialogDescription> : null}
@@ -107,7 +107,7 @@ export function ReminderFormDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[10px] bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
                 disabled={isPending}
               >
                 {isPending ? 'Сохранение…' : 'Сохранить'}

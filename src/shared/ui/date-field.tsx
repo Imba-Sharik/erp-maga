@@ -16,7 +16,12 @@ interface DateFieldProps {
 }
 
 /** Поповер-датапикер. Хранит ISO `yyyy-MM-dd`. */
-export function DateField({ value, onChange, placeholder = 'дд.мм.гггг', className }: DateFieldProps) {
+export function DateField({
+  value,
+  onChange,
+  placeholder = 'дд.мм.гггг',
+  className,
+}: DateFieldProps) {
   const [open, setOpen] = useState(false)
   const parsed = value ? parseISO(value) : undefined
   const selected = parsed && isValid(parsed) ? parsed : undefined
@@ -29,7 +34,7 @@ export function DateField({ value, onChange, placeholder = 'дд.мм.гггг',
           type="button"
           variant="outline"
           className={cn(
-            'min-w-0 h-10! w-full justify-between rounded-[10px] border-[#B1B1B1] bg-white px-3 text-left text-sm font-normal',
+            'border-border-strong bg-card h-10! w-full min-w-0 justify-between rounded-[10px] px-3 text-left text-sm font-normal',
             !selected && 'text-muted-foreground',
             className,
           )}

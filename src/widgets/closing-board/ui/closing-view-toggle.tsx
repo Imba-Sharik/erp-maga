@@ -22,7 +22,7 @@ export function ClosingViewToggle({ value, onChange, className }: ClosingViewTog
       role="group"
       aria-label="Вид отображения"
       className={cn(
-        'flex h-10 shrink-0 items-center gap-1 rounded-[10px] border border-[#B1B1B1] bg-white p-1',
+        'border-border-strong bg-card flex h-10 shrink-0 items-center gap-1 rounded-[10px] border p-1',
         className,
       )}
     >
@@ -40,7 +40,7 @@ export function ClosingViewToggle({ value, onChange, className }: ClosingViewTog
               'flex h-full w-9 cursor-pointer items-center justify-center rounded-[7px] transition-colors',
               active
                 ? 'bg-primary text-primary-foreground'
-                : 'text-[#6B6B6B] hover:bg-[#F4F2EC]',
+                : 'text-foreground-soft hover:bg-surface-muted',
             )}
           >
             <Icon className="size-4" />

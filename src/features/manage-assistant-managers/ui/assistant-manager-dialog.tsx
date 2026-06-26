@@ -17,7 +17,7 @@ import { buildAssistantCandidates } from '../lib/assistant-menu'
 import { applyAssistantSelection, type AssistantDialogMode } from '../lib/assistant-set'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'h-10 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 /** Спец-значение «Снять вспомогательного» в режиме замены. */
 const REMOVE_ASSISTANT_ID = '__remove_assistant__'
@@ -123,13 +123,13 @@ export function AssistantManagerDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">{title}</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">{title}</DialogTitle>
           {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#1B1A17]">Вспомогательный менеджер</span>
+            <span className="text-foreground text-sm font-medium">Вспомогательный менеджер</span>
             <Select value={selectedId} onValueChange={setSelectedId} disabled={selectDisabled}>
               <SelectTrigger className={TRIGGER_CLASS}>
                 <SelectValue placeholder="Выберите менеджера" />
@@ -166,7 +166,7 @@ export function AssistantManagerDialog({
             </Button>
             <Button
               type="button"
-              className="rounded-[10px] bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-[10px]"
               onClick={handleApply}
               disabled={!canApply || isPending}
             >

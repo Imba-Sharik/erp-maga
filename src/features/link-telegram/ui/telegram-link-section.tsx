@@ -26,22 +26,22 @@ export function TelegramLinkSection() {
 
   return (
     <>
-      <section className="overflow-hidden rounded-[14px] border border-[#E9E6DD] bg-white">
-        <div className="flex items-start gap-4 border-b border-[#F0F0F0] px-5 py-4">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#E9ECFF]">
-            <SendIcon className="size-5 text-[#4B61B9]" aria-hidden />
+      <section className="border-border bg-card overflow-hidden rounded-[14px] border">
+        <div className="border-surface-divider flex items-start gap-4 border-b px-5 py-4">
+          <div className="bg-info-surface flex size-10 shrink-0 items-center justify-center rounded-full">
+            <SendIcon className="text-info size-5" aria-hidden />
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-heading text-base font-semibold text-[#1B1A17]">Telegram</h2>
+              <h2 className="font-heading text-foreground text-base font-semibold">Telegram</h2>
               {!isLoading && (
                 <Badge variant={isLinked ? 'success' : 'counter'} className="text-2xs">
                   {isLinked ? 'Привязан' : 'Не привязан'}
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-[#ACACAC]">
+            <p className="text-muted-foreground text-sm">
               Получайте уведомления по проектам в Telegram-боте MAG. Привязка выполняется через
               официального бота — пароль вводить не нужно.
             </p>
@@ -50,12 +50,12 @@ export function TelegramLinkSection() {
 
         <div className="flex flex-col gap-4 px-5 py-4">
           {isLoading ? (
-            <p className="text-sm text-[#ACACAC]">Загрузка статуса…</p>
+            <p className="text-muted-foreground text-sm">Загрузка статуса…</p>
           ) : isLinked ? (
             <>
               <dl className="grid gap-1 text-sm">
-                <dt className="text-[#ACACAC]">Аккаунт</dt>
-                <dd className="font-medium text-[#1B1A17]">{username ?? 'Telegram подключён'}</dd>
+                <dt className="text-muted-foreground">Аккаунт</dt>
+                <dd className="text-foreground font-medium">{username ?? 'Telegram подключён'}</dd>
               </dl>
 
               <div className="flex flex-wrap gap-2">
@@ -63,7 +63,7 @@ export function TelegramLinkSection() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-[10px] border-[#E9E6DD] text-[#1B1A17]"
+                  className="border-border text-foreground rounded-[10px]"
                   onClick={() => setUnlinkDialogOpen(true)}
                 >
                   Отвязать
@@ -72,7 +72,7 @@ export function TelegramLinkSection() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="rounded-[10px] text-[#4B61B9]"
+                  className="text-info rounded-[10px]"
                   onClick={() => void refetch()}
                   disabled={isFetching}
                 >
@@ -83,21 +83,21 @@ export function TelegramLinkSection() {
             </>
           ) : (
             <>
-              <ol className="list-decimal space-y-1.5 pl-4 text-sm text-[#1B1A17]">
+              <ol className="text-foreground list-decimal space-y-1.5 pl-4 text-sm">
                 <li>Нажмите «Привязать Telegram» — откроется бот в новой вкладке.</li>
                 <li>В боте нажмите «Start» или отправьте команду, которую предложит бот.</li>
                 <li>Вернитесь сюда: статус обновится автоматически при возврате на вкладку.</li>
               </ol>
 
               {linkData && (
-                <p className="rounded-[10px] border border-[#B7CCE4] bg-[#E9ECFF]/60 px-3 py-2 text-sm text-[#4B61B9]">
+                <p className="border-info-border bg-info-surface/60 text-info rounded-[10px] border px-3 py-2 text-sm">
                   Ссылка действует до {formatDateTime(linkData.expires_at)}. Если не успели —
                   запросите новую.
                 </p>
               )}
 
               {isError && errorMessage && (
-                <p className="text-sm text-[#D25252]" role="alert">
+                <p className="text-error text-sm" role="alert">
                   {errorMessage}
                 </p>
               )}
@@ -117,7 +117,7 @@ export function TelegramLinkSection() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="rounded-[10px] text-[#4B61B9]"
+                  className="text-info rounded-[10px]"
                   onClick={() => void refetch()}
                   disabled={isFetching}
                 >

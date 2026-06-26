@@ -29,12 +29,12 @@ export function StageReadonlyBox({
         IconCmp && 'gap-2',
         align === 'center' ? 'justify-center' : 'justify-start',
         isSystem
-          ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
-          : 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]',
+          ? 'border-border-medium bg-surface-muted text-foreground-soft border-dashed'
+          : 'border-border-strong bg-surface-subtle text-foreground-soft',
         className,
       )}
     >
-      {IconCmp ? <IconCmp className="size-4 shrink-0 text-[#6B6B6B]" /> : null}
+      {IconCmp ? <IconCmp className="text-foreground-soft size-4 shrink-0" /> : null}
       {IconCmp ? <span className="min-w-0 flex-1 truncate">{value}</span> : value}
     </div>
   )

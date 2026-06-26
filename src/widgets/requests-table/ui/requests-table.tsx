@@ -57,13 +57,13 @@ export function RequestsTable({ variant }: RequestsTableProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5">
       <div className="relative w-full shrink-0 md:w-75">
-        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#ACACAC]" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           type="search"
           placeholder="Поиск проектов"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pl-9 placeholder:text-[#ACACAC]"
+          className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pl-9"
         />
       </div>
       <ProjectsTableView

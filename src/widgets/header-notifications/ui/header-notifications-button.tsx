@@ -16,13 +16,13 @@ export function HeaderNotificationsButton({ className }: HeaderNotificationsButt
     <Button
       variant="ghost"
       size="icon-sm"
-      className={cn('relative text-foreground', className)}
+      className={cn('text-foreground relative', className)}
       asChild
     >
       <Link to="/notifications" aria-label="Уведомления">
         <BellIcon className="size-5 shrink-0 [&_path]:stroke-current" />
         {unreadCount > 0 && (
-          <span className="text-2xs absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#D25252] px-1 leading-none font-semibold text-white">
+          <span className="text-2xs bg-error absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 leading-none font-semibold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

@@ -4,11 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { MagLogo, SettingsIcon } from '@/shared/assets'
 import { useCurrentUser } from '@/entities/current-user'
 import { useUnreadNotificationCount } from '@/entities/notification'
-import {
-  USER_ROLE_LABELS,
-  useRoleNavItems,
-  useUserRole,
-} from '@/entities/user-role'
+import { USER_ROLE_LABELS, useRoleNavItems, useUserRole } from '@/entities/user-role'
 import { DEV_ROLES_WITH_CREDS, useDevLogin, useLogout, type DevRole } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
@@ -96,7 +92,7 @@ export function AppSidebar() {
                       asChild
                       tooltip={item.title}
                       isActive={isActive}
-                      className="hover:text-sidebar-accent-foreground border border-transparent data-[active=true]:border-[#B1B1B1] data-[active=true]:bg-[#FFFFFF] data-[active=true]:font-normal"
+                      className="hover:text-sidebar-accent-foreground data-[active=true]:border-border-strong data-[active=true]:bg-card border border-transparent data-[active=true]:font-normal"
                     >
                       <Link to={item.url} onClick={handleNavClick}>
                         <div
@@ -108,7 +104,7 @@ export function AppSidebar() {
                           <span className="relative flex shrink-0">
                             <item.icon className="size-4 shrink-0" />
                             {showDot && (
-                              <span className="ring-sidebar absolute -top-0.5 -right-0.5 size-2 rounded-full bg-[#D25252] ring-2" />
+                              <span className="ring-sidebar bg-error absolute -top-0.5 -right-0.5 size-2 rounded-full ring-2" />
                             )}
                           </span>
                           <span className="truncate">{item.title}</span>

@@ -20,12 +20,12 @@ export function ProjectAsideCard({
   return (
     <div
       className={cn(
-        '@container flex flex-col rounded-[15px] border border-[#B1B1B1] bg-white p-2 @xl:p-3.75',
+        'border-border-strong bg-card @container flex flex-col rounded-[15px] border p-2 @xl:p-3.75',
         className,
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-[#454545]">{title}</p>
+        <p className="text-foreground-soft text-sm font-medium">{title}</p>
         {badge}
       </div>
       {subline ? (
@@ -33,7 +33,7 @@ export function ProjectAsideCard({
       ) : (
         <div className="h-1" />
       )}
-      <div className="divide-y divide-[#F0F0F0] [&>*:last-child]:pb-0">{children}</div>
+      <div className="divide-surface-divider divide-y [&>*:last-child]:pb-0">{children}</div>
     </div>
   )
 }

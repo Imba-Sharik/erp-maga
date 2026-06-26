@@ -26,23 +26,23 @@ export function NotificationsPage() {
     <div className="flex w-full max-w-4xl flex-col gap-6">
       <header className="flex shrink-0 flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="font-heading font-bold text-[#1B1A17]">Уведомления</h1>
-          <p className="hidden max-w-[640px] text-sm text-[#ACACAC] md:block">
+          <h1 className="font-heading text-foreground font-bold">Уведомления</h1>
+          <p className="text-muted-foreground hidden max-w-[640px] text-sm md:block">
             События по проектам из вашего inbox. Новые записи создаёт сервер при действиях в
             воронке.
           </p>
         </div>
       </header>
 
-      {isLoading && <p className="text-sm text-[#ACACAC]">Загрузка…</p>}
+      {isLoading && <p className="text-muted-foreground text-sm">Загрузка…</p>}
 
       {isError && (
-        <div className="flex flex-col gap-2 text-sm text-[#D25252]">
+        <div className="text-error flex flex-col gap-2 text-sm">
           <p>Не удалось загрузить уведомления.</p>
           <button
             type="button"
             onClick={() => void refetch()}
-            className="w-fit text-[#4B61B9] underline"
+            className="text-info w-fit underline"
           >
             Повторить
           </button>
@@ -50,7 +50,7 @@ export function NotificationsPage() {
       )}
 
       {!isLoading && !isError && visibleNotifications.length === 0 && (
-        <p className="text-sm text-[#ACACAC]">
+        <p className="text-muted-foreground text-sm">
           Пока нет уведомлений. Они появятся, когда по вашим проектам произойдут события, на которые
           вы подписаны.
         </p>

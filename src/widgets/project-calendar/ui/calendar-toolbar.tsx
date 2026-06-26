@@ -9,7 +9,7 @@ import { SearchBar } from '@/shared/ui/search-bar'
 import { MonthYearNavigator } from '@/shared/ui/month-calendar'
 
 const SELECT_BASE =
-  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground'
 
 /** С фильтром менеджера горизонтальный ряд не помещается при открытом сайдбаре и двухколоночной сетке. */
 const TOOLBAR_LAYOUT = {
@@ -165,7 +165,7 @@ export function CalendarToolbar({
           aria-hidden={!isFetching}
           aria-label={isFetching ? 'Загрузка проектов' : undefined}
           className={cn(
-            'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity xl:block',
+            'hidden size-4 shrink-0 text-muted-foreground transition-opacity xl:block',
             isFetching ? 'animate-spin opacity-100' : 'opacity-0',
           )}
         /> */}

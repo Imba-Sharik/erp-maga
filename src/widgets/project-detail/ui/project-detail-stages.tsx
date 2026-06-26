@@ -62,7 +62,7 @@ export function ProjectDetailStages({ project, flow, readOnly = false }: Project
 
   if (economicsOnly && closing.length === 0 && preproject.length === 0) {
     return (
-      <p className="text-sm text-[#ACACAC]">
+      <p className="text-muted-foreground text-sm">
         Финансовые данные появятся, когда проект дойдёт до этапа «{STAGE_LABELS.ready_to_event}».
       </p>
     )

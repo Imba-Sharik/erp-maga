@@ -93,7 +93,7 @@ export function ManagerAssignmentsEditCell({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="shrink-0 text-[#BCBCBC] hover:text-[#454545] data-[state=open]:text-[#454545]"
+                className="text-disabled-foreground hover:text-foreground-soft data-[state=open]:text-foreground-soft shrink-0"
                 aria-label={ariaLabel}
                 disabled={isDisabled || isPending}
                 onClick={stopRowNavigation}
@@ -108,12 +108,12 @@ export function ManagerAssignmentsEditCell({
             >
               <div className="max-h-52 overflow-y-auto p-1">
                 {totalOptions === 0 ? (
-                  <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
+                  <p className="text-muted-foreground px-2 py-1.5 text-sm">Нет данных</p>
                 ) : (
                   groups.map((group, groupIndex) => (
                     <div key={group.label ?? groupIndex}>
                       {group.label ? (
-                        <DropdownMenuLabel className="px-2 py-1 text-xs text-[#ACACAC]">
+                        <DropdownMenuLabel className="text-muted-foreground px-2 py-1 text-xs">
                           {group.label}
                         </DropdownMenuLabel>
                       ) : null}
@@ -178,7 +178,10 @@ export function ManagerAssignmentsEditCell({
             </DropdownMenuContent>
           </DropdownMenu>
           <span
-            className={cn('min-w-0 truncate text-[#ACACAC]', isOpen && 'text-[#454545]')}
+            className={cn(
+              'text-muted-foreground min-w-0 truncate',
+              isOpen && 'text-foreground-soft',
+            )}
             title={displayText}
           >
             {displayText}

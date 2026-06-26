@@ -13,7 +13,7 @@ const DEFAULT_COLUMN_VIEW_OPTIONS: { value: ProjectsTableColumnView; label: stri
 ]
 
 const COLUMN_VIEW_TRIGGER =
-  'h-10! w-full max-w-50 flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs @3xl:w-55 @3xl:max-w-none @3xl:flex-none @3xl:text-sm'
+  'h-10! w-full max-w-50 flex-1 rounded-[10px] border-border-strong bg-card text-xs @3xl:w-55 @3xl:max-w-none @3xl:flex-none @3xl:text-sm'
 
 interface ProjectsTableToolbarProps {
   search: string
@@ -43,13 +43,13 @@ export function ProjectsTableToolbar({
       <div className="flex w-full flex-col gap-2.5 @3xl:flex-row @3xl:items-center @3xl:gap-3">
         <div className="flex items-center gap-2 @3xl:w-75">
           <div className="relative min-w-0 flex-1">
-            <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @3xl:left-3 @3xl:size-4" />
+            <Search className="text-muted-foreground absolute top-1/2 left-2 size-3.5 -translate-y-1/2 @3xl:left-3 @3xl:size-4" />
             <Input
               type="search"
               placeholder="Поиск проектов"
               value={search}
               onChange={(e) => onChangeSearch(e.target.value)}
-              className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
+              className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pr-1.5 pl-7 text-xs placeholder:text-xs @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
             />
           </div>
           {onAddProject && (
@@ -57,7 +57,7 @@ export function ProjectsTableToolbar({
               type="button"
               onClick={onAddProject}
               aria-label="Добавить проект"
-              className="size-10 shrink-0 rounded-[10px] bg-black p-0 text-lg leading-none text-white hover:bg-black/90 @3xl:hidden"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 size-10 shrink-0 rounded-[10px] p-0 text-lg leading-none @3xl:hidden"
             >
               +
             </Button>

@@ -31,12 +31,12 @@ export function ConfirmDeleteReminderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Удалить напоминание?</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Удалить напоминание?</DialogTitle>
           <DialogDescription>
             Напоминание будет удалено. Это действие нельзя отменить.
           </DialogDescription>
           {reminder?.title ? (
-            <p className="text-sm text-[#454545]">Напоминание: {reminder.title}</p>
+            <p className="text-foreground-soft text-sm">Напоминание: {reminder.title}</p>
           ) : null}
         </DialogHeader>
         {errorMessage ? <p className="text-destructive text-sm">{errorMessage}</p> : null}

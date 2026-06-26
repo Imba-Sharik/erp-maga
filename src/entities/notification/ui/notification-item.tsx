@@ -38,13 +38,13 @@ export function NotificationItem({
         <span
           className={cn(
             'truncate text-sm',
-            isRead ? 'font-normal text-[#6B6B6B]' : 'font-medium text-[#1B1A17]',
+            isRead ? 'text-foreground-soft font-normal' : 'text-foreground font-medium',
           )}
         >
           {title}
         </span>
         {(message || subtitle) && (
-          <span className="line-clamp-2 text-xs text-[#ACACAC]">
+          <span className="text-muted-foreground line-clamp-2 text-xs">
             {message}
             {message && subtitle ? ' · ' : null}
             {subtitle}
@@ -54,7 +54,7 @@ export function NotificationItem({
     </>
   )
 
-  const className = 'flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[#FAF9F6]'
+  const className = 'flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-surface-subtle'
 
   if (projectId != null) {
     return (

@@ -34,10 +34,10 @@ export function RequestDetailPage() {
   useBreadcrumb([{ label: back.label, to: back.to }, { label: project?.title ?? id ?? '' }])
 
   if (isLoading) {
-    return <p className="text-sm text-[#ACACAC]">Загружаем проект…</p>
+    return <p className="text-muted-foreground text-sm">Загружаем проект…</p>
   }
   if (isError || !project) {
-    return <p className="text-sm text-red-600">Не удалось загрузить проект (id {id}).</p>
+    return <p className="text-error text-sm">Не удалось загрузить проект (id {id}).</p>
   }
 
   // key — пересоздать useStageFlow при переходе между проектами.

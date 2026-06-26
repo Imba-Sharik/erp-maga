@@ -84,14 +84,14 @@ export function ReminderDayPanel({
     >
       <div className="flex min-h-10 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         {titleSlot ?? (
-          <h2 className="font-heading leading-none font-bold text-[#1B1A17]">Напоминания</h2>
+          <h2 className="font-heading text-foreground leading-none font-bold">Напоминания</h2>
         )}
-        {subtitle ? <span className="text-sm text-[#ACACAC]">{subtitle}</span> : null}
+        {subtitle ? <span className="text-muted-foreground text-sm">{subtitle}</span> : null}
       </div>
 
       <Card
         className={cn(
-          'gap-2.5 border-[#B1B1B1] p-2.5 shadow-none',
+          'border-border-strong gap-2.5 p-2.5 shadow-none',
           heightCapped && 'flex min-h-0 flex-1 flex-col overflow-visible',
         )}
       >
@@ -103,7 +103,7 @@ export function ReminderDayPanel({
           className={cn('meeting-day-panel-scroll-area', heightCapped && 'min-h-0 flex-1')}
         >
           {!selectedDate ? (
-            <p className="px-1 py-4 text-sm text-[#ACACAC]">
+            <p className="text-muted-foreground px-1 py-4 text-sm">
               Выберите один день в календаре слева.
             </p>
           ) : (
@@ -113,7 +113,7 @@ export function ReminderDayPanel({
                 {canCreate ? (
                   <Button
                     type="button"
-                    className="h-10 rounded-[10px] bg-black text-white hover:bg-black/90"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-[10px]"
                     onClick={onAddReminder}
                   >
                     <Plus className="size-4" />
@@ -123,7 +123,9 @@ export function ReminderDayPanel({
               </div>
 
               {reminders.length === 0 ? (
-                <p className="px-1 py-2 text-sm text-[#ACACAC]">На этот день напоминаний нет</p>
+                <p className="text-muted-foreground px-1 py-2 text-sm">
+                  На этот день напоминаний нет
+                </p>
               ) : (
                 <div className="flex flex-col gap-2.5">
                   {reminders.map((reminder) => (
@@ -133,9 +135,7 @@ export function ReminderDayPanel({
                       editable={(canEditReminder?.(reminder) ?? false) && !reminder.sentAt}
                       managerName={resolveManagerName?.(reminder.managerId)}
                       projectHref={
-                        reminder.projectId != null
-                          ? `/projects/${reminder.projectId}`
-                          : undefined
+                        reminder.projectId != null ? `/projects/${reminder.projectId}` : undefined
                       }
                       projectTitle={
                         reminder.projectId != null

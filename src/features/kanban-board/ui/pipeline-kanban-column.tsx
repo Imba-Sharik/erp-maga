@@ -73,8 +73,8 @@ export function PipelineKanbanColumn({
       <div className="bg-card shrink-0">
         <div className="flex flex-col gap-2 px-4 pt-3.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-sm text-[#454545]">{title}</span>
-            <span className="shrink-0 text-xs text-[#ACACAC]">
+            <span className="text-foreground-soft truncate text-sm">{title}</span>
+            <span className="text-muted-foreground shrink-0 text-xs">
               {columnCountLabel(projects.length, backendTotalCount)}
             </span>
           </div>
@@ -94,7 +94,7 @@ export function PipelineKanbanColumn({
       >
         <div className="flex flex-col gap-4 p-4">
           {projects.length === 0 ? (
-            <p className="text-xs text-[#ACACAC]">Пусто</p>
+            <p className="text-muted-foreground text-xs">Пусто</p>
           ) : (
             <>
               {visible.map((p) => (
@@ -115,7 +115,7 @@ export function PipelineKanbanColumn({
                   type="button"
                   onClick={handleShowMore}
                   disabled={isFetchingNextPage}
-                  className="mt-1 inline-flex cursor-pointer items-center justify-center gap-2 rounded-md py-2 text-center text-xs text-[#454545] transition-colors hover:bg-[#F4F2EC] disabled:cursor-default disabled:opacity-60"
+                  className="text-foreground-soft hover:bg-surface-muted mt-1 inline-flex cursor-pointer items-center justify-center gap-2 rounded-md py-2 text-center text-xs transition-colors disabled:cursor-default disabled:opacity-60"
                 >
                   {isFetchingNextPage && <Loader2 className="size-3.5 animate-spin" />}
                   Показать ещё {nextBatch} {pluralProjects(nextBatch)}

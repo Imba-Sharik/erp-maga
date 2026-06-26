@@ -11,7 +11,7 @@ interface ProjectDocumentsProps {
 }
 
 const cardClassName =
-  '@container flex flex-col gap-4 overflow-hidden rounded-[14px] border border-[#E9E6DD] bg-white p-2.5 @xl:p-5'
+  '@container flex flex-col gap-4 overflow-hidden rounded-[14px] border border-border bg-card p-2.5 @xl:p-5'
 
 export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) {
   const estimateFileName = getRecord('calculation_prepared')?.values?.estimateFileName ?? ''
@@ -23,7 +23,7 @@ export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) 
   const hasClosing = closingItems.length > 0
 
   if (!hasEstimate && !hasClosing) {
-    return <p className="text-sm text-[#ACACAC]">Загруженных документов пока нет</p>
+    return <p className="text-muted-foreground text-sm">Загруженных документов пока нет</p>
   }
 
   return (
@@ -31,7 +31,7 @@ export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) 
       {hasEstimate ? (
         <div className={cardClassName}>
           <div className="flex w-full min-w-0 flex-col gap-1.5 md:max-w-sm">
-            <span className="text-sm font-medium text-[#454545]">Смета</span>
+            <span className="text-foreground-soft text-sm font-medium">Смета</span>
             <StageEstimateField
               projectId={project.id}
               value={estimateFileName}
@@ -48,7 +48,7 @@ export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) 
               key={item.documentType}
               className="flex w-full min-w-0 flex-col gap-1.5 md:max-w-sm"
             >
-              <span className="text-sm font-medium text-[#454545]">{item.label}</span>
+              <span className="text-foreground-soft text-sm font-medium">{item.label}</span>
               <StageDocumentField
                 projectId={project.id}
                 documentType={item.documentType}
@@ -57,7 +57,7 @@ export function ProjectDocuments({ project, getRecord }: ProjectDocumentsProps) 
                 interaction="download"
               />
               {item.status ? (
-                <span className="text-xs text-[#ACACAC]">
+                <span className="text-muted-foreground text-xs">
                   {DOCUMENT_STATUS_LABELS[item.status] ?? item.status}
                 </span>
               ) : null}

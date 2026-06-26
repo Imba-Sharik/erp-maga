@@ -57,7 +57,7 @@ export function ManagersTableRow({
   return (
     <GridTableRow gridTemplate={MANAGERS_TABLE_GRID_TEMPLATE}>
       <GridTableCell>
-        <span className="w-full truncate font-medium text-[#454545]">{manager.fullName}</span>
+        <span className="text-foreground-soft w-full truncate font-medium">{manager.fullName}</span>
       </GridTableCell>
 
       <ManagerAssignmentsEditCell

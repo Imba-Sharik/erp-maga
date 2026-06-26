@@ -8,8 +8,7 @@ const textBlockClass =
 
 const headerRowClass = 'flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden text-sm'
 
-const titleRowClass =
-  'flex min-w-0 w-full items-center gap-1.5 overflow-hidden sm:w-auto sm:flex-1'
+const titleRowClass = 'flex min-w-0 w-full items-center gap-1.5 overflow-hidden sm:w-auto sm:flex-1'
 
 interface StageStatusHeaderProps {
   statusLabel: string
@@ -23,7 +22,7 @@ export function StageStatusHeader({
   statusLabel,
   title,
   titleClassName,
-  statusClassName = 'font-medium text-[#454545]',
+  statusClassName = 'font-medium text-foreground-soft',
   collapsible = false,
 }: StageStatusHeaderProps) {
   const status = (
@@ -53,9 +52,7 @@ export function StageStatusHeader({
 
   if (collapsible) {
     return (
-      <CollapsibleTrigger className={cn('group', headerRowClass)}>
-        {textBlock}
-      </CollapsibleTrigger>
+      <CollapsibleTrigger className={cn('group', headerRowClass)}>{textBlock}</CollapsibleTrigger>
     )
   }
 

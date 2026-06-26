@@ -5,7 +5,7 @@ import { ClearableSelect, type SelectOption } from '@/shared/ui/clearable-select
 import type { ColumnFilterKey, ColumnFilters } from '../lib/filter-projects-table'
 
 export const HEADER_FILTER_TRIGGER =
-  'h-8! w-full min-w-0 gap-1 rounded-sm border-0 bg-[#F6F6F6] px-2 text-sm text-[#454545] shadow-none data-placeholder:text-[#454545]'
+  'h-8! w-full min-w-0 gap-1 rounded-sm border-0 bg-surface-muted px-2 text-sm text-foreground-soft shadow-none data-placeholder:text-foreground-soft'
 
 interface TableHeaderFiltersProps {
   columnFilters: ColumnFilters

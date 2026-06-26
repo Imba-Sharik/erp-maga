@@ -283,7 +283,7 @@ export function StageSectionCurrent({
       value={(field.value as string) ?? ''}
       onValueChange={(value) => handleDocumentStatusChange(f.name, field.onChange, value)}
     >
-      <SelectTrigger className="h-9 w-full rounded-[10px] border-[#B1B1B1] text-sm">
+      <SelectTrigger className="border-border-strong h-9 w-full rounded-[10px] text-sm">
         <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
       </SelectTrigger>
       <SelectContent>
@@ -365,7 +365,7 @@ export function StageSectionCurrent({
                   value={(field.value as string) ?? ''}
                   placeholder={f.placeholder}
                   style={{ fieldSizing: 'fixed' }}
-                  className="native-os-scrollbar h-full min-h-[90px] flex-1 resize-none rounded-[10px] border-[#B1B1B1] text-sm"
+                  className="native-os-scrollbar border-border-strong h-full min-h-[90px] flex-1 resize-none rounded-[10px] text-sm"
                   onBlur={(event) => {
                     field.onBlur()
                     if (f.patchOnBlur) {
@@ -398,14 +398,14 @@ export function StageSectionCurrent({
                   value={(field.value as string) ?? ''}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
+                  className="border-border-strong h-9 rounded-[10px] text-sm"
                 />
               ) : (
                 <Input
                   {...field}
                   value={(field.value as string) ?? ''}
                   placeholder={f.placeholder}
-                  className="h-9 rounded-[10px] border-[#B1B1B1] text-sm"
+                  className="border-border-strong h-9 rounded-[10px] text-sm"
                   onBlur={(event) => {
                     field.onBlur()
                     if (f.patchOnBlur) {
@@ -439,7 +439,7 @@ export function StageSectionCurrent({
   return (
     <div
       className={cn(
-        '@container flex w-full flex-col gap-4 rounded-[15px] border bg-white p-2.5 @xl:p-5',
+        'bg-card @container flex w-full flex-col gap-4 rounded-[15px] border p-2.5 @xl:p-5',
         stageBlockBorderClass(hasDraftHighlight),
       )}
     >
@@ -458,7 +458,7 @@ export function StageSectionCurrent({
                     type="button"
                     variant="outline"
                     onClick={onCancelEditing}
-                    className="h-[38px] rounded-[10px] border-[#B1B1B1] px-4 text-sm"
+                    className="border-border-strong h-[38px] rounded-[10px] px-4 text-sm"
                   >
                     Отмена
                   </Button>
@@ -490,7 +490,7 @@ export function StageSectionCurrent({
           </div>
         ) : null}
       </div>
-      <div className="h-px w-full bg-[#F0F0F0]" />
+      <div className="bg-surface-divider h-px w-full" />
       <Form {...form}>
         <form className="flex flex-col gap-4" noValidate>
           <div className="grid grid-cols-1 items-start gap-x-5 gap-y-4 @[640px]:grid-cols-3">

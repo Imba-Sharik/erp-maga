@@ -70,7 +70,7 @@ export function ConfirmRollbackStageDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">
+          <DialogTitle className="font-heading text-foreground">
             Вернуть на предыдущий этап?
           </DialogTitle>
           <DialogDescription>
@@ -81,9 +81,9 @@ export function ConfirmRollbackStageDialog({
 
         {showEventDate ? (
           <div className="flex flex-col gap-2">
-            <span className="text-sm text-[#454545]">Фактическая дата мероприятия</span>
+            <span className="text-foreground-soft text-sm">Фактическая дата мероприятия</span>
             <DateField value={eventDate} onChange={setEventDate} />
-            <p className="text-xs text-[#ACACAC]">
+            <p className="text-muted-foreground text-xs">
               Дата мероприятия прошла — укажите новую (сегодня или позже).
             </p>
           </div>

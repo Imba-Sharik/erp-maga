@@ -100,7 +100,7 @@ export function ProjectCalendar({
           onPaintDates={onPaintDates}
           isLoading={isLoading}
         />
-        <p className="pt-2 text-right text-xs text-[#ACACAC] sm:pt-4 sm:text-sm">
+        <p className="text-muted-foreground pt-2 text-right text-xs sm:pt-4 sm:text-sm">
           {totalThisMonth} {pluralProjects(totalThisMonth)} в этом месяце
         </p>
       </div>

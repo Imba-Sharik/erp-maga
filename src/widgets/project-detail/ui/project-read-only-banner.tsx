@@ -6,8 +6,8 @@ import { Eye } from 'lucide-react'
  */
 export function ProjectReadOnlyBanner() {
   return (
-    <div className="flex items-center gap-2.5 rounded-[10px] border border-[#E9E6DD] bg-[#F9F9F9] px-4 py-3 text-sm text-[#454545]">
-      <Eye className="size-4 shrink-0 text-[#ACACAC]" />
+    <div className="border-border bg-surface-subtle text-foreground-soft flex items-center gap-2.5 rounded-[10px] border px-4 py-3 text-sm">
+      <Eye className="text-muted-foreground size-4 shrink-0" />
       <span>Проект ведёт другой менеджер — доступен только для просмотра.</span>
     </div>
   )

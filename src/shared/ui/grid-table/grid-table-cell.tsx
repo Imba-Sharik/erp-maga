@@ -10,7 +10,7 @@ export function GridTableCell({ children, muted }: { children: ReactNode; muted?
   return (
     <div
       className={`flex min-h-[44px] min-w-0 items-center px-3 py-2 text-sm ${
-        muted ? 'text-[#ACACAC]' : 'text-[#454545]'
+        muted ? 'text-muted-foreground' : 'text-foreground-soft'
       }`}
     >
       {typeof children === 'string' ? (

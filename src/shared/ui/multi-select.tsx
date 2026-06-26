@@ -106,13 +106,15 @@ export function MultiSelect({
           <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
             <span className="min-w-0 truncate">{selectedLabels[0]}</span>
             {selectedLabels.length > 1 ? (
-              <span className="shrink-0 rounded-full bg-[#E9E6DD] px-1.5 py-0.5 text-xs leading-none text-[#6B6B6B]">
+              <span className="bg-surface-hover text-foreground-soft shrink-0 rounded-full px-1.5 py-0.5 text-xs leading-none">
                 +{selectedLabels.length - 1}
               </span>
             ) : null}
           </span>
         ) : (
-          <span className="min-w-0 flex-1 truncate text-left text-[#BCBCBC]">{placeholder}</span>
+          <span className="text-disabled-foreground min-w-0 flex-1 truncate text-left">
+            {placeholder}
+          </span>
         )}
         <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
       </DropdownMenuTrigger>
@@ -122,12 +124,12 @@ export function MultiSelect({
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         {flatOptions.length === 0 ? (
-          <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
+          <p className="text-muted-foreground px-2 py-1.5 text-sm">Нет данных</p>
         ) : grouped ? (
           (options as readonly MultiSelectOptionGroup[]).map((group, groupIndex) => (
             <div key={group.label ?? groupIndex}>
               {group.label ? (
-                <DropdownMenuLabel className="px-2 py-1 text-xs text-[#ACACAC]">
+                <DropdownMenuLabel className="text-muted-foreground px-2 py-1 text-xs">
                   {group.label}
                 </DropdownMenuLabel>
               ) : null}

@@ -35,13 +35,13 @@ export function ConfirmDeleteProjectDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Удалить проект?</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Удалить проект?</DialogTitle>
           <DialogDescription>
             Проект будет помечен удалённым и пропадёт из списков. Действие доступно только
             администратору.
           </DialogDescription>
           {project?.title ? (
-            <p className="text-sm text-[#454545]">Проект: {project.title}</p>
+            <p className="text-foreground-soft text-sm">Проект: {project.title}</p>
           ) : null}
         </DialogHeader>
         {isError && errorMessage ? (

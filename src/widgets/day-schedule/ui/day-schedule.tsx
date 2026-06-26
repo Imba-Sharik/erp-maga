@@ -25,7 +25,7 @@ export function DaySchedule({ scheduleDays, maxHeightPx, onRemoveSelectedDay }: 
       <DayScheduleHeader projectsCount={totalProjects} daysSelectedCount={daysSelectedCount} />
       <Card
         className={cn(
-          'gap-2.5 border-[#B1B1B1] p-2.5 shadow-none',
+          'border-border-strong gap-2.5 p-2.5 shadow-none',
           heightCapped && 'flex min-h-0 flex-1 flex-col overflow-visible',
         )}
       >
@@ -41,7 +41,7 @@ export function DaySchedule({ scheduleDays, maxHeightPx, onRemoveSelectedDay }: 
           className={cn('day-schedule-scroll-area', heightCapped && 'min-h-0 flex-1')}
         >
           {daysSelectedCount === 0 ? (
-            <p className="px-1 py-4 text-sm text-[#ACACAC]">
+            <p className="text-muted-foreground px-1 py-4 text-sm">
               Выберите один или несколько дней в календаре слева.
             </p>
           ) : (

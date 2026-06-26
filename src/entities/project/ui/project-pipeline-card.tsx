@@ -82,15 +82,15 @@ export function ProjectPipelineCard({
     <Card
       className={cn(
         'gap-1 p-2.5 shadow-none transition-colors',
-        hasDraft ? null : 'bg-[#F9F9F9]',
-        stageCardBorderClass(hasDraft, 'border-[#D3D3D3] hover:border-[#B1B1B1]'),
+        hasDraft ? null : 'bg-surface-subtle',
+        stageCardBorderClass(hasDraft, 'border-border-medium hover:border-border-strong'),
       )}
     >
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={goToDetail}
-          className="focus-visible:ring-ring/50 min-w-0 flex-1 cursor-pointer truncate rounded-sm text-left text-sm font-semibold text-[#454545] hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          className="focus-visible:ring-ring/50 text-foreground-soft min-w-0 flex-1 cursor-pointer truncate rounded-sm text-left text-sm font-semibold hover:underline focus-visible:ring-2 focus-visible:outline-none"
         >
           {project.title}
         </button>
@@ -100,7 +100,7 @@ export function ProjectPipelineCard({
               <button
                 type="button"
                 aria-label="Меню проекта"
-                className="-m-1 shrink-0 cursor-pointer rounded p-1 text-[#454545] transition-colors hover:bg-[#E9E6DD]"
+                className="text-foreground-soft hover:bg-surface-hover -m-1 shrink-0 cursor-pointer rounded p-1 transition-colors"
               >
                 <MoreVertical className="size-4" />
               </button>
@@ -146,13 +146,15 @@ export function ProjectPipelineCard({
         onKeyDown={handleBodyKeyDown}
         className="focus-visible:ring-ring/50 flex cursor-pointer flex-col gap-1 rounded-sm focus-visible:ring-2 focus-visible:outline-none"
       >
-        <p className="text-xs text-[#ACACAC]">
+        <p className="text-muted-foreground text-xs">
           {project.loft} · {project.hall}
         </p>
-        <p className="text-xs text-[#ACACAC]">Дата мероприятия: {formatDate(project.date)}</p>
-        <p className="text-xs text-[#ACACAC]">Тип мероприятия: {project.type}</p>
-        <p className="text-xs text-[#ACACAC]">Компания: {project.company}</p>
-        <p className="text-xs text-[#ACACAC]">
+        <p className="text-muted-foreground text-xs">
+          Дата мероприятия: {formatDate(project.date)}
+        </p>
+        <p className="text-muted-foreground text-xs">Тип мероприятия: {project.type}</p>
+        <p className="text-muted-foreground text-xs">Компания: {project.company}</p>
+        <p className="text-muted-foreground text-xs">
           Телефон: <span className="text-funnel-preproject">{project.phone}</span>
         </p>
         {project.isFromPlum ? (
@@ -178,7 +180,7 @@ export function ProjectPipelineCard({
         {/* Бейджи менеджеров всегда снизу (1–2 строки); дата обновления — в правом нижнем углу. */}
         <div className="mt-1 flex items-end justify-between gap-2">
           <ProjectManagerBadge project={project} className="min-w-0 shrink" />
-          <span className="text-2xs shrink-0 text-[#ACACAC]">
+          <span className="text-2xs text-muted-foreground shrink-0">
             {formatRelativeUpdateLabel(project.updatedAt)}
           </span>
         </div>

@@ -14,7 +14,7 @@ export function MeetingCountBadge({ count }: { count: number }) {
         '@max-[560px]/calendar:text-3xs',
       )}
     >
-      <span className="size-1.5 shrink-0 rounded-full bg-[#848484] @max-[699px]/calendar:hidden" />
+      <span className="bg-muted-foreground size-1.5 shrink-0 rounded-full @max-[699px]/calendar:hidden" />
       <span className="hidden min-w-0 truncate @[700px]:block">
         {count} {pluralMeetings(count)}
       </span>
