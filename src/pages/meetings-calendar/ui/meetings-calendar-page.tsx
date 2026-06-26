@@ -52,7 +52,11 @@ function parseManagerId(value: string | null | undefined): number | null {
 export function MeetingsCalendarPage() {
   const role = useUserRole()
   const currentUser = useCurrentUser()
-  const showManagerFilter = role === 'director' || role === 'admin'
+  // ERP-216: менеджер видит календарь встреч как руководитель (фильтр по отв. менеджеру).
+  // По умолчанию — только свои; напоминания всегда остаются его собственными.
+  const isManagerRole = role === 'manager'
+  const isDirectorRole = role === 'director' || role === 'admin'
+  const showManagerFilter = isDirectorRole || isManagerRole
   // Создавать встречи могут менеджер и руководитель (ERP-183).
   const meetingsCreatable = canCreateMeeting(role)
   // Напоминания видят и менеджер (свои), и Руководитель/админ (менеджеров, с фильтром по менеджеру).
@@ -74,10 +78,18 @@ export function MeetingsCalendarPage() {
   const [panelTab, setPanelTab] = useState<PanelTab>('meetings')
 
   const {
-    filterOptions: managerFilterOptions,
+    filterOptions: baseManagerOptions,
     isLoading: managersSelectLoading,
     isError: managersSelectError,
   } = useManagersDirectory()
+
+  // Свой mag-manager id строкой — дефолт фильтра менеджера и гарантия пункта в списке.
+  const ownManagerIdStr = ownerId != null ? String(ownerId) : null
+  const managerFilterOptions = useMemo(() => {
+    if (!isManagerRole || !ownManagerIdStr) return baseManagerOptions
+    if (baseManagerOptions.some((o) => o.value === ownManagerIdStr)) return baseManagerOptions
+    return [{ value: ownManagerIdStr, label: currentUser.displayName }, ...baseManagerOptions]
+  }, [baseManagerOptions, isManagerRole, ownManagerIdStr, currentUser.displayName])
 
   const { today, initialVisibleMonth } = useMemo(() => {
     const now = new Date()
@@ -86,8 +98,11 @@ export function MeetingsCalendarPage() {
 
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  // Множественный выбор менеджеров (только director/admin). Пустой массив — все менеджеры.
-  const [magManagerIds, setMagManagerIds] = useState<string[]>([])
+  // Множественный выбор менеджеров. undefined — не трогали (дефолт по роли: менеджер — он сам,
+  // руководитель — все). Пустой массив — все менеджеры; конкретные id — только они.
+  const [magManagerSelection, setMagManagerSelection] = useState<string[] | undefined>(undefined)
+  const magManagerIds =
+    magManagerSelection ?? (isManagerRole && ownManagerIdStr ? [ownManagerIdStr] : [])
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Meeting | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Meeting | null>(null)
@@ -98,12 +113,21 @@ export function MeetingsCalendarPage() {
 
   // Бэк фильтрует только по одному менеджеру, поэтому для руководителя тянем все
   // встречи (manager не передаём) и фильтруем по выбранным id на клиенте.
-  // Менеджер всегда скоупится на себя серверным фильтром.
+  // Менеджер смотрит только себя → скоупим запрос на бэке. Как только выбирает
+  // других/всех — тянем всё (бэк авторизует менеджера на `manager`, ERP-216) и
+  // фильтруем по выбранным id на клиенте.
+  const viewingOwnOnly =
+    isManagerRole &&
+    ownManagerIdStr != null &&
+    magManagerIds.length === 1 &&
+    magManagerIds[0] === ownManagerIdStr
+
   const queryManagerId = useMemo((): number | null => {
-    if (showManagerFilter) return null
+    if (isDirectorRole) return null
+    if (isManagerRole && !viewingOwnOnly) return null
     const parsed = parseManagerId(currentUser.id)
     return parsed ?? 1
-  }, [showManagerFilter, currentUser.id])
+  }, [isDirectorRole, isManagerRole, viewingOwnOnly, currentUser.id])
 
   const selectedManagerIds = useMemo(
     () => new Set(magManagerIds.map(Number).filter((id) => Number.isFinite(id))),
@@ -166,11 +190,13 @@ export function MeetingsCalendarPage() {
 
   // Руководитель видит напоминания менеджеров; при выборе менеджера(ов) — только их
   // (фильтра по менеджеру в API нет, поэтому фильтруем по managerId на клиенте).
+  // Менеджер (ERP-216) всегда видит только свои напоминания — фильтр по отв. менеджеру к ним
+  // не применяем (иначе при выборе другого менеджера его собственные пропали бы).
   const visibleReminders = useMemo(() => {
     const all = reminderData ?? []
-    if (!showManagerFilter || selectedManagerIds.size === 0) return all
+    if (!isDirectorRole || selectedManagerIds.size === 0) return all
     return all.filter((reminder) => selectedManagerIds.has(reminder.managerId))
-  }, [reminderData, showManagerFilter, selectedManagerIds])
+  }, [reminderData, isDirectorRole, selectedManagerIds])
 
   const remindersByDay = useMemo(() => groupRemindersByDay(visibleReminders), [visibleReminders])
   const totalRemindersThisMonth = useMemo(
@@ -228,7 +254,7 @@ export function MeetingsCalendarPage() {
             onSelectDate={handleSelectDate}
             showManagerFilter={showManagerFilter}
             magManagerIds={magManagerIds}
-            onChangeMagManagerIds={setMagManagerIds}
+            onChangeMagManagerIds={setMagManagerSelection}
             managerFilterOptions={managerFilterOptions}
             managersSelectLoading={managersSelectLoading}
             managersSelectError={managersSelectError}
@@ -245,7 +271,7 @@ export function MeetingsCalendarPage() {
               remindersByDay={remindersByDay}
               canCreate={remindersCreatable}
               canEditReminder={canEditReminder}
-              resolveManagerName={showManagerFilter ? resolveManagerName : undefined}
+              resolveManagerName={isDirectorRole ? resolveManagerName : undefined}
               maxHeightPx={panelMaxHeightPx}
               titleSlot={panelTabs}
               onAddReminder={() => setReminderCreateOpen(true)}
