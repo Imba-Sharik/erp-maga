@@ -27,7 +27,7 @@ export function ProjectsKanban({
   renderAssistantMenu,
 }: ProjectsKanbanProps) {
   return (
-    <Card className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible border-[#B1B1B1] py-0 shadow-none">
+    <Card className="border-border-strong @container flex h-full min-h-0 flex-1 flex-col overflow-visible py-0 shadow-none">
       <OverlayScrollbarsComponent
         options={{
           overflow: { x: 'scroll', y: 'hidden' },
@@ -39,7 +39,7 @@ export function ProjectsKanban({
         }}
         className="projects-kanban-scroll-area h-full min-h-0 w-full min-w-0 flex-1"
       >
-        <div className="flex h-full min-w-fit divide-x divide-[#D3D3D3]">
+        <div className="divide-border-medium flex h-full min-w-fit divide-x">
           {PRE_PROJECT_STAGES.map((stage) => (
             <ProjectsKanbanColumnItem
               key={stage}

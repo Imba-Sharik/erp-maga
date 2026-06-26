@@ -58,7 +58,7 @@ export function MeetingDayPanel({
 
       <Card
         className={cn(
-          'gap-2.5 border-[#B1B1B1] p-2.5 shadow-none',
+          'border-border-strong gap-2.5 p-2.5 shadow-none',
           heightCapped && 'flex min-h-0 flex-1 flex-col overflow-visible',
         )}
       >
@@ -74,7 +74,7 @@ export function MeetingDayPanel({
           className={cn('meeting-day-panel-scroll-area', heightCapped && 'min-h-0 flex-1')}
         >
           {!selectedDate ? (
-            <p className="px-1 py-4 text-sm text-[#ACACAC]">
+            <p className="text-muted-foreground px-1 py-4 text-sm">
               Выберите один день в календаре слева.
             </p>
           ) : (
@@ -94,7 +94,7 @@ export function MeetingDayPanel({
               </div>
 
               {meetings.length === 0 ? (
-                <p className="px-1 py-2 text-sm text-[#ACACAC]">На этот день встреч нет</p>
+                <p className="text-muted-foreground px-1 py-2 text-sm">На этот день встреч нет</p>
               ) : (
                 <div className="flex flex-col gap-2.5">
                   {meetings.map((meeting) => (

@@ -30,8 +30,8 @@ export function StageFieldReadonly({
   const isSystem = source === 'system'
 
   const boxColors = isSystem
-    ? 'border-dashed border-[#C7C7C7] bg-[#F4F2EC] text-[#6B6B6B]'
-    : 'border-[#B1B1B1] bg-[#FAFAFA] text-[#454545]'
+    ? 'border-dashed border-border-medium bg-surface-muted text-foreground-soft'
+    : 'border-border-strong bg-surface-subtle text-foreground-soft'
 
   const wrap = (content: ReactNode, fieldClassName?: string) =>
     hideLabel ? (
@@ -46,7 +46,7 @@ export function StageFieldReadonly({
     return wrap(
       <div
         className={cn(
-          'contain-size flex min-h-[90px] w-full flex-1 rounded-[10px] border text-sm',
+          'flex min-h-[90px] w-full flex-1 rounded-[10px] border text-sm contain-size',
           boxColors,
         )}
         title={isSystem ? 'Заполнено системой' : undefined}

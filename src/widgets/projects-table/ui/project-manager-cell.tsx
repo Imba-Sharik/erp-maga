@@ -116,7 +116,7 @@ export function ProjectManagerCell({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="shrink-0 text-[#BCBCBC] hover:text-[#454545] data-[state=open]:text-[#454545]"
+                  className="text-disabled-foreground hover:text-foreground-soft data-[state=open]:text-foreground-soft shrink-0"
                   aria-label="Назначить менеджеров"
                   title="Назначить менеджеров"
                   onClick={stopRowNavigation}
@@ -131,17 +131,17 @@ export function ProjectManagerCell({
               >
                 <div className="max-h-52 overflow-y-auto p-1">
                   {optionsLoading ? (
-                    <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Загрузка…</p>
+                    <p className="text-muted-foreground px-2 py-1.5 text-sm">Загрузка…</p>
                   ) : optionsError ? (
                     <p className="text-destructive px-2 py-1.5 text-sm">
                       Не удалось загрузить менеджеров
                     </p>
                   ) : showHallAssignmentHint ? (
-                    <p className="max-w-60 px-2 py-1.5 text-sm whitespace-normal text-[#ACACAC]">
+                    <p className="text-muted-foreground max-w-60 px-2 py-1.5 text-sm whitespace-normal">
                       {MANAGER_HALL_ASSIGNMENT_HINT}
                     </p>
                   ) : assignableOptions.length === 0 ? (
-                    <p className="px-2 py-1.5 text-sm text-[#ACACAC]">Нет данных</p>
+                    <p className="text-muted-foreground px-2 py-1.5 text-sm">Нет данных</p>
                   ) : (
                     assignableOptions.map((option) => {
                       const isLead = draft.leadId === option.id
@@ -163,7 +163,9 @@ export function ProjectManagerCell({
                             <Star
                               className={cn(
                                 'size-4',
-                                isLead ? 'fill-amber-400 text-amber-500' : 'text-[#C7C7C7]',
+                                isLead
+                                  ? 'fill-amber-400 text-amber-500'
+                                  : 'text-disabled-foreground',
                               )}
                             />
                           </button>
@@ -179,7 +181,7 @@ export function ProjectManagerCell({
                             <UserPlus
                               className={cn(
                                 'size-4',
-                                isAssistant ? 'text-red-500' : 'text-[#C7C7C7]',
+                                isAssistant ? 'text-red-500' : 'text-disabled-foreground',
                               )}
                             />
                           </button>
@@ -224,7 +226,10 @@ export function ProjectManagerCell({
             </DropdownMenu>
           )}
           <span
-            className={cn('min-w-0 truncate text-[#ACACAC]', isOpen && 'text-[#454545]')}
+            className={cn(
+              'text-muted-foreground min-w-0 truncate',
+              isOpen && 'text-foreground-soft',
+            )}
             title={displayName}
           >
             {displayName}

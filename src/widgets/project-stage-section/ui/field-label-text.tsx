@@ -7,7 +7,7 @@ export function FieldLabelText({ label, required }: FieldLabelTextProps) {
   return (
     <>
       {label}
-      {required ? <span className="text-[#D25252]">*</span> : null}
+      {required ? <span className="text-error">*</span> : null}
     </>
   )
 }

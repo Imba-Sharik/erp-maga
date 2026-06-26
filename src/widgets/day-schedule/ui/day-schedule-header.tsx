@@ -14,13 +14,12 @@ function buildSubtitle(projectsCount: number, daysSelectedCount: number): string
 }
 
 export function DayScheduleHeader({ projectsCount, daysSelectedCount }: DayScheduleHeaderProps) {
-  const subtitle =
-    daysSelectedCount > 0 ? buildSubtitle(projectsCount, daysSelectedCount) : null
+  const subtitle = daysSelectedCount > 0 ? buildSubtitle(projectsCount, daysSelectedCount) : null
 
   return (
-    <div className="flex h-10 flex-col gap-1 items-start sm:flex-row sm:items-center sm:justify-between">
-      <h2 className="font-heading leading-none font-bold text-[#1B1A17]">Расписание</h2>
-      {subtitle && <span className="text-sm text-[#ACACAC]">{subtitle}</span>}
+    <div className="flex h-10 flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <h2 className="font-heading text-foreground leading-none font-bold">Расписание</h2>
+      {subtitle && <span className="text-muted-foreground text-sm">{subtitle}</span>}
     </div>
   )
 }

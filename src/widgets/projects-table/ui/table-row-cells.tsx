@@ -27,7 +27,7 @@ export function formatTableDateTime(iso: string): string {
 export function ProjectTitleCell({ project }: { project: Project }) {
   return (
     <GridTableCell>
-      <span className="w-full truncate font-medium text-[#454545]">
+      <span className="text-foreground-soft w-full truncate font-medium">
         {project.title || TABLE_EMPTY}
       </span>
     </GridTableCell>

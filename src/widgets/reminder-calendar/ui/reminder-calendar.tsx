@@ -1,10 +1,6 @@
 import { useMemo, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
-import {
-  pluralReminders,
-  ReminderCountBadge,
-  type RemindersByDay,
-} from '@/entities/reminder'
+import { pluralReminders, ReminderCountBadge, type RemindersByDay } from '@/entities/reminder'
 import { toDayKey } from '@/shared/lib/date'
 import { cn } from '@/shared/lib/utils'
 import { MonthCalendarGrid, MonthYearNavigator } from '@/shared/ui/month-calendar'
@@ -57,7 +53,7 @@ export function ReminderCalendar({
             aria-hidden={!isFetching}
             aria-label={isFetching ? 'Загрузка напоминаний' : undefined}
             className={cn(
-              'hidden size-4 shrink-0 text-[#ACACAC] transition-opacity @min-[880px]/calendar:block',
+              'text-muted-foreground hidden size-4 shrink-0 transition-opacity @min-[880px]/calendar:block',
               isFetching ? 'animate-spin opacity-100' : 'opacity-0',
             )}
           />
@@ -81,7 +77,7 @@ export function ReminderCalendar({
           isLoading={isLoading}
           enablePaintSelect={false}
         />
-        <p className="pt-2 text-right text-xs text-[#ACACAC] sm:pt-4 sm:text-sm">
+        <p className="text-muted-foreground pt-2 text-right text-xs sm:pt-4 sm:text-sm">
           {totalThisMonth} {pluralReminders(totalThisMonth)} в этом месяце
         </p>
       </div>

@@ -53,7 +53,7 @@ function calcRow(values: ArticleValues) {
 }
 
 function Operator({ children }: { children: string }) {
-  return <span className="px-1 text-sm font-medium text-[#6B6B6B]">{children}</span>
+  return <span className="text-foreground-soft px-1 text-sm font-medium">{children}</span>
 }
 
 interface ArticleRowProps {
@@ -67,7 +67,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
   return (
     <div className="grid grid-cols-2 items-end gap-4 @[900px]:grid-cols-[minmax(0,1fr)_88px_120px]">
       <div className="col-span-2 flex min-w-0 flex-col gap-1.5 @[900px]:col-span-1">
-        <span className="text-xs font-medium text-[#454545]">{ARTICLE_LABELS[row.kind]}</span>
+        <span className="text-foreground-soft text-xs font-medium">{ARTICLE_LABELS[row.kind]}</span>
         <div className="flex min-w-0 items-center gap-1.5">
           <StageReadonlyBox
             value={row.values.sales === null ? '—' : formatMoney(row.values.sales)}
@@ -91,7 +91,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-[#454545]">% Бонуса</span>
+        <span className="text-foreground-soft text-xs font-medium">% Бонуса</span>
         <StageReadonlyBox
           value={formatPercent(row.values.bonusPercent)}
           source="system"
@@ -99,7 +99,7 @@ function ArticleRow({ row, editable, onBonusChange }: ArticleRowProps) {
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-[#454545]">Бонус по статье</span>
+        <span className="text-foreground-soft text-xs font-medium">Бонус по статье</span>
         {editable ? (
           <MoneyInput
             value={bonusAmount}
@@ -177,7 +177,9 @@ export function StagePassedBonus({
     >
       <Collapsible defaultOpen className="flex flex-col">
         <CollapsibleTrigger className="group flex items-center gap-1.5 text-start text-sm">
-          <span className="font-medium text-[#454545]">Бонус: Продажная часть (основной блок)</span>
+          <span className="text-foreground-soft font-medium">
+            Бонус: Продажная часть (основной блок)
+          </span>
           <ChevronDown className="text-muted-foreground size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-4">

@@ -29,7 +29,7 @@ export function MoneyInput({
   invalid = false,
   className,
 }: MoneyInputProps) {
-  const inputClassName = cn('h-9 rounded-[10px] border-[#B1B1B1] bg-white text-sm', className)
+  const inputClassName = cn('h-9 rounded-[10px] border-border-strong bg-white text-sm', className)
   const [focused, setFocused] = useState(false)
   const [draft, setDraft] = useState(() => valueToDraft(value))
 

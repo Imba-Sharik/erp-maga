@@ -19,7 +19,7 @@ const COLUMN_VIEW_OPTIONS: { value: ClosingColumnView; label: string }[] = [
 ]
 
 const COLUMN_VIEW_TRIGGER =
-  'h-10! min-w-0 flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs @3xl:w-55 @3xl:flex-none @3xl:text-sm'
+  'h-10! min-w-0 flex-1 rounded-[10px] border-border-strong bg-white text-xs @3xl:w-55 @3xl:flex-none @3xl:text-sm'
 
 interface ClosingBoardToolbarKanbanProps {
   archiveMode: false
@@ -98,13 +98,13 @@ export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
     <div className="@container flex shrink-0 flex-col gap-2.5 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4">
       <div className="flex w-full flex-row items-center gap-2 @3xl:gap-3">
         <div className="relative min-w-0 flex-1 @3xl:w-75 @3xl:flex-none">
-          <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @3xl:left-3 @3xl:size-4" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2 size-3.5 -translate-y-1/2 @3xl:left-3 @3xl:size-4" />
           <Input
             type="search"
             placeholder="Поиск проектов"
             value={props.search}
             onChange={(e) => props.onChangeSearch(e.target.value)}
-            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
+            className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs @3xl:pr-3 @3xl:pl-9 @3xl:text-sm @3xl:placeholder:text-sm"
           />
         </div>
 

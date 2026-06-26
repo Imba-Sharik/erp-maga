@@ -34,7 +34,7 @@ export function StageBlockShell({
   isCurrent = false,
   canShowAdvance = false,
   headerTitle,
-  headerColorClass = 'text-[#454545]',
+  headerColorClass = 'text-foreground-soft',
   hasDraftHighlight,
   onAdvance,
   isAdvancing = false,
@@ -55,7 +55,7 @@ export function StageBlockShell({
 
   const body = (
     <>
-      {showHeaderRow ? <div className="h-px w-full bg-[#F0F0F0]" /> : null}
+      {showHeaderRow ? <div className="bg-surface-divider h-px w-full" /> : null}
       {children}
     </>
   )

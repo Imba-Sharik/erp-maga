@@ -35,20 +35,29 @@ export function ProjectReminders({
   const [editTarget, setEditTarget] = useState<Reminder | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null)
 
-  const { create, update, remove, isCreating, isUpdating, isDeleting, createError, updateError, deleteError } =
-    useProjectReminders({
-      projectId,
-      onCreated: () => setCreateOpen(false),
-      onUpdated: () => setEditTarget(null),
-      onDeleted: () => setDeleteTarget(null),
-    })
+  const {
+    create,
+    update,
+    remove,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    createError,
+    updateError,
+    deleteError,
+  } = useProjectReminders({
+    projectId,
+    onCreated: () => setCreateOpen(false),
+    onUpdated: () => setEditTarget(null),
+    onDeleted: () => setDeleteTarget(null),
+  })
 
   const today = format(new Date(), 'yyyy-MM-dd')
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-[#ACACAC]">
+        <p className="text-muted-foreground text-sm">
           События по проекту с уведомлением в ЕРП и Telegram
         </p>
         {canCreate ? (
@@ -64,16 +73,16 @@ export function ProjectReminders({
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center gap-2 rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-sm text-[#ACACAC]">
+        <div className="border-border text-muted-foreground flex items-center justify-center gap-2 rounded-[14px] border bg-white px-5 py-8 text-sm">
           <Loader2 className="size-4 animate-spin" />
           Загрузка…
         </div>
       ) : isError ? (
-        <div className="rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-center text-sm text-[#D25252]">
+        <div className="border-border text-error rounded-[14px] border bg-white px-5 py-8 text-center text-sm">
           Не удалось загрузить напоминания
         </div>
       ) : !reminders || reminders.length === 0 ? (
-        <div className="rounded-[14px] border border-[#E9E6DD] bg-white px-5 py-8 text-center text-sm text-[#ACACAC]">
+        <div className="border-border text-muted-foreground rounded-[14px] border bg-white px-5 py-8 text-center text-sm">
           По этому проекту пока нет напоминаний
         </div>
       ) : (

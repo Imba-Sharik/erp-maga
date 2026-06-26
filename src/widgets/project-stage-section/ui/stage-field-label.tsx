@@ -36,7 +36,7 @@ function StageFieldLabelForm({
       data-error={!!error}
       htmlFor={formItemId}
       className={cn(
-        'data-[error=true]:text-destructive gap-0 text-xs font-medium text-[#454545]',
+        'data-[error=true]:text-destructive text-foreground-soft gap-0 text-xs font-medium',
         className,
       )}
     >
@@ -55,7 +55,7 @@ function StageFieldLabelStatic({
     <span
       data-error={error || undefined}
       className={cn(
-        'data-[error=true]:text-destructive text-xs font-medium text-[#454545]',
+        'data-[error=true]:text-destructive text-foreground-soft text-xs font-medium',
         className,
       )}
     >
