@@ -109,6 +109,7 @@
   --chip-foreground: var(--neutral-600); /* текст нейтрального чипа */
   --border-medium: var(--neutral-200); /* #d3d3d3 — resting-граница карточки */
   --border-strong: var(--neutral-400); /* #b1b1b1 — hover/active-граница */
+  --overlay: var(--neutral-950); /* чёрный скрим под диалогами (прозрачность — модификатором /NN) */
 
   /* Статусы (light-only). */
   --success: var(--green-solid);
@@ -236,6 +237,7 @@
   --color-chip-foreground: var(--chip-foreground);
   --color-border-medium: var(--border-medium);
   --color-border-strong: var(--border-strong);
+  --color-overlay: var(--overlay);
 
   /* Статусы. */
   --color-success: var(--success);
