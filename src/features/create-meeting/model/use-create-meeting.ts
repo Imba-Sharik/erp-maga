@@ -40,6 +40,7 @@ export function useCreateMeeting({
         const optimistic: Meeting = {
           id: optimisticId,
           title: data.name,
+          eventType: data.type ?? '',
           comment: data.comment,
           time: parsed?.time ?? '00:00',
           date: parsed?.date ?? date,

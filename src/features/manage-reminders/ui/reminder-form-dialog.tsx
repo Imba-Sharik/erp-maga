@@ -78,8 +78,7 @@ export function ReminderFormDialog({
       reminder
         ? {
             title: reminder.title,
-            // Тип события не приходит с бэка (ERP-215, поля пока нет) — заполняется заново.
-            eventType: '',
+            eventType: reminder.eventType,
             comment: reminder.comment,
             date: reminder.date,
             time: reminder.time,

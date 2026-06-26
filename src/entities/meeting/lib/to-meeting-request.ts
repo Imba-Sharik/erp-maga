@@ -7,14 +7,13 @@ import type { Meeting } from '../model/types'
 
 export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date'
 
-// Тип события (`values.eventType`, ERP-215) пока в запрос не уходит — на бэке нет
-// поля. Когда появится — добавляем его в тело здесь и в toMeetingUpdateRequest.
 export function toMeetingCreateRequest(
   values: MeetingFormValues,
   date: string,
 ): MeetingCreateRequest {
   return {
     name: values.title,
+    type: values.eventType as MeetingCreateRequest['type'],
     comment: values.comment,
     meeting_datetime: buildBusinessDatetime(date, values.time),
     hall_ids: values.halls.map(Number),
@@ -27,6 +26,7 @@ export function toMeetingUpdateRequest(
 ): PatchedMeetingCreateUpdateRequest {
   return {
     name: values.title,
+    type: values.eventType as PatchedMeetingCreateUpdateRequest['type'],
     comment: values.comment,
     meeting_datetime: buildBusinessDatetime(meeting.date, values.time),
     hall_ids: values.halls.map(Number),

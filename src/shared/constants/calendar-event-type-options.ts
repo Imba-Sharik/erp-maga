@@ -1,11 +1,10 @@
 /**
  * Тип события календаря — общий для встреч и напоминаний (ERP-215).
- * Бэк поля пока не хранит: селект собирается формой, но в запрос не уходит
- * (см. `toMeetingCreateRequest` / `toReminderCreateRequest`).
+ * Значения совпадают с enum бэка (`type` на встречах/напоминаниях).
  */
 export type CalendarEventType =
   | 'meeting'
-  | 'assembly'
+  | 'installation'
   | 'event'
   | 'day_off'
   | 'vacation'
@@ -18,7 +17,7 @@ export type CalendarEventTypeOption = {
 
 export const CALENDAR_EVENT_TYPE_OPTIONS: readonly CalendarEventTypeOption[] = [
   { value: 'meeting', label: 'Встреча' },
-  { value: 'assembly', label: 'Монтаж' },
+  { value: 'installation', label: 'Монтаж' },
   { value: 'event', label: 'Мероприятие' },
   { value: 'day_off', label: 'Выходной' },
   { value: 'vacation', label: 'Отпуск' },

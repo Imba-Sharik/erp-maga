@@ -471,8 +471,9 @@ paths:
     get:
       operationId: meetings_list
       description: Правая панель календаря встреч. `date=YYYY-MM-DD` фильтрует встречи
-        выбранного дня; `loft` / `hall` — по привязанным залам. Поддерживает infinite-scroll
-        пагинацию через `limit` и `offset`.
+        выбранного дня; `loft` / `hall` — по привязанным залам; `manager` — фильтр
+        по менеджерам (см. параметр). Менеджер MAG без `manager` видит только свои
+        встречи. Поддерживает infinite-scroll пагинацию через `limit` и `offset`.
       summary: Список встреч
       parameters:
       - in: query
@@ -503,8 +504,8 @@ paths:
           items:
             type: integer
         description: Один или несколько ID менеджеров через запятую (например `?manager=1,2`).
-          Доступно руководителю и администратору; менеджер MAG всегда видит только
-          свои встречи.
+          Доступно менеджеру MAG, руководителю и администратору. Менеджер MAG без
+          фильтра видит только свои встречи; с фильтром видит встречи выбранных менеджеров.
         explode: false
         style: form
       - in: query
@@ -537,8 +538,11 @@ paths:
           description: ''
     post:
       operationId: meetings_create
-      description: Доступно менеджеру MAG и руководителю; владелец встречи берётся
-        из текущего пользователя. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.
+      description: 'Доступно менеджеру MAG и руководителю; владелец встречи берётся
+        из текущего пользователя. `type` обязателен: `meeting` (Встреча), `installation`
+        (Монтаж), `event` (Мероприятие), `day_off` (Выходной), `vacation` (Отпуск),
+        `out_of_office` (Отсутствие в офисе). `meeting_datetime` — время начала, `meeting_end_datetime`
+        — обязательное время окончания. Обязательно `hall_ids` — id залов из GET /api/v1/halls/halls/.'
       summary: Создать встречу
       tags:
       - meetings
@@ -607,8 +611,11 @@ paths:
           description: Встреча не найдена
     patch:
       operationId: meetings_partial_update
-      description: Доступно только менеджеру-владельцу встречи. `hall_ids` опционально
-        на PATCH.
+      description: 'Доступно только менеджеру-владельцу встречи. `type` — код типа
+        события: `meeting`, `installation`, `event`, `day_off`, `vacation`, `out_of_office`.
+        `meeting_datetime` — время начала, `meeting_end_datetime` — время окончания;
+        при изменении одного из полей интервал валидируется с текущим значением второго.
+        `hall_ids` опционально на PATCH.'
       summary: Изменить встречу
       parameters:
       - in: path
@@ -680,9 +687,10 @@ paths:
   /api/v1/meetings/calendar/:
     get:
       operationId: meetings_calendar_retrieve
-      description: Фильтры `loft` и `hall` — по привязанным залам встречи. Поле `reminders`
-        содержит напоминания за тот же период для руководителя; для остальных ролей
-        возвращается пустой список.
+      description: Фильтры `loft` и `hall` — по привязанным залам встречи; `manager`
+        — фильтр по менеджерам (см. параметр). Менеджер MAG без `manager` видит только
+        свои встречи. Поле `reminders` содержит напоминания за тот же период для руководителя;
+        для остальных ролей возвращается пустой список.
       summary: Календарь встреч за месяц или период
       parameters:
       - in: query
@@ -714,8 +722,8 @@ paths:
           items:
             type: integer
         description: Один или несколько ID менеджеров через запятую (например `?manager=1,2`).
-          Доступно руководителю и администратору; менеджер MAG всегда видит только
-          свои встречи.
+          Доступно менеджеру MAG, руководителю и администратору. Менеджер MAG без
+          фильтра видит только свои встречи; с фильтром видит встречи выбранных менеджеров.
         explode: false
         style: form
       - in: query
@@ -1976,12 +1984,10 @@ paths:
   /api/v1/projects/{id}/transition/:
     post:
       operationId: projects_transition_create
-      description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. После `bonus_approved` закрытие — отдельный
-        переход `to_stage=closed` (кнопка на фронте, только руководитель). На стадии
-        `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны и
-        редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
-        в `ready_to_event` те же поля в transition тоже необязательны.'
+      description: |-
+        Сохраняет поля текущего этапа и переводит проект в `to_stage`. Тело плоское: `{ to_stage, ...поля }`. После `bonus_approved` закрытие — отдельный переход `to_stage=closed` (кнопка на фронте, только руководитель). На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля в transition тоже необязательны.
+
+        **return_from_out_of_mag:** обязателен `target_stage` (предпроектный этап ≤ `last_active_stage`). Перед возвратом удаляются данные этапов между `target_stage` и `last_active_stage` — по той же логике, что при откате (например, при возврате на `calculation_prepared` с `ready_to_event` снимаются договор и блоки продаж).
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -2140,12 +2146,10 @@ paths:
   /api/v1/projects/{id}/transitions/:
     post:
       operationId: projects_transitions_create
-      description: 'Сохраняет поля текущего этапа и переводит проект в `to_stage`.
-        Тело плоское: `{ to_stage, ...поля }`. После `bonus_approved` закрытие — отдельный
-        переход `to_stage=closed` (кнопка на фронте, только руководитель). На стадии
-        `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны и
-        редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе
-        в `ready_to_event` те же поля в transition тоже необязательны.'
+      description: |-
+        Сохраняет поля текущего этапа и переводит проект в `to_stage`. Тело плоское: `{ to_stage, ...поля }`. После `bonus_approved` закрытие — отдельный переход `to_stage=closed` (кнопка на фронте, только руководитель). На стадии `contract_signed` данные договора (тип, номер, дата, юрлицо) опциональны и редактируются через `PATCH /api/v1/projects/{id}/contract/`; при переходе в `ready_to_event` те же поля в transition тоже необязательны.
+
+        **return_from_out_of_mag:** обязателен `target_stage` (предпроектный этап ≤ `last_active_stage`). Перед возвратом удаляются данные этапов между `target_stage` и `last_active_stage` — по той же логике, что при откате (например, при возврате на `calculation_prepared` с `ready_to_event` снимаются договор и блоки продаж).
       summary: Переход на следующий этап
       parameters:
       - in: path
@@ -2313,7 +2317,7 @@ paths:
 
         Без пагинации. Проекты в стадии `out_of_mag_scope` не возвращаются (см. `GET /projects/out-of-mag/`).
 
-        **Доступ:** manager_mag — проекты по залам из матрицы (включая невзятые и взятые коллегой); lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
+        **Доступ:** manager_mag — проекты по залам из матрицы (включая невзятые и взятые коллегой); с `mag_manager=<user_id>` видит календарь выбранного ответственного; lead, accountant, admin — все; lead/admin могут сузить выборку `mag_manager=<user_id>`.
 
         В `results`: event_type, event_type_label, plum_event_status, plum_event_status_label, is_from_plum, client_company, phone, halls[] — залы проекта (внутренние hall_id / loft_id MAG; данные из каталога и ProjectEventHall). При отсутствии зала в каталоге — sync_error на проекте.
       summary: 'Календарь: проекты за месяц / период'
@@ -2334,7 +2338,7 @@ paths:
         name: mag_manager
         schema:
           type: integer
-        description: Фильтр по менеджеру MAG (только lead, admin)
+        description: Фильтр по менеджеру MAG (manager_mag, lead, admin)
       - in: query
         name: month
         schema:
@@ -2630,6 +2634,8 @@ paths:
       description: |-
         Доступно менеджеру MAG, руководителю и администратору.
 
+        `type` обязателен: `meeting` (Встреча), `installation` (Монтаж), `event` (Мероприятие), `day_off` (Выходной), `vacation` (Отпуск), `out_of_office` (Отсутствие в офисе).
+
         **Менеджер:** создаёт напоминание для себя; `manager_id` запрещён и вернёт 400.
 
         **Руководитель / администратор:** создаёт напоминание для себя или, указав `manager_id`, для конкретного менеджера. В последнем случае менеджер увидит напоминание в своём списке; руководитель видит его через общий список (без фильтра или с `manager=<id>`).
@@ -2702,7 +2708,9 @@ paths:
           description: Напоминание не найдено
     patch:
       operationId: reminders_partial_update
-      description: Только неотправленные напоминания (`sent_at` пусто).
+      description: 'Только неотправленные напоминания (`sent_at` пусто). `type` —
+        код типа события: `meeting`, `installation`, `event`, `day_off`, `vacation`,
+        `out_of_office`.'
       summary: Изменить напоминание
       parameters:
       - in: path
@@ -3477,6 +3485,26 @@ components:
         comment:
           type: string
           readOnly: true
+        type:
+          enum:
+          - meeting
+          - installation
+          - event
+          - day_off
+          - vacation
+          - out_of_office
+          - null
+          type: string
+          description: |-
+            * `meeting` - Встреча
+            * `installation` - Монтаж
+            * `event` - Мероприятие
+            * `day_off` - Выходной
+            * `vacation` - Отпуск
+            * `out_of_office` - Отсутствие в офисе
+          x-spec-enum-id: ae5747c411205727
+          readOnly: true
+          nullable: true
         meeting_datetime:
           type: string
           format: date-time
@@ -3514,6 +3542,7 @@ components:
       - meeting_datetime
       - meeting_time
       - name
+      - type
       - updated_at
     MeetingCalendarResponse:
       type: object
@@ -3552,6 +3581,23 @@ components:
         comment:
           type: string
           minLength: 1
+        type:
+          enum:
+          - meeting
+          - installation
+          - event
+          - day_off
+          - vacation
+          - out_of_office
+          type: string
+          description: |-
+            * `meeting` - Встреча
+            * `installation` - Монтаж
+            * `event` - Мероприятие
+            * `day_off` - Выходной
+            * `vacation` - Отпуск
+            * `out_of_office` - Отсутствие в офисе
+          x-spec-enum-id: ae5747c411205727
         meeting_datetime:
           type: string
           format: date-time
@@ -3573,6 +3619,7 @@ components:
       - hall_ids
       - meeting_datetime
       - name
+      - type
     MeetingHall:
       type: object
       properties:
@@ -4256,6 +4303,23 @@ components:
         comment:
           type: string
           minLength: 1
+        type:
+          enum:
+          - meeting
+          - installation
+          - event
+          - day_off
+          - vacation
+          - out_of_office
+          type: string
+          description: |-
+            * `meeting` - Встреча
+            * `installation` - Монтаж
+            * `event` - Мероприятие
+            * `day_off` - Выходной
+            * `vacation` - Отпуск
+            * `out_of_office` - Отсутствие в офисе
+          x-spec-enum-id: ae5747c411205727
         meeting_datetime:
           type: string
           format: date-time
@@ -4298,6 +4362,23 @@ components:
         comment:
           type: string
           title: Комментарий
+        type:
+          enum:
+          - meeting
+          - installation
+          - event
+          - day_off
+          - vacation
+          - out_of_office
+          type: string
+          description: |-
+            * `meeting` - Встреча
+            * `installation` - Монтаж
+            * `event` - Мероприятие
+            * `day_off` - Выходной
+            * `vacation` - Отпуск
+            * `out_of_office` - Отсутствие в офисе
+          x-spec-enum-id: ae5747c411205727
         reminder_datetime:
           type: string
           format: date-time
@@ -6072,7 +6153,7 @@ components:
           type: string
           x-spec-enum-id: 69e1ee0236235aae
           description: |-
-            Alias для to_stage. При return_from_out_of_mag обязателен и задаёт стадию возврата: только предпроектный этап не позже last_active_stage.
+            Alias для to_stage. При return_from_out_of_mag обязателен и задаёт стадию возврата: только предпроектный этап не позже last_active_stage. Данные этапов строго после target_stage до last_active_stage удаляются (как при откате: договор, расчёт продаж и т.д. — по цепочке rollback).
 
             * `plum_request` - Заявка из Plum
             * `primary_contact_done` - Первичный контакт выполнен
@@ -6278,6 +6359,27 @@ components:
           type: string
           readOnly: true
           title: Комментарий
+        type:
+          enum:
+          - meeting
+          - installation
+          - event
+          - day_off
+          - vacation
+          - out_of_office
+          - null
+          type: string
+          description: |-
+            * `meeting` - Встреча
+            * `installation` - Монтаж
+            * `event` - Мероприятие
+            * `day_off` - Выходной
+            * `vacation` - Отпуск
+            * `out_of_office` - Отсутствие в офисе
+          x-spec-enum-id: ae5747c411205727
+          readOnly: true
+          nullable: true
+          title: Тип события
         reminder_datetime:
           type: string
           format: date-time
@@ -6320,6 +6422,7 @@ components:
       - reminder_datetime
       - reminder_time
       - sent_at
+      - type
       - updated_at
       - user_id
     ReminderCalendarResponse:
@@ -6363,6 +6466,23 @@ components:
         comment:
           type: string
           title: Комментарий
+        type:
+          enum:
+          - meeting
+          - installation
+          - event
+          - day_off
+          - vacation
+          - out_of_office
+          type: string
+          description: |-
+            * `meeting` - Встреча
+            * `installation` - Монтаж
+            * `event` - Мероприятие
+            * `day_off` - Выходной
+            * `vacation` - Отпуск
+            * `out_of_office` - Отсутствие в офисе
+          x-spec-enum-id: ae5747c411205727
         reminder_datetime:
           type: string
           format: date-time
@@ -6373,6 +6493,7 @@ components:
       required:
       - name
       - reminder_datetime
+      - type
     ReminderListPaginated:
       type: object
       properties:
@@ -6541,7 +6662,8 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
-          description: Этап bonus_calculated → bonus_approved (override)
+          description: Этап bonus_calculated → bonus_approved (override), не может
+            быть отрицательным
       required:
       - block
       - kind

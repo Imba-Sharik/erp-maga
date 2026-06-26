@@ -62,8 +62,7 @@ export function EditMeetingDialog({
       ]
       form.reset({
         title: meeting.title,
-        // Тип события не приходит с бэка (ERP-215, поля пока нет) — заполняется заново.
-        eventType: '',
+        eventType: meeting.eventType,
         comment: meeting.comment,
         time: meeting.time,
         lofts: loftIds,
