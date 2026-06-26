@@ -7,6 +7,11 @@ import type { Meeting } from '../model/types'
 
 export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date'
 
+/**
+ * Форма создания собирает и время окончания (`endTime`), но бэк хранит только
+ * `meeting_datetime` (начало) — поэтому в запрос уходит лишь начало. Когда на
+ * бэке появится поле окончания, добавляем его сюда из `values.endTime`.
+ */
 export function toMeetingCreateRequest(
   values: MeetingFormValues,
   date: string,
