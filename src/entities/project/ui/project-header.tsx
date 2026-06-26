@@ -25,7 +25,7 @@ export function ProjectHeader({ project, currentStage }: ProjectHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 @sm:flex-row @sm:items-center @sm:justify-between @sm:gap-4">
-        <h1 className="text-2xl font-bold text-[#1B1A17]">{project.title}</h1>
+        <h1 className="text-foreground text-2xl font-bold">{project.title}</h1>
         <PlumLink href={project.plumCardUrl} />
       </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
@@ -33,7 +33,7 @@ export function ProjectHeader({ project, currentStage }: ProjectHeaderProps) {
           <span className="text-muted-foreground">Текущий этап</span>
           <ProjectStageBadge stage={currentStage ?? project.stage} />
         </div>
-        <span className="text-[#454545]">Менеджер: {project.manager}</span>
+        <span className="text-foreground-soft">Менеджер: {project.manager}</span>
         <span className="text-muted-foreground">
           Заведено в систему: {formatEnteredAt(project.enteredSystemAt)}
         </span>

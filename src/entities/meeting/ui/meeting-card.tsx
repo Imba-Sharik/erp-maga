@@ -27,15 +27,15 @@ export function MeetingCard({
   return (
     <article
       className={cn(
-        'flex flex-col gap-2 rounded-[10px] border border-[#E8E8E8] bg-white p-3',
+        'border-border flex flex-col gap-2 rounded-[10px] border bg-white p-3',
         className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-[#1B1A17]">{meeting.title}</h3>
-          <p className="text-xs text-[#848484]">{meeting.time}</p>
-          {venueLabel ? <p className="text-xs text-[#ACACAC]">{venueLabel}</p> : null}
+          <h3 className="text-foreground truncate text-sm font-semibold">{meeting.title}</h3>
+          <p className="text-muted-foreground text-xs">{meeting.time}</p>
+          {venueLabel ? <p className="text-muted-foreground text-xs">{venueLabel}</p> : null}
         </div>
         {editable ? (
           <div className="flex shrink-0 gap-1">
@@ -43,7 +43,7 @@ export function MeetingCard({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="text-[#ACACAC] hover:text-[#1B1A17]"
+              className="text-muted-foreground hover:text-foreground"
               aria-label="Редактировать встречу"
               onClick={() => onEdit?.(meeting)}
             >
@@ -53,7 +53,7 @@ export function MeetingCard({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="hover:text-destructive text-[#ACACAC]"
+              className="hover:text-destructive text-muted-foreground"
               aria-label="Удалить встречу"
               onClick={() => onDelete?.(meeting)}
             >
@@ -62,9 +62,11 @@ export function MeetingCard({
           </div>
         ) : null}
       </div>
-      <p className="text-sm wrap-break-word whitespace-pre-wrap text-[#454545]">{meeting.comment}</p>
+      <p className="text-foreground-soft text-sm wrap-break-word whitespace-pre-wrap">
+        {meeting.comment}
+      </p>
       {managerName ? (
-        <p className="flex items-center justify-end gap-1 text-xs text-[#848484]">
+        <p className="text-muted-foreground flex items-center justify-end gap-1 text-xs">
           <User className="size-3 shrink-0" />
           <span className="truncate">{managerName}</span>
         </p>

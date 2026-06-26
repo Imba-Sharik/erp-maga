@@ -3,7 +3,7 @@ import { USER_ROLE_LABELS } from '@/entities/user-role'
 import { formatActivityTime } from '../lib/format-activity-time'
 import type { ProjectActivityEvent } from '../model/types'
 
-const DEFAULT_DOT_COLOR = '#4B61B9'
+const DEFAULT_DOT_COLOR = 'var(--info)'
 
 interface ActivityEventItemProps {
   event: ProjectActivityEvent
@@ -24,8 +24,8 @@ export function ActivityEventItem({ event }: ActivityEventItemProps) {
         style={{ backgroundColor: dotColor ?? DEFAULT_DOT_COLOR }}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm font-medium text-[#1B1A17]">{headline}</span>
-        <span className="text-xs text-[#ACACAC]">{formatActivityTime(at)}</span>
+        <span className="text-foreground text-sm font-medium">{headline}</span>
+        <span className="text-muted-foreground text-xs">{formatActivityTime(at)}</span>
       </div>
     </div>
   )

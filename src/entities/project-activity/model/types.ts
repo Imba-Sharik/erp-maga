@@ -10,6 +10,6 @@ export interface ProjectActivityEvent {
   action: string
   /** ISO-datetime события. */
   at: string
-  /** Цвет точки слева — по умолчанию #4B61B9. */
+  /** Цвет точки слева — по умолчанию var(--info). */
   dotColor?: string
 }

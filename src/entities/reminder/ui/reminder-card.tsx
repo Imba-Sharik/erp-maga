@@ -36,14 +36,14 @@ export function ReminderCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-[#1B1A17]">{reminder.title}</h3>
+          <h3 className="text-foreground truncate text-sm font-semibold">{reminder.title}</h3>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span className="text-xs text-[#848484]">{reminder.time}</span>
-            {reminder.sentAt ? <span className="text-xs text-[#9AAE8C]">Отправлено</span> : null}
+            <span className="text-muted-foreground text-xs">{reminder.time}</span>
+            {reminder.sentAt ? <span className="text-success text-xs">Отправлено</span> : null}
             {projectHref ? (
               <Link
                 to={projectHref}
-                className="inline-flex max-w-full items-center gap-1 text-xs text-[#4B61B9] hover:underline"
+                className="text-info inline-flex max-w-full items-center gap-1 text-xs hover:underline"
                 title={projectTitle}
               >
                 <FolderOpen className="size-3 shrink-0" />
@@ -58,7 +58,7 @@ export function ReminderCard({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="text-[#ACACAC] hover:text-[#1B1A17]"
+              className="text-muted-foreground hover:text-foreground"
               aria-label="Редактировать напоминание"
               onClick={() => onEdit?.(reminder)}
             >
@@ -68,7 +68,7 @@ export function ReminderCard({
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="hover:text-destructive text-[#ACACAC]"
+              className="hover:text-destructive text-muted-foreground"
               aria-label="Удалить напоминание"
               onClick={() => onDelete?.(reminder)}
             >
@@ -78,12 +78,12 @@ export function ReminderCard({
         ) : null}
       </div>
       {reminder.comment ? (
-        <p className="text-sm wrap-break-word whitespace-pre-wrap text-[#454545]">
+        <p className="text-foreground-soft text-sm wrap-break-word whitespace-pre-wrap">
           {reminder.comment}
         </p>
       ) : null}
       {managerName ? (
-        <p className="flex items-center justify-end gap-1 text-xs text-[#848484]">
+        <p className="text-muted-foreground flex items-center justify-end gap-1 text-xs">
           <User className="size-3 shrink-0" />
           <span className="truncate">{managerName}</span>
         </p>
