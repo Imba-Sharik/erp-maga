@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/utils'
 
 /** Базовые стили строки таблицы (hover без «кликабельного» курсора). */
 export const GRID_TABLE_ROW_CLASS = cn(
-  'grid w-full items-center text-left transition-colors hover:bg-[#FAF9F6]',
+  'grid w-full items-center text-left transition-colors hover:bg-surface-subtle',
 )
 
 /** Строка с переходом в деталку (проекты и т.п.). */

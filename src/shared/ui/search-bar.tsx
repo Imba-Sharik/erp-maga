@@ -12,19 +12,19 @@ export function SearchBar({ className, groupClassName, ...props }: SearchBarProp
   return (
     <InputGroup
       className={cn(
-        'h-10 rounded-[10px] border-[#B1B1B1] bg-white shadow-none',
+        'border-border-strong h-10 rounded-[10px] bg-white shadow-none',
         '[&:has([data-slot=input-group-control]:focus-visible)]:border-ring',
         '[&:has([data-slot=input-group-control]:focus-visible)]:ring-[3px]',
         '[&:has([data-slot=input-group-control]:focus-visible)]:ring-ring/50',
         groupClassName,
       )}
     >
-      <InputGroupAddon align="inline-start" className="text-[#ACACAC]">
+      <InputGroupAddon align="inline-start" className="text-muted-foreground">
         <Search />
       </InputGroupAddon>
       <InputGroupInput
         type="search"
-        className={cn('text-sm placeholder:text-[#ACACAC]', className)}
+        className={cn('placeholder:text-muted-foreground text-sm', className)}
         {...props}
       />
     </InputGroup>

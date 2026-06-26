@@ -81,7 +81,7 @@ export function GridTableView({
   }, [setupInfiniteScrollObserver])
 
   return (
-    <Card className="flex max-h-full min-h-0 flex-col gap-0 overflow-visible border-[#B1B1B1] py-0 shadow-none">
+    <Card className="border-border-strong flex max-h-full min-h-0 flex-col gap-0 overflow-visible py-0 shadow-none">
       <OverlayScrollbarsComponent
         ref={scrollAreaRef}
         events={{ initialized: handleScrollAreaInitialized }}
@@ -97,7 +97,7 @@ export function GridTableView({
       >
         <div style={{ minWidth }}>
           <div
-            className="sticky top-0 z-10 grid items-center border-b border-[#D3D3D3] bg-white"
+            className="border-border-medium sticky top-0 z-10 grid items-center border-b bg-white"
             style={{ gridTemplateColumns: gridTemplate }}
           >
             {header}
@@ -110,7 +110,7 @@ export function GridTableView({
               {errorMessage}
             </div>
           ) : isEmpty ? (
-            <div className="flex h-40 items-center justify-center px-4 text-sm text-[#ACACAC]">
+            <div className="text-muted-foreground flex h-40 items-center justify-center px-4 text-sm">
               {emptyMessage}
             </div>
           ) : (
@@ -119,7 +119,7 @@ export function GridTableView({
               {hasNextPage && (
                 <div
                   ref={sentinelRef}
-                  className="flex h-12 items-center justify-center text-[#ACACAC]"
+                  className="text-muted-foreground flex h-12 items-center justify-center"
                 >
                   {isFetchingNextPage && <Loader2 className="size-4 animate-spin" />}
                 </div>

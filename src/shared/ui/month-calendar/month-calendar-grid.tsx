@@ -43,10 +43,13 @@ export function MonthCalendarGrid({
   const isDragging = enablePaintSelect && paintSelect.isDragging
 
   return (
-    <Card className="gap-0 overflow-hidden border-[#B1B1B1] py-0 shadow-none">
-      <div className="grid grid-cols-7 border-b border-[#B1B1B1] bg-[#F3F3F3]">
+    <Card className="border-border-strong gap-0 overflow-hidden py-0 shadow-none">
+      <div className="border-border-strong bg-surface-muted grid grid-cols-7 border-b">
         {WEEKDAYS_RU.map((wd) => (
-          <div key={wd} className="px-1.5 py-2 text-xs text-[#ACACAC] md:px-3 md:py-3 md:text-sm">
+          <div
+            key={wd}
+            className="text-muted-foreground px-1.5 py-2 text-xs md:px-3 md:py-3 md:text-sm"
+          >
             {wd}
           </div>
         ))}

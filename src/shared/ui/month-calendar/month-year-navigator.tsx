@@ -21,15 +21,15 @@ export const MONTHS_RU = [
 export const YEAR_OPTIONS = [2024, 2025, 2026, 2027] as const
 
 const SELECT_BASE =
-  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'max-md:h-9! md:h-10! min-w-0 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
 
 const MONTH_NAV_ARROW_BTN =
-  'flex h-full w-5 shrink-0 items-center justify-center text-[#3D3D3D] transition-colors ' +
-  'hover:bg-[#F5F5F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset'
+  'flex h-full w-5 shrink-0 items-center justify-center text-foreground-soft transition-colors ' +
+  'hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset'
 
 const MONTH_SELECT_TRIGGER =
   'h-full min-w-0 flex-1 justify-center gap-0 rounded-none border-0 bg-transparent px-1 py-0 shadow-none ' +
-  'text-sm font-normal text-[#1B1A17] ' +
+  'text-sm font-normal text-foreground ' +
   'focus-visible:z-10 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset ' +
   '[&>svg]:hidden ' +
   '[&_[data-slot=select-value]]:w-full [&_[data-slot=select-value]]:justify-center'
@@ -38,25 +38,25 @@ const LAYOUT = {
   compact: {
     triggerYear: `${SELECT_BASE} @min-[560px]/calendar:w-fit @min-[560px]/calendar:min-w-20 @min-[560px]/calendar:flex-none`,
     monthNav:
-      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-border-strong bg-white ' +
       '@min-[560px]/calendar:w-fit @min-[560px]/calendar:min-w-28 @min-[560px]/calendar:flex-none',
   },
   default: {
     triggerYear: `${SELECT_BASE} @min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-20 @min-[880px]/calendar:flex-none`,
     monthNav:
-      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-border-strong bg-white ' +
       '@min-[880px]/calendar:w-fit @min-[880px]/calendar:min-w-28 @min-[880px]/calendar:flex-none',
   },
   wide: {
     triggerYear: `${SELECT_BASE} @min-[1040px]/calendar:w-fit @min-[1040px]/calendar:min-w-20 @min-[1040px]/calendar:flex-none`,
     monthNav:
-      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-border-strong bg-white ' +
       '@min-[1040px]/calendar:w-fit @min-[1040px]/calendar:min-w-28 @min-[1040px]/calendar:flex-none',
   },
   wider: {
     triggerYear: `${SELECT_BASE} @min-[1200px]/calendar:w-fit @min-[1200px]/calendar:min-w-20 @min-[1200px]/calendar:flex-none`,
     monthNav:
-      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-[#B1B1B1] bg-white ' +
+      'flex max-md:h-9! md:h-10! min-w-0 w-full items-center overflow-hidden rounded-[10px] border border-border-strong bg-white ' +
       '@min-[1200px]/calendar:w-fit @min-[1200px]/calendar:min-w-28 @min-[1200px]/calendar:flex-none',
   },
 } as const

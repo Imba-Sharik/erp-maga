@@ -15,7 +15,7 @@ export function ToggleSwitch({ label, checked, onChange, className }: ToggleSwit
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        'flex shrink-0 cursor-pointer items-center gap-2.5 text-sm text-[#454545]',
+        'text-foreground-soft flex shrink-0 cursor-pointer items-center gap-2.5 text-sm',
         className,
       )}
     >
@@ -23,7 +23,7 @@ export function ToggleSwitch({ label, checked, onChange, className }: ToggleSwit
       <span
         className={cn(
           'relative h-5 w-9 shrink-0 rounded-full transition-colors',
-          checked ? 'bg-black' : 'bg-[#D3D3D3]',
+          checked ? 'bg-black' : 'bg-border-medium',
         )}
       >
         <span

@@ -9,7 +9,7 @@ export function RequiredLabel({ label, required }: RequiredLabelProps) {
   return (
     <span>
       {label}
-      {required ? <span className="text-[#D25252]"> *</span> : null}
+      {required ? <span className="text-error"> *</span> : null}
     </span>
   )
 }
