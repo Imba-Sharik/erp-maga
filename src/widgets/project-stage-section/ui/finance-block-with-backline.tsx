@@ -204,6 +204,7 @@ interface FinanceBlockWithBacklineProps {
   onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
   onAdvance?: () => void
+  isAdvancing?: boolean
   hasDraftHighlight?: boolean
   /** Дополнительные блоки в секции «Информация» (перед статусом перевода). */
   infoExtras?: ReactNode
@@ -225,6 +226,7 @@ export function FinanceBlockWithBackline({
   onTaxRateChange,
   onToggleBackline,
   onAdvance,
+  isAdvancing,
   hasDraftHighlight,
   infoExtras,
 }: FinanceBlockWithBacklineProps) {
@@ -284,6 +286,7 @@ export function FinanceBlockWithBackline({
       headerColorClass={headerColorClass}
       hasDraftHighlight={hasDraftHighlight}
       onAdvance={handleAdvance}
+      isAdvancing={isAdvancing}
       headerActions={
         isCurrent ? (
           <RollbackStageButton project={project} readOnly={presentation.readOnly} />

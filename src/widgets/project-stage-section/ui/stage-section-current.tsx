@@ -72,6 +72,8 @@ interface StageSectionCurrentProps {
   record?: StageRecord
   articles?: ProjectArticles
   onAdvance?: (values: Partial<StageFormData>) => void
+  /** Переход уже выполняется — гасит кнопку «Следующий этап». */
+  isAdvancing?: boolean
   onPatchValues?: (patch: Partial<StageFormData>) => void
   /**
    * Режим инлайн-редактирования прошлого этапа:
@@ -93,6 +95,7 @@ export function StageSectionCurrent({
   record,
   articles,
   onAdvance,
+  isAdvancing = false,
   onPatchValues,
   editingMode,
   hasDraftHighlight,
@@ -475,6 +478,7 @@ export function StageSectionCurrent({
                   <Button
                     type="button"
                     onClick={handleAdvance}
+                    disabled={isAdvancing}
                     className="h-[38px] rounded-[10px] px-4 text-sm"
                   >
                     {advanceLabel}

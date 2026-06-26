@@ -49,6 +49,7 @@ export function ProjectDetailStages({ project, flow, readOnly = false }: Project
     presentation,
     project,
     onAdvance: flow.advance,
+    isAdvancing: flow.isAdvancing,
     onPatchValues: flow.patchCurrentStageValues,
     onPatchStageValues: flow.patchStageValues,
     articles: flow.articles,

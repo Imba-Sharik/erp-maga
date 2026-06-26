@@ -22,6 +22,7 @@ interface StagePassedReadyProps {
   onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
   onAdvance?: () => void
+  isAdvancing?: boolean
 }
 
 export function StagePassedReady({ presentation, ...props }: StagePassedReadyProps) {

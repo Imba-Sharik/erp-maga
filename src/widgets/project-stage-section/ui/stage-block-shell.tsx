@@ -22,6 +22,8 @@ interface StageBlockShellProps {
   headerColorClass?: string
   hasDraftHighlight?: boolean
   onAdvance?: () => void
+  /** Переход уже выполняется — гасим кнопку «Следующий этап». */
+  isAdvancing?: boolean
   /** Доп. действия в шапке слева от «Следующий этап» (напр. «Предыдущий этап»). */
   headerActions?: ReactNode
   children: ReactNode
@@ -35,6 +37,7 @@ export function StageBlockShell({
   headerColorClass = 'text-[#454545]',
   hasDraftHighlight,
   onAdvance,
+  isAdvancing = false,
   headerActions,
   children,
 }: StageBlockShellProps) {
@@ -74,6 +77,7 @@ export function StageBlockShell({
                 <Button
                   type="button"
                   onClick={() => onAdvance?.()}
+                  disabled={isAdvancing}
                   className="h-[38px] rounded-[10px] px-4"
                 >
                   <span className="text-xs @xl:text-sm">Следующий этап</span>
