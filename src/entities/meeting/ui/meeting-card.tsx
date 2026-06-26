@@ -27,7 +27,7 @@ export function MeetingCard({
   return (
     <article
       className={cn(
-        'border-border flex flex-col gap-2 rounded-[10px] border bg-white p-3',
+        'border-border bg-card flex flex-col gap-2 rounded-[10px] border p-3',
         className,
       )}
     >
