@@ -29,7 +29,7 @@ export function ConfirmUnlinkTelegramDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Отвязать Telegram?</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Отвязать Telegram?</DialogTitle>
           <DialogDescription>
             {username
               ? `Аккаунт ${username} перестанет получать уведомления от бота MAG в Telegram.`

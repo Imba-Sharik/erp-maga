@@ -4,21 +4,21 @@ import { cn } from '@/shared/lib/utils'
 type FileRowVariant = Exclude<StageDocumentFieldVariant, 'empty'>
 
 const VARIANT_TEXT: Record<FileRowVariant, string> = {
-  confirmed: 'text-[#2E7D32]',
-  rejected: 'text-[#D25252]',
-  uploaded: 'text-[#B0B0B0]',
+  confirmed: 'text-success-foreground',
+  rejected: 'text-error',
+  uploaded: 'text-muted-foreground',
 }
 
 const VARIANT_BG: Record<FileRowVariant, string> = {
-  confirmed: 'bg-[#E8F5E9]',
-  rejected: 'bg-[#FDEDED]',
-  uploaded: 'bg-[#F3F3F3]',
+  confirmed: 'bg-success-surface',
+  rejected: 'bg-error-surface',
+  uploaded: 'bg-surface-muted',
 }
 
 const VARIANT_ICON: Record<FileRowVariant, string> = {
-  confirmed: 'text-[#2E7D32]',
-  rejected: 'text-[#D25252]',
-  uploaded: 'text-[#B0B0B0]',
+  confirmed: 'text-success-foreground',
+  rejected: 'text-error',
+  uploaded: 'text-muted-foreground',
 }
 
 export function resolveFileRowVariant(variant: StageDocumentFieldVariant): FileRowVariant {

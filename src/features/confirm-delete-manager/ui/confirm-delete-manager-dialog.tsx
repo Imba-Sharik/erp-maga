@@ -40,7 +40,7 @@ export function ConfirmDeleteManagerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">
+          <DialogTitle className="font-heading text-foreground">
             Заблокировать менеджера?
           </DialogTitle>
           <DialogDescription>

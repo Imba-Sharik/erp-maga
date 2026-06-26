@@ -29,7 +29,7 @@ import { useCreateMeeting } from '../model/use-create-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
-const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white'
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-white'
 
 function formatDayLabel(iso: string): string | null {
   const d = parseISO(iso)
@@ -89,7 +89,7 @@ export function CreateMeetingDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Добавить встречу</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Добавить встречу</DialogTitle>
           {formatDayLabel(date) ? (
             <DialogDescription>На {formatDayLabel(date)}</DialogDescription>
           ) : null}
@@ -110,7 +110,7 @@ export function CreateMeetingDialog({
                   <FormControl>
                     <Input
                       {...field}
-                      className="h-10 rounded-[10px] border-[#B1B1B1]"
+                      className="border-border-strong h-10 rounded-[10px]"
                       placeholder="Введите название"
                     />
                   </FormControl>
@@ -129,7 +129,7 @@ export function CreateMeetingDialog({
                   <FormControl>
                     <Textarea
                       {...field}
-                      className="min-h-20 rounded-[10px] border-[#B1B1B1]"
+                      className="border-border-strong min-h-20 rounded-[10px]"
                       placeholder="Введите комментарий"
                     />
                   </FormControl>

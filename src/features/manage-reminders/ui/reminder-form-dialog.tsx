@@ -84,7 +84,7 @@ export function ReminderFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">
+          <DialogTitle className="font-heading text-foreground">
             {isEdit ? 'Редактировать напоминание' : 'Добавить напоминание'}
           </DialogTitle>
           {dayLabel ? <DialogDescription>На {dayLabel}</DialogDescription> : null}

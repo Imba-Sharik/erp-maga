@@ -15,7 +15,8 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
-const FIELD_CLASS = 'h-11 rounded-[10px] border-[#D3D3D3] bg-white placeholder:text-[#ACACAC]'
+const FIELD_CLASS =
+  'h-11 rounded-[10px] border-border-medium bg-white placeholder:text-muted-foreground'
 
 export function LoginForm() {
   const { login, isPending, isError } = useLogin()
@@ -28,8 +29,8 @@ export function LoginForm() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-xl font-bold text-[#1B1A17]">Авторизация</h1>
-        <p className="text-sm text-[#ACACAC]">Введите ваш email и пароль</p>
+        <h1 className="text-foreground text-xl font-bold">Авторизация</h1>
+        <p className="text-muted-foreground text-sm">Введите ваш email и пароль</p>
       </div>
 
       <Form {...form}>

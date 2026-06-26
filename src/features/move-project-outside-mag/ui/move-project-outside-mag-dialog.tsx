@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useMoveProjectOutsideMag } from '../model/use-move-project-outside-mag'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
 
 const reasonValues = ['event_cancelled', 'other_rental', 'no_equipment'] as const
 
@@ -77,7 +77,7 @@ export function MoveProjectOutsideMagDialog({
     >
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-left text-[#1B1A17]">
+          <DialogTitle className="font-heading text-foreground text-left">
             Перевести во «Вне контура MAG»?
           </DialogTitle>
           {project?.title ? (

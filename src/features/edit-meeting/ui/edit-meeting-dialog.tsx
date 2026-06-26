@@ -22,7 +22,7 @@ import { useUpdateMeeting } from '../model/use-update-meeting'
 
 const EMPTY_VALUES: MeetingFormValues = { title: '', comment: '', time: '', lofts: [], halls: [] }
 
-const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-[#B1B1B1] bg-white'
+const TRIGGER_CLASS = 'h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-white'
 
 export interface EditMeetingDialogProps {
   open: boolean
@@ -89,7 +89,7 @@ export function EditMeetingDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Редактировать встречу</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Редактировать встречу</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -107,7 +107,7 @@ export function EditMeetingDialog({
                   <FormControl>
                     <Input
                       {...field}
-                      className="h-10 rounded-[10px] border-[#B1B1B1]"
+                      className="border-border-strong h-10 rounded-[10px]"
                       placeholder="Введите название"
                     />
                   </FormControl>
@@ -126,7 +126,7 @@ export function EditMeetingDialog({
                   <FormControl>
                     <Textarea
                       {...field}
-                      className="min-h-20 rounded-[10px] border-[#B1B1B1]"
+                      className="border-border-strong min-h-20 rounded-[10px]"
                       placeholder="Введите комментарий"
                     />
                   </FormControl>

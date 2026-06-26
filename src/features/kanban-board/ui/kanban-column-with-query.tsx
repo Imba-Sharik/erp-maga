@@ -59,8 +59,8 @@ export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
   if (query.isLoading) {
     return (
       <KanbanColumnPlaceholder title={title} accentClassName={accentClassName}>
-        <Loader2 className="size-4 animate-spin text-[#ACACAC]" />
-        <span className="text-xs text-[#ACACAC]">Загружаем…</span>
+        <Loader2 className="text-muted-foreground size-4 animate-spin" />
+        <span className="text-muted-foreground text-xs">Загружаем…</span>
       </KanbanColumnPlaceholder>
     )
   }
@@ -100,7 +100,7 @@ function KanbanColumnPlaceholder({
       <div className="bg-card shrink-0">
         <div className="flex flex-col gap-2 px-4 pt-3.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-sm text-[#454545]">{title}</span>
+            <span className="text-foreground-soft truncate text-sm">{title}</span>
           </div>
           <div className={`h-1.25 rounded-b-[5px] ${accentClassName}`} />
         </div>

@@ -56,7 +56,7 @@ export function AttachmentFileRow({
           type="button"
           variant="outline"
           size="icon"
-          className="size-9 shrink-0 rounded-[10px] border-none bg-[#F3F3F3] text-[#B0B0B0]"
+          className="bg-surface-muted text-muted-foreground size-9 shrink-0 rounded-[10px] border-none"
           disabled={replaceDisabled}
           aria-label="Выбрать другой файл"
           onClick={onReplace}

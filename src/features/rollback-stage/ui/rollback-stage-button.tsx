@@ -31,7 +31,7 @@ export function RollbackStageButton({ project, readOnly = false }: RollbackStage
         type="button"
         variant="outline"
         onClick={() => setOpen(true)}
-        className="h-[38px] rounded-[10px] border-[#B1B1B1] px-4 text-sm"
+        className="border-border-strong h-[38px] rounded-[10px] px-4 text-sm"
       >
         <ArrowLeft className="size-3.5" />
         Предыдущий этап

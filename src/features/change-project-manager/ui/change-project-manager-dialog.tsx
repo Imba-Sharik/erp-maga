@@ -31,7 +31,7 @@ import {
 import { useChangeProjectManagers } from '../model/use-change-project-managers'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
 
 export interface ChangeProjectManagerDialogProps {
   open: boolean
@@ -130,13 +130,13 @@ export function ChangeProjectManagerDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Сменить менеджеров</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Сменить менеджеров</DialogTitle>
           {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#1B1A17]">Ведущий менеджер</span>
+            <span className="text-foreground text-sm font-medium">Ведущий менеджер</span>
             <Select
               value={selection.leadId ?? ''}
               onValueChange={(value) =>
@@ -165,7 +165,7 @@ export function ChangeProjectManagerDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#1B1A17]">Вспомогательные менеджеры</span>
+            <span className="text-foreground text-sm font-medium">Вспомогательные менеджеры</span>
             <MultiSelect
               values={selection.assistantIds}
               onChange={(values) => setSelection((s) => ({ ...s, assistantIds: values }))}

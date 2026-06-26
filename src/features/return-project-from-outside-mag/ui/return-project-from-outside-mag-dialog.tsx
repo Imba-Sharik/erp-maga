@@ -25,7 +25,7 @@ import { getAllowedReturnStages } from '../lib/get-allowed-return-stages'
 import { useReturnProjectFromOutsideMag } from '../model/use-return-project-from-outside-mag'
 
 const TRIGGER_CLASS =
-  'h-10 w-full rounded-[10px] border-[#B1B1B1] bg-white data-placeholder:text-[#BCBCBC]'
+  'h-10 w-full rounded-[10px] border-border-strong bg-white data-placeholder:text-disabled-foreground'
 
 const stageValues = [
   'plum_request',
@@ -100,7 +100,7 @@ export function ReturnProjectFromOutsideMagDialog({
     >
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">
+          <DialogTitle className="font-heading text-foreground">
             Вернуть проект в воронку?
           </DialogTitle>
           {project?.title ? <DialogDescription>Проект: {project.title}</DialogDescription> : null}

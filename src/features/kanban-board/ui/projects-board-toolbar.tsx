@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
 const TRIGGER_CLASS =
-  'h-10! w-full min-w-[calc(50%-4px)] flex-1 rounded-[10px] border-[#B1B1B1] bg-white text-xs data-placeholder:text-[#BCBCBC] @4xl:w-41.5 @4xl:min-w-0 @4xl:flex-none @4xl:text-sm'
+  'h-10! w-full min-w-[calc(50%-4px)] flex-1 rounded-[10px] border-border-strong bg-white text-xs data-placeholder:text-disabled-foreground @4xl:w-41.5 @4xl:min-w-0 @4xl:flex-none @4xl:text-sm'
 
 // Слот сортировки: на мобиле занимает половину ряда (как фильтры), на десктопе шире —
 // внутри помимо селекта ещё стрелка направления и подписи длиннее («По дате мероприятия»).
@@ -75,13 +75,13 @@ export function ProjectsBoardToolbar({
     >
       <div className="flex items-center gap-2 @4xl:w-75">
         <div className="relative min-w-0 flex-1">
-          <Search className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[#ACACAC] @4xl:left-3 @4xl:size-4" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2 size-3.5 -translate-y-1/2 @4xl:left-3 @4xl:size-4" />
           <Input
             type="search"
             placeholder="Поиск проектов"
             value={search}
             onChange={(e) => onChangeSearch(e.target.value)}
-            className="h-10 rounded-[10px] border-[#B1B1B1] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs placeholder:text-[#ACACAC] @4xl:pr-3 @4xl:pl-9 @4xl:text-sm @4xl:placeholder:text-sm"
+            className="border-border-strong placeholder:text-muted-foreground h-10 rounded-[10px] bg-white pr-1.5 pl-7 text-xs placeholder:text-xs @4xl:pr-3 @4xl:pl-9 @4xl:text-sm @4xl:placeholder:text-sm"
           />
         </div>
         {onAddProject && (

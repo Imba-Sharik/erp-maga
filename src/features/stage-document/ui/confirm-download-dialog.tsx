@@ -27,7 +27,7 @@ export function ConfirmDownloadDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-4 sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="font-heading text-[#1B1A17]">Скачать файл?</DialogTitle>
+          <DialogTitle className="font-heading text-foreground">Скачать файл?</DialogTitle>
           <DialogDescription className="break-all">{fileName}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -40,12 +40,7 @@ export function ConfirmDownloadDialog({
           >
             Отмена
           </Button>
-          <Button
-            type="button"
-            className="rounded-[10px]"
-            onClick={onConfirm}
-            disabled={isPending}
-          >
+          <Button type="button" className="rounded-[10px]" onClick={onConfirm} disabled={isPending}>
             {isPending ? 'Скачивание…' : 'Скачать'}
           </Button>
         </DialogFooter>

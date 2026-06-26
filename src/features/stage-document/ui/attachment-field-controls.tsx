@@ -16,7 +16,7 @@ export function AttachmentUploadButton({
   return (
     <Button
       type="button"
-      className="h-9 w-full justify-center rounded-[10px] border-[#B1B1B1] text-sm font-normal"
+      className="border-border-strong h-9 w-full justify-center rounded-[10px] text-sm font-normal"
       disabled={disabled}
       onClick={onClick}
     >
@@ -27,7 +27,7 @@ export function AttachmentUploadButton({
 
 export function AttachmentEmptyPlaceholder() {
   return (
-    <div className="flex h-9 w-full items-center rounded-[10px] border border-[#B1B1B1] bg-[#FAFAFA] px-3 py-2 text-sm">
+    <div className="border-border-strong bg-surface-subtle flex h-9 w-full items-center rounded-[10px] border px-3 py-2 text-sm">
       <span className="text-muted-foreground">—</span>
     </div>
   )
@@ -35,8 +35,8 @@ export function AttachmentEmptyPlaceholder() {
 
 export function AttachmentRejectedPlaceholder() {
   return (
-    <div className="flex h-9 w-full items-center rounded-[10px] bg-[#FDEDED] px-3 py-2 text-sm">
-      <span className="text-[#D25252]">—</span>
+    <div className="bg-error-surface flex h-9 w-full items-center rounded-[10px] px-3 py-2 text-sm">
+      <span className="text-error">—</span>
     </div>
   )
 }
