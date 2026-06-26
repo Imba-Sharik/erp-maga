@@ -1,0 +1,278 @@
+/* ==========================================================================
+ * Тема приложения: палитра → семантические токены → экспорт в Tailwind
+ * ==========================================================================
+ *
+ * Единственный источник правды по цветам. Компоненты НЕ хардкодят hex —
+ * используют семантические Tailwind-классы (`text-foreground-soft`,
+ * `bg-success-surface`, `border-border-strong`…) или `var(--token)` в местах,
+ * где цвет уходит в инлайн-стиль из JS.
+ *
+ * Слои:
+ *   1. Палитра (`--neutral-*`, `--green-*`, `--red-*`…) — сырые значения, без
+ *      семантики. Единый ramp нейтралей + хью-рампы статусов. Внутри слоя 1
+ *      hex допустим, дальше — только ссылки на палитру.
+ *   2. Семантические токены (`:root` / `.dark`) — что-значит-цвет; ссылаются на
+ *      палитру. Светлая тема — через палитру, тёмная — через oklch-скелет.
+ *   3. `@theme inline` — экспорт семантики в утилиты Tailwind (`--color-*`).
+ *
+ * Решения (зафиксированы с заказчиком):
+ *   • Статусные цвета (success/info/warning/error, воронки, бейджи) — светлые,
+ *     одним значением, без отдельного dark-варианта.
+ *   • Нейтрали объединены в один ramp; `--foreground/--border/--muted-foreground`
+ *     в светлой теме ссылаются на него, в тёмной остаются на текущих oklch.
+ * ========================================================================== */
+
+@custom-variant dark (&:is(.dark *));
+
+/* --------------------------------------------------------------------------
+ * Слой 1 — Палитра (raw). Объявлена на :root, чтобы быть доступной и в .dark.
+ * -------------------------------------------------------------------------- */
+:root {
+  /* Нейтрали. Тяжёлые значения (#acacac, #b1b1b1, #454545, #1b1a17, #e9e6dd,
+     #f4f2ec, #faf9f6, #f0f0f0, #d3d3d3, #c7c7c7) сохранены точно; редкие
+     дубли схлопнуты к ближайшей ступени. Светлые поверхности тёплые (беж),
+     как и базовый oklch-хью проекта. */
+  --neutral-0: #ffffff;
+  --neutral-25: #faf9f6; /* тёплый near-white: фон карточек / hover */
+  --neutral-50: #f4f2ec; /* тёплая светлая поверхность */
+  --neutral-75: #f0f0f0; /* разделители (divider) */
+  --neutral-100: #e9e6dd; /* тёплая subtle-граница / чип-фон */
+  --neutral-200: #d3d3d3; /* граница среднего тона */
+  --neutral-300: #c7c7c7; /* disabled / placeholder */
+  --neutral-400: #b1b1b1; /* сильная / hover-граница */
+  --neutral-450: #acacac; /* приглушённый текст (muted) */
+  --neutral-500: #8a8a8a;
+  --neutral-600: #6e6e6e;
+  --neutral-700: #454545; /* вторичный текст */
+  --neutral-800: #3c3c3c;
+  --neutral-900: #1b1a17; /* основной текст (ink) */
+  --neutral-950: #000000;
+
+  /* Статусные хью: fg (тёмный текст) / solid (насыщенный) / border / surface. */
+  --green-fg: #295935;
+  --green-solid: #3aa56b;
+  --green-border: #b7e4be;
+  --green-surface: #e8fbeb;
+
+  --red-solid: #d25252;
+  --red-border: #f3d2d2;
+  --red-surface: #fdeded;
+
+  --amber-fg: #aa8540;
+  --amber-solid: #e0a53e;
+  --amber-border: #e4d3b7;
+  --amber-surface: #fbf4e8;
+
+  --blue-fg: #4b61b9;
+  --blue-solid: #5e83e3;
+  --blue-border: #b7cce4;
+  --blue-surface: #e9ecff;
+
+  --violet-solid: #6b5b95;
+}
+
+/* --------------------------------------------------------------------------
+ * Слой 2 — Семантические токены. Светлая тема.
+ * -------------------------------------------------------------------------- */
+:root {
+  /* База (shadcn-скелет). Структурные токены остаются на oklch; нейтральные
+     текст/границы перенаправлены на палитру для объединения серых. */
+  --background: oklch(0.975 0.005 90);
+  --foreground: var(--neutral-900);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--neutral-900);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--neutral-900);
+  --primary: oklch(0.205 0.005 90);
+  --primary-foreground: oklch(0.975 0.005 90);
+  --secondary: oklch(0.955 0.008 90);
+  --secondary-foreground: oklch(0.395 0.007 90);
+  --muted: oklch(0.955 0.008 90);
+  --muted-foreground: var(--neutral-450);
+  --accent: oklch(0.935 0.011 90);
+  --accent-foreground: var(--neutral-900);
+  --destructive: oklch(0.55 0.13 25);
+  --destructive-foreground: oklch(0.97 0.03 25);
+  --border: var(--neutral-100);
+  --input: var(--neutral-100);
+  --ring: oklch(0.52 0.07 245);
+  --radius: 0.75rem;
+
+  /* Нейтральная семантика текста/поверхностей/границ (на палитру). */
+  --foreground-soft: var(--neutral-700); /* #454545 — вторичный текст/кнопки */
+  --disabled-foreground: var(--neutral-300); /* #c7c7c7 — disabled/placeholder */
+  --surface-subtle: var(--neutral-25); /* #faf9f6 — фон карточек */
+  --surface-muted: var(--neutral-50); /* #f4f2ec — приглушённая поверхность */
+  --surface-divider: var(--neutral-75); /* #f0f0f0 — разделители */
+  --surface-hover: var(--neutral-100); /* #e9e6dd — hover-заливка */
+  --chip-surface: var(--neutral-100); /* фон нейтрального чипа */
+  --chip-foreground: var(--neutral-600); /* текст нейтрального чипа */
+  --border-medium: var(--neutral-200); /* #d3d3d3 — resting-граница карточки */
+  --border-strong: var(--neutral-400); /* #b1b1b1 — hover/active-граница */
+
+  /* Статусы (light-only). */
+  --success: var(--green-solid);
+  --success-foreground: var(--green-fg);
+  --success-surface: var(--green-surface);
+  --success-border: var(--green-border);
+  --error: var(--red-solid);
+  --error-surface: var(--red-surface);
+  --error-border: var(--red-border);
+  --warning: var(--amber-fg);
+  --warning-solid: var(--amber-solid);
+  --warning-surface: var(--amber-surface);
+  --warning-border: var(--amber-border);
+  --info: var(--blue-fg);
+  --info-surface: var(--blue-surface);
+  --info-border: var(--blue-border);
+  --violet: var(--violet-solid);
+
+  /* Бренд / воронки / подсветка черновика. */
+  --funnel-preproject: var(--blue-solid);
+  --funnel-closing: var(--green-solid);
+  --draft-highlight: var(--amber-solid);
+  --draft-highlight-muted: var(--amber-fg);
+
+  /* Sidebar (shadcn-скелет). */
+  --sidebar: oklch(0.96 0.008 90);
+  --sidebar-foreground: oklch(0.395 0.007 90);
+  --sidebar-primary: oklch(0.205 0.005 90);
+  --sidebar-primary-foreground: oklch(0.975 0.005 90);
+  --sidebar-accent: oklch(0.935 0.011 90);
+  --sidebar-accent-foreground: var(--neutral-950);
+  --sidebar-border: var(--neutral-100);
+  --sidebar-ring: oklch(0.52 0.07 245);
+
+  --font-size-heading: 22px;
+}
+
+/* --------------------------------------------------------------------------
+ * Слой 2 — Тёмная тема. База остаётся на oklch (как было); новые нейтральные
+ * токены делегируются дарк-скелету, чтобы поверхности/границы/текст не ломались.
+ * Статусные хью НЕ переопределяем — остаются светлыми (по решению).
+ * -------------------------------------------------------------------------- */
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.129 0.042 264.695);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.984 0.003 247.858);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.279 0.041 260.031);
+  --input: oklch(0.279 0.041 260.031);
+  --ring: oklch(0.446 0.043 257.281);
+
+  /* Делегирование новых нейтральных токенов дарк-скелету. */
+  --foreground-soft: var(--muted-foreground);
+  --disabled-foreground: var(--muted-foreground);
+  --surface-subtle: var(--card);
+  --surface-muted: var(--muted);
+  --surface-divider: var(--border);
+  --surface-hover: var(--muted);
+  --chip-surface: var(--muted);
+  --chip-foreground: var(--muted-foreground);
+  --border-medium: var(--border);
+  --border-strong: var(--muted-foreground);
+
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  --font-size-heading: 22px;
+}
+
+/* --------------------------------------------------------------------------
+ * Слой 3 — Экспорт в Tailwind (`--color-*` → утилиты bg-/text-/border-/…).
+ * -------------------------------------------------------------------------- */
+@theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --text-2xs: 10px;
+  --text-3xs: 9px;
+
+  /* База. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Нейтральная семантика. */
+  --color-foreground-soft: var(--foreground-soft);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-divider: var(--surface-divider);
+  --color-surface-hover: var(--surface-hover);
+  --color-chip-surface: var(--chip-surface);
+  --color-chip-foreground: var(--chip-foreground);
+  --color-border-medium: var(--border-medium);
+  --color-border-strong: var(--border-strong);
+
+  /* Статусы. */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-surface: var(--success-surface);
+  --color-success-border: var(--success-border);
+  --color-error: var(--error);
+  --color-error-surface: var(--error-surface);
+  --color-error-border: var(--error-border);
+  --color-warning: var(--warning);
+  --color-warning-solid: var(--warning-solid);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-border: var(--warning-border);
+  --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
+  --color-info-border: var(--info-border);
+  --color-violet: var(--violet);
+
+  /* Бренд / воронки / черновик. */
+  --color-funnel-preproject: var(--funnel-preproject);
+  --color-funnel-closing: var(--funnel-closing);
+  --color-draft-highlight: var(--draft-highlight);
+  --color-draft-highlight-muted: var(--draft-highlight-muted);
+
+  /* Радиусы. */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Sidebar. */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+}
