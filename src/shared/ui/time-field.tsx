@@ -15,7 +15,7 @@ export function TimeField({ value, onChange, className }: TimeFieldProps) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={cn(
-        'border-border-strong h-10 rounded-[10px] bg-white text-sm',
+        'border-border-strong bg-card h-10 rounded-[10px] text-sm',
         '[&::-webkit-calendar-picker-indicator]:opacity-60',
         className,
       )}

@@ -18,7 +18,7 @@ export function Toaster() {
         unstyled: true,
         classNames: {
           toast:
-            'flex w-full items-center gap-3 rounded-[15px] border border-border bg-white p-4 font-sans text-sm text-foreground-soft shadow-[0_8px_30px_rgba(0,0,0,0.12)]',
+            'flex w-full items-center gap-3 rounded-[15px] border border-border bg-card p-4 font-sans text-sm text-foreground-soft shadow-[0_8px_30px_rgba(0,0,0,0.12)]',
           content: 'flex min-w-0 flex-col gap-0.5',
           title: 'font-medium break-words text-foreground-soft',
           description: 'text-xs text-muted-foreground',

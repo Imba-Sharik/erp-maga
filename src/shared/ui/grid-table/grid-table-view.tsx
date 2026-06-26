@@ -97,7 +97,7 @@ export function GridTableView({
       >
         <div style={{ minWidth }}>
           <div
-            className="border-border-medium sticky top-0 z-10 grid items-center border-b bg-white"
+            className="border-border-medium bg-card sticky top-0 z-10 grid items-center border-b"
             style={{ gridTemplateColumns: gridTemplate }}
           >
             {header}
@@ -106,7 +106,7 @@ export function GridTableView({
           {isLoading ? (
             <GridTableSkeleton columnCount={skeletonColumnCount ?? 1} gridTemplate={gridTemplate} />
           ) : isError ? (
-            <div className="flex h-40 items-center justify-center px-4 text-sm text-red-600">
+            <div className="text-error flex h-40 items-center justify-center px-4 text-sm">
               {errorMessage}
             </div>
           ) : isEmpty ? (

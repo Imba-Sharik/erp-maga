@@ -23,12 +23,12 @@ export function ToggleSwitch({ label, checked, onChange, className }: ToggleSwit
       <span
         className={cn(
           'relative h-5 w-9 shrink-0 rounded-full transition-colors',
-          checked ? 'bg-black' : 'bg-border-medium',
+          checked ? 'bg-primary' : 'bg-border-medium',
         )}
       >
         <span
           className={cn(
-            'absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-all',
+            'bg-card absolute top-0.5 size-4 rounded-full shadow-sm transition-all',
             checked ? 'left-[18px]' : 'left-0.5',
           )}
         />

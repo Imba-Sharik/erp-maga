@@ -39,7 +39,7 @@ export function MonthDayCell({
       onPointerEnter={onPointerEnter}
       aria-selected={isSelected}
       className={cn(
-        'flex w-full cursor-pointer touch-none flex-col bg-white',
+        'bg-card flex w-full cursor-pointer touch-none flex-col',
         '@min-[1101px]/calendar:min-h-16 @min-[1101px]/calendar:md:min-h-24',
         '@max-[1100px]/calendar:aspect-square @max-[1100px]/calendar:min-h-0 @max-[1100px]/calendar:overflow-hidden',
         outOfMonth && 'bg-surface-muted',
@@ -51,7 +51,7 @@ export function MonthDayCell({
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5 p-1.5 text-left md:p-2.5',
           '@max-[560px]/calendar:gap-1 @max-[560px]/calendar:p-1',
-          isSelected && 'to-border-medium bg-linear-to-br from-white',
+          isSelected && 'to-border-medium from-card bg-linear-to-br',
         )}
       >
         <span className="relative inline-flex shrink-0 items-center justify-center max-sm:ml-0.5">

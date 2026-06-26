@@ -11,7 +11,7 @@ export function DatePill({ date, className }: DatePillProps) {
   return (
     <div
       className={cn(
-        'border-border-strong text-foreground inline-flex h-10 w-fit items-center rounded-[10px] border bg-white px-3.5 text-sm font-semibold',
+        'border-border-strong text-foreground bg-card inline-flex h-10 w-fit items-center rounded-[10px] border px-3.5 text-sm font-semibold',
         className,
       )}
     >

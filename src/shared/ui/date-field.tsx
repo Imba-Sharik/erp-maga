@@ -34,7 +34,7 @@ export function DateField({
           type="button"
           variant="outline"
           className={cn(
-            'border-border-strong h-10! w-full min-w-0 justify-between rounded-[10px] bg-white px-3 text-left text-sm font-normal',
+            'border-border-strong bg-card h-10! w-full min-w-0 justify-between rounded-[10px] px-3 text-left text-sm font-normal',
             !selected && 'text-muted-foreground',
             className,
           )}

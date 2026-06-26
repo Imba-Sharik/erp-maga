@@ -12,7 +12,7 @@ export function SearchBar({ className, groupClassName, ...props }: SearchBarProp
   return (
     <InputGroup
       className={cn(
-        'border-border-strong h-10 rounded-[10px] bg-white shadow-none',
+        'border-border-strong bg-card h-10 rounded-[10px] shadow-none',
         '[&:has([data-slot=input-group-control]:focus-visible)]:border-ring',
         '[&:has([data-slot=input-group-control]:focus-visible)]:ring-[3px]',
         '[&:has([data-slot=input-group-control]:focus-visible)]:ring-ring/50',
