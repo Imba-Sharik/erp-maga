@@ -4,6 +4,7 @@ import { ExternalLink } from 'lucide-react'
 import type { ReminderFormValues } from '@/entities/reminder'
 import { useRequestTelegramLink, useTelegramAccountStatus } from '@/features/link-telegram'
 import { Button } from '@/shared/ui/button'
+import { EventTypeSelect } from '@/shared/ui/event-type-select'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Input } from '@/shared/ui/input'
 import { RequiredLabel } from '@/shared/ui/required-label'
@@ -75,6 +76,25 @@ export function ReminderFormFields({
                 {...field}
                 className="border-border-strong h-10 rounded-[10px]"
                 placeholder="Введите заголовок"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name="eventType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              <RequiredLabel label="Тип события" required />
+            </FormLabel>
+            <FormControl>
+              <EventTypeSelect
+                value={field.value}
+                onChange={field.onChange}
+                triggerClassName="h-10 min-w-0 w-full rounded-[10px] border-border-strong bg-card data-placeholder:text-disabled-foreground"
               />
             </FormControl>
             <FormMessage />

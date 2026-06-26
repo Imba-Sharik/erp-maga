@@ -4,6 +4,8 @@ import { buildBusinessDatetime } from '@/shared/lib/date'
 
 import type { ReminderFormValues } from './reminder-form-schema'
 
+// Тип события (`values.eventType`, ERP-215) пока в запрос не уходит — на бэке нет
+// поля. Когда появится — добавляем его сюда и в toReminderUpdateRequest.
 export function toReminderCreateRequest(
   values: ReminderFormValues,
   projectId?: number | null,

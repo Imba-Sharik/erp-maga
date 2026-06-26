@@ -7,6 +7,8 @@ import type { Meeting } from '../model/types'
 
 export { buildBusinessDatetime as buildMeetingDatetime } from '@/shared/lib/date'
 
+// Тип события (`values.eventType`, ERP-215) пока в запрос не уходит — на бэке нет
+// поля. Когда появится — добавляем его в тело здесь и в toMeetingUpdateRequest.
 export function toMeetingCreateRequest(
   values: MeetingFormValues,
   date: string,

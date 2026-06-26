@@ -17,6 +17,7 @@ describe('to-meeting-request', () => {
       toMeetingCreateRequest(
         {
           title: 'Встреча',
+          eventType: 'meeting',
           comment: 'Комментарий',
           time: '09:15',
           lofts: ['1'],
@@ -47,6 +48,7 @@ describe('to-meeting-request', () => {
       toMeetingUpdateRequest(
         {
           title: 'Новая',
+          eventType: 'meeting',
           comment: 'Новый коммент',
           time: '11:45',
           lofts: ['1'],
