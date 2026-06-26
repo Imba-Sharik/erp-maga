@@ -57,6 +57,7 @@
   --red-solid: #d25252;
   --red-border: #f3d2d2;
   --red-surface: #fdeded;
+  --red-surface-hover: #ffe5e5; /* темнее surface — для hover на тонированных кнопках */
 
   --amber-fg: #aa8540;
   --amber-solid: #e0a53e;
@@ -118,6 +119,7 @@
   --success-border: var(--green-border);
   --error: var(--red-solid);
   --error-surface: var(--red-surface);
+  --error-surface-hover: var(--red-surface-hover);
   --error-border: var(--red-border);
   --warning: var(--amber-fg);
   --warning-solid: var(--amber-solid);
@@ -246,6 +248,7 @@
   --color-success-border: var(--success-border);
   --color-error: var(--error);
   --color-error-surface: var(--error-surface);
+  --color-error-surface-hover: var(--error-surface-hover);
   --color-error-border: var(--error-border);
   --color-warning: var(--warning);
   --color-warning-solid: var(--warning-solid);
