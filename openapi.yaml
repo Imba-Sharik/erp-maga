@@ -1300,7 +1300,9 @@ paths:
 
         Каждая запись: кто (user), когда (created_at), действие (action_type / action_label), поле (field_name), старое/новое (old_value / new_value), этап на момент действия (stage), источник (source: user | system | plum), доп. данные (metadata). Для перехода A → B поле `stage` содержит A, а from/to остаются в `old_value` / `new_value`.
 
-        Типы action_type: stage_change, field_change, plum_sync, project_created, out_of_mag, out_of_mag_return, bonus_manual_change, data_rejected, data_confirmed, stage_rollback, project_deleted, other.
+        Типы action_type: stage_change, field_change, block_change, plum_sync, project_created, out_of_mag, out_of_mag_return, bonus_manual_change, data_rejected, data_confirmed, stage_rollback, project_deleted, other.
+
+        Для block_change поле message содержит сводку для таба блока (например «Руководитель изменил данные в блоке …»).
 
         Пагинация: limit, offset (ответ: count, next, previous, results).
       summary: Лог действий по проекту
@@ -1310,6 +1312,7 @@ paths:
         schema:
           type: string
           enum:
+          - block_change
           - bonus_manual_change
           - data_confirmed
           - data_rejected
@@ -1584,9 +1587,9 @@ paths:
   /api/v1/projects/{id}/contract/:
     patch:
       operationId: projects_contract_partial_update
-      description: 'Доступно при `can_edit_contract === true`: стадии от `contract_signed`
-        до `bonus_approved` включительно (не closed/archived/out_of_mag); менеджер
-        проекта или lead. Все поля запроса опциональны (partial update).'
+      description: 'Доступно при `can_edit_contract === true`: lead — contract_signed
+        … bonus_approved; менеджер проекта — до data_confirmed. Все поля запроса опциональны
+        (partial update).'
       summary: Обновить данные договора (contract_signed … bonus_approved)
       parameters:
       - in: path
@@ -1785,6 +1788,9 @@ paths:
   /api/v1/projects/{id}/expenses/:
     patch:
       operationId: projects_expenses_partial_update
+      description: Доступно при `can_edit_expenses === true`. После documents_confirmed
+        правки доступны только руководителю; на bonus_calculated / bonus_approved
+        запускается пересчёт бонуса.
       summary: Обновить блок расходов
       parameters:
       - in: path
@@ -1940,6 +1946,9 @@ paths:
           description: ''
     patch:
       operationId: projects_sales_partial_update
+      description: Доступно при `can_edit_sales === true`. После подтверждения данных
+        правки доступны только руководителю; при изменении на стадиях bonus_calculated
+        / bonus_approved бонус пересчитывается автоматически.
       summary: Обновить блок продаж
       parameters:
       - in: path
@@ -3046,6 +3055,16 @@ paths:
           description: ''
 components:
   schemas:
+    AllowedTransition:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+      required:
+      - code
+      - label
     AllowedTransitionSchema:
       type: object
       properties:
@@ -4539,13 +4558,18 @@ components:
           type: boolean
         can_edit_contract:
           type: boolean
-          description: Можно PATCH /projects/{id}/contract/ (менеджер проекта или
-            lead). true с contract_signed до bonus_approved; false на closed/archived/out_of_mag
-            и на ранних стадиях до contract_signed.
+          description: Можно PATCH /projects/{id}/contract/. Lead — с contract_signed
+            до bonus_approved; менеджер — до data_confirmed (после подтверждения данных
+            только lead). false на archived/out_of_mag; lead также на closed.
         can_edit_sales:
           type: boolean
+          description: Можно PATCH /projects/{id}/sales/. Менеджер — на ready_to_event.
+            Lead — также на закрывающих стадиях после event_held (исправление данных
+            менеджера).
         can_edit_expenses:
           type: boolean
+          description: Можно PATCH /projects/{id}/expenses/. Менеджер — event_held
+            и expenses_entered. Lead — также с documents_confirmed и далее до bonus_approved.
         can_claim:
           type: boolean
           description: Менеджер может взять проект из пула (PATCH mag_manager_id =
@@ -4971,6 +4995,7 @@ components:
           - data_rejected
           - data_confirmed
           - project_deleted
+          - block_change
           - other
           type: string
           description: |-
@@ -4985,11 +5010,15 @@ components:
             * `data_rejected` - Данные не приняты
             * `data_confirmed` - Данные подтверждены
             * `project_deleted` - Удаление проекта
+            * `block_change` - Изменение блока
             * `other` - Прочее
-          x-spec-enum-id: c9b2ed54e2a98a2d
+          x-spec-enum-id: b49356eae2c60d65
           readOnly: true
           title: Тип действия
         action_label:
+          type: string
+          readOnly: true
+        message:
           type: string
           readOnly: true
         field_name:
@@ -5071,6 +5100,7 @@ components:
       - created_at
       - field_name
       - id
+      - message
       - metadata
       - new_value
       - old_value
@@ -5244,7 +5274,7 @@ components:
       - event_type
     ProjectDetail:
       type: object
-      description: UI-флаги claim/read-only для MAG_MANAGER (источник — ProjectManagerAccess).
+      description: Per-block edit flags и переходы стадий (источник — StagePipelineService).
       properties:
         id:
           type: integer
@@ -5399,6 +5429,31 @@ components:
           readOnly: true
           description: MAG_MANAGER видит проект, но не может редактировать (пул/чужой
             claim/нет роли вспомогательного).
+        can_edit_client:
+          type: boolean
+          readOnly: true
+        can_edit_contract:
+          type: boolean
+          readOnly: true
+          description: Можно PATCH /projects/{id}/contract/. Lead — с contract_signed
+            до bonus_approved; менеджер — до data_confirmed (после подтверждения данных
+            только lead). false на archived/out_of_mag; lead также на closed.
+        can_edit_sales:
+          type: boolean
+          readOnly: true
+          description: Можно PATCH /projects/{id}/sales/. Менеджер — на ready_to_event.
+            Lead — также на закрывающих стадиях после event_held (исправление данных
+            менеджера).
+        can_edit_expenses:
+          type: boolean
+          readOnly: true
+          description: Можно PATCH /projects/{id}/expenses/. Менеджер — event_held
+            и expenses_entered. Lead — также с documents_confirmed и далее до bonus_approved.
+        allowed_transitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedTransition'
+          readOnly: true
         sales_total:
           type: number
           format: double
@@ -5859,6 +5914,7 @@ components:
             $ref: '#/components/schemas/ProjectArticle'
           readOnly: true
       required:
+      - allowed_transitions
       - archived_at
       - articles
       - assistant_managers
@@ -5876,6 +5932,10 @@ components:
       - calculation_prepared_set_by
       - can_claim
       - can_edit
+      - can_edit_client
+      - can_edit_contract
+      - can_edit_expenses
+      - can_edit_sales
       - city
       - city_labels
       - client_company
