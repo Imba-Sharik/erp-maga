@@ -1,5 +1,5 @@
 import { ArrowRight, Pencil } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { cn } from '@/shared/lib/utils'
 
@@ -10,6 +10,8 @@ import {
   STAGE_FUNNEL,
   contactChannelLabels,
   contractTypeLabels,
+  resolveStageBlockEditable,
+  resolveStageEditAccess,
   type DocumentStatus,
   type ProjectDetail,
   type ProjectStage,
@@ -40,8 +42,8 @@ import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
-import { resolveStageEditAccess } from '../lib/resolve-stage-edit-access'
 import { canEditField } from '../lib/stage-permissions'
+import { usePassedEditToggle } from '../lib/use-passed-edit-toggle'
 import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
 import { StageFieldLabel } from './stage-field-label'
 import { StageFieldReadonly } from './stage-field-readonly'
@@ -149,10 +151,16 @@ export function StageSectionPassed({
   )
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  const { canEdit, canAdvance } = resolveStageEditAccess(stage, role, readOnly)
-  const [editing, setEditing] = useState(false)
+  const access = resolveStageEditAccess({
+    stage,
+    role,
+    isCurrent,
+    readOnly,
+    blockEditable: resolveStageBlockEditable(project, stage),
+  })
+  const passedEdit = usePassedEditToggle()
 
-  if (editing && onEditPassed) {
+  if (passedEdit.editing && onEditPassed) {
     return (
       <StageSectionCurrent
         project={project}
@@ -163,17 +171,19 @@ export function StageSectionPassed({
         editingMode="edit"
         onEditingSubmit={(next) => {
           onEditPassed(next)
-          setEditing(false)
+          passedEdit.finishEdit()
         }}
-        onCancelEditing={() => setEditing(false)}
+        onCancelEditing={passedEdit.cancelEdit}
       />
     )
   }
 
-  const showEditButton = !isCurrent && canEdit && Boolean(onEditPassed)
+  const showEditButton = access.canEditPassed && Boolean(onEditPassed)
 
   const renderField = (f: StageFieldConfig) => {
-    const fieldEditable = !readOnly && canEditField(stage, role, f)
+    // Пройденная секция всегда read-only по виду (getReadonlyFieldSource → 'system'
+    // при isCurrent=false); правка идёт через отдельную форму выше. Контекст 'passed'.
+    const fieldEditable = canEditField(stage, role, f, 'passed')
 
     if (f.type === 'estimate') {
       const fileName = readField(ctx, values, f) ?? ''
@@ -248,7 +258,7 @@ export function StageSectionPassed({
                 source={getReadonlyFieldSource(f, {
                   fieldEditable,
                   isCurrent,
-                  canEditStage: canEdit,
+                  canEditStage: access.canEditPassed,
                 })}
                 isSelect
               />
@@ -284,7 +294,7 @@ export function StageSectionPassed({
         source={getReadonlyFieldSource(f, {
           fieldEditable,
           isCurrent,
-          canEditStage: canEdit,
+          canEditStage: access.canEditPassed,
         })}
         isSelect={f.type === 'select'}
         className={spanClass(f.span, f.type === 'textarea')}
@@ -307,9 +317,9 @@ export function StageSectionPassed({
             titleClassName={funnelColor}
             collapsible
           />
-          {(isCurrent && canAdvance) || showEditButton ? (
+          {(isCurrent && access.canAdvance) || showEditButton ? (
             <div className="flex flex-wrap items-center justify-end gap-2.5">
-              {isCurrent && canAdvance && (
+              {isCurrent && access.canAdvance && (
                 <Button
                   type="button"
                   onClick={() => onAdvance?.(values)}
@@ -323,7 +333,7 @@ export function StageSectionPassed({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setEditing(true)}
+                  onClick={passedEdit.startEdit}
                   className="border-border-strong bg-card h-[38px] rounded-[10px] px-4 text-sm"
                 >
                   <Pencil className="size-3.5" />

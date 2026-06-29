@@ -221,6 +221,17 @@ export interface StageSnapshot {
 }
 
 export interface ProjectDetail extends Project {
+  /**
+   * Пер-блочные права правки от бэка (`can_edit_client/contract/sales/expenses`,
+   * источник — PipelineCapabilities). Единственный источник правды «можно ли править
+   * блок сейчас» (текущий или пройденный): учитывает роль, стадию, владельца,
+   * archived/out_of_mag, `event_date` и т.п. Фронт ими гейтит кнопку «Редактировать»
+   * вместо своей матрицы. `canEditClient` — блок «Заявка из PLUM» (mag_comment).
+   */
+  canEditClient: boolean
+  canEditContract: boolean
+  canEditSales: boolean
+  canEditExpenses: boolean
   enteredSystemAt: string
   history: StageHistoryEntry[]
   /** Проект синхронизирован из Plum (`is_from_plum` в API). */

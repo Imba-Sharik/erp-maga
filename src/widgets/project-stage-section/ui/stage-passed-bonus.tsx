@@ -1,7 +1,7 @@
 import { ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
 
 import { useUserRole } from '@/entities/user-role'
-import type { ProjectDetail, StageFormData } from '@/entities/project'
+import { canEditCurrentStage, type ProjectDetail, type StageFormData } from '@/entities/project'
 import { RollbackStageButton } from '@/features/rollback-stage'
 import {
   ARTICLE_LABELS,
@@ -19,7 +19,6 @@ import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 
-import { canEditStage } from '../lib/stage-permissions'
 import { MoneyInput } from './money-input'
 import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
@@ -137,7 +136,7 @@ export function StagePassedBonus({
   hasDraftHighlight,
 }: StagePassedBonusProps) {
   const role = useUserRole()
-  const canEdit = canEditStage('bonus_calculated', role)
+  const canEdit = canEditCurrentStage('bonus_calculated', role)
   const editable = !presentation.readOnly && canEdit && isCurrent
 
   const rows = buildBonusRows(articles)

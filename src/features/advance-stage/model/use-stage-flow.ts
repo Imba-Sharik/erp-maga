@@ -19,13 +19,27 @@ import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsContr
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { useProjectsClientPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsClientPartialUpdate'
 import { useProjectsContractPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsContractPartialUpdate'
+import { useProjectsExpensesPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsExpensesPartialUpdate'
+import { useProjectsSalesPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsSalesPartialUpdate'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
 import { toast } from '@/shared/ui/toast'
 
 import { buildClientPatchBody, mapClientBlockToFormData } from '../lib/to-client-patch-body'
-import { buildContractPatchBody, mapContractBlockToFormData } from '../lib/to-contract-patch-body'
 import { prepareArticlesForStage, prepareTaxRateForStage } from '../lib/prepare-articles-for-stage'
+import { STAGE_PATCH_ADAPTERS } from '../lib/stage-patch-registry'
 import { buildTransitionBody } from '../lib/to-transition-body'
+
+/**
+ * Унифицированная сигнатура `mutate` block-ручек (contract/sales/expenses).
+ * У kubb-хуков типы тел/ответов разные, но рантайм-форма совпадает — приводим к ней.
+ */
+type StagePatchMutateFn = (
+  vars: { id: number; data: object },
+  options: {
+    onSuccess: (response: unknown) => void
+    onError: (error: unknown) => void
+  },
+) => void
 
 export interface StageRecord {
   enteredAt?: string
@@ -60,6 +74,8 @@ export interface StageFlow {
   updateArticle: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   setTaxRate: (rate: number | null) => void
   toggleBackline: () => void
+  /** Заменить статьи целиком — для отмены инлайн-правки финансового этапа (restore snapshot). */
+  replaceArticles: (next: ProjectArticles) => void
 }
 
 export interface UseStageFlowOptions {
@@ -150,6 +166,8 @@ export function useStageFlow({
   const transitionMutation = useProjectsTransitionsCreate()
   const contractPatchMutation = useProjectsContractPartialUpdate()
   const clientPatchMutation = useProjectsClientPartialUpdate()
+  const salesPatchMutation = useProjectsSalesPartialUpdate()
+  const expensesPatchMutation = useProjectsExpensesPartialUpdate()
   // Черновик с прошлого визита — только свой (по пользователю) и только если этап не сменился.
   const initialDraft = useMemo(() => {
     const draft =
@@ -376,31 +394,63 @@ export function useStageFlow({
 
   const patchStageValues = useCallback(
     (stage: ProjectStage, values: Partial<StageFormData>) => {
-      if (stage !== 'contract_signed') {
+      const adapter = STAGE_PATCH_ADAPTERS[stage]
+      // Этап без серверного маршрута (или нет projectId) — правим только локально:
+      // дозаполнение пропущенного этапа и этапы, чьи ручки ещё не готовы у бэка.
+      if (!adapter || projectId === undefined) {
         applyStageValuesLocally(stage, values)
         return
       }
 
-      if (projectId === undefined) {
-        applyStageValuesLocally(stage, values)
-        return
-      }
+      // Финансовые этапы кладут правки в общий `articles` ещё до Save, поэтому
+      // оптимистичный apply form-значений безвреден (values там пустой).
+      applyStageValuesLocally(stage, values)
 
-      const data = buildContractPatchBody(values)
-      contractPatchMutation.mutate(
-        { id: projectId, data },
+      const body = adapter.buildBody({ values, articles, taxRate })
+      if (!body || Object.keys(body).length === 0) return
+
+      const mutation =
+        stage === 'plum_request'
+          ? clientPatchMutation
+          : stage === 'contract_signed'
+            ? contractPatchMutation
+            : stage === 'ready_to_event'
+              ? salesPatchMutation
+              : stage === 'expenses_entered'
+                ? expensesPatchMutation
+                : undefined
+      if (!mutation) return
+      ;(mutation.mutate as unknown as StagePatchMutateFn)(
+        { id: projectId, data: body },
         {
-          onSuccess: (block) => {
-            const synced = mapContractBlockToFormData(block)
-            applyStageValuesLocally(stage, { ...values, ...synced })
-            queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
-            queryClient.invalidateQueries({ queryKey: projectsListQueryKey() })
+          onSuccess: (response) => {
+            // Мгновенный апдейт формы только для block-схем (contract). Финансы
+            // (sales/expenses) пересчитывает бэк — полагаемся на invalidate+refetch.
+            if (adapter.mapResponse) {
+              applyStageValuesLocally(stage, { ...values, ...adapter.mapResponse(response) })
+            }
+            // Полная инвалидация проекта: пересчёт итогов/прибыли/бонуса на поздних
+            // этапах, обновление aside «Финансы» и аудит-лог правки руководителя.
+            invalidateProjectAfterTransition(queryClient, projectId)
             void queryClient.invalidateQueries({ queryKey: notificationsListQueryKey() })
+          },
+          onError: (error) => {
+            toast.error(getTransitionErrorMessage(error, 'Не удалось сохранить изменения этапа'))
           },
         },
       )
     },
-    [applyStageValuesLocally, contractPatchMutation, projectId, queryClient],
+    [
+      applyStageValuesLocally,
+      articles,
+      taxRate,
+      projectId,
+      queryClient,
+      clientPatchMutation,
+      contractPatchMutation,
+      salesPatchMutation,
+      expensesPatchMutation,
+    ],
   )
 
   const updateArticle = useCallback(
@@ -432,6 +482,11 @@ export function useStageFlow({
       ...prev,
       backline: prev.backline ? null : createEmptyBacklineBlock(),
     }))
+  }, [])
+
+  const replaceArticles = useCallback((next: ProjectArticles) => {
+    financeDirtyRef.current = true
+    setArticles(next)
   }, [])
 
   // После PATCH документов / refetch GET — подтягиваем статус и аудит с бэка в локальный flow.
@@ -498,5 +553,6 @@ export function useStageFlow({
     updateArticle,
     setTaxRate,
     toggleBackline,
+    replaceArticles,
   }
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   ALL_STAGE_LABELS,
   STAGE_FUNNEL,
+  canEditCurrentStage,
   type ProjectDetail,
   type ProjectStage,
   type StageFormData,
@@ -15,7 +16,6 @@ import type { StageRecord } from '@/features/advance-stage'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 
-import { canEditStage } from '../lib/stage-permissions'
 import { StageSectionCurrent } from './stage-section-current'
 import { StageStatusHeader } from './stage-status-header'
 
@@ -41,7 +41,7 @@ export function StageSectionSkipped({
 }: StageSectionSkippedProps) {
   const [editing, setEditing] = useState(false)
   const role = useUserRole()
-  const canEdit = !readOnly && canEditStage(stage, role)
+  const canEdit = !readOnly && canEditCurrentStage(stage, role)
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
 

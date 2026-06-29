@@ -23,6 +23,8 @@ interface StagePassedReadyProps {
   onToggleBackline: () => void
   onAdvance?: () => void
   isAdvancing?: boolean
+  onSavePassed?: () => void
+  onReplaceArticles?: (next: ProjectArticles) => void
 }
 
 export function StagePassedReady({ presentation, ...props }: StagePassedReadyProps) {

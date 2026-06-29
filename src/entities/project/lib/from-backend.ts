@@ -439,6 +439,10 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
 
   return {
     ...base,
+    canEditClient: Boolean(b.can_edit_client),
+    canEditContract: Boolean(b.can_edit_contract),
+    canEditSales: Boolean(b.can_edit_sales),
+    canEditExpenses: Boolean(b.can_edit_expenses),
     enteredSystemAt: b.created_at,
     isFromPlum: base.isFromPlum,
     plumId: b.plum_event_id,
