@@ -5,6 +5,7 @@ import { DOCUMENT_TYPE_LABELS } from './document-labels'
 import {
   formatDocumentStatusValue,
   formatGenericFieldLabel,
+  formatGenericFieldValue,
   formatStageValue,
   hasAuditValue,
   resolveManagerName,
@@ -87,6 +88,8 @@ export function formatFieldChange(entry: ProjectAuditLog, ctx?: AuditLogFormatCo
         `«${formatGenericFieldLabel(field.name)}»`,
         entry.old_value,
         entry.new_value,
+        undefined,
+        (value) => formatGenericFieldValue(field.name, value),
       )
   }
 }
