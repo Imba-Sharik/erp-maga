@@ -232,6 +232,11 @@ export interface ProjectDetail extends Project {
   /** Менеджер PLUM (`plum_lofthall_manager` в API). */
   plumLofthallManager?: string
   clientCompany: string
+  /**
+   * Контактное лицо клиента. Приоритет: отредактированное `contact_person`,
+   * иначе значение из Plum (`plum_contact_person`).
+   */
+  contactPerson: string
   clientStatus: PlumStatus
   finance: ProjectFinance
   /** Снимки пройденных этапов с бэка — для гидрации `useStageFlow` после перезагрузки. */

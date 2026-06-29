@@ -447,6 +447,7 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
     plumSyncedAt: b.plum_last_synced_at,
     plumLofthallManager: b.plum_lofthall_manager ?? '',
     clientCompany: b.client_company ?? '',
+    contactPerson: b.contact_person || b.plum_contact_person || '',
     clientStatus: 'confirmed',
     finance: { sales: null, expenses: null, bonuses: null, netProfit: null },
     history: [],
