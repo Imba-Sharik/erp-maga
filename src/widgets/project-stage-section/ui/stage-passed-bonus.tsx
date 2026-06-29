@@ -7,6 +7,7 @@ import {
   ARTICLE_LABELS,
   BACKLINE_ARTICLE_KINDS,
   MAIN_ARTICLE_KINDS,
+  articleBonusAmount,
   formatMoney,
   formatPercent,
   type ArticleBlock,
@@ -46,10 +47,8 @@ function buildBonusRows(articles: ProjectArticles): BonusRow[] {
 
 function calcRow(values: ArticleValues) {
   const netProfit = (values.sales ?? 0) - (values.expense ?? 0)
-  const formulaBonus = (netProfit * values.bonusPercent) / 100
-  // Если руководитель скорректировал — берём override, иначе формулу.
-  const bonusAmount = values.bonusAmount ?? formulaBonus
-  return { netProfit, bonusAmount }
+  // Бонус по статье: override руководителя либо формульный дефолт (округлён, без минуса).
+  return { netProfit, bonusAmount: articleBonusAmount(values) }
 }
 
 function Operator({ children }: { children: string }) {
