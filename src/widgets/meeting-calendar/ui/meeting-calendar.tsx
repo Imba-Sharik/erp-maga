@@ -81,6 +81,7 @@ export function MeetingCalendar({
               onChange={onChangeMagManagerIds}
               triggerClassName={SELECT_BASE}
               disabled={managerSelectDisabled}
+              clearable
             />
           </div>
         ) : null}

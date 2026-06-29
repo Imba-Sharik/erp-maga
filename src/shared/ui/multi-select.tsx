@@ -5,7 +5,9 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './dropdown-menu'
 
@@ -68,6 +70,13 @@ interface MultiSelectProps {
   placeholder: string
   triggerClassName?: string
   disabled?: boolean
+  /**
+   * Показывать пункт сброса «Не выбрано» вверху списка (когда что-то выбрано).
+   * Включать только в фильтрах, не в полях форм.
+   */
+  clearable?: boolean
+  /** Текст пункта сброса. */
+  clearLabel?: string
 }
 
 /**
@@ -81,6 +90,8 @@ export function MultiSelect({
   placeholder,
   triggerClassName,
   disabled = false,
+  clearable = false,
+  clearLabel = 'Не выбрано',
 }: MultiSelectProps) {
   const flatOptions = flattenOptions(options)
   const grouped = isGroupedOptions(options)
@@ -123,6 +134,20 @@ export function MultiSelect({
         className="max-h-72 w-(--radix-dropdown-menu-trigger-width) min-w-56 p-1"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
+        {clearable && hasSelection ? (
+          <>
+            <DropdownMenuItem
+              className="text-muted-foreground"
+              onSelect={(e) => {
+                e.preventDefault()
+                onChange([])
+              }}
+            >
+              {clearLabel}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         {flatOptions.length === 0 ? (
           <p className="text-muted-foreground px-2 py-1.5 text-sm">Нет данных</p>
         ) : grouped ? (

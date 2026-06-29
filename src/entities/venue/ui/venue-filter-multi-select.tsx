@@ -20,5 +20,5 @@ export function VenueFilterMultiSelect({
   ...props
 }: VenueFilterMultiSelectProps) {
   const placeholder = useVenueFilterPlaceholder(filter)
-  return <MultiSelect {...props} placeholder={placeholder} />
+  return <MultiSelect {...props} placeholder={placeholder} clearable />
 }

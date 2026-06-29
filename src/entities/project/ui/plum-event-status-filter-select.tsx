@@ -23,6 +23,7 @@ export function PlumEventStatusFilterSelect({
       onChange={onChange}
       triggerClassName={triggerClassName}
       disabled={disabled}
+      clearable
     />
   )
 }
