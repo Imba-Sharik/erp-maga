@@ -9,7 +9,7 @@ import {
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
-import { useDebouncedValue } from '@/shared/hooks'
+import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 import {
   ChangeProjectManagerDialog,
   useChangeProjectManagers,
@@ -23,8 +23,6 @@ import { DeleteProjectButton } from '@/features/delete-project'
 import { buildKanbanListParams } from '@/features/kanban-board'
 import type { BoardListParams } from '@/shared/api'
 import {
-  EMPTY_COLUMN_FILTERS,
-  applyColumnFilterChange,
   filterProjectsTable,
   ProjectsTableView,
   type ColumnFilterKey,
@@ -40,6 +38,13 @@ import { ClosingKanban } from './closing-kanban'
 const CLOSING_BACK: ProjectBackOrigin = {
   to: '/closing',
   label: 'Закрытие',
+}
+
+/** Архивные колоночные фильтры → `c*`-ключи URL (отдельно от венью-фильтров канбана). */
+const COLUMN_FILTER_PARAM: Record<Exclude<ColumnFilterKey, 'manager'>, string> = {
+  loft: 'cloft',
+  hall: 'chall',
+  stage: 'cstage',
 }
 
 interface ClosingBoardProps {
@@ -58,6 +63,11 @@ export function ClosingBoard({
   canChangeManager = true,
 }: ClosingBoardProps) {
   const role = useUserRole()
+  // Фильтры/поиск/сортировка — в URL (переживают F5). Режим «Архив», переключатель
+  // канбан/таблица и вид колонок — это вид/режим, в URL не сохраняем (локальный useState).
+  // Архивные колоночные фильтры разнесены по `c*`-ключам, чтобы не пересекаться с
+  // венью-фильтрами канбана (это независимые наборы); статус Plum общий — ключ `plum`.
+  const { getString, getArray, set, patch } = useFilterParams()
   const [archiveMode, setArchiveMode] = useState(false)
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
   const [assistantTarget, setAssistantTarget] = useState<{
@@ -79,17 +89,32 @@ export function ClosingBoard({
   } = useManagersDirectory()
 
   // Kanban filters
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState(PROJECTS_SORT_DEFAULT)
-  const [city, setCity] = useState<string | null>(null)
-  const [hall, setHall] = useState<string | null>(null)
-  const [loft, setLoft] = useState<string | null>(null)
+  const search = getString('q') ?? ''
+  const sort = getString('sort') ?? PROJECTS_SORT_DEFAULT
+  const city = getString('city')
+  const hall = getString('hall')
+  const loft = getString('loft')
+  const setSearch = (value: string) => set('q', value)
+  const setSort = (value: string) => set('sort', value === PROJECTS_SORT_DEFAULT ? null : value)
+  const setCity = (value: string | null) => set('city', value)
+  const setHall = (value: string | null) => set('hall', value)
+  const setLoft = (value: string | null) => set('loft', value)
   const [viewMode, setViewMode] = useState<ClosingViewMode>('kanban')
 
   // Archive table filters
-  const [archiveSearch, setArchiveSearch] = useState('')
+  const archiveSearch = getString('aq') ?? ''
+  const setArchiveSearch = (value: string) => set('aq', value)
   const [columnView, setColumnView] = useState<ClosingColumnView>('closing-general')
-  const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
+  const columnFilters = useMemo<ColumnFilters>(
+    () => ({
+      loft: getString('cloft'),
+      hall: getString('chall'),
+      manager: getString('cmanager'),
+      stage: getString('cstage'),
+      plumEventStatus: getArray('plum'),
+    }),
+    [getString, getArray],
+  )
 
   const { restrictToHallIds, venueSelectDisabled } = useManagerVenueRestriction({
     managerId: columnFilters.manager,
@@ -162,16 +187,19 @@ export function ClosingBoard({
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => applyColumnFilterChange(prev, key, value))
+    // Смена менеджера сбрасывает зал и LOFT — они могут быть недоступны у нового менеджера.
+    if (key === 'manager') patch({ cmanager: value, chall: null, cloft: null })
+    else set(COLUMN_FILTER_PARAM[key], value)
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
-    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+    set('plum', values)
   }
 
   const handleToggleArchive = (value: boolean) => {
     setArchiveMode(value)
-    setColumnFilters(EMPTY_COLUMN_FILTERS)
+    // Сброс колоночных фильтров архива (как было при переключении режима).
+    patch({ cloft: null, chall: null, cmanager: null, cstage: null, plum: null })
     onArchiveModeChange?.(value)
   }
 

@@ -1,13 +1,17 @@
-import { useState } from 'react'
-
+import { useFilterParams } from '@/shared/hooks'
 import { ManagersTable } from '@/widgets/managers-table'
 
 import { ManagersToolbar } from './managers-toolbar'
 
 export function ManagersPage() {
-  const [search, setSearch] = useState('')
-  const [hall, setHall] = useState<string | null>(null)
-  const [loft, setLoft] = useState<string | null>(null)
+  // Поиск и фильтры зал/LOFT живут в URL — переживают перезагрузку (F5).
+  const { getString, set } = useFilterParams()
+  const search = getString('q') ?? ''
+  const hall = getString('hall')
+  const loft = getString('loft')
+  const setSearch = (value: string) => set('q', value)
+  const setHall = (value: string | null) => set('hall', value)
+  const setLoft = (value: string | null) => set('loft', value)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6">

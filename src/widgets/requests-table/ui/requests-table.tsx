@@ -1,14 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Search } from 'lucide-react'
 
 import type { ProjectBackOrigin } from '@/entities/project'
-import { useDebouncedValue } from '@/shared/hooks'
+import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 import { Input } from '@/shared/ui/input'
 import {
-  EMPTY_COLUMN_FILTERS,
   filterProjectsTable,
   ProjectsTableView,
   type ColumnFilterKey,
+  type ColumnFilters,
 } from '@/widgets/projects-table'
 
 import { useRequestsTableQuery, type RequestsTableVariant } from '../lib/use-requests-table-query'
@@ -33,8 +33,21 @@ interface RequestsTableProps {
 
 /** Таблица запросов бухгалтера: `open` — ждут подтверждения, `closed` — уже закрыты. */
 export function RequestsTable({ variant }: RequestsTableProps) {
-  const [search, setSearch] = useState('')
-  const [columnFilters, setColumnFilters] = useState(EMPTY_COLUMN_FILTERS)
+  // Поиск, статус Plum и фильтры колонок живут в URL — переживают перезагрузку (F5).
+  // /requests и /closed-requests — разные маршруты, их query-параметры не пересекаются.
+  const { getString, getArray, set } = useFilterParams()
+  const search = getString('q') ?? ''
+  const setSearch = (value: string) => set('q', value)
+  const columnFilters = useMemo<ColumnFilters>(
+    () => ({
+      loft: getString('loft'),
+      hall: getString('hall'),
+      manager: getString('manager'),
+      stage: getString('stage'),
+      plumEventStatus: getArray('plum'),
+    }),
+    [getString, getArray],
+  )
   const config = VARIANT_CONFIG[variant]
   const debouncedSearch = useDebouncedValue(search)
 
@@ -47,11 +60,11 @@ export function RequestsTable({ variant }: RequestsTableProps) {
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => ({ ...prev, [key]: value }))
+    set(key, value)
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
-    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+    set('plum', values)
   }
 
   return (

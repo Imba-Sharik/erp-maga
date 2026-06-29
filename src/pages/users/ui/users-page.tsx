@@ -1,7 +1,5 @@
-import { useState } from 'react'
-
 import { useUsersList } from '@/shared/api/generated/hooks/usersController/useUsersList'
-import { useDebouncedValue } from '@/shared/hooks'
+import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 import { formatDateTime } from '@/shared/lib/date'
 import {
   GridTableCell,
@@ -28,7 +26,10 @@ function getRoleLabel(role: string): string {
 }
 
 export function UsersPage() {
-  const [search, setSearch] = useState('')
+  // Поиск живёт в URL — переживает перезагрузку (F5).
+  const { getString, set } = useFilterParams()
+  const search = getString('q') ?? ''
+  const setSearch = (value: string) => set('q', value)
   const debouncedSearch = useDebouncedValue(search)
   const trimmedSearch = debouncedSearch.trim()
 
