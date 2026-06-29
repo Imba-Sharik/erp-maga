@@ -99,6 +99,37 @@ function mergeDraftValues(
   return merged
 }
 
+/**
+ * Сидинг снимков этапов из бэкового снапшота: для активного этапа проставляем
+ * `enteredAt`/`enteredBy` (приоритет: бэк → PLUM/дата создания для plum_request →
+ * текущий пользователь) и мержим несохранённый черновик поверх бэковых значений.
+ * Используется и при маунте, и при server-driven смене этапа (откат) — во втором
+ * случае `draftValues` не передаём (черновик старого этапа уже невалиден).
+ */
+function seedRecords(
+  initialRecords: StageRecords | undefined,
+  stage: ProjectStage,
+  currentUserFullName: string,
+  projectEnteredAt: string | undefined,
+  draftValues: Partial<StageFormData> | undefined,
+): StageRecords {
+  const seeded: StageRecords = { ...initialRecords }
+  const current = seeded[stage]
+  const seededEnteredAt =
+    current?.enteredAt ??
+    (stage === 'plum_request' ? projectEnteredAt : undefined) ??
+    new Date().toISOString()
+  const seededEnteredBy =
+    current?.enteredBy ?? (stage === 'plum_request' ? PLUM_SYSTEM_LABEL : currentUserFullName)
+  seeded[stage] = {
+    ...current,
+    enteredAt: seededEnteredAt,
+    enteredBy: seededEnteredBy,
+    values: mergeDraftValues(current?.values, draftValues),
+  }
+  return seeded
+}
+
 /** Этапы с финансовыми блоками — их черновик хранит `articles`/`taxRate`, а не RHF-форму. */
 const FINANCE_DRAFT_STAGES: ReadonlySet<ProjectStage> = new Set<ProjectStage>([
   'ready_to_event',
@@ -127,32 +158,17 @@ export function useStageFlow({
   }, [projectId, initialStage, currentUser.id])
 
   const [currentStage, setCurrentStage] = useState<ProjectStage>(initialStage)
-  const [records, setRecords] = useState<StageRecords>(() => {
-    // Гидрация пройденных этапов снимками с бэка + запись текущего этапа.
-    const seeded: StageRecords = { ...initialRecords }
-    const current = seeded[initialStage]
-    // Приоритет: значение с бэка (`current?.enteredAt`) → дата создания проекта для
-    // plum_request → момент маунта. Для не-plum «дата создания проекта» бессмысленна,
-    // поэтому пропускаем и сразу падаем в now (= когда пользователь сюда зашёл).
-    const seededEnteredAt =
-      current?.enteredAt ??
-      (initialStage === 'plum_request' ? projectEnteredAt : undefined) ??
-      new Date().toISOString()
-    // Аналогично для автора: бэк → PLUM (для plum_request) → текущий пользователь.
-    // Подменяем на viewer, чтобы поле «Статус перевёл менеджер» сразу было заполнено,
-    // когда бэк не вернул `*_set_by` для текущего этапа.
-    const seededEnteredBy =
-      current?.enteredBy ??
-      (initialStage === 'plum_request' ? PLUM_SYSTEM_LABEL : currentUser.fullName)
-    seeded[initialStage] = {
-      ...current,
-      enteredAt: seededEnteredAt,
-      enteredBy: seededEnteredBy,
-      // Черновик перебивает значения с бэка — несохранённая правка текущего этапа.
-      values: mergeDraftValues(current?.values, initialDraft?.values),
-    }
-    return seeded
-  })
+  const [records, setRecords] = useState<StageRecords>(() =>
+    // Гидрация пройденных этапов снимками с бэка + запись текущего этапа; черновик
+    // перебивает бэковые значения (несохранённая правка текущего этапа).
+    seedRecords(
+      initialRecords,
+      initialStage,
+      currentUser.fullName,
+      projectEnteredAt,
+      initialDraft?.values,
+    ),
+  )
   const [articles, setArticles] = useState<ProjectArticles>(() => {
     const base = initialDraft?.articles ?? initialArticles ?? createInitialArticles()
     return prepareArticlesForStage(base, initialStage)
@@ -177,14 +193,31 @@ export function useStageFlow({
 
   const isCurrent = useCallback((stage: ProjectStage) => stage === currentStage, [currentStage])
 
-  // Сервер может сменить этап в обход локального flow — например, откат на предыдущий
-  // этап (отдельный эндпоинт пишет свежий ProjectDetail в кэш, но не зовёт
-  // applyAdvanceLocally). Подхватываем серверный этап, чтобы секция переключилась без
-  // перезагрузки. Для advance безопасно: к приходу свежих данных currentStage уже равен
-  // новому initialStage (выставлен оптимистично) — эффект становится no-op.
+  // Сервер может сменить этап в обход локального flow — откат на предыдущий этап
+  // (отдельный эндпоинт пишет свежий ProjectDetail в кэш, но не зовёт applyAdvanceLocally)
+  // или внешнее изменение. Подхватываем серверный этап И регидрируем финансы/records из
+  // свежего снапшота: `useStageFlow` не пересоздаётся при откате (key=projectId, не этап),
+  // поэтому без этого в стейте остались бы локальные значения старого этапа (бонусы, налог,
+  // формы). Свой advance сюда не попадает: там к приходу свежих данных currentStage уже
+  // равен новому initialStage (setQueryData + applyAdvanceLocally батчатся) — условие ложно.
   useEffect(() => {
+    if (initialStage === currentStage) return
     setCurrentStage(initialStage)
-  }, [initialStage])
+    setArticles(prepareArticlesForStage(initialArticles ?? createInitialArticles(), initialStage))
+    setTaxRateState(prepareTaxRateForStage(initialTaxRate ?? null, initialStage))
+    setRecords(
+      seedRecords(initialRecords, initialStage, currentUser.fullName, projectEnteredAt, undefined),
+    )
+    financeDirtyRef.current = false
+  }, [
+    initialStage,
+    currentStage,
+    initialArticles,
+    initialTaxRate,
+    initialRecords,
+    currentUser.fullName,
+    projectEnteredAt,
+  ])
 
   const getRecord = useCallback((stage: ProjectStage) => records[stage], [records])
 
