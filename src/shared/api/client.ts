@@ -14,9 +14,28 @@ declare module 'axios' {
 
 const REFRESH_URL = '/api/v1/auth/token/refresh/'
 
+/**
+ * DRF/django-filter ждёт multi-value фильтры через запятую (`?manager=1,2`),
+ * а дефолтный axios сериализует массив как `manager[]=1&manager[]=2` — бэк такой
+ * ключ не видит и фильтр игнорирует. Склеиваем массивы запятой; скаляры — как есть.
+ */
+export function serializeParams(params: Record<string, unknown>): string {
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value == null) continue
+    if (Array.isArray(value)) {
+      if (value.length > 0) search.append(key, value.join(','))
+    } else {
+      search.append(key, String(value))
+    }
+  }
+  return search.toString()
+}
+
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? '',
   withCredentials: true,
+  paramsSerializer: { serialize: serializeParams },
 })
 
 axiosInstance.interceptors.request.use((config) => {
