@@ -101,6 +101,48 @@ describe('formatAuditLogAction', () => {
     expect(action).toBe('изменил «номер договора»: «001» → «002»')
   })
 
+  it('переводит дотированное имя поля-комментария', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'calculation.comment',
+        old_value: 'test',
+        new_value: 'test123',
+      }),
+    )
+
+    expect(action).toBe('изменил «комментарий к расчёту»: «test» → «test123»')
+  })
+
+  it('различает комментарии разных секций по дотированному пути', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'primary_contact.comment',
+        old_value: '',
+        new_value: 'test',
+      }),
+    )
+
+    expect(action).toBe('установил «комментарий по контакту»: «test»')
+  })
+
+  it('переводит enum-значение канала контакта', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'field_change',
+        action_label: 'Изменение поля',
+        field_name: 'primary_contact.contact_channel',
+        old_value: 'messenger',
+        new_value: 'meeting',
+      }),
+    )
+
+    expect(action).toBe('изменил «канал контакта»: «Мессенджер» → «Встреча»')
+  })
+
   it('добавляет к правке поля контекст этапа', () => {
     const action = formatAuditLogAction(
       makeEntry({
