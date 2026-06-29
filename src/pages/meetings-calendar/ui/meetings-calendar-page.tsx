@@ -28,7 +28,7 @@ import {
   EditReminderDialog,
 } from '@/features/manage-reminders'
 import { toDayKey } from '@/shared/lib/date'
-import { useElementSize } from '@/shared/hooks'
+import { useElementSize, useFilterParams } from '@/shared/hooks'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { CombinedCalendar } from '@/widgets/combined-calendar'
 import { MeetingDayPanel } from '@/widgets/meeting-day-panel'
@@ -96,11 +96,21 @@ export function MeetingsCalendarPage() {
     return { today: now, initialVisibleMonth: startOfMonth(now) }
   }, [])
 
+  // Месяц, выбранный день и таб «Встречи/Напоминания» — навигация/вид, в URL не сохраняем.
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  // Множественный выбор менеджеров. undefined — не трогали (дефолт по роли: менеджер — он сам,
-  // руководитель — все). Пустой массив — все менеджеры; конкретные id — только они.
-  const [magManagerSelection, setMagManagerSelection] = useState<string[] | undefined>(undefined)
+  // Множественный выбор менеджеров живёт в URL (переживает F5). undefined — не трогали
+  // (дефолт по роли: менеджер — он сам, руководитель — все); `all` — явно все менеджеры;
+  // иначе список id. `all`-сентинел отличает «явно все» от «не трогали» (нет параметра).
+  const { getString, set: setFilterParam } = useFilterParams()
+  const rawManager = getString('manager')
+  const magManagerSelection = useMemo<string[] | undefined>(() => {
+    if (rawManager === null) return undefined
+    if (rawManager === 'all') return []
+    return rawManager.split(',').filter(Boolean)
+  }, [rawManager])
+  const setMagManagerSelection = (ids: string[]) =>
+    setFilterParam('manager', ids.length > 0 ? ids : 'all')
   const magManagerIds = useMemo(
     () => magManagerSelection ?? (isManagerRole && ownManagerIdStr ? [ownManagerIdStr] : []),
     [magManagerSelection, isManagerRole, ownManagerIdStr],

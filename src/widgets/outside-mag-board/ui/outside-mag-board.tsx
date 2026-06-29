@@ -5,8 +5,6 @@ import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/man
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { ReturnProjectFromOutsideMagDialog } from '@/features/return-project-from-outside-mag'
 import {
-  EMPTY_COLUMN_FILTERS,
-  applyColumnFilterChange,
   filterProjectsTable,
   ProjectsTableView,
   useOutsideMagTableQuery,
@@ -15,7 +13,7 @@ import {
 } from '@/widgets/projects-table'
 
 import { env } from '@/shared/config'
-import { useDebouncedValue } from '@/shared/hooks'
+import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 import type { BoardListParams } from '@/shared/api'
 import { OUTSIDE_MAG_MOCK_PROJECTS } from '../model/outside-mag-mock-projects'
 import { OutsideMagSearchToolbar } from './outside-mag-search-toolbar'
@@ -29,8 +27,20 @@ interface OutsideMagBoardProps {
 }
 
 export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
-  const [search, setSearch] = useState('')
-  const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
+  // Поиск и фильтры колонок живут в URL — переживают перезагрузку (F5).
+  const { getString, getArray, set, patch } = useFilterParams()
+  const search = getString('q') ?? ''
+  const setSearch = (value: string) => set('q', value)
+  const columnFilters = useMemo<ColumnFilters>(
+    () => ({
+      loft: getString('loft'),
+      hall: getString('hall'),
+      manager: getString('manager'),
+      stage: getString('stage'),
+      plumEventStatus: getArray('plum'),
+    }),
+    [getString, getArray],
+  )
   const [returnTarget, setReturnTarget] = useState<Project | null>(null)
   const debouncedSearch = useDebouncedValue(search)
 
@@ -98,11 +108,13 @@ export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
   }, [projects, debouncedSearch, columnFilters, managerFilterName])
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => applyColumnFilterChange(prev, key, value))
+    // Смена менеджера сбрасывает зал и LOFT — они могут быть недоступны у нового менеджера.
+    if (key === 'manager') patch({ manager: value, hall: null, loft: null })
+    else set(key, value)
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
-    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+    set('plum', values)
   }
 
   return (

@@ -16,7 +16,7 @@ import {
 } from '@/features/manage-assistant-managers'
 import { MoveProjectOutsideMagDialog } from '@/features/move-project-outside-mag'
 import type { BoardListParams } from '@/shared/api'
-import { useDebouncedValue } from '@/shared/hooks'
+import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 
 import { ProjectsKanban } from './projects-kanban'
 
@@ -32,12 +32,20 @@ interface ProjectsBoardProps {
 }
 
 export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardProps) {
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState(PROJECTS_SORT_DEFAULT)
-  const [city, setCity] = useState<string | null>(null)
-  const [hall, setHall] = useState<string | null>(null)
-  const [loft, setLoft] = useState<string | null>(null)
-  const [plumEventStatus, setPlumEventStatus] = useState<string[]>([])
+  // Фильтры/поиск/сортировка живут в URL — переживают перезагрузку (F5) и шарятся ссылкой.
+  const { getString, getArray, set } = useFilterParams()
+  const search = getString('q') ?? ''
+  const sort = getString('sort') ?? PROJECTS_SORT_DEFAULT
+  const city = getString('city')
+  const hall = getString('hall')
+  const loft = getString('loft')
+  const plumEventStatus = getArray('plum')
+  const setSearch = (value: string) => set('q', value)
+  const setSort = (value: string) => set('sort', value === PROJECTS_SORT_DEFAULT ? null : value)
+  const setCity = (value: string | null) => set('city', value)
+  const setHall = (value: string | null) => set('hall', value)
+  const setLoft = (value: string | null) => set('loft', value)
+  const setPlumEventStatus = (values: string[]) => set('plum', values)
   const [outsideMagTarget, setOutsideMagTarget] = useState<Project | null>(null)
   const [assistantTarget, setAssistantTarget] = useState<AssistantTarget | null>(null)
   const debouncedSearch = useDebouncedValue(search)

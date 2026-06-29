@@ -4,15 +4,13 @@ import type { ReactNode } from 'react'
 import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/manager'
 import type { Project } from '@/entities/project'
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
-import { useDebouncedValue } from '@/shared/hooks'
+import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 
 import {
-  EMPTY_COLUMN_FILTERS,
   filterProjectsTable,
   type ColumnFilterKey,
   type ColumnFilters,
 } from '../lib/filter-projects-table'
-import { applyColumnFilterChange } from '../lib/apply-column-filter-change'
 import type { ProjectsTableColumnView } from '../lib/economics-columns'
 import { useProjectsTableQuery } from '../lib/use-projects-table-query'
 import { ProjectsTableToolbar } from './projects-table-toolbar'
@@ -29,10 +27,24 @@ export function ProjectsTable({
   managerEditable = true,
   renderRowAction,
 }: ProjectsTableProps = {}) {
-  const [search, setSearch] = useState('')
-  const [pendingOnly, setPendingOnly] = useState(false)
-  const [columnFilters, setColumnFilters] = useState<ColumnFilters>(EMPTY_COLUMN_FILTERS)
+  // Поиск, тумблер «Ожидают обработки» и фильтры колонок живут в URL — переживают F5.
+  // Вид колонок (general/economics) — вне объёма, остаётся локальным.
+  const { getString, getArray, set, patch } = useFilterParams()
+  const search = getString('q') ?? ''
+  const pendingOnly = getString('pending') === '1'
+  const columnFilters = useMemo<ColumnFilters>(
+    () => ({
+      loft: getString('loft'),
+      hall: getString('hall'),
+      manager: getString('manager'),
+      stage: getString('stage'),
+      plumEventStatus: getArray('plum'),
+    }),
+    [getString, getArray],
+  )
   const [columnView, setColumnView] = useState<ProjectsTableColumnView>('general')
+  const setSearch = (value: string) => set('q', value)
+  const setPendingOnly = (value: boolean) => set('pending', value ? '1' : null)
   const debouncedSearch = useDebouncedValue(search)
 
   const { halls, lofts } = useVenueCatalog()
@@ -70,11 +82,13 @@ export function ProjectsTable({
   )
 
   const handleColumnFilterChange = (key: ColumnFilterKey, value: string | null) => {
-    setColumnFilters((prev) => applyColumnFilterChange(prev, key, value))
+    // Смена менеджера сбрасывает зал и LOFT — они могут быть недоступны у нового менеджера.
+    if (key === 'manager') patch({ manager: value, hall: null, loft: null })
+    else set(key, value)
   }
 
   const handlePlumEventStatusChange = (values: string[]) => {
-    setColumnFilters((prev) => ({ ...prev, plumEventStatus: values }))
+    set('plum', values)
   }
 
   return (

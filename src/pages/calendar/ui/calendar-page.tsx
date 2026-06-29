@@ -21,7 +21,7 @@ import {
 } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import { useProjectsCalendarList } from '@/shared/api/generated/hooks/projectsController/useProjectsCalendarList'
-import { useElementSize } from '@/shared/hooks'
+import { useElementSize, useFilterParams } from '@/shared/hooks'
 import { DaySchedule } from '@/widgets/day-schedule'
 import { ProjectCalendar } from '@/widgets/project-calendar'
 
@@ -67,18 +67,27 @@ export function CalendarPage() {
     }
   }, [])
 
+  // Месяц и выбранные дни — навигация, в URL не сохраняем (локальный useState).
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
-  const [loft, setLoft] = useState<string | null>(null)
-  const [hall, setHall] = useState<string[]>([])
-  // undefined — не трогали (берём дефолт по роли); null — явно «все»; строка — выбранный менеджер.
-  const [magManagerSelection, setMagManagerSelection] = useState<string | null | undefined>(
-    undefined,
-  )
+
+  // Фильтры/поиск живут в URL — переживают перезагрузку (F5) и шарятся ссылкой.
+  const { getString, getArray, set, patch } = useFilterParams()
+  const loft = getString('loft')
+  const hall = useMemo(() => getArray('hall'), [getArray])
+  const projectSearch = getString('q') ?? ''
+  const plumEventStatus = useMemo(() => getArray('plum'), [getArray])
+  const setLoft = (value: string | null) => set('loft', value)
+  const setHall = (value: string[]) => set('hall', value)
+  const setProjectSearch = (value: string) => set('q', value)
+  const setPlumEventStatus = (values: string[]) => set('plum', values)
+
+  // Менеджер: нет параметра — не трогали (дефолт по роли); `all` — явно «все»; иначе id.
+  const rawManager = getString('manager')
+  const magManagerSelection: string | null | undefined =
+    rawManager === null ? undefined : rawManager === 'all' ? null : rawManager
   const magManagerId =
     magManagerSelection === undefined ? (isManagerRole ? ownManagerId : null) : magManagerSelection
-  const [projectSearch, setProjectSearch] = useState('')
-  const [plumEventStatus, setPlumEventStatus] = useState<string[]>([])
 
   const { event_date_after, event_date_before } = useMemo(() => {
     const gridStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 })
@@ -101,11 +110,14 @@ export function CalendarPage() {
     managersLoading: managersSelectLoading,
   })
 
-  const handleChangeMagManager = useCallback((value: string | null) => {
-    setMagManagerSelection(value)
-    setHall([])
-    setLoft(null)
-  }, [])
+  // Смена менеджера сбрасывает зал и LOFT (могут быть недоступны у нового менеджера);
+  // `null` («все») кодируем как `all`, чтобы отличать от «не трогали» (нет параметра).
+  const handleChangeMagManager = useCallback(
+    (value: string | null) => {
+      patch({ manager: value === null ? 'all' : value, hall: [], loft: null })
+    },
+    [patch],
+  )
 
   const { data, isLoading, isFetching } = useProjectsCalendarList({
     event_date_after,
