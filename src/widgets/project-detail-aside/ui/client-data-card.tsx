@@ -19,7 +19,7 @@ export function ClientDataCard({ project }: { project: ProjectDetail }) {
       }
     >
       <KvRow label="Компания" value={project.clientCompany} />
-      <KvRow label="Контактное лицо" value={project.manager} />
+      <KvRow label="Контактное лицо" value={project.contactPerson} />
       <KvRow label="Телефон" value={project.phone} />
       {telegramUrl && (
         <KvRow
