@@ -25,6 +25,18 @@ export function formatAuditLogAction(entry: ProjectAuditLog, ctx?: AuditLogForma
     case 'field_change':
       return withStageSuffix(formatFieldChange(entry, ctx), entry.stage)
 
+    case 'block_change': {
+      // Правка блока задним числом (Руководитель, ERP-198). Ярлык блока берём из
+      // metadata.block_label (источник — бэк); фразу строим сами — субъект «Роль Имя»
+      // подставляет UI отдельно, поэтому здесь только глагольная часть без подлежащего.
+      const blockLabel =
+        entry.metadata && typeof entry.metadata.block_label === 'string'
+          ? entry.metadata.block_label
+          : ''
+      const phrase = blockLabel ? `изменил данные в блоке «${blockLabel}»` : entry.action_label
+      return withStageSuffix(phrase, entry.stage)
+    }
+
     case 'bonus_manual_change':
       if (hasAuditValue(entry.old_value) || hasAuditValue(entry.new_value)) {
         return formatBonusManualChange(entry)

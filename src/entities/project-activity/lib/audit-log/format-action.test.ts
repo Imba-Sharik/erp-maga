@@ -10,6 +10,7 @@ function makeEntry(overrides: Partial<ProjectAuditLog>): ProjectAuditLog {
     created_at: '2026-05-27T15:46:55.336763+03:00',
     action_type: 'other',
     action_label: 'Прочее',
+    message: 'Прочее',
     field_name: '',
     old_value: '',
     new_value: '',
@@ -156,5 +157,26 @@ describe('formatAuditLogAction', () => {
     )
 
     expect(action).toBe('изменил «налог»: «10» → «20» · этап «Расходы внесены»')
+  })
+
+  it('block_change: глагольная фраза из metadata.block_label (без подлежащего)', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'block_change',
+        action_label: 'Изменение блока',
+        metadata: { block: 'sales', block_label: 'Продажи' },
+        stage: null,
+      }),
+    )
+
+    expect(action).toBe('изменил данные в блоке «Продажи»')
+  })
+
+  it('block_change: fallback на action_label без metadata.block_label', () => {
+    const action = formatAuditLogAction(
+      makeEntry({ action_type: 'block_change', action_label: 'Изменение блока', stage: null }),
+    )
+
+    expect(action).toBe('Изменение блока')
   })
 })
