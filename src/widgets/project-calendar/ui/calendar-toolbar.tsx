@@ -144,7 +144,7 @@ export function CalendarToolbar({
         placeholder={managerPlaceholder}
         disabled={managerSelectDisabled}
         triggerClassName={layout.triggerBase}
-        className={cn('w-[min(40%,160px)] shrink-0', layout.managerMobileHide)}
+        className={cn('w-[min(45%,200px)] shrink-0', layout.managerMobileHide)}
       />
     ) : null
 
