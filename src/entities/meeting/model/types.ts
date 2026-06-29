@@ -24,6 +24,10 @@ export type MeetingsByDay = Map<string, Meeting[]>
 export interface ListMeetingsParams {
   dateFrom: string
   dateTo: string
-  /** null — все менеджеры */
-  managerId: number | null
+  /**
+   * Фильтр по отв. менеджерам (бэк: `?manager=1,2`). Пустой массив — фильтр не
+   * передаётся: руководитель/админ видят всех, менеджер MAG — только свои.
+   * Чтобы менеджер увидел чужие встречи, id нужно передать явно (ERP-216).
+   */
+  managerIds: number[]
 }

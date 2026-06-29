@@ -101,8 +101,10 @@ export function MeetingsCalendarPage() {
   // Множественный выбор менеджеров. undefined — не трогали (дефолт по роли: менеджер — он сам,
   // руководитель — все). Пустой массив — все менеджеры; конкретные id — только они.
   const [magManagerSelection, setMagManagerSelection] = useState<string[] | undefined>(undefined)
-  const magManagerIds =
-    magManagerSelection ?? (isManagerRole && ownManagerIdStr ? [ownManagerIdStr] : [])
+  const magManagerIds = useMemo(
+    () => magManagerSelection ?? (isManagerRole && ownManagerIdStr ? [ownManagerIdStr] : []),
+    [magManagerSelection, isManagerRole, ownManagerIdStr],
+  )
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Meeting | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Meeting | null>(null)
@@ -111,28 +113,24 @@ export function MeetingsCalendarPage() {
   const [reminderEditTarget, setReminderEditTarget] = useState<Reminder | null>(null)
   const [reminderDeleteTarget, setReminderDeleteTarget] = useState<Reminder | null>(null)
 
-  // Бэк фильтрует только по одному менеджеру, поэтому для руководителя тянем все
-  // встречи (manager не передаём) и фильтруем по выбранным id на клиенте.
-  // Менеджер смотрит только себя → скоупим запрос на бэке. Как только выбирает
-  // других/всех — тянем всё (бэк авторизует менеджера на `manager`, ERP-216) и
-  // фильтруем по выбранным id на клиенте.
-  const viewingOwnOnly =
-    isManagerRole &&
-    ownManagerIdStr != null &&
-    magManagerIds.length === 1 &&
-    magManagerIds[0] === ownManagerIdStr
-
-  const queryManagerId = useMemo((): number | null => {
-    if (isDirectorRole) return null
-    if (isManagerRole && !viewingOwnOnly) return null
-    const parsed = parseManagerId(currentUser.id)
-    return parsed ?? 1
-  }, [isDirectorRole, isManagerRole, viewingOwnOnly, currentUser.id])
-
   const selectedManagerIds = useMemo(
     () => new Set(magManagerIds.map(Number).filter((id) => Number.isFinite(id))),
     [magManagerIds],
   )
+
+  // Бэк фильтрует встречи по списку `manager` (ERP-216). Менеджер MAG без фильтра
+  // видит только свои, поэтому выбранных менеджеров обязательно передаём явно:
+  // - конкретный выбор (вкл. «только я») → эти id;
+  // - «все» (пустой выбор): руководитель → без фильтра (бэк отдаёт всех),
+  //   менеджер → перечисляем все id из справочника, иначе бэк вернёт только свои.
+  const allManagerIds = useMemo(
+    () => managerFilterOptions.map((o) => Number(o.value)).filter((id) => Number.isFinite(id)),
+    [managerFilterOptions],
+  )
+  const queryManagerIds = useMemo((): number[] => {
+    if (selectedManagerIds.size > 0) return [...selectedManagerIds]
+    return isManagerRole ? allManagerIds : []
+  }, [selectedManagerIds, isManagerRole, allManagerIds])
 
   // Имя отв. менеджера по id — показываем на карточках только Руководителю/админу.
   // Свои записи (владелец = текущий пользователь) помечаем «Вы».
@@ -159,8 +157,8 @@ export function MeetingsCalendarPage() {
   }, [visibleMonth])
 
   const queryParams: ListMeetingsParams = useMemo(
-    () => ({ dateFrom, dateTo, managerId: queryManagerId }),
-    [dateFrom, dateTo, queryManagerId],
+    () => ({ dateFrom, dateTo, managerIds: queryManagerIds }),
+    [dateFrom, dateTo, queryManagerIds],
   )
 
   const { data, isLoading, isFetching } = useMeetingsCalendarList(queryParams)
