@@ -42,13 +42,15 @@ export function taxAmount(totalSales: number, taxRate: number): number {
 }
 
 /**
- * Бонус по одной статье: при override руководителя — возвращает override,
- * иначе формула `(sales − expense) × bonusPercent / 100`.
+ * Бонус по одной статье: при override руководителя — возвращает override (ручной ввод уже
+ * ограничен неотрицательными целыми). Иначе авто-подстановка по формуле
+ * `(sales − expense) × bonusPercent / 100`, округлённая до целого; отрицательная → 0.
  */
 export function articleBonusAmount(values: ArticleValues): number {
+  if (values.bonusAmount != null) return values.bonusAmount
   const netProfit = (values.sales ?? 0) - (values.expense ?? 0)
   const formula = (netProfit * values.bonusPercent) / 100
-  return values.bonusAmount ?? formula
+  return Math.max(0, Math.round(formula))
 }
 
 /** Итоговый бонус по проекту: сумма `articleBonusAmount` по всем статьям (main + backline, если есть). */
