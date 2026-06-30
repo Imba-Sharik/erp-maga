@@ -47,6 +47,21 @@ const COLUMN_FILTER_PARAM: Record<Exclude<ColumnFilterKey, 'manager'>, string> =
   stage: 'cstage',
 }
 
+/** Ключи URL для экрана «Закрытие»: фильтры канбана + архива (`c*`) + общий `plum`. */
+const CLOSING_FILTER_KEYS = [
+  'q',
+  'sort',
+  'city',
+  'hall',
+  'loft',
+  'aq',
+  'cloft',
+  'chall',
+  'cmanager',
+  'cstage',
+  'plum',
+] as const
+
 interface ClosingBoardProps {
   listDateParams: BoardListParams
   onArchiveModeChange?: (archiveMode: boolean) => void
@@ -67,7 +82,10 @@ export function ClosingBoard({
   // канбан/таблица и вид колонок — это вид/режим, в URL не сохраняем (локальный useState).
   // Архивные колоночные фильтры разнесены по `c*`-ключам, чтобы не пересекаться с
   // венью-фильтрами канбана (это независимые наборы); статус Plum общий — ключ `plum`.
-  const { getString, getArray, set, patch } = useFilterParams()
+  const { getString, getArray, set, patch } = useFilterParams({
+    scope: 'closing',
+    params: CLOSING_FILTER_KEYS,
+  })
   const [archiveMode, setArchiveMode] = useState(false)
   const [changeManagerTarget, setChangeManagerTarget] = useState<Project | null>(null)
   const [assistantTarget, setAssistantTarget] = useState<{

@@ -27,6 +27,9 @@ import { ProjectCalendar } from '@/widgets/project-calendar'
 
 const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
+/** Ключи URL, которые персистим для календаря проектов (месяц/дни — навигация, не персистим). */
+const CALENDAR_FILTER_KEYS = ['q', 'loft', 'hall', 'manager', 'plum'] as const
+
 function parseMagManagerId(magManagerId: string | null): number | undefined {
   if (!magManagerId) return undefined
   const id = Number(magManagerId)
@@ -71,8 +74,12 @@ export function CalendarPage() {
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleMonth)
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
 
-  // Фильтры/поиск живут в URL — переживают перезагрузку (F5) и шарятся ссылкой.
-  const { getString, getArray, set, patch } = useFilterParams()
+  // Фильтры/поиск живут в URL (переживают F5, шарятся ссылкой) и дублируются в localStorage
+  // (переживают закрытие вкладки / новое окно).
+  const { getString, getArray, set, patch } = useFilterParams({
+    scope: 'calendar',
+    params: CALENDAR_FILTER_KEYS,
+  })
   const loft = getString('loft')
   const hall = useMemo(() => getArray('hall'), [getArray])
   const projectSearch = getString('q') ?? ''
