@@ -16,6 +16,17 @@ import { useProjectsTableQuery } from '../lib/use-projects-table-query'
 import { ProjectsTableToolbar } from './projects-table-toolbar'
 import { ProjectsTableView } from './projects-table-view'
 
+/** Ключи URL, которые персистим для таблицы всех проектов. */
+const PROJECTS_TABLE_FILTER_KEYS = [
+  'q',
+  'pending',
+  'loft',
+  'hall',
+  'manager',
+  'stage',
+  'plum',
+] as const
+
 interface ProjectsTableProps {
   onAddProject?: () => void
   managerEditable?: boolean
@@ -27,9 +38,13 @@ export function ProjectsTable({
   managerEditable = true,
   renderRowAction,
 }: ProjectsTableProps = {}) {
-  // Поиск, тумблер «Ожидают обработки» и фильтры колонок живут в URL — переживают F5.
-  // Вид колонок (general/economics) — вне объёма, остаётся локальным.
-  const { getString, getArray, set, patch } = useFilterParams()
+  // Поиск, тумблер «Ожидают обработки» и фильтры колонок живут в URL (переживают F5) и
+  // дублируются в localStorage (переживают закрытие вкладки). Вид колонок (general/economics)
+  // — вне объёма, остаётся локальным.
+  const { getString, getArray, set, patch } = useFilterParams({
+    scope: 'projects-table',
+    params: PROJECTS_TABLE_FILTER_KEYS,
+  })
   const search = getString('q') ?? ''
   const pendingOnly = getString('pending') === '1'
   const columnFilters = useMemo<ColumnFilters>(

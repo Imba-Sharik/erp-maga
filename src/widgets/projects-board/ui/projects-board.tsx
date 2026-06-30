@@ -20,6 +20,9 @@ import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
 
 import { ProjectsKanban } from './projects-kanban'
 
+/** Ключи URL, которые персистим для канбана всех проектов. */
+const PROJECTS_BOARD_FILTER_KEYS = ['q', 'sort', 'city', 'hall', 'loft', 'plum'] as const
+
 interface AssistantTarget {
   project: Project
   mode: AssistantDialogMode
@@ -32,8 +35,12 @@ interface ProjectsBoardProps {
 }
 
 export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardProps) {
-  // Фильтры/поиск/сортировка живут в URL — переживают перезагрузку (F5) и шарятся ссылкой.
-  const { getString, getArray, set } = useFilterParams()
+  // Фильтры/поиск/сортировка живут в URL (переживают F5, шарятся ссылкой) и дублируются в
+  // localStorage (переживают закрытие вкладки / новое окно).
+  const { getString, getArray, set } = useFilterParams({
+    scope: 'projects-board',
+    params: PROJECTS_BOARD_FILTER_KEYS,
+  })
   const search = getString('q') ?? ''
   const sort = getString('sort') ?? PROJECTS_SORT_DEFAULT
   const city = getString('city')

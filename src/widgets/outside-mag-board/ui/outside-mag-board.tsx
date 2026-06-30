@@ -22,13 +22,20 @@ import { ReturnFromOutsideMagButton } from './return-from-outside-mag-button'
 /** Только явный флаг; в dev без VITE_USE_MOCKS=true — реальный GET /projects/out-of-mag/. */
 const isOutsideMagMocksEnabled = env.USE_MOCKS
 
+/** Ключи URL, которые персистим для экрана «Вне контура MAG». */
+const OUTSIDE_MAG_FILTER_KEYS = ['q', 'loft', 'hall', 'manager', 'stage', 'plum'] as const
+
 interface OutsideMagBoardProps {
   listDateParams: BoardListParams
 }
 
 export function OutsideMagBoard({ listDateParams }: OutsideMagBoardProps) {
-  // Поиск и фильтры колонок живут в URL — переживают перезагрузку (F5).
-  const { getString, getArray, set, patch } = useFilterParams()
+  // Поиск и фильтры колонок живут в URL (переживают F5) и дублируются в localStorage
+  // (переживают закрытие вкладки / новое окно).
+  const { getString, getArray, set, patch } = useFilterParams({
+    scope: 'outside-mag',
+    params: OUTSIDE_MAG_FILTER_KEYS,
+  })
   const search = getString('q') ?? ''
   const setSearch = (value: string) => set('q', value)
   const columnFilters = useMemo<ColumnFilters>(

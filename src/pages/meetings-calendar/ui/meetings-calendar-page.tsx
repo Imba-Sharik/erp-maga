@@ -40,6 +40,9 @@ const WIDE_LAYOUT_MIN_WRAPPER_PX = 1400
 
 type PanelTab = 'meetings' | 'reminders'
 
+/** Ключ URL, который персистим для календаря встреч (только фильтр менеджеров). */
+const MEETINGS_CALENDAR_FILTER_KEYS = ['manager'] as const
+
 const PANEL_TAB_CLASS =
   'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-10 cursor-pointer rounded-[10px] border border-border-strong bg-card px-4 py-1.5 text-sm font-normal text-foreground-soft data-[state=active]:border-transparent data-[state=active]:shadow-none'
 
@@ -102,7 +105,10 @@ export function MeetingsCalendarPage() {
   // Множественный выбор менеджеров живёт в URL (переживает F5). undefined — не трогали
   // (дефолт по роли: менеджер — он сам, руководитель — все); `all` — явно все менеджеры;
   // иначе список id. `all`-сентинел отличает «явно все» от «не трогали» (нет параметра).
-  const { getString, set: setFilterParam } = useFilterParams()
+  const { getString, set: setFilterParam } = useFilterParams({
+    scope: 'meetings-calendar',
+    params: MEETINGS_CALENDAR_FILTER_KEYS,
+  })
   const rawManager = getString('manager')
   const magManagerSelection = useMemo<string[] | undefined>(() => {
     if (rawManager === null) return undefined

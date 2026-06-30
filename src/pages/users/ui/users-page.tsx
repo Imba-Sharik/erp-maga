@@ -25,9 +25,15 @@ function getRoleLabel(role: string): string {
   return BACKEND_ROLE_LABELS[role] ?? role
 }
 
+/** Ключ URL, который персистим для списка пользователей (только поиск). */
+const USERS_FILTER_KEYS = ['q'] as const
+
 export function UsersPage() {
-  // Поиск живёт в URL — переживает перезагрузку (F5).
-  const { getString, set } = useFilterParams()
+  // Поиск живёт в URL (переживает F5) и дублируется в localStorage (переживает закрытие вкладки).
+  const { getString, set } = useFilterParams({
+    scope: 'users',
+    params: USERS_FILTER_KEYS,
+  })
   const search = getString('q') ?? ''
   const setSearch = (value: string) => set('q', value)
   const debouncedSearch = useDebouncedValue(search)

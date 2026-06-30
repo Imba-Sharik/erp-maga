@@ -3,9 +3,16 @@ import { ManagersTable } from '@/widgets/managers-table'
 
 import { ManagersToolbar } from './managers-toolbar'
 
+/** Ключи URL, которые персистим для экрана управления менеджерами. */
+const MANAGERS_FILTER_KEYS = ['q', 'hall', 'loft'] as const
+
 export function ManagersPage() {
-  // Поиск и фильтры зал/LOFT живут в URL — переживают перезагрузку (F5).
-  const { getString, set } = useFilterParams()
+  // Поиск и фильтры зал/LOFT живут в URL (переживают F5) и дублируются в localStorage
+  // (переживают закрытие вкладки / новое окно).
+  const { getString, set } = useFilterParams({
+    scope: 'managers',
+    params: MANAGERS_FILTER_KEYS,
+  })
   const search = getString('q') ?? ''
   const hall = getString('hall')
   const loft = getString('loft')

@@ -27,15 +27,22 @@ const VARIANT_CONFIG = {
   { columnView: 'requests' | 'closed-requests'; backOrigin: ProjectBackOrigin }
 >
 
+/** Ключи URL, которые персистим для таблиц заявок (общие для open/closed). */
+const REQUESTS_FILTER_KEYS = ['q', 'loft', 'hall', 'manager', 'stage', 'plum'] as const
+
 interface RequestsTableProps {
   variant: RequestsTableVariant
 }
 
 /** Таблица запросов бухгалтера: `open` — ждут подтверждения, `closed` — уже закрыты. */
 export function RequestsTable({ variant }: RequestsTableProps) {
-  // Поиск, статус Plum и фильтры колонок живут в URL — переживают перезагрузку (F5).
-  // /requests и /closed-requests — разные маршруты, их query-параметры не пересекаются.
-  const { getString, getArray, set } = useFilterParams()
+  // Поиск, статус Plum и фильтры колонок живут в URL (переживают F5) и дублируются в
+  // localStorage (переживают закрытие вкладки / новое окно). /requests и /closed-requests —
+  // разные маршруты и разные ключи хранилища, их состояние не пересекается.
+  const { getString, getArray, set } = useFilterParams({
+    scope: `requests:${variant}`,
+    params: REQUESTS_FILTER_KEYS,
+  })
   const search = getString('q') ?? ''
   const setSearch = (value: string) => set('q', value)
   const columnFilters = useMemo<ColumnFilters>(
