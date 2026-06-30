@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
+import {
+  buildHydratedParams,
+  filtersStorageKey,
+  pickStoredSnapshot,
+  readStoredFilters,
+  shouldHydrate,
+  writeStoredFilters,
+} from '@/shared/lib/filter-storage'
+
 /**
  * Значение фильтра для записи в URL:
  * - строка — `?key=value`
@@ -8,6 +17,20 @@ import { useSearchParams } from 'react-router-dom'
  * - `null` / `''` — параметр удаляется (дефолтное/сброшенное состояние не засоряет URL)
  */
 export type FilterParamValue = string | string[] | null
+
+/**
+ * Опциональная персистентность фильтров в localStorage (см. {@link useFilterParams}).
+ * Без неё хук ведёт себя как раньше — состояние только в URL.
+ */
+export interface FilterPersistConfig {
+  /** Идентификатор экрана; ключ localStorage строится внутри как `erp-maga:filters:<scope>`. */
+  scope: string
+  /**
+   * Какие query-ключи персистить. ВАЖНО: ссылка должна быть стабильной
+   * (модульная константа), иначе эффекты будут перезапускаться на каждый рендер.
+   */
+  params: readonly string[]
+}
 
 export interface FilterParams {
   /** Строковый фильтр; `null`, если параметра нет в URL (дефолт подставляйте через `??`). */
@@ -34,8 +57,12 @@ export interface FilterParams {
  * Иначе react-router 7 замкнул бы функц. апдейтер на `searchParams` текущего
  * рендера, и параллельные `setSearchParams` затёрли бы друг друга.
  */
-export function useFilterParams(): FilterParams {
+export function useFilterParams(persist?: FilterPersistConfig): FilterParams {
   const [params, setParams] = useSearchParams()
+  // Снимаем стабильные примитивы, чтобы не зависеть от идентичности inline-объекта `persist`.
+  // Полный ключ хранилища строим из `scope` здесь — потребители про префикс не знают.
+  const persistParams = persist?.params
+  const persistKey = persist ? filtersStorageKey(persist.scope) : undefined
 
   // Черновик последнего применённого набора параметров в пределах тика.
   // Синхронизируется с актуальным URL после коммита (в т.ч. при «назад/вперёд»);
@@ -44,6 +71,23 @@ export function useFilterParams(): FilterParams {
   useEffect(() => {
     draftRef.current = params
   }, [params])
+
+  // Гидрация из localStorage — один раз на маунте и только если URL «чистый» по своим
+  // ключам (URL приоритетен). Гидрированное состояние пишем в URL через `replace`, чтобы
+  // остальной код читал его как обычно и история не засорялась. `hydratedRef` гарантирует
+  // однократность; `params` в зависимостях — лишь чтобы линтер видел чтение (повторы — no-op).
+  const hydratedRef = useRef(false)
+  useEffect(() => {
+    if (hydratedRef.current) return
+    hydratedRef.current = true
+    if (!persistKey || !persistParams) return
+    if (!shouldHydrate(params, persistParams)) return
+    const next = buildHydratedParams(params, readStoredFilters(persistKey), persistParams)
+    if (next) {
+      draftRef.current = next
+      setParams(next, { replace: true })
+    }
+  }, [persistKey, persistParams, params, setParams])
 
   const patch = useCallback(
     (updates: Record<string, FilterParamValue>) => {
@@ -55,8 +99,14 @@ export function useFilterParams(): FilterParams {
       }
       draftRef.current = next
       setParams(next, { replace: true })
+      // Зеркалим срез своих ключей в localStorage синхронно с изменением. Через `patch`
+      // проходят и `set`, и каскадные обновления — поэтому отдельный эффект-зеркало не нужен
+      // (и нет гонки с гидрацией: запись происходит только по действию пользователя).
+      if (persistKey && persistParams) {
+        writeStoredFilters(persistKey, pickStoredSnapshot(next, persistParams))
+      }
     },
-    [setParams],
+    [setParams, persistKey, persistParams],
   )
 
   const set = useCallback(
