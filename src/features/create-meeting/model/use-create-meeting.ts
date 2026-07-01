@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 
 import {
   fromMeeting,
+  meetingsCalendarQueryKey,
   prependMeetingToCache,
   removeMeetingFromCache,
   toMeetingCreateRequest,
@@ -55,6 +56,11 @@ export function useCreateMeeting({
           removeMeetingFromCache(queryClient, queryParams, context.optimisticId)
         }
         prependMeetingToCache(queryClient, queryParams, fromMeeting(created))
+        // ERP-232: список кэшируется по фильтру `manager` (staleTime 60с). После создания
+        // фильтр «Отв. менеджер» сбрасывается — активным станет запрос с ДРУГИМ ключом, чьи
+        // данные ещё свежи по staleTime и сами не рефетчатся. Инвалидируем все запросы
+        // календаря встреч, чтобы новый активный фильтр перезапросил данные и показал встречу.
+        queryClient.invalidateQueries({ queryKey: meetingsCalendarQueryKey() })
         onSuccess?.()
       },
       onError: (_error, _variables, context) => {
