@@ -5,11 +5,11 @@ import type {
   ArticleValues,
   ProjectArticles,
 } from '@/entities/project-article'
+import { canEditCurrentStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 
-import { canEditStage } from '../lib/stage-permissions'
 import { ExpensesCommentField, FinanceBlockWithBackline } from './finance-block-with-backline'
 
 interface StagePassedExpensesProps {
@@ -25,6 +25,8 @@ interface StagePassedExpensesProps {
   onToggleBackline: () => void
   onAdvance?: () => void
   isAdvancing?: boolean
+  onSavePassed?: () => void
+  onReplaceArticles?: (next: ProjectArticles) => void
 }
 
 export function StagePassedExpenses({
@@ -33,7 +35,7 @@ export function StagePassedExpenses({
   ...rest
 }: StagePassedExpensesProps) {
   const role = useUserRole()
-  const canEdit = canEditStage('expenses_entered', role)
+  const canEdit = canEditCurrentStage('expenses_entered', role)
   const commentEditable = !presentation.readOnly && canEdit && Boolean(isCurrent)
 
   return (

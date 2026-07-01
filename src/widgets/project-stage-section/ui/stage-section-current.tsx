@@ -12,6 +12,8 @@ import {
   ALL_STAGE_LABELS,
   STAGE_FUNNEL,
   getStageFormSchema,
+  resolveStageBlockEditable,
+  resolveStageEditAccess,
   type DocumentStatus,
   type ProjectDetail,
   type ProjectStage,
@@ -47,7 +49,6 @@ import { getReadonlyFieldSource } from '../lib/readonly-field-source'
 import { renderNarrowPairs } from '../lib/render-narrow-pairs'
 import { renderDocumentsConfirmedGrid } from '../lib/render-documents-confirmed-grid'
 import { resolveSystemValue } from '../lib/resolve-system-value'
-import { resolveStageEditAccess } from '../lib/resolve-stage-edit-access'
 import { canEditField } from '../lib/stage-permissions'
 import { DateField } from '@/shared/ui/date-field'
 import { StageDocumentField, StageEstimateField } from '@/features/stage-document'
@@ -121,7 +122,23 @@ export function StageSectionCurrent({
   const defaults = getDefaults(editableFields, record?.values ?? {})
   const funnelColor =
     STAGE_FUNNEL[stage] === 'closing' ? 'text-funnel-closing' : 'text-funnel-preproject'
-  const { canEdit, canAdvance } = resolveStageEditAccess(stage, role, readOnly)
+  // Этот компонент рендерит и текущий этап, и форму правки прошлого (`editingMode='edit'`)
+  // или дозаполнения пропущенного (`'fill'`). Контекст прав поля зависит от режима:
+  // 'edit' (пройденный) → 'passed' и НЕ зависит от глобального read-only (развязка ERP-198).
+  const editContext: 'current' | 'passed' = editingMode === 'edit' ? 'passed' : 'current'
+  const access = resolveStageEditAccess({
+    stage,
+    role,
+    isCurrent: !editingMode,
+    readOnly,
+    blockEditable: resolveStageBlockEditable(project, stage),
+  })
+  const canEditCurrent = access.canEditCurrent
+  const canAdvance = access.canAdvance
+  const resolveFieldEditable = (f: StageFieldConfig) =>
+    editContext === 'passed'
+      ? canEditField(stage, role, f, 'passed')
+      : !readOnly && canEditField(stage, role, f, 'current')
   const currentUser = useCurrentUser()
   const { update: updateDocumentStatus } = useUpdateDocumentStatus()
   const isMountRef = useRef(true)
@@ -142,7 +159,9 @@ export function StageSectionCurrent({
 
   useEffect(() => {
     const sub = form.watch((values) => {
-      if (!canEdit) return
+      // Черновики — только для формы текущего этапа; в режимах правки прошлого/дозаполнения
+      // не сохраняем (черновик гидрируется лишь для текущего этапа в useStageFlow).
+      if (editingMode || !canEditCurrent) return
       const draftValues = values as Record<string, unknown>
       const hasContent = editableFields.some((f) => Boolean(draftValues[f.name]))
       if (hasContent) {
@@ -158,7 +177,7 @@ export function StageSectionCurrent({
       }
     })
     return () => sub.unsubscribe()
-  }, [form, editableFields, canEdit, project.id, stage, currentUser.id])
+  }, [form, editableFields, editingMode, canEditCurrent, project.id, stage, currentUser.id])
 
   const watchedValues = form.watch() as Partial<StageFormData>
 
@@ -237,7 +256,7 @@ export function StageSectionCurrent({
     const fileField = allFields.find((item) => item.name === docPair.fileName)
     if (!fileField?.documentType) return null
 
-    const fileEditable = !readOnly && canEditField(stage, role, fileField)
+    const fileEditable = resolveFieldEditable(fileField)
 
     return (
       <FormField
@@ -297,7 +316,7 @@ export function StageSectionCurrent({
   )
 
   const renderField = (f: StageFieldConfig) => {
-    const fieldEditable = !readOnly && canEditField(stage, role, f)
+    const fieldEditable = resolveFieldEditable(f)
     const values = record?.values ?? {}
 
     if (f.source === 'system' || !fieldEditable) {
@@ -431,7 +450,7 @@ export function StageSectionCurrent({
     stage === 'contract_signed'
       ? 'Готов к проведению'
       : stage === 'documents_confirmed'
-        ? canEdit
+        ? canEditCurrent
           ? 'Подтвердить документы'
           : 'Пропустить этап'
         : 'Следующий этап'
@@ -449,44 +468,40 @@ export function StageSectionCurrent({
           title={ALL_STAGE_LABELS[stage]}
           titleClassName={funnelColor}
         />
-        {canRollback || (canAdvance && stage !== 'closed') ? (
+        {editingMode ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
-            {editingMode ? (
-              <>
-                {onCancelEditing ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onCancelEditing}
-                    className="border-border-strong h-[38px] rounded-[10px] px-4 text-sm"
-                  >
-                    Отмена
-                  </Button>
-                ) : null}
-                <Button
-                  type="button"
-                  onClick={handleEditingSubmit}
-                  className="h-[38px] rounded-[10px] px-4 text-sm"
-                >
-                  Сохранить
-                </Button>
-              </>
-            ) : (
-              <>
-                <RollbackStageButton project={project} readOnly={readOnly} />
-                {canAdvance && stage !== 'closed' ? (
-                  <Button
-                    type="button"
-                    onClick={handleAdvance}
-                    disabled={isAdvancing}
-                    className="h-[38px] rounded-[10px] px-4 text-sm"
-                  >
-                    {advanceLabel}
-                    <ArrowRight className="size-3.5" />
-                  </Button>
-                ) : null}
-              </>
-            )}
+            {onCancelEditing ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancelEditing}
+                className="border-border-strong h-[38px] rounded-[10px] px-4 text-sm"
+              >
+                Отмена
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              onClick={handleEditingSubmit}
+              className="h-[38px] rounded-[10px] px-4 text-sm"
+            >
+              Сохранить
+            </Button>
+          </div>
+        ) : canRollback || (canAdvance && stage !== 'closed') ? (
+          <div className="flex flex-wrap items-center justify-end gap-2.5">
+            <RollbackStageButton project={project} readOnly={readOnly} />
+            {canAdvance && stage !== 'closed' ? (
+              <Button
+                type="button"
+                onClick={handleAdvance}
+                disabled={isAdvancing}
+                className="h-[38px] rounded-[10px] px-4 text-sm"
+              >
+                {advanceLabel}
+                <ArrowRight className="size-3.5" />
+              </Button>
+            ) : null}
           </div>
         ) : null}
       </div>

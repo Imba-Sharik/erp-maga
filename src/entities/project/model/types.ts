@@ -221,6 +221,21 @@ export interface StageSnapshot {
 }
 
 export interface ProjectDetail extends Project {
+  /**
+   * Пер-блочные права правки от бэка (`can_edit_*`, источник — PipelineCapabilities,
+   * отдаются в pipeline-state `GET /projects/{id}/pipeline/`, а не в ProjectDetail).
+   * Единственный источник правды «можно ли править блок сейчас» (текущий или
+   * пройденный): учитывает роль, стадию, владельца, archived/out_of_mag, `event_date`
+   * и т.п. Фронт ими гейтит кнопку «Редактировать» вместо своей матрицы.
+   * `canEditClient` — блок «Заявка из PLUM» (mag_comment). `canEditPrimaryContact` и
+   * `canEditCalculation` — правка руководителем задним числом (ERP-198).
+   */
+  canEditClient: boolean
+  canEditContract: boolean
+  canEditSales: boolean
+  canEditExpenses: boolean
+  canEditPrimaryContact: boolean
+  canEditCalculation: boolean
   enteredSystemAt: string
   history: StageHistoryEntry[]
   /** Проект синхронизирован из Plum (`is_from_plum` в API). */

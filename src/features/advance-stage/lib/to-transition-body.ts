@@ -4,6 +4,8 @@ import type { ProjectTransitionRequest } from '@/shared/api/generated/types/Proj
 import type { ProjectTransitionRequestToStageEnumKey } from '@/shared/api/generated/types/ProjectTransitionRequest'
 import type { TransitionArticleRequest } from '@/shared/api/generated/types/TransitionArticleRequest'
 
+import { toDecimalString } from './articles-to-decimals'
+
 /** Статус документа для transition: enum, пустая строка при skip или omit. */
 function apiDocStatus(
   status: DocumentStatus | '' | undefined,
@@ -19,11 +21,6 @@ function apiDocStatus(
 /** Стейджи воронки = подмножество to_stage, имена совпадают 1:1. */
 function toStage(stage: ProjectStage): ProjectTransitionRequestToStageEnumKey {
   return stage as ProjectTransitionRequestToStageEnumKey
-}
-
-function toDecimalString(value: number | null | undefined): string | undefined {
-  if (value === null || value === undefined || !Number.isFinite(value)) return undefined
-  return value.toFixed(2)
 }
 
 function blockToArticles(

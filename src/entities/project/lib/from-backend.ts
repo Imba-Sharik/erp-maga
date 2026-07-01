@@ -1,6 +1,7 @@
 import type { OutOfMagProject } from '@/shared/api/generated/types/OutOfMagProject'
 import type { Project as BackendProject } from '@/shared/api/generated/types/Project'
 import type { ProjectCalendarItemSchema } from '@/shared/api/generated/types/ProjectCalendarItemSchema'
+import type { PipelineStateSchema } from '@/shared/api/generated/types/PipelineStateSchema'
 import type { ProjectDetail as BackendProjectDetail } from '@/shared/api/generated/types/ProjectDetail'
 import type { ProjectDocumentFile } from '@/shared/api/generated/types/ProjectDocumentFile'
 import type { ProjectDocumentStatus } from '@/shared/api/generated/types/ProjectDocumentStatus'
@@ -416,7 +417,10 @@ function mapStageSnapshots(b: BackendProjectDetail): Partial<Record<ProjectStage
   return snapshots
 }
 
-export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail | null {
+export function mapBackendProjectDetail(
+  b: BackendProjectDetail,
+  pipeline?: PipelineStateSchema,
+): ProjectDetail | null {
   const base = mapBackendProject(b)
   if (!base) return null
 
@@ -439,6 +443,13 @@ export function mapBackendProjectDetail(b: BackendProjectDetail): ProjectDetail 
 
   return {
     ...base,
+    // Пер-блочные флаги правки живут только в pipeline-state (не в ProjectDetail).
+    canEditClient: Boolean(pipeline?.can_edit_client),
+    canEditContract: Boolean(pipeline?.can_edit_contract),
+    canEditSales: Boolean(pipeline?.can_edit_sales),
+    canEditExpenses: Boolean(pipeline?.can_edit_expenses),
+    canEditPrimaryContact: Boolean(pipeline?.can_edit_primary_contact),
+    canEditCalculation: Boolean(pipeline?.can_edit_calculation),
     enteredSystemAt: b.created_at,
     isFromPlum: base.isFromPlum,
     plumId: b.plum_event_id,

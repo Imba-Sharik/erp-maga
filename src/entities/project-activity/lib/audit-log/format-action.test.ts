@@ -157,4 +157,29 @@ describe('formatAuditLogAction', () => {
 
     expect(action).toBe('изменил «налог»: «10» → «20» · этап «Расходы внесены»')
   })
+
+  it('lead_block_edit: глагольная фраза из metadata.block (без подлежащего)', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'lead_block_edit',
+        action_label: 'Правка руководителя',
+        metadata: { block: 'Продажи' },
+        stage: null,
+      }),
+    )
+
+    expect(action).toBe('изменил данные в блоке «Продажи»')
+  })
+
+  it('lead_block_edit: fallback на action_label без metadata.block', () => {
+    const action = formatAuditLogAction(
+      makeEntry({
+        action_type: 'lead_block_edit',
+        action_label: 'Правка руководителя',
+        stage: null,
+      }),
+    )
+
+    expect(action).toBe('Правка руководителя')
+  })
 })

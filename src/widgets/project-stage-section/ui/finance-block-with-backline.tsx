@@ -1,5 +1,5 @@
-import { ChevronDown, Plus, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 
 import {
   ARTICLE_LABELS,
@@ -15,15 +15,16 @@ import {
   type FinanceAspect,
   type ProjectArticles,
 } from '@/entities/project-article'
-import type { ProjectDetail, ProjectStage } from '@/entities/project'
+import { canEditCurrentStage, type ProjectDetail, type ProjectStage } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 import { RollbackStageButton } from '@/features/rollback-stage'
 import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
+import { Button } from '@/shared/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { Input } from '@/shared/ui/input'
 
-import { canEditStage } from '../lib/stage-permissions'
+import { usePassedEditToggle } from '../lib/use-passed-edit-toggle'
 import { FinanceArticlesGrid } from './finance-articles-grid'
 import { MoneyInput } from './money-input'
 import { StageBlockShell } from './stage-block-shell'
@@ -208,6 +209,13 @@ interface FinanceBlockWithBacklineProps {
   hasDraftHighlight?: boolean
   /** Дополнительные блоки в секции «Информация» (перед статусом перевода). */
   infoExtras?: ReactNode
+  /**
+   * Сохранить правку пройденного этапа (PATCH). Задано — на пройденной секции
+   * появляется «Редактировать»; статьи берутся из общего `articles` (см. useStageFlow).
+   */
+  onSavePassed?: () => void
+  /** Восстановить статьи при отмене инлайн-правки пройденного этапа. */
+  onReplaceArticles?: (next: ProjectArticles) => void
 }
 
 export function FinanceBlockWithBackline({
@@ -229,10 +237,45 @@ export function FinanceBlockWithBackline({
   isAdvancing,
   hasDraftHighlight,
   infoExtras,
+  onSavePassed,
+  onReplaceArticles,
 }: FinanceBlockWithBacklineProps) {
   const role = useUserRole()
-  const canEdit = canEditStage(stage, role)
-  const editable = !presentation.readOnly && canEdit && isCurrent
+  const canEditCurrent = canEditCurrentStage(stage, role)
+  const editableCurrent = !presentation.readOnly && canEditCurrent && isCurrent
+
+  // Инлайн-правка пройденного этапа (Руководитель): доступна, если задан onSavePassed
+  // (родитель выдаёт его при canEditPassed + наличии PATCH-маршрута).
+  const passedEdit = usePassedEditToggle()
+  const editablePassed = !isCurrent && Boolean(onSavePassed) && passedEdit.editing
+
+  // Суммы основного блока правятся в обоих режимах. Бэклайн-РАСХОДЫ правятся и задним
+  // числом (бэк `/expenses/` принимает вложенный `backline`); бэклайн-ПРОДАЖИ — только
+  // на текущем этапе (`/sales/` — плоский dict, backline не принимает, см. to-*-patch-body).
+  const editableMain = editableCurrent || editablePassed
+  const backlineEditable = editableCurrent || (editablePassed && aspect === 'expense')
+  // % налога принадлежит продажной воронке: правим на текущем или при passed-правке sales.
+  const taxEditable = editableCurrent || (editablePassed && aspect === 'sales')
+
+  const snapshotRef = useRef<{ articles: ProjectArticles; taxRate: number | null } | null>(null)
+  const handleStartPassedEdit = () => {
+    snapshotRef.current = { articles, taxRate }
+    passedEdit.startEdit()
+  }
+  const handleCancelPassedEdit = () => {
+    if (snapshotRef.current) {
+      onReplaceArticles?.(snapshotRef.current.articles)
+      onTaxRateChange(snapshotRef.current.taxRate)
+    }
+    snapshotRef.current = null
+    passedEdit.cancelEdit()
+  }
+  const handleSavePassedEdit = () => {
+    snapshotRef.current = null
+    onSavePassed?.()
+    passedEdit.finishEdit()
+  }
+
   const backlineAdded = articles.backline !== null
 
   const totalSales = projectTotal(articles, 'sales')
@@ -266,12 +309,45 @@ export function FinanceBlockWithBackline({
         kind={kind}
         values={values}
         aspect={aspect}
-        editable={editable}
+        editable={block === 'backline' ? backlineEditable : editableMain}
         showValidation={showValidation}
         onChange={(patch) => onArticleChange(block, kind, patch)}
       />
     )
   }
+
+  const passedEditActions =
+    !isCurrent && Boolean(onSavePassed) ? (
+      passedEdit.editing ? (
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancelPassedEdit}
+            className="border-border-strong h-[38px] rounded-[10px] px-4 text-sm"
+          >
+            Отмена
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSavePassedEdit}
+            className="h-[38px] rounded-[10px] px-4 text-sm"
+          >
+            Сохранить
+          </Button>
+        </>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleStartPassedEdit}
+          className="border-border-strong bg-card h-[38px] rounded-[10px] px-4 text-sm"
+        >
+          <Pencil className="size-3.5" />
+          Редактировать
+        </Button>
+      )
+    ) : undefined
 
   return (
     <StageBlockShell
@@ -281,7 +357,7 @@ export function FinanceBlockWithBackline({
         showAdvanceButton: presentation.showAdvanceButton,
       }}
       isCurrent={isCurrent}
-      canShowAdvance={canEdit}
+      canShowAdvance={canEditCurrent}
       headerTitle={headerTitle}
       headerColorClass={headerColorClass}
       hasDraftHighlight={hasDraftHighlight}
@@ -290,7 +366,9 @@ export function FinanceBlockWithBackline({
       headerActions={
         isCurrent ? (
           <RollbackStageButton project={project} readOnly={presentation.readOnly} />
-        ) : undefined
+        ) : (
+          passedEditActions
+        )
       }
     >
       <div className="flex flex-col gap-5">
@@ -304,7 +382,7 @@ export function FinanceBlockWithBackline({
               renderArticle={(kind) => renderArticleRow('main', kind)}
               summary={[
                 <StageField key="tax-rate" label="Единый % налога" required error={taxError}>
-                  {editable ? (
+                  {taxEditable ? (
                     <PercentInput
                       value={taxRate}
                       invalid={Boolean(taxError)}
@@ -331,7 +409,7 @@ export function FinanceBlockWithBackline({
                     value: formatMoney(mainTotal + tax),
                   }}
                 />,
-                editable ? (
+                editableCurrent ? (
                   <ActionField key="action">
                     {backlineAdded ? (
                       <button
@@ -375,7 +453,7 @@ export function FinanceBlockWithBackline({
                     value={formatMoney(backlineTotal)}
                     source="system"
                   />,
-                  editable ? (
+                  editableCurrent ? (
                     <ActionField key="bl-action">
                       <button
                         type="button"

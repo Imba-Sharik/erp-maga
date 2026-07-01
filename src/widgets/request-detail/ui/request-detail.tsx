@@ -34,6 +34,7 @@ export function RequestDetail({ project }: { project: ProjectDetail }) {
     onArticleChange: flow.updateArticle,
     onTaxRateChange: flow.setTaxRate,
     onToggleBackline: flow.toggleBackline,
+    onReplaceArticles: flow.replaceArticles,
     getRecord: flow.getRecord,
   }
 
