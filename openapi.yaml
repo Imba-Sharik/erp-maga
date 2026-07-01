@@ -1314,6 +1314,7 @@ paths:
           - data_confirmed
           - data_rejected
           - field_change
+          - lead_block_edit
           - other
           - out_of_mag
           - out_of_mag_return
@@ -1448,6 +1449,52 @@ paths:
       responses:
         '204':
           description: Бэклайн удалён
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/projects/{id}/calculation/:
+    patch:
+      operationId: projects_calculation_partial_update
+      description: Доступно только Руководителю (`lead`) на любой уже достигнутой
+        стадии (не archived/out_of_mag). Поле `comment` опционально (partial update).
+      summary: Обновить комментарий расчёта (правка Руководителя)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCalculationBlockUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCalculationBlockUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCalculationBlockUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationBlockSchema'
+          description: ''
         '400':
           content:
             application/json:
@@ -1826,6 +1873,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+  /api/v1/projects/{id}/name/:
+    patch:
+      operationId: projects_name_partial_update
+      description: Ручное редактирование названия. Доступно менеджеру проекта и руководителю.
+        Пустое название недопустимо. После сохранения название фиксируется (`event_name_locked=true`)
+        и Plum-синхронизация его больше не перезаписывает. Смена пишется в лог действий.
+      summary: Обновить название проекта вручную
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectNameUpdateRequest'
+            examples:
+              НовоеНазвание:
+                value:
+                  event_name: Свадьба Ивановых 12.08
+                summary: Новое название
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectNameUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectNameUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectNameSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/pipeline/:
     get:
       operationId: projects_pipeline_retrieve
@@ -1846,6 +1945,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PipelineStateSchema'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+  /api/v1/projects/{id}/primary-contact/:
+    patch:
+      operationId: projects_primary_contact_partial_update
+      description: Доступно только Руководителю (`lead`) на любой уже достигнутой
+        стадии (не archived/out_of_mag). Все поля запроса опциональны (partial update).
+      summary: Обновить первичный контакт (правка Руководителя)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrimaryContactBlockUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrimaryContactBlockUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrimaryContactBlockUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrimaryContactBlockSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
           description: ''
         '403':
           content:
@@ -3044,6 +3189,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserMeSchema'
           description: ''
+  /api/v1/webhooks/plum/:
+    post:
+      operationId: plum_webhook_create
+      description: 'Принимает события мероприятий Plum в конверте `{resource, action,
+        data}` (`action`: created/updated/deleted). Проверяет HMAC-подпись заголовка
+        `X-Plum-Signature`, если задан `PLUM_WEBHOOK_SECRET`. Обрабатывается асинхронно:
+        при валидном конверте всегда отвечает `200`. На приёме тело толерантно (лишние
+        поля игнорируются); ниже — полная структура.'
+      summary: Webhook событий Plum
+      tags:
+      - plum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlumWebhookDocRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlumWebhookDocRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlumWebhookDocRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          description: Принято в обработку
+        '403':
+          description: Неверная подпись
 components:
   schemas:
     AllowedTransitionSchema:
@@ -3092,6 +3267,11 @@ components:
           type: integer
       required:
       - id
+    CalculationBlockSchema:
+      type: object
+      properties:
+        comment:
+          type: string
     ClientBlockSchema:
       type: object
       properties:
@@ -4194,6 +4374,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReminderListPaginated'
+    PatchedCalculationBlockUpdateRequest:
+      type: object
+      description: PATCH /projects/{id}/calculation/ — правка Руководителем (достигнутая
+        стадия).
+      properties:
+        comment:
+          type: string
     PatchedClientBlockUpdateRequest:
       type: object
       description: PATCH /projects/{id}/client/ на этапе plum_request — комментарий
@@ -4346,6 +4533,24 @@ components:
           type: integer
           minimum: 1
           writeOnly: true
+    PatchedPrimaryContactBlockUpdateRequest:
+      type: object
+      description: PATCH /projects/{id}/primary-contact/ — правка Руководителем (достигнутая
+        стадия).
+      properties:
+        contact_channel:
+          enum:
+          - call
+          - meeting
+          - messenger
+          type: string
+          description: |-
+            * `call` - Звонок
+            * `meeting` - Встреча
+            * `messenger` - Мессенджер
+          x-spec-enum-id: d761fff10538b66c
+        comment:
+          type: string
     PatchedProjectMagManagerUpdateRequest:
       type: object
       properties:
@@ -4354,6 +4559,15 @@ components:
           nullable: true
           description: 'Lead/admin: назначить менеджера по primary залу или null.
             MAG_MANAGER: только свой id для claim проекта из пула.'
+    PatchedProjectNameUpdateRequest:
+      type: object
+      description: PATCH /projects/{id}/name/ — ручное название (пустое недопустимо).
+      properties:
+        event_name:
+          type: string
+          minLength: 1
+          description: Новое название проекта. Пустое значение недопустимо.
+          maxLength: 500
     PatchedReminderCreateUpdateRequest:
       type: object
       properties:
@@ -4546,6 +4760,14 @@ components:
           type: boolean
         can_edit_expenses:
           type: boolean
+        can_edit_primary_contact:
+          type: boolean
+          description: Можно PATCH /projects/{id}/primary-contact/ (lead на достигнутой
+            стадии).
+        can_edit_calculation:
+          type: boolean
+          description: Можно PATCH /projects/{id}/calculation/ (lead на достигнутой
+            стадии).
         can_claim:
           type: boolean
           description: Менеджер может взять проект из пула (PATCH mag_manager_id =
@@ -4571,9 +4793,11 @@ components:
       - blocks
       - can_claim
       - can_edit
+      - can_edit_calculation
       - can_edit_client
       - can_edit_contract
       - can_edit_expenses
+      - can_edit_primary_contact
       - can_edit_sales
       - data_rejected
       - is_read_only
@@ -4581,6 +4805,144 @@ components:
       - stage
       - stage_label
       - was_not_ready_for_event
+    PlumContactDocRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+    PlumCustomerDocRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          minLength: 1
+      required:
+      - id
+      - name
+    PlumEventDataDocRequest:
+      type: object
+      description: 'Тело `data` для `resource: "event"` (описание структуры для OpenAPI).'
+      properties:
+        id:
+          type: integer
+          description: ID события Plum — ключ проекта. Обязателен.
+        updated_at:
+          type: string
+          minLength: 1
+          description: Версия события ('YYYY-MM-DD HH:MM:SS' / ISO). Рекомендуется
+            для created/updated (stale-guard); для deleted не нужен.
+        name:
+          type: string
+        status:
+          type: integer
+          description: EventStatus (снимок).
+        event_type:
+          type: integer
+        event_format:
+          type: integer
+        city:
+          type: integer
+          description: ID города Plum.
+        date_from:
+          type: string
+          minLength: 1
+          description: Дата мероприятия, YYYY-MM-DD.
+        date_to:
+          type: string
+          minLength: 1
+        halls:
+          type: array
+          items:
+            type: integer
+          description: plum_id залов; матчим по локальному каталогу.
+        description:
+          type: string
+        mag_comment:
+          type: string
+        assistant_comment:
+          type: string
+        cover_letter:
+          type: string
+        meeting_result:
+          type: string
+        main_contact:
+          allOf:
+          - $ref: '#/components/schemas/PlumContactDocRequest'
+          description: Главный контакт (заменяет api/eventclient + api/user).
+        manager:
+          allOf:
+          - $ref: '#/components/schemas/PlumManagerDocRequest'
+          description: Менеджер мероприятия LoftHall.
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlumCustomerDocRequest'
+          description: Компании клиента (+ компания main_contact).
+      required:
+      - id
+    PlumManagerDocRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+    PlumWebhookDocRequest:
+      type: object
+      description: Полностью типизированный конверт вебхука — для OpenAPI-схемы.
+      properties:
+        resource:
+          enum:
+          - event
+          type: string
+          description: '* `event` - event'
+          x-spec-enum-id: 4ce299baa8d8a693
+        action:
+          enum:
+          - created
+          - updated
+          - deleted
+          type: string
+          description: |-
+            * `created` - created
+            * `updated` - updated
+            * `deleted` - deleted
+          x-spec-enum-id: de12c5a163ca6ae1
+        data:
+          $ref: '#/components/schemas/PlumEventDataDocRequest'
+      required:
+      - action
+      - data
+      - resource
+    PrimaryContactBlockSchema:
+      type: object
+      properties:
+        contact_channel:
+          enum:
+          - call
+          - meeting
+          - messenger
+          - ''
+          type: string
+          description: |-
+            * `call` - Звонок
+            * `meeting` - Встреча
+            * `messenger` - Мессенджер
+          x-spec-enum-id: d761fff10538b66c
+        comment:
+          type: string
     Project:
       type: object
       description: UI-флаги claim/read-only для MAG_MANAGER (источник — ProjectManagerAccess).
@@ -4971,6 +5333,7 @@ components:
           - data_rejected
           - data_confirmed
           - project_deleted
+          - lead_block_edit
           - other
           type: string
           description: |-
@@ -4985,8 +5348,9 @@ components:
             * `data_rejected` - Данные не приняты
             * `data_confirmed` - Данные подтверждены
             * `project_deleted` - Удаление проекта
+            * `lead_block_edit` - Правка руководителя
             * `other` - Прочее
-          x-spec-enum-id: c9b2ed54e2a98a2d
+          x-spec-enum-id: 4be7e4ebd1fc52b0
           readOnly: true
           title: Тип действия
         action_label:
@@ -6091,6 +6455,16 @@ components:
       - hall_name
       - loft_id
       - loft_name
+    ProjectNameSchema:
+      type: object
+      properties:
+        event_name:
+          type: string
+        event_name_locked:
+          type: boolean
+      required:
+      - event_name
+      - event_name_locked
     ProjectRollbackStageRequest:
       type: object
       properties:
@@ -7070,6 +7444,8 @@ tags:
   description: Уведомления (REST)
 - name: telegram
   description: Привязка Telegram и webhook бота
+- name: plum
+  description: Входящие вебхуки Plum (события мероприятий)
 - name: websocket
   description: WebSocket-протокол (см. x-mag-websocket)
 x-mag-websocket:
