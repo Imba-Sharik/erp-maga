@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import type { ProjectDetail, ProjectStage } from '../model/types'
 import { PlumLink } from './plum-link'
 import { ProjectStageBadge } from './project-stage-badge'
@@ -19,13 +21,15 @@ function formatEnteredAt(iso: string) {
 interface ProjectHeaderProps {
   project: ProjectDetail
   currentStage?: ProjectStage
+  /** Слот названия. Виджет подставляет редактируемый заголовок (ERP-231); по умолчанию — статичный h1. */
+  titleSlot?: ReactNode
 }
 
-export function ProjectHeader({ project, currentStage }: ProjectHeaderProps) {
+export function ProjectHeader({ project, currentStage, titleSlot }: ProjectHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 @sm:flex-row @sm:items-center @sm:justify-between @sm:gap-4">
-        <h1 className="text-foreground text-2xl font-bold">{project.title}</h1>
+        {titleSlot ?? <h1 className="text-foreground text-2xl font-bold">{project.title}</h1>}
         <PlumLink href={project.plumCardUrl} />
       </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
