@@ -6,6 +6,7 @@ import {
   resolveRequestBackFromPathname,
   type ProjectBackOrigin,
 } from '@/entities/project'
+import { useProjectsPipelineRetrieve } from '@/shared/api/generated/hooks/projectsController/useProjectsPipelineRetrieve'
 import { useProjectsRetrieve } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import { useBreadcrumb } from '@/shared/hooks'
 import { RequestDetail } from '@/widgets/request-detail'
@@ -28,8 +29,13 @@ export function RequestDetailPage() {
 
   const numericId = id ? Number(id) : undefined
   const { data, isLoading, isError } = useProjectsRetrieve(numericId)
+  // Пер-блочные права правки (`can_edit_*`) приходят отдельным запросом состояния воронки.
+  const { data: pipeline } = useProjectsPipelineRetrieve(numericId)
 
-  const project = useMemo(() => (data ? mapBackendProjectDetail(data) : null), [data])
+  const project = useMemo(
+    () => (data ? mapBackendProjectDetail(data, pipeline) : null),
+    [data, pipeline],
+  )
 
   useBreadcrumb([{ label: back.label, to: back.to }, { label: project?.title ?? id ?? '' }])
 
