@@ -17,6 +17,8 @@ type Flags = Pick<
   | 'canEditExpenses'
   | 'canEditPrimaryContact'
   | 'canEditCalculation'
+  | 'canEditEventHeld'
+  | 'canEditBonus'
 >
 
 const ALL_EDITABLE: Flags = {
@@ -26,6 +28,8 @@ const ALL_EDITABLE: Flags = {
   canEditExpenses: true,
   canEditPrimaryContact: true,
   canEditCalculation: true,
+  canEditEventHeld: true,
+  canEditBonus: true,
 }
 // Так бэк отвечает на archived/out_of_mag, на прошедшую дату события и т.п.
 const NONE_EDITABLE: Flags = {
@@ -35,6 +39,8 @@ const NONE_EDITABLE: Flags = {
   canEditExpenses: false,
   canEditPrimaryContact: false,
   canEditCalculation: false,
+  canEditEventHeld: false,
+  canEditBonus: false,
 }
 
 const PATCHABLE_STAGES: ProjectStage[] = [
@@ -44,6 +50,8 @@ const PATCHABLE_STAGES: ProjectStage[] = [
   'contract_signed',
   'ready_to_event',
   'expenses_entered',
+  'event_held',
+  'bonus_calculated',
 ]
 
 /**
@@ -85,7 +93,7 @@ describe('видимость кнопки «Редактировать» на п
   })
 
   it('нет кнопки на этапах без PATCH-ручки, даже если флаги выставлены (нет block-маршрута)', () => {
-    for (const stage of ['event_held', 'bonus_calculated'] as ProjectStage[]) {
+    for (const stage of ['data_confirmed', 'bonus_approved'] as ProjectStage[]) {
       expect(resolveStageBlockEditable(ALL_EDITABLE, stage)).toBeUndefined()
       expect(isStagePatchable(stage)).toBe(false)
       expect(showsPassedEditButton(ALL_EDITABLE, stage)).toBe(false)

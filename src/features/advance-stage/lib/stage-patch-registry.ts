@@ -3,9 +3,11 @@ import type { ProjectArticles } from '@/entities/project-article'
 import type { ClientBlockSchema } from '@/shared/api/generated/types/ClientBlockSchema'
 import type { ContractBlockSchema } from '@/shared/api/generated/types/ContractBlockSchema'
 
+import { buildBonusPatchBody } from './to-bonus-patch-body'
 import { buildCalculationPatchBody } from './to-calculation-patch-body'
 import { buildClientPatchBody, mapClientBlockToFormData } from './to-client-patch-body'
 import { buildContractPatchBody, mapContractBlockToFormData } from './to-contract-patch-body'
+import { buildEventHeldPatchBody } from './to-event-held-patch-body'
 import { buildExpensesPatchBody } from './to-expenses-patch-body'
 import { buildPrimaryContactPatchBody } from './to-primary-contact-patch-body'
 import { buildSalesPatchBody } from './to-sales-patch-body'
@@ -55,7 +57,12 @@ export const STAGE_PATCH_ADAPTERS: Partial<Record<ProjectStage, StagePatchAdapte
   expenses_entered: {
     buildBody: ({ articles, values }) => buildExpensesPatchBody({ articles, values }),
   },
-  // event_held / bonus_calculated — правки задним числом не предусмотрены (нет block-ручки).
+  event_held: {
+    buildBody: ({ values }) => buildEventHeldPatchBody(values),
+  },
+  bonus_calculated: {
+    buildBody: ({ articles }) => buildBonusPatchBody({ articles }),
+  },
 }
 
 /** У этапа есть реальный PATCH-маршрут (кнопка «Редактировать» имеет смысл). */
