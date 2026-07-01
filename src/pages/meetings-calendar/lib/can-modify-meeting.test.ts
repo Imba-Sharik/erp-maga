@@ -30,8 +30,12 @@ describe('canCreateMeeting', () => {
 })
 
 describe('canModifyMeeting', () => {
-  it('менеджер правит любую видимую встречу (видит только свои)', () => {
-    expect(canModifyMeeting({ role: 'manager', ownerId: 7, meeting: meeting(99) })).toBe(true)
+  it('менеджер правит только свою встречу', () => {
+    expect(canModifyMeeting({ role: 'manager', ownerId: 7, meeting: meeting(7) })).toBe(true)
+  })
+
+  it('менеджер не правит чужую встречу (видит её через фильтр «Отв. менеджер»)', () => {
+    expect(canModifyMeeting({ role: 'manager', ownerId: 7, meeting: meeting(99) })).toBe(false)
   })
 
   it('руководитель правит только свою встречу', () => {
