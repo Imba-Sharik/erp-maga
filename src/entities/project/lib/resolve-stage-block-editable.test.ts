@@ -5,7 +5,12 @@ import { resolveStageBlockEditable } from './resolve-stage-block-editable'
 
 type Flags = Pick<
   ProjectDetail,
-  'canEditClient' | 'canEditContract' | 'canEditSales' | 'canEditExpenses'
+  | 'canEditClient'
+  | 'canEditContract'
+  | 'canEditSales'
+  | 'canEditExpenses'
+  | 'canEditPrimaryContact'
+  | 'canEditCalculation'
 >
 
 describe('resolveStageBlockEditable', () => {
@@ -15,8 +20,12 @@ describe('resolveStageBlockEditable', () => {
       canEditContract: true,
       canEditSales: false,
       canEditExpenses: true,
+      canEditPrimaryContact: true,
+      canEditCalculation: false,
     }
     expect(resolveStageBlockEditable(flags, 'plum_request')).toBe(true)
+    expect(resolveStageBlockEditable(flags, 'primary_contact_done')).toBe(true)
+    expect(resolveStageBlockEditable(flags, 'calculation_prepared')).toBe(false)
     expect(resolveStageBlockEditable(flags, 'contract_signed')).toBe(true)
     expect(resolveStageBlockEditable(flags, 'ready_to_event')).toBe(false)
     expect(resolveStageBlockEditable(flags, 'expenses_entered')).toBe(true)
@@ -28,10 +37,10 @@ describe('resolveStageBlockEditable', () => {
       canEditContract: true,
       canEditSales: true,
       canEditExpenses: true,
+      canEditPrimaryContact: true,
+      canEditCalculation: true,
     }
     const noHandle: ProjectStage[] = [
-      'primary_contact_done',
-      'calculation_prepared',
       'event_held',
       'documents_confirmed',
       'data_confirmed',

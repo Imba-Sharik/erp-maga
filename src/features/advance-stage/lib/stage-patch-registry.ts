@@ -3,9 +3,11 @@ import type { ProjectArticles } from '@/entities/project-article'
 import type { ClientBlockSchema } from '@/shared/api/generated/types/ClientBlockSchema'
 import type { ContractBlockSchema } from '@/shared/api/generated/types/ContractBlockSchema'
 
+import { buildCalculationPatchBody } from './to-calculation-patch-body'
 import { buildClientPatchBody, mapClientBlockToFormData } from './to-client-patch-body'
 import { buildContractPatchBody, mapContractBlockToFormData } from './to-contract-patch-body'
 import { buildExpensesPatchBody } from './to-expenses-patch-body'
+import { buildPrimaryContactPatchBody } from './to-primary-contact-patch-body'
 import { buildSalesPatchBody } from './to-sales-patch-body'
 
 export interface StagePatchContext {
@@ -35,6 +37,14 @@ export const STAGE_PATCH_ADAPTERS: Partial<Record<ProjectStage, StagePatchAdapte
     buildBody: ({ values }) => buildClientPatchBody(values),
     mapResponse: (resp) => mapClientBlockToFormData(resp as ClientBlockSchema),
   },
+  primary_contact_done: {
+    // Ответ (PrimaryContactBlockSchema) отдаёт канал в бэковом enum (`call`), поэтому
+    // не мапим его назад в форму — полагаемся на invalidate+refetch (ProjectDetail даёт `phone`).
+    buildBody: ({ values }) => buildPrimaryContactPatchBody(values),
+  },
+  calculation_prepared: {
+    buildBody: ({ values }) => buildCalculationPatchBody(values),
+  },
   contract_signed: {
     buildBody: ({ values }) => buildContractPatchBody(values),
     mapResponse: (resp) => mapContractBlockToFormData(resp as ContractBlockSchema),
@@ -45,8 +55,7 @@ export const STAGE_PATCH_ADAPTERS: Partial<Record<ProjectStage, StagePatchAdapte
   expenses_entered: {
     buildBody: ({ articles, values }) => buildExpensesPatchBody({ articles, values }),
   },
-  // primary_contact_done / calculation_prepared / event_held / bonus_calculated —
-  // добавятся, когда у бэка появятся соответствующие block-ручки (Фаза 2).
+  // event_held / bonus_calculated — правки задним числом не предусмотрены (нет block-ручки).
 }
 
 /** У этапа есть реальный PATCH-маршрут (кнопка «Редактировать» имеет смысл). */

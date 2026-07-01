@@ -17,9 +17,11 @@ import { stageDraftActions } from '@/entities/stage-draft'
 import { getTransitionErrorMessage, invalidateProjectAfterTransition } from '@/shared/api'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+import { useProjectsCalculationPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsCalculationPartialUpdate'
 import { useProjectsClientPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsClientPartialUpdate'
 import { useProjectsContractPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsContractPartialUpdate'
 import { useProjectsExpensesPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsExpensesPartialUpdate'
+import { useProjectsPrimaryContactPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsPrimaryContactPartialUpdate'
 import { useProjectsSalesPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsSalesPartialUpdate'
 import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
 import { toast } from '@/shared/ui/toast'
@@ -168,6 +170,8 @@ export function useStageFlow({
   const clientPatchMutation = useProjectsClientPartialUpdate()
   const salesPatchMutation = useProjectsSalesPartialUpdate()
   const expensesPatchMutation = useProjectsExpensesPartialUpdate()
+  const primaryContactPatchMutation = useProjectsPrimaryContactPartialUpdate()
+  const calculationPatchMutation = useProjectsCalculationPartialUpdate()
   // Черновик с прошлого визита — только свой (по пользователю) и только если этап не сменился.
   const initialDraft = useMemo(() => {
     const draft =
@@ -412,13 +416,17 @@ export function useStageFlow({
       const mutation =
         stage === 'plum_request'
           ? clientPatchMutation
-          : stage === 'contract_signed'
-            ? contractPatchMutation
-            : stage === 'ready_to_event'
-              ? salesPatchMutation
-              : stage === 'expenses_entered'
-                ? expensesPatchMutation
-                : undefined
+          : stage === 'primary_contact_done'
+            ? primaryContactPatchMutation
+            : stage === 'calculation_prepared'
+              ? calculationPatchMutation
+              : stage === 'contract_signed'
+                ? contractPatchMutation
+                : stage === 'ready_to_event'
+                  ? salesPatchMutation
+                  : stage === 'expenses_entered'
+                    ? expensesPatchMutation
+                    : undefined
       if (!mutation) return
       ;(mutation.mutate as unknown as StagePatchMutateFn)(
         { id: projectId, data: body },
@@ -450,6 +458,8 @@ export function useStageFlow({
       contractPatchMutation,
       salesPatchMutation,
       expensesPatchMutation,
+      primaryContactPatchMutation,
+      calculationPatchMutation,
     ],
   )
 

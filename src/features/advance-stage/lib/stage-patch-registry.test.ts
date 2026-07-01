@@ -5,10 +5,12 @@ import { createInitialArticles } from '@/entities/project-article'
 
 import { isStagePatchable, STAGE_PATCH_ADAPTERS } from './stage-patch-registry'
 
-describe('isStagePatchable (Фаза 1)', () => {
-  it('маршруты есть у клиента (заявки), договора, продаж и расходов', () => {
+describe('isStagePatchable', () => {
+  it('маршруты есть у заявки, первичного контакта, расчёта, договора, продаж и расходов', () => {
     for (const stage of [
       'plum_request',
+      'primary_contact_done',
+      'calculation_prepared',
       'contract_signed',
       'ready_to_event',
       'expenses_entered',
@@ -17,10 +19,8 @@ describe('isStagePatchable (Фаза 1)', () => {
     }
   })
 
-  it('этапы без серверной ручки пока непатчабельны', () => {
+  it('этапы без серверной ручки непатчабельны', () => {
     for (const stage of [
-      'primary_contact_done',
-      'calculation_prepared',
       'event_held',
       'documents_confirmed',
       'bonus_calculated',
@@ -59,5 +59,23 @@ describe('STAGE_PATCH_ADAPTERS.buildBody', () => {
       taxRate: null,
     })
     expect(body).toMatchObject({ mag_comment: 'перезвонить' })
+  })
+
+  it('primary_contact_done собирает тело из комментария и канала (phone → call)', () => {
+    const body = STAGE_PATCH_ADAPTERS.primary_contact_done?.buildBody({
+      values: { contactComment: 'дозвонился', contactChannel: 'phone' },
+      articles: createInitialArticles(),
+      taxRate: null,
+    })
+    expect(body).toMatchObject({ comment: 'дозвонился', contact_channel: 'call' })
+  })
+
+  it('calculation_prepared собирает тело из комментария к расчёту', () => {
+    const body = STAGE_PATCH_ADAPTERS.calculation_prepared?.buildBody({
+      values: { calcComment: 'уточнил смету' },
+      articles: createInitialArticles(),
+      taxRate: null,
+    })
+    expect(body).toMatchObject({ comment: 'уточнил смету' })
   })
 })
