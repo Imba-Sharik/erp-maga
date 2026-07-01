@@ -68,7 +68,7 @@ export function ProjectsTableToolbar({
           )}
         </div>
 
-        <div className="flex items-center gap-3 @3xl:gap-2.5">
+        <div className="flex flex-wrap items-center gap-3 @3xl:flex-nowrap @3xl:gap-2.5">
           <Select
             value={columnView}
             onValueChange={(v) => onColumnViewChange(v as ProjectsTableColumnView)}
@@ -85,12 +85,14 @@ export function ProjectsTableToolbar({
             </SelectContent>
           </Select>
           {viewModeToggle}
+          {/* Мобила: подпись и тумблер — одной строкой (nowrap), сам свитч
+              уходит вправо и переносится целиком на новую строку при нехватке места. */}
           {showPendingToggle && (
             <ToggleSwitch
               label="Ожидают обработки"
               checked={pendingOnly}
               onChange={onTogglePending}
-              className="shrink flex-wrap gap-2 text-xs @3xl:hidden"
+              className="ml-auto text-xs @3xl:hidden"
             />
           )}
         </div>
