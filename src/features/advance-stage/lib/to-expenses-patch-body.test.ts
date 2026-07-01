@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createInitialArticles } from '@/entities/project-article'
+import { createEmptyBacklineBlock, createInitialArticles } from '@/entities/project-article'
 
 import { buildExpensesPatchBody } from './to-expenses-patch-body'
 
@@ -22,6 +22,17 @@ describe('buildExpensesPatchBody', () => {
     expect(
       buildExpensesPatchBody({ articles, values: { postEventComment: 'превышение' } }),
     ).toMatchObject({ comment: 'превышение' })
+  })
+
+  it('бэклайн-расходы уходят вложенным объектом backline', () => {
+    const articles = createInitialArticles()
+    articles.backline = createEmptyBacklineBlock()
+    articles.backline.equipment.expense = 50000
+    articles.backline.sublease.expense = 12000
+
+    expect(buildExpensesPatchBody({ articles })).toEqual({
+      backline: { equipment: '50000.00', subrent: '12000.00' },
+    })
   })
 
   it('нечего сохранять → null', () => {

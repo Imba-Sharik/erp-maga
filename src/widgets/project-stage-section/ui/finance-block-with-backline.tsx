@@ -249,9 +249,11 @@ export function FinanceBlockWithBackline({
   const passedEdit = usePassedEditToggle()
   const editablePassed = !isCurrent && Boolean(onSavePassed) && passedEdit.editing
 
-  // Суммы основного блока правятся в обоих режимах; бэклайн — только на текущем этапе
-  // (его суммы пока не персистятся block-ручками, см. to-sales/to-expenses-patch-body).
+  // Суммы основного блока правятся в обоих режимах. Бэклайн-РАСХОДЫ правятся и задним
+  // числом (бэк `/expenses/` принимает вложенный `backline`); бэклайн-ПРОДАЖИ — только
+  // на текущем этапе (`/sales/` — плоский dict, backline не принимает, см. to-*-patch-body).
   const editableMain = editableCurrent || editablePassed
+  const backlineEditable = editableCurrent || (editablePassed && aspect === 'expense')
   // % налога принадлежит продажной воронке: правим на текущем или при passed-правке sales.
   const taxEditable = editableCurrent || (editablePassed && aspect === 'sales')
 
@@ -307,7 +309,7 @@ export function FinanceBlockWithBackline({
         kind={kind}
         values={values}
         aspect={aspect}
-        editable={block === 'backline' ? editableCurrent : editableMain}
+        editable={block === 'backline' ? backlineEditable : editableMain}
         showValidation={showValidation}
         onChange={(patch) => onArticleChange(block, kind, patch)}
       />

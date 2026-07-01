@@ -11,10 +11,11 @@ interface BuildExpensesPatchBodyArgs {
 
 /**
  * UI → PATCH /projects/{id}/expenses/ (этап `expenses_entered`, правка задним числом).
- * Тело — плоские суммы расходов основного блока + комментарий к расходам.
+ * Тело — плоские суммы расходов основного блока + комментарий + вложенный `backline`.
  *
- * TODO(backend): бэклайн-расходы (`backline`-объект в схеме) не отправляем — его
- * форма пока не зафиксирована (Фаза 2). Partial update не трогает их.
+ * Бэклайн-расходы бэк принимает отдельным вложенным объектом `backline`
+ * (BACKLINE_EXPENSE_ARTICLES), без коллизии имён с основным блоком — в отличие от
+ * `/sales/`, куда бэклайн-продажи пока не отправляются (плоский dict).
  */
 export function buildExpensesPatchBody({
   articles,
@@ -24,6 +25,11 @@ export function buildExpensesPatchBody({
   // Комментарий к расходам хранится в UI под `postEventComment` (см. fields-map).
   if (values?.postEventComment !== undefined) {
     body.comment = values.postEventComment
+  }
+  // Бэклайн существует только если менеджер его добавил (иначе `articles.backline === null`).
+  if (articles.backline) {
+    const backline = blockAspectToDecimals(articles.backline, 'expense')
+    if (Object.keys(backline).length > 0) body.backline = backline
   }
   return Object.keys(body).length > 0 ? body : null
 }
