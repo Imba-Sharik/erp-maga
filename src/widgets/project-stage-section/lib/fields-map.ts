@@ -76,7 +76,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'text',
       source: 'manager',
       required: true,
-      passedReadOnly: true,
     },
     {
       name: 'phone',
@@ -84,7 +83,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'phone',
       source: 'manager',
       required: true,
-      passedReadOnly: true,
     },
     {
       name: 'createdAt',
@@ -98,14 +96,12 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'text',
       source: 'manager',
       required: true,
-      passedReadOnly: true,
     },
     {
       name: 'email',
       label: 'Email',
       type: 'text',
       source: 'manager',
-      passedReadOnly: true,
     },
     {
       name: 'magComment',
