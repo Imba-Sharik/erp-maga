@@ -2,7 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import { projectToApiListRow, type ProjectDetail } from '@/entities/project'
-import { patchProjectInMatchingCaches } from '@/shared/api'
+import {
+  getTransitionErrorMessage,
+  invalidateProjectAfterTransition,
+  patchProjectInMatchingCaches,
+} from '@/shared/api'
+import { projectsNamePartialUpdate } from '@/shared/api/generated/clients/projectsController/projectsNamePartialUpdate'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import type { ProjectsRetrieveQueryResponse } from '@/shared/api/generated/types/projectsController/ProjectsRetrieve'
 import { toast } from '@/shared/ui/toast'
@@ -19,23 +24,26 @@ interface UseEditProjectTitleOptions {
 /**
  * Ручное редактирование названия проекта (ERP-231).
  *
- * Пока фронт-only: бэк-эндпоинта ещё нет, поэтому сеть не трогаем — обновляем кэш
- * оптимистично, чтобы новое название сразу было видно в карточке, списках и воронке.
- * Когда бэк будет готов — в `mutationFn` встаёт реальный PATCH, а потребители не меняются.
- * Бэк по контракту должен: выставить флаг «название редактировалось вручную» (Plum-sync
- * не перезапишет) и записать смену в «Лог действий» (кто, когда, было → стало).
+ * `PATCH /projects/{id}/name/`: бэк проверяет права (403) и пустое значение (400),
+ * выставляет `event_name_locked=true` (Plum-синхронизация больше не перезапишет название)
+ * и пишет смену в «Лог действий». В ответе — авторитетное `event_name`.
+ *
+ * Detail-кэш и списки патчим оптимистично для мгновенного отклика в карточке/воронке;
+ * `onSettled` инвалидирует проект (в т.ч. audit-log), чтобы «Лог действий» подтянул новую
+ * запись, а название во всех вью сверилось с сервером.
  */
 export function useEditProjectTitle({ onSuccess }: UseEditProjectTitleOptions = {}) {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async ({ project, title }: EditProjectTitleInput) => {
-      // TODO(ERP-231): подключить бэк, когда появится эндпоинт обновления названия, напр.:
-      //   await projectsPartialUpdate(Number(project.id), { event_name: title })
-      return { project, title }
+      const data = await projectsNamePartialUpdate(Number(project.id), { event_name: title })
+      return data
     },
-    onSuccess: ({ project, title }) => {
+    onSuccess: (data, { project }) => {
       const projectId = Number(project.id)
+      // Бэк мог нормализовать значение — берём название из ответа.
+      const title = data.event_name
       // Detail-кэш карточки: `title` маппится из `event_name` (см. mapBackendProjectDetail).
       queryClient.setQueryData<ProjectsRetrieveQueryResponse>(
         projectsRetrieveQueryKey(projectId),
@@ -46,8 +54,11 @@ export function useEditProjectTitle({ onSuccess }: UseEditProjectTitleOptions = 
       toast.success('Название обновлено')
       onSuccess?.()
     },
-    onError: () => {
-      toast.error('Не удалось обновить название')
+    onError: (error) => {
+      toast.error(getTransitionErrorMessage(error, 'Не удалось обновить название'))
+    },
+    onSettled: (_data, _error, { project }) => {
+      invalidateProjectAfterTransition(queryClient, Number(project.id))
     },
   })
 
