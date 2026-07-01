@@ -1,0 +1,78 @@
+name: Deploy (test)
+
+# Собираем образ в GitHub Actions, пушим в GHCR, затем по SSH на тестовом
+# VPS делаем `docker compose pull && up -d`. Триггерится ТОЛЬКО на push в test,
+# поэтому push в main этот workflow не запускает (там свой test.yml с CI).
+on:
+  push:
+    branches: [test]
+  workflow_dispatch: # можно запускать вручную из вкладки Actions
+
+# Не даём двум деплоям на один сервер идти одновременно.
+concurrency:
+  group: deploy-test
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: test # берёт переменные/секреты из окружения "test"
+    permissions:
+      contents: read
+      packages: write # право пушить образ в GHCR
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image name (lowercase)
+        id: meta
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}:test
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
+          # VITE_API_URL зашивается в бандл на этапе сборки (build-time).
+          # Это публичная переменная окружения (Settings → Environments → test → Variables).
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_USE_MOCKS=false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: test
+    permissions:
+      contents: read
+      packages: read # чтобы GITHUB_TOKEN мог тянуть образ на сервере
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            cd /srv/mag/frontend
+            docker compose -f docker-compose.deploy.yml pull
+            docker compose -f docker-compose.deploy.yml up -d
+            docker image prune -f

@@ -1,0 +1,13 @@
+# Этот файл живёт НА ТЕСТОВОМ VPS как /srv/mag/frontend/docker-compose.deploy.yml
+# В отличие от корневого docker-compose.yml он НЕ собирает образ на сервере,
+# а тянет готовый из GHCR (сборка происходит в GitHub Actions).
+#
+# Имя compose-проекта по умолчанию = имя папки (frontend), поэтому сервис `app`
+# заменит уже запущенный контейнер бесшовно (тот же порт, тот же service name).
+services:
+  app:
+    image: ghcr.io/imba-sharik/erp-maga:test
+    restart: always
+    pull_policy: always
+    ports:
+      - "127.0.0.1:5173:80" # за реверс-прокси, как сейчас
