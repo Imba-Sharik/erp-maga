@@ -11,6 +11,8 @@ type Flags = Pick<
   | 'canEditExpenses'
   | 'canEditPrimaryContact'
   | 'canEditCalculation'
+  | 'canEditEventHeld'
+  | 'canEditBonus'
 >
 
 describe('resolveStageBlockEditable', () => {
@@ -22,6 +24,8 @@ describe('resolveStageBlockEditable', () => {
       canEditExpenses: true,
       canEditPrimaryContact: true,
       canEditCalculation: false,
+      canEditEventHeld: true,
+      canEditBonus: false,
     }
     expect(resolveStageBlockEditable(flags, 'plum_request')).toBe(true)
     expect(resolveStageBlockEditable(flags, 'primary_contact_done')).toBe(true)
@@ -29,6 +33,8 @@ describe('resolveStageBlockEditable', () => {
     expect(resolveStageBlockEditable(flags, 'contract_signed')).toBe(true)
     expect(resolveStageBlockEditable(flags, 'ready_to_event')).toBe(false)
     expect(resolveStageBlockEditable(flags, 'expenses_entered')).toBe(true)
+    expect(resolveStageBlockEditable(flags, 'event_held')).toBe(true)
+    expect(resolveStageBlockEditable(flags, 'bonus_calculated')).toBe(false)
   })
 
   it('undefined для этапов без block-ручки (правки задним числом нет)', () => {
@@ -39,12 +45,12 @@ describe('resolveStageBlockEditable', () => {
       canEditExpenses: true,
       canEditPrimaryContact: true,
       canEditCalculation: true,
+      canEditEventHeld: true,
+      canEditBonus: true,
     }
     const noHandle: ProjectStage[] = [
-      'event_held',
       'documents_confirmed',
       'data_confirmed',
-      'bonus_calculated',
       'bonus_approved',
       'closed',
       'out_of_mag_scope',

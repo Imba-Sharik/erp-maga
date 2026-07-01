@@ -227,8 +227,9 @@ export interface ProjectDetail extends Project {
    * Единственный источник правды «можно ли править блок сейчас» (текущий или
    * пройденный): учитывает роль, стадию, владельца, archived/out_of_mag, `event_date`
    * и т.п. Фронт ими гейтит кнопку «Редактировать» вместо своей матрицы.
-   * `canEditClient` — блок «Заявка из PLUM» (mag_comment). `canEditPrimaryContact` и
-   * `canEditCalculation` — правка руководителем задним числом (ERP-198).
+   * `canEditClient` — блок «Заявка из PLUM» (mag_comment + идентификация клиента).
+   * `canEditPrimaryContact`/`canEditCalculation`/`canEditEventHeld`/`canEditBonus` —
+   * правка руководителем задним числом (ERP-198).
    */
   canEditClient: boolean
   canEditContract: boolean
@@ -236,6 +237,8 @@ export interface ProjectDetail extends Project {
   canEditExpenses: boolean
   canEditPrimaryContact: boolean
   canEditCalculation: boolean
+  canEditEventHeld: boolean
+  canEditBonus: boolean
   enteredSystemAt: string
   history: StageHistoryEntry[]
   /** Проект синхронизирован из Plum (`is_from_plum` в API). */
