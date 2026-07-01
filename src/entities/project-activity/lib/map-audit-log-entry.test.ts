@@ -10,7 +10,6 @@ function makeEntry(overrides: Partial<ProjectAuditLog>): ProjectAuditLog {
     created_at: '2026-05-27T15:46:55.336763+03:00',
     action_type: 'field_change',
     action_label: 'Изменение поля',
-    message: 'Изменение поля',
     field_name: 'tax_rate',
     old_value: '10',
     new_value: '20',

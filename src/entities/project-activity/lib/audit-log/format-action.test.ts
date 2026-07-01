@@ -10,7 +10,6 @@ function makeEntry(overrides: Partial<ProjectAuditLog>): ProjectAuditLog {
     created_at: '2026-05-27T15:46:55.336763+03:00',
     action_type: 'other',
     action_label: 'Прочее',
-    message: 'Прочее',
     field_name: '',
     old_value: '',
     new_value: '',
@@ -159,12 +158,12 @@ describe('formatAuditLogAction', () => {
     expect(action).toBe('изменил «налог»: «10» → «20» · этап «Расходы внесены»')
   })
 
-  it('block_change: глагольная фраза из metadata.block_label (без подлежащего)', () => {
+  it('lead_block_edit: глагольная фраза из metadata.block (без подлежащего)', () => {
     const action = formatAuditLogAction(
       makeEntry({
-        action_type: 'block_change',
-        action_label: 'Изменение блока',
-        metadata: { block: 'sales', block_label: 'Продажи' },
+        action_type: 'lead_block_edit',
+        action_label: 'Правка руководителя',
+        metadata: { block: 'Продажи' },
         stage: null,
       }),
     )
@@ -172,11 +171,15 @@ describe('formatAuditLogAction', () => {
     expect(action).toBe('изменил данные в блоке «Продажи»')
   })
 
-  it('block_change: fallback на action_label без metadata.block_label', () => {
+  it('lead_block_edit: fallback на action_label без metadata.block', () => {
     const action = formatAuditLogAction(
-      makeEntry({ action_type: 'block_change', action_label: 'Изменение блока', stage: null }),
+      makeEntry({
+        action_type: 'lead_block_edit',
+        action_label: 'Правка руководителя',
+        stage: null,
+      }),
     )
 
-    expect(action).toBe('Изменение блока')
+    expect(action).toBe('Правка руководителя')
   })
 })
