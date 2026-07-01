@@ -10,10 +10,8 @@ interface BuildSalesPatchBodyArgs {
 
 /**
  * UI → PATCH /projects/{id}/sales/ (этап `ready_to_event`, правка задним числом).
- * Тело — плоские суммы продаж основного блока + единый % налога.
- *
- * TODO(backend): эндпойнт `/sales/` пока не принимает бэклайн (нет поля в схеме) —
- * бэклайн-продажи правятся отдельно (Фаза 2). Partial update не трогает их.
+ * Тело — плоские суммы продаж основного блока + единый % налога + вложенный `backline`
+ * (бэклайн-продажи; бэк принимает его отдельным объектом, как у расходов).
  */
 export function buildSalesPatchBody({
   articles,
@@ -22,5 +20,10 @@ export function buildSalesPatchBody({
   const body = blockAspectToDecimals(articles.main, 'sales') as PatchedSalesBlockUpdateRequest
   const tax = toDecimalString(taxRate)
   if (tax !== undefined) body.contract_tax_percent = tax
+  // Бэклайн существует только если менеджер его добавил (иначе `articles.backline === null`).
+  if (articles.backline) {
+    const backline = blockAspectToDecimals(articles.backline, 'sales')
+    if (Object.keys(backline).length > 0) body.backline = backline
+  }
   return Object.keys(body).length > 0 ? body : null
 }
