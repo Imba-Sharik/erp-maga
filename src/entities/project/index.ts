@@ -43,6 +43,7 @@ export {
 export { projectToApiListRow } from './lib/project-to-api-list-row'
 export { isProjectLeadManager, isProjectAssistantManager } from './lib/resolve-manager-role'
 export { resolveProjectReadOnly } from './lib/project-edit-access'
+export { canEditProjectTitle } from './lib/can-edit-project-title'
 export { getOutsideMagReasonLabel } from './lib/outside-mag-reason'
 export { PREPROJECT_STAGE_TO_API, preprojectStageToApi } from './lib/preproject-stage-api'
 export { CLOSING_STAGE_TO_API, closingStageToApi } from './lib/closing-stage-api'
