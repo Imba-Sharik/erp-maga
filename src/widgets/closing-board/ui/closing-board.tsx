@@ -10,6 +10,7 @@ import { useManagerVenueRestriction, useManagersDirectory } from '@/entities/man
 import { resolveVenueFilterIds, useVenueCatalog } from '@/entities/venue'
 import { useUserRole } from '@/entities/user-role'
 import { useDebouncedValue, useFilterParams } from '@/shared/hooks'
+import type { ViewMode } from '@/shared/ui/view-mode-toggle'
 import {
   ChangeProjectManagerDialog,
   useChangeProjectManagers,
@@ -32,7 +33,6 @@ import {
 import { useClosingActiveTableQuery } from '../lib/use-closing-active-table-query'
 import { useClosingArchiveQuery } from '../lib/use-closing-archive-query'
 import { ClosingBoardToolbar, type ClosingColumnView } from './closing-board-toolbar'
-import type { ClosingViewMode } from './closing-view-toggle'
 import { ClosingKanban } from './closing-kanban'
 
 const CLOSING_BACK: ProjectBackOrigin = {
@@ -117,7 +117,7 @@ export function ClosingBoard({
   const setCity = (value: string | null) => set('city', value)
   const setHall = (value: string | null) => set('hall', value)
   const setLoft = (value: string | null) => set('loft', value)
-  const [viewMode, setViewMode] = useState<ClosingViewMode>('kanban')
+  const [viewMode, setViewMode] = useState<ViewMode>('kanban')
 
   // Archive table filters
   const archiveSearch = getString('aq') ?? ''

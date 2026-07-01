@@ -3,10 +3,10 @@ import { Search } from 'lucide-react'
 import { Input } from '@/shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { ToggleSwitch } from '@/shared/ui/toggle-switch'
+import { ViewModeToggle, type ViewMode } from '@/shared/ui/view-mode-toggle'
 import { ProjectsBoardToolbar } from '@/features/kanban-board'
 
 import type { ProjectsTableColumnView } from '@/widgets/projects-table/lib/economics-columns'
-import { ClosingViewToggle, type ClosingViewMode } from './closing-view-toggle'
 
 export type ClosingColumnView = Extract<
   ProjectsTableColumnView,
@@ -29,14 +29,14 @@ interface ClosingBoardToolbarKanbanProps {
   hall: string | null
   loft: string | null
   plumEventStatus: string[]
-  viewMode: ClosingViewMode
+  viewMode: ViewMode
   onChangeSearch: (value: string) => void
   onChangeSort: (value: string) => void
   onChangeCity: (value: string | null) => void
   onChangeHall: (value: string | null) => void
   onChangeLoft: (value: string | null) => void
   onChangePlumEventStatus: (values: string[]) => void
-  onViewModeChange: (value: ClosingViewMode) => void
+  onViewModeChange: (value: ViewMode) => void
   onToggleArchive: (value: boolean) => void
 }
 
@@ -54,41 +54,34 @@ type ClosingBoardToolbarProps = ClosingBoardToolbarKanbanProps | ClosingBoardToo
 export function ClosingBoardToolbar(props: ClosingBoardToolbarProps) {
   if (!props.archiveMode) {
     return (
-      <div className="@container flex min-w-0 shrink-0 flex-col gap-2.5 @[1700px]:flex-row @[1700px]:items-center @[1700px]:justify-between @[1700px]:gap-4">
-        <div className="flex min-w-0 flex-col gap-2.5 @[1700px]:min-w-0 @[1700px]:flex-1 @[1700px]:flex-row @[1700px]:items-center @[1700px]:gap-3">
-          <ProjectsBoardToolbar
-            filtersAlign="start"
-            search={props.search}
-            sort={props.sort}
-            city={props.city}
-            hall={props.hall}
-            loft={props.loft}
-            plumEventStatus={props.plumEventStatus}
-            onChangeSearch={props.onChangeSearch}
-            onChangeSort={props.onChangeSort}
-            onChangeCity={props.onChangeCity}
-            onChangeHall={props.onChangeHall}
-            onChangeLoft={props.onChangeLoft}
-            onChangePlumEventStatus={props.onChangePlumEventStatus}
-          />
-          {/* Мобила: тогл слева + свитч архива справа в одной строке.
-              Десктоп: обёртка растворяется (contents) — тогл встаёт к фильтрам,
-              свитч архива уходит в правый край тулбара. */}
-          <div className="flex items-center justify-between gap-3 @[1700px]:contents">
-            <ClosingViewToggle value={props.viewMode} onChange={props.onViewModeChange} />
+      <div className="@container">
+        {/* Поиск, фильтры, тогл и свитч архива — единый переносящийся блок.
+            Свитч архива уходит в конец блока и прижимается вправо (ml-auto). */}
+        <ProjectsBoardToolbar
+          filtersAlign="start"
+          search={props.search}
+          sort={props.sort}
+          city={props.city}
+          hall={props.hall}
+          loft={props.loft}
+          plumEventStatus={props.plumEventStatus}
+          onChangeSearch={props.onChangeSearch}
+          onChangeSort={props.onChangeSort}
+          onChangeCity={props.onChangeCity}
+          onChangeHall={props.onChangeHall}
+          onChangeLoft={props.onChangeLoft}
+          onChangePlumEventStatus={props.onChangePlumEventStatus}
+          viewModeToggle={
+            <ViewModeToggle value={props.viewMode} onChange={props.onViewModeChange} />
+          }
+          trailing={
             <ToggleSwitch
               label="Архивные проекты"
               checked={false}
               onChange={props.onToggleArchive}
-              className="text-xs @[1700px]:hidden"
+              className="shrink-0 text-xs @4xl:ml-auto @4xl:text-sm"
             />
-          </div>
-        </div>
-        <ToggleSwitch
-          label="Архивные проекты"
-          checked={false}
-          onChange={props.onToggleArchive}
-          className="hidden text-sm @[1700px]:flex"
+          }
         />
       </div>
     )

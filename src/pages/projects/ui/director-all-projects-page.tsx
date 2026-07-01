@@ -2,7 +2,8 @@ import { useState } from 'react'
 
 import { CreateProjectDialog } from '@/features/create-project'
 import { Button } from '@/shared/ui/button'
-import { ProjectsTable } from '@/widgets/projects-table'
+
+import { AllProjectsView } from './all-projects-view'
 
 export function DirectorAllProjectsPage() {
   const [createOpen, setCreateOpen] = useState(false)
@@ -27,7 +28,11 @@ export function DirectorAllProjectsPage() {
 
       <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
 
-      <ProjectsTable onAddProject={() => setCreateOpen(true)} />
+      <AllProjectsView
+        defaultView="table"
+        managerEditable
+        onAddProject={() => setCreateOpen(true)}
+      />
     </div>
   )
 }

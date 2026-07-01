@@ -31,12 +31,15 @@ interface ProjectsTableProps {
   onAddProject?: () => void
   managerEditable?: boolean
   renderRowAction?: (project: Project) => ReactNode
+  /** Переключатель «канбан ⇄ таблица» — рендерится в тулбаре */
+  viewModeToggle?: ReactNode
 }
 
 export function ProjectsTable({
   onAddProject,
   managerEditable = true,
   renderRowAction,
+  viewModeToggle,
 }: ProjectsTableProps = {}) {
   // Поиск, тумблер «Ожидают обработки» и фильтры колонок живут в URL (переживают F5) и
   // дублируются в localStorage (переживают закрытие вкладки). Вид колонок (general/economics)
@@ -116,6 +119,7 @@ export function ProjectsTable({
         onTogglePending={setPendingOnly}
         onColumnViewChange={setColumnView}
         onAddProject={onAddProject}
+        viewModeToggle={viewModeToggle}
       />
       <ProjectsTableView
         projects={filtered}
