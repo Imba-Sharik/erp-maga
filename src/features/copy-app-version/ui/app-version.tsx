@@ -1,4 +1,5 @@
-import { APP_VERSION, APP_VERSION_LABEL, BUILD_DATE, BUILD_SHA } from '@/shared/config'
+import { useRef } from 'react'
+import { APP_VERSION, BUILD_DATE, BUILD_SHA } from '@/shared/config'
 import { useCopyToClipboard } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { toast } from '@/shared/ui/toast'
@@ -12,11 +13,12 @@ interface AppVersionProps {
 
 /**
  * Блок версии приложения. Если копирование в буфер доступно — блок кликабелен и
- * копирует метку версии (с тостом об успехе); иначе рендерится статичным текстом
- * без ховер-аффорданс, чтобы не вводить в заблуждение.
+ * копирует ровно отрисованную метку (с тостом об успехе); иначе рендерится
+ * статичным текстом без ховер-аффорданс, чтобы не вводить в заблуждение.
  */
 export function AppVersion({ className }: AppVersionProps) {
   const { isSupported, copy } = useCopyToClipboard()
+  const labelRef = useRef<HTMLButtonElement>(null)
 
   const content = (
     <>
@@ -34,14 +36,18 @@ export function AppVersion({ className }: AppVersionProps) {
   }
 
   const handleCopy = async () => {
-    if (await copy(APP_VERSION_LABEL)) {
+    // Копируем именно то, что отрисовано, — показ и буфер не могут разъехаться.
+    const text = labelRef.current?.textContent?.trim()
+    if (text && (await copy(text))) {
       toast.success('Версия скопирована')
     }
   }
 
   return (
     <button
+      ref={labelRef}
       type="button"
+      aria-label={`Скопировать версию ${APP_VERSION}`}
       title={`${TOOLTIP} — нажмите, чтобы скопировать`}
       onClick={handleCopy}
       className={cn(
