@@ -17,3 +17,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+// Штамп билда, инъектируется через vite `define` (см. vite.config.ts).
+declare const __APP_VERSION__: string
+declare const __BUILD_SHA__: string
+declare const __BUILD_DATE__: string
