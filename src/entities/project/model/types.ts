@@ -144,7 +144,14 @@ export interface StageFormData {
   legalEntity?: string
   contractComment?: string
 
-  // event_held
+  // event_held + expenses_entered
+  /**
+   * ВНИМАНИЕ: один UI-ключ для ДВУХ разных бэк-полей. На `event_held` это
+   * «Комментарий после мероприятия» (`Project.post_event_comment`, PATCH
+   * /event-held/), на `expenses_entered` — «Комментарий к расходам»
+   * (`ExpenseBlock.comment`, PATCH /expenses/). Конфликта нет, пока значения
+   * живут в records по-этапно (`records[stage].values`); не сливать их в общий стор.
+   */
   postEventComment?: string
   eventDate?: string
   closingFunnelEnteredAt?: string

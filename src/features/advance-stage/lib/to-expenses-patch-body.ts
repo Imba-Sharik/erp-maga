@@ -14,8 +14,8 @@ interface BuildExpensesPatchBodyArgs {
  * Тело — плоские суммы расходов основного блока + комментарий + вложенный `backline`.
  *
  * Бэклайн-расходы бэк принимает отдельным вложенным объектом `backline`
- * (BACKLINE_EXPENSE_ARTICLES), без коллизии имён с основным блоком — в отличие от
- * `/sales/`, куда бэклайн-продажи пока не отправляются (плоский dict).
+ * (BACKLINE_EXPENSE_ARTICLES), без коллизии имён с основным блоком — та же форма,
+ * что у бэклайн-продаж в `/sales/` (см. to-sales-patch-body).
  */
 export function buildExpensesPatchBody({
   articles,
