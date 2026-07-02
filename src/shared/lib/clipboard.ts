@@ -50,6 +50,9 @@ function legacyCopy(text: string): boolean {
   const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
 
   textarea.select()
+  // iOS Safari игнорирует один только select() на readonly-поле — setSelectionRange
+  // выделяет текст и там, и на десктопе (приём из clipboard.js).
+  textarea.setSelectionRange(0, text.length)
 
   let succeeded = false
   try {

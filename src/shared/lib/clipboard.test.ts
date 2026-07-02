@@ -41,9 +41,11 @@ describe('copyTextToClipboard', () => {
     expect(execCommand).toHaveBeenCalledWith('copy')
   })
 
-  it('использует execCommand, когда async Clipboard API нет', async () => {
+  it('использует execCommand и выделяет через setSelectionRange (iOS-safe)', async () => {
+    const setSelectionRange = vi.spyOn(HTMLTextAreaElement.prototype, 'setSelectionRange')
     setExecCommand(vi.fn().mockReturnValue(true))
     await expect(copyTextToClipboard('v0.6.0')).resolves.toBe(true)
+    expect(setSelectionRange).toHaveBeenCalledWith(0, 'v0.6.0'.length)
   })
 
   it('резолвится в false, когда скопировать нельзя', async () => {
