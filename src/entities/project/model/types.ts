@@ -119,6 +119,12 @@ export interface Project {
   archivedAt?: string
   /** ISO-datetime подтверждения документов бухгалтером (этап documents_confirmed). */
   documentsConfirmedAt?: string
+  /**
+   * Руководитель не принял данные на этапе data_confirmed (`data_rejected`) —
+   * системная пауза: переход на «Бонус рассчитан» закрыт, проект подсвечивается.
+   * В ProjectDetail поле есть всегда; в списочном Project появится с ERP-220.
+   */
+  dataRejected?: boolean
 }
 
 export type ContractType = 'with_vat' | 'without_vat'

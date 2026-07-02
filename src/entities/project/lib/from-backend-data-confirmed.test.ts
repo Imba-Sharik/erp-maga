@@ -66,3 +66,23 @@ describe('mapBackendProjectDetail — снимок data_confirmed', () => {
     expect(snapshot?.enteredAt).toBe(DATA_CONFIRMATION_AT)
   })
 })
+
+describe('mapBackendProjectDetail — data_rejected (ERP-221)', () => {
+  it('маппит data_rejected=true в dataRejected', () => {
+    const detail = mapBackendProjectDetail(makeBackendDetail({ data_rejected: true }))
+
+    expect(detail?.dataRejected).toBe(true)
+  })
+
+  it('маппит data_rejected=false в dataRejected=false', () => {
+    const detail = mapBackendProjectDetail(makeBackendDetail({ data_rejected: false }))
+
+    expect(detail?.dataRejected).toBe(false)
+  })
+
+  it('без поля в payload (список до ERP-220) dataRejected отсутствует', () => {
+    const detail = mapBackendProjectDetail(makeBackendDetail())
+
+    expect(detail?.dataRejected).toBeUndefined()
+  })
+})
