@@ -121,7 +121,13 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <div className="mx-3 group-data-[collapsible=icon]:hidden">
-          <p className="text-muted-foreground pb-1 text-start text-xs whitespace-nowrap">V 0.5.5</p>
+          <p
+            title={`build ${__BUILD_SHA__} · ${__BUILD_DATE__}`}
+            className="text-muted-foreground pb-1 text-start text-xs whitespace-nowrap"
+          >
+            v{__APP_VERSION__}
+            <span className="opacity-60"> · {__BUILD_SHA__}</span>
+          </p>
           <div
             aria-hidden
             className="border-sidebar-border shrink-0 border-t group-data-[collapsible=icon]:mx-0"
