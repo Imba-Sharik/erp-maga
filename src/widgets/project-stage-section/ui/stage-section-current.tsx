@@ -305,7 +305,8 @@ export function StageSectionCurrent({
   /**
    * Статус проверки данных (этап data_confirmed, ERP-221) — самостоятельное действие,
    * как статусы документов у бухгалтерии: сохраняется сразу при выборе, а не при
-   * переходе этапа. Аудит-штампы (`dataConfirmedAt/By`) приходят с бэка после рефетча.
+   * переходе этапа. Штампы `dataConfirmedBy/At` зеркалим локально вслед за бэком:
+   * `confirmed` фиксирует подтверждение от текущего пользователя, `rejected` снимает его.
    */
   const handleDataConfirmedStatusChange = (
     onChangeValue: (value: string) => void,
@@ -314,7 +315,12 @@ export function StageSectionCurrent({
     onChangeValue(value)
     const status = parseDataConfirmedStatus(value)
     if (!status) return
-    onPatchValues?.({ dataConfirmedStatus: status })
+    const confirmed = status === 'confirmed'
+    onPatchValues?.({
+      dataConfirmedStatus: status,
+      dataConfirmedBy: confirmed ? currentUser.fullName : undefined,
+      dataConfirmedAt: confirmed ? new Date().toISOString() : undefined,
+    })
     // В режимах правки прошлого этапа сохранение идёт кнопкой «Сохранить», не сразу.
     if (!editingMode) {
       updateDataConfirmedStatus({ projectId: project.id, status })

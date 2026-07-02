@@ -1,10 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
-import { notificationsListQueryKey } from '@/entities/notification'
 import { getTransitionErrorMessage, invalidateProjectAfterTransition } from '@/shared/api'
-import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
-import { useProjectsTransitionsCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsTransitionsCreate'
+import { useProjectsDataConfirmationPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsDataConfirmationPartialUpdate'
 import { toast } from '@/shared/ui/toast'
 
 export type DataConfirmedStatus = 'confirmed' | 'rejected'
@@ -15,34 +13,28 @@ interface UpdateDataConfirmedStatusArgs {
 }
 
 /**
- * Установка статуса проверки данных руководителем на этапе `data_confirmed` (ERP-221).
- * Это отдельное действие над проектом (как статусы документов у бухгалтерии),
- * а не переход этапа: воронка не двигается, действие попадает в audit-лог.
+ * Статус проверки данных руководителем на этапе `data_confirmed` (ERP-220/221) —
+ * PATCH /projects/{id}/data-confirmation/. Отдельное действие над проектом (как
+ * статусы документов у бухгалтерии), а не переход этапа: воронка не двигается.
  *
- * ИНТЕРИМ до выделенной ручки статуса на бэке (ERP-220):
- * - «Не приняты» — POST /transitions/ с `data_confirmed_status: rejected`. Бэк
- *   трактует это как no-op: ставит `data_rejected=true`, пишет лог и НЕ меняет этап.
- * - «Данные подтверждены» — без перехода на сервере зафиксировать нечем; статус
- *   остаётся локальным и уходит в transition-теле при «Следующий этап».
- * После ERP-220 обе ветки заменить на kubb-хук новой ручки из openapi.
+ * `rejected` — системная пауза: бэк ставит `data_rejected`, снимает прежнее
+ * подтверждение, шлёт ERP-уведомление менеджеру и пишет audit-лог; переход на
+ * «Бонус рассчитан» отвечает 400, пока пауза не снята. `confirmed` — снимает паузу
+ * и фиксирует подтверждение (кто/когда). Полная инвалидация проекта — чтобы
+ * подсветка в списках/канбане и audit-лог обновились сразу.
  */
 export function useUpdateDataConfirmedStatus() {
   const queryClient = useQueryClient()
-  const mutation = useProjectsTransitionsCreate()
+  const mutation = useProjectsDataConfirmationPartialUpdate()
 
   const update = useCallback(
     ({ projectId, status }: UpdateDataConfirmedStatusArgs) => {
-      if (status !== 'rejected') return
       const id = Number(projectId)
       mutation.mutate(
-        { id, data: { to_stage: 'bonus_calculated', data_confirmed_status: 'rejected' } },
+        { id, data: { status } },
         {
-          onSuccess: (detail) => {
-            // Сервер — источник правды: свежий ProjectDetail несёт data_rejected и
-            // data_confirmed_status для гидрации селекта после перезагрузки.
-            queryClient.setQueryData(projectsRetrieveQueryKey(id), detail)
+          onSuccess: () => {
             invalidateProjectAfterTransition(queryClient, id)
-            void queryClient.invalidateQueries({ queryKey: notificationsListQueryKey() })
           },
           onError: (error) => {
             toast.error(getTransitionErrorMessage(error, 'Не удалось сохранить статус проверки'))
