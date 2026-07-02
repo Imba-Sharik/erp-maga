@@ -80,9 +80,9 @@ describe('mapBackendProjectDetail — data_rejected (ERP-221)', () => {
     expect(detail?.dataRejected).toBe(false)
   })
 
-  it('без поля в payload (список до ERP-220) dataRejected отсутствует', () => {
+  it('без поля в payload (старый бэк) dataRejected=false — подсветки нет', () => {
     const detail = mapBackendProjectDetail(makeBackendDetail())
 
-    expect(detail?.dataRejected).toBeUndefined()
+    expect(detail?.dataRejected).toBe(false)
   })
 })

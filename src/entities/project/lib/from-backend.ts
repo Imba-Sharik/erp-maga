@@ -173,8 +173,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     ...('documents_confirmed_at' in b && b.documents_confirmed_at
       ? { documentsConfirmedAt: b.documents_confirmed_at }
       : {}),
-    // data_rejected пока есть только в ProjectDetailSchema; в списке появится с ERP-220.
-    ...('data_rejected' in b ? { dataRejected: Boolean(b.data_rejected) } : {}),
+    dataRejected: Boolean(b.data_rejected),
     ...(hasAnyEconomics(economics) ? { economics } : {}),
   }
 }
