@@ -2,9 +2,18 @@ const MONEY_FORMAT = new Intl.NumberFormat('ru-RU', {
   maximumFractionDigits: 0,
 })
 
+/**
+ * Деньги в системе — целые рубли. Единый округлитель, чтобы отображение (`formatMoney`)
+ * и редактируемый черновик (`MoneyInput`) округляли одинаково — иначе фокус на поле
+ * вскрывает дробь под округлённой «витриной».
+ */
+export function roundMoney(value: number): number {
+  return Math.round(value)
+}
+
 export function formatMoney(value: number): string {
   if (!Number.isFinite(value) || value === 0) return '0 ₽'
-  return `${MONEY_FORMAT.format(Math.round(value))} ₽`
+  return `${MONEY_FORMAT.format(roundMoney(value))} ₽`
 }
 
 export function formatPercent(value: number): string {

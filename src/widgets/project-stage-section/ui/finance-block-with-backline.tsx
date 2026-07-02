@@ -5,6 +5,7 @@ import {
   ARTICLE_LABELS,
   areFinanceAspectFieldsFilled,
   blockTotal,
+  createEmptyBacklineBlock,
   formatMoney,
   formatPercent,
   projectTotal,
@@ -203,7 +204,11 @@ interface FinanceBlockWithBacklineProps {
   taxRate: number | null
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onTaxRateChange: (rate: number | null) => void
+  /** Локальный флип бэклайна на текущем этапе (сохранится при переходе). */
   onToggleBackline: () => void
+  /** Добавить/удалить бэклайн на пройденном этапе через `/backline/` (POST/DELETE). */
+  onAddBackline?: () => Promise<void>
+  onRemoveBackline?: () => Promise<void>
   onAdvance?: () => void
   isAdvancing?: boolean
   hasDraftHighlight?: boolean
@@ -233,6 +238,8 @@ export function FinanceBlockWithBackline({
   onArticleChange,
   onTaxRateChange,
   onToggleBackline,
+  onAddBackline,
+  onRemoveBackline,
   onAdvance,
   isAdvancing,
   hasDraftHighlight,
@@ -276,6 +283,38 @@ export function FinanceBlockWithBackline({
   }
 
   const backlineAdded = articles.backline !== null
+
+  // Кнопки «Добавить/Удалить бэклайн»: на текущем этапе — локальный флип (бэк создаёт
+  // блок при переходе); на пройденном — отдельная ручка `/backline/` (POST/DELETE),
+  // т.к. без реального блока PATCH `/sales/` падает с `no_backline`. Структурное
+  // изменение задним числом коммитится сразу, поэтому синхронно ре-базируем снапшот
+  // отмены: «Отмена» откатывает правку значений, но не сам факт добавления/удаления.
+  const rebaselinePassedBackline = (present: boolean) => {
+    if (!snapshotRef.current) return
+    snapshotRef.current = {
+      ...snapshotRef.current,
+      articles: {
+        ...snapshotRef.current.articles,
+        backline: present
+          ? (snapshotRef.current.articles.backline ?? createEmptyBacklineBlock())
+          : null,
+      },
+    }
+  }
+
+  const handleToggleBackline = () => {
+    if (!editablePassed) {
+      onToggleBackline()
+      return
+    }
+    const wasAdded = backlineAdded
+    const action = wasAdded ? onRemoveBackline : onAddBackline
+    void action?.()
+      .then(() => rebaselinePassedBackline(!wasAdded))
+      .catch(() => {
+        /* ошибка уже показана тостом в useStageFlow — структуру не трогаем */
+      })
+  }
 
   const totalSales = projectTotal(articles, 'sales')
   const tax = taxAmount(totalSales, taxRate ?? 0)
@@ -408,7 +447,7 @@ export function FinanceBlockWithBackline({
                     value: formatMoney(mainTotal + tax),
                   }}
                 />,
-                editableCurrent ? (
+                backlineEditable ? (
                   <ActionField key="action">
                     {backlineAdded ? (
                       <button
@@ -422,7 +461,7 @@ export function FinanceBlockWithBackline({
                     ) : (
                       <button
                         type="button"
-                        onClick={onToggleBackline}
+                        onClick={handleToggleBackline}
                         className="text-funnel-preproject border-funnel-preproject hover:bg-funnel-preproject/15 bg-info-surface inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium"
                       >
                         <Plus className="size-3.5" />
@@ -452,11 +491,11 @@ export function FinanceBlockWithBackline({
                     value={formatMoney(backlineTotal)}
                     source="system"
                   />,
-                  editableCurrent ? (
+                  backlineEditable ? (
                     <ActionField key="bl-action">
                       <button
                         type="button"
-                        onClick={onToggleBackline}
+                        onClick={handleToggleBackline}
                         className="border-error-border bg-card text-error hover:bg-error-surface inline-flex h-9 w-fit cursor-pointer items-center gap-1.5 self-start rounded-[10px] border px-3 text-sm font-medium transition-colors"
                       >
                         <Trash2 className="size-3.5" />
