@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { formatMoney } from '@/entities/project-article'
+import { formatMoney, roundMoney } from '@/entities/project-article'
 import { cn } from '@/shared/lib/utils'
 import { Input } from '@/shared/ui/input'
 
@@ -18,7 +18,9 @@ function digitsOnly(input: string): string {
 
 function valueToDraft(value: number | null): string {
   if (value === null) return ''
-  return String(value)
+  // Округляем так же, как отображение (formatMoney): иначе фокус показал бы дробное
+  // «реальное» значение (55.4), а digitsOnly на blur схлопнул бы точку → 554.
+  return String(roundMoney(value))
 }
 
 /** Money-input для manager-полей: цифры фильтруются, форматирование пробелов + ₽ — в blur. */
