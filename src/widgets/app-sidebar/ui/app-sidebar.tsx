@@ -59,7 +59,19 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="overflow-hidden pt-1">
+    <Sidebar
+      variant="floating"
+      collapsible="icon"
+      className={cn(
+        // Плавающая скруглённая панель по редизайну (Figma 108:425): белый фон,
+        // рамка #d3d3d3 (border-medium), радиус 20px, без тени. Инсет оставляем
+        // дефолтный floating (p-2) — от него зависит расчёт ширины свёрнутого
+        // состояния, кастомный паддинг его ломает.
+        '**:data-[slot=sidebar-inner]:bg-card **:data-[slot=sidebar-inner]:rounded-[20px]',
+        '**:data-[slot=sidebar-inner]:border-border-medium **:data-[slot=sidebar-inner]:shadow-none',
+        '**:data-[slot=sidebar-inner]:overflow-hidden **:data-[slot=sidebar-inner]:pt-1',
+      )}
+    >
       <SidebarHeader>
         <div className="text-sidebar-accent-foreground flex w-full items-center gap-2">
           <MagLogo
