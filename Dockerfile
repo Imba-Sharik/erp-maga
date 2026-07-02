@@ -4,6 +4,10 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
+# git нужен, чтобы vite взял commit sha из .git при ручной сборке на сервере
+# (в CI sha приходит build-arg'ом VITE_APP_SHA и git не используется).
+RUN apk add --no-cache git
+
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
@@ -15,7 +19,8 @@ ARG VITE_APP_SHA
 ARG VITE_APP_BUILD_DATE
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_USE_MOCKS=$VITE_USE_MOCKS
-# .git не попадает в контекст сборки (.dockerignore) — SHA/дату штампа берём из CI.
+# Штамп: в CI VITE_APP_SHA приходит build-arg'ом; при ручной серверной сборке он
+# не задан — тогда vite берёт sha из .git (он в контексте, git установлен выше).
 ENV VITE_APP_SHA=$VITE_APP_SHA
 ENV VITE_APP_BUILD_DATE=$VITE_APP_BUILD_DATE
 
