@@ -41,16 +41,22 @@ export function taxAmount(totalSales: number, taxRate: number): number {
   return (totalSales * taxRate) / 100
 }
 
+/** Бонус — деньги: неотрицательное целое (округляем, минус → 0). */
+function normalizeBonus(amount: number): number {
+  return Math.max(0, Math.round(amount))
+}
+
 /**
- * Бонус по одной статье: при override руководителя — возвращает override (ручной ввод уже
- * ограничен неотрицательными целыми). Иначе авто-подстановка по формуле
- * `(sales − expense) × bonusPercent / 100`, округлённая до целого; отрицательная → 0.
+ * Бонус по одной статье: при override руководителя — приоритетен override, иначе
+ * авто-подстановка по формуле `(sales − expense) × bonusPercent / 100`. В обоих случаях
+ * нормализуем как деньги (`normalizeBonus`): формула может дать дробь/минус, а override
+ * с бэка (`mapBackendArticles`) — дробный `bonus_amount`, который иначе «вскроется»
+ * при фокусе на поле ввода.
  */
 export function articleBonusAmount(values: ArticleValues): number {
-  if (values.bonusAmount != null) return values.bonusAmount
+  if (values.bonusAmount != null) return normalizeBonus(values.bonusAmount)
   const netProfit = (values.sales ?? 0) - (values.expense ?? 0)
-  const formula = (netProfit * values.bonusPercent) / 100
-  return Math.max(0, Math.round(formula))
+  return normalizeBonus((netProfit * values.bonusPercent) / 100)
 }
 
 /** Итоговый бонус по проекту: сумма `articleBonusAmount` по всем статьям (main + backline, если есть). */

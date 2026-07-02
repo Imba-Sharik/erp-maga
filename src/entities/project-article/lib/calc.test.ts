@@ -35,6 +35,20 @@ describe('articleBonusAmount', () => {
     expect(articleBonusAmount(values)).toBe(0)
   })
 
+  it('дробный override округляет как деньги (бэк может прислать дробный bonus_amount)', () => {
+    // 55.4 → 55: без нормализации фокус на поле вскрыл бы дробь, а blur → 554.
+    expect(articleBonusAmount({ sales: 0, expense: 0, bonusPercent: 0, bonusAmount: 55.4 })).toBe(
+      55,
+    )
+    expect(articleBonusAmount({ sales: 0, expense: 0, bonusPercent: 0, bonusAmount: 55.5 })).toBe(
+      56,
+    )
+  })
+
+  it('отрицательный override превращает в 0', () => {
+    expect(articleBonusAmount({ sales: 0, expense: 0, bonusPercent: 0, bonusAmount: -10 })).toBe(0)
+  })
+
   it('нулевой процент даёт 0', () => {
     expect(articleBonusAmount({ sales: 1_000, expense: 0, bonusPercent: 0 })).toBe(0)
   })
