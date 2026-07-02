@@ -6,7 +6,9 @@ export {
 } from './event-type-options'
 export {
   CALENDAR_EVENT_TYPE_OPTIONS,
+  CALENDAR_EVENT_TYPE_TAG_CLASS,
   getCalendarEventTypeLabel,
+  getCalendarEventTypeTagClass,
   type CalendarEventType,
   type CalendarEventTypeOption,
 } from './calendar-event-type-options'
