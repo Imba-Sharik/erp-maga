@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { buildTelegramPhoneUrl } from '../lib/build-telegram-phone-url'
+import { dataRejectedCardClass } from '../lib/data-rejected-highlight'
 import { hallChipNames } from '../lib/map-project-halls'
 import { pluralHalls } from '../lib/plural'
 import { shouldShowPlumStatusLine } from '../lib/plum-status'
@@ -250,8 +251,10 @@ export function ProjectPipelineCard({
     <Card
       className={cn(
         'gap-2 p-3 shadow-none transition-colors',
-        hasDraft ? null : 'bg-surface-subtle-neutral',
-        stageCardBorderClass(hasDraft, 'border-border-medium hover:border-border-strong'),
+        hasDraft || project.dataRejected ? null : 'bg-surface-subtle-neutral',
+        // «Данные не приняты» (ERP-221) важнее черновика: красная обводка перебивает жёлтую.
+        dataRejectedCardClass(project.dataRejected) ??
+          stageCardBorderClass(hasDraft, 'border-border-medium hover:border-border-strong'),
       )}
     >
       <div className="flex items-center justify-between gap-2">

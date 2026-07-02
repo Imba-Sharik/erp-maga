@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/shared/ui/textarea'
 import {
   ALL_STAGE_LABELS,
+  DATA_REJECTED_HIGHLIGHT_CLASS,
   STAGE_FUNNEL,
   getStageFormSchema,
   resolveStageBlockEditable,
@@ -29,9 +30,15 @@ import { stageDraftActions, stageBlockBorderClass } from '@/entities/stage-draft
 import { useUserRole } from '@/entities/user-role'
 import type { StageRecord } from '@/features/advance-stage'
 import { canRollbackProject, RollbackStageButton } from '@/features/rollback-stage'
+import { useUpdateDataConfirmedStatus } from '@/features/update-data-confirmed-status'
 import { useUpdateDocumentStatus } from '@/features/update-document-status'
 import { cn } from '@/shared/lib/utils'
 
+import {
+  isDataConfirmedStatusField,
+  isDataRejectedStatus,
+  parseDataConfirmedStatus,
+} from '../lib/data-confirmed-status'
 import {
   confirmedAtLabelForDocStatus,
   FILE_NAME_TO_STATUS_FIELD,
@@ -141,6 +148,7 @@ export function StageSectionCurrent({
       : !readOnly && canEditField(stage, role, f, 'current')
   const currentUser = useCurrentUser()
   const { update: updateDocumentStatus } = useUpdateDocumentStatus()
+  const { update: updateDataConfirmedStatus } = useUpdateDataConfirmedStatus()
   const isMountRef = useRef(true)
 
   // ERP-208: откат на предыдущий этап — только Руководитель и только если этап не первый.
@@ -294,14 +302,37 @@ export function StageSectionCurrent({
     }
   }
 
-  const renderDocumentStatusSelect = (
+  /**
+   * Статус проверки данных (этап data_confirmed, ERP-221) — самостоятельное действие,
+   * как статусы документов у бухгалтерии: сохраняется сразу при выборе, а не при
+   * переходе этапа. Штампы `dataConfirmedBy/At` зеркалим локально вслед за бэком:
+   * `confirmed` фиксирует подтверждение от текущего пользователя, `rejected` снимает его.
+   */
+  const handleDataConfirmedStatusChange = (
+    onChangeValue: (value: string) => void,
+    value: string,
+  ) => {
+    onChangeValue(value)
+    const status = parseDataConfirmedStatus(value)
+    if (!status) return
+    const confirmed = status === 'confirmed'
+    onPatchValues?.({
+      dataConfirmedStatus: status,
+      dataConfirmedBy: confirmed ? currentUser.fullName : undefined,
+      dataConfirmedAt: confirmed ? new Date().toISOString() : undefined,
+    })
+    // В режимах правки прошлого этапа сохранение идёт кнопкой «Сохранить», не сразу.
+    if (!editingMode) {
+      updateDataConfirmedStatus({ projectId: project.id, status })
+    }
+  }
+
+  const renderStatusSelect = (
     f: StageFieldConfig,
-    field: { value: unknown; onChange: (value: string) => void },
+    fieldValue: unknown,
+    onValueChange: (value: string) => void,
   ) => (
-    <Select
-      value={(field.value as string) ?? ''}
-      onValueChange={(value) => handleDocumentStatusChange(f.name, field.onChange, value)}
-    >
+    <Select value={(fieldValue as string) ?? ''} onValueChange={onValueChange}>
       <SelectTrigger className="border-border-strong h-9 w-full rounded-[10px] text-sm">
         <SelectValue placeholder={f.placeholder ?? 'Выберите…'} />
       </SelectTrigger>
@@ -314,6 +345,14 @@ export function StageSectionCurrent({
       </SelectContent>
     </Select>
   )
+
+  const renderDocumentStatusSelect = (
+    f: StageFieldConfig,
+    field: { value: unknown; onChange: (value: string) => void },
+  ) =>
+    renderStatusSelect(f, field.value, (value) =>
+      handleDocumentStatusChange(f.name, field.onChange, value),
+    )
 
   const renderField = (f: StageFieldConfig) => {
     const fieldEditable = resolveFieldEditable(f)
@@ -400,6 +439,10 @@ export function StageSectionCurrent({
                     <div className="min-w-0 flex-1">{renderDocumentStatusSelect(f, field)}</div>
                     <div className="min-w-0 flex-1">{renderAccountantDocumentUpload(f.name)}</div>
                   </div>
+                ) : isDataConfirmedStatusField(stage, f.name) ? (
+                  renderStatusSelect(f, field.value, (value) =>
+                    handleDataConfirmedStatusChange(field.onChange, value),
+                  )
                 ) : (
                   renderDocumentStatusSelect(f, field)
                 )
@@ -446,6 +489,9 @@ export function StageSectionCurrent({
     edit: 'Редактирование этапа:',
   }
   const headerLabel = editingMode ? EDITING_HEADER_LABEL[editingMode] : 'Текущий этап:'
+  // «Не приняты» на data_confirmed — системная пауза (ERP-221): переход к бонусу
+  // недоступен, блок этапа подсвечен.
+  const dataRejected = !editingMode && isDataRejectedStatus(stage, mergedValues.dataConfirmedStatus)
   const advanceLabel =
     stage === 'contract_signed'
       ? 'Готов к проведению'
@@ -459,7 +505,7 @@ export function StageSectionCurrent({
     <div
       className={cn(
         'bg-card @container flex w-full flex-col gap-4 rounded-[15px] border p-2.5 @xl:p-5',
-        stageBlockBorderClass(hasDraftHighlight),
+        dataRejected ? DATA_REJECTED_HIGHLIGHT_CLASS : stageBlockBorderClass(hasDraftHighlight),
       )}
     >
       <div className="flex flex-col-reverse items-stretch gap-3 @xl:flex-row @xl:flex-wrap @xl:items-center @xl:justify-between">
@@ -488,10 +534,10 @@ export function StageSectionCurrent({
               Сохранить
             </Button>
           </div>
-        ) : canRollback || (canAdvance && stage !== 'closed') ? (
+        ) : canRollback || (canAdvance && stage !== 'closed' && !dataRejected) ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             <RollbackStageButton project={project} readOnly={readOnly} />
-            {canAdvance && stage !== 'closed' ? (
+            {canAdvance && stage !== 'closed' && !dataRejected ? (
               <Button
                 type="button"
                 onClick={handleAdvance}

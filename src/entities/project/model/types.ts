@@ -119,6 +119,12 @@ export interface Project {
   archivedAt?: string
   /** ISO-datetime подтверждения документов бухгалтером (этап documents_confirmed). */
   documentsConfirmedAt?: string
+  /**
+   * Руководитель не принял данные на этапе data_confirmed (`data_rejected`) —
+   * системная пауза: переход на «Бонус рассчитан» закрыт, проект подсвечивается.
+   * Приходит и в списке, и в деталке; нет только в календарной схеме.
+   */
+  dataRejected?: boolean
 }
 
 export type ContractType = 'with_vat' | 'without_vat'

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import type { ManagerSelectOption } from '@/entities/manager'
 import {
+  dataRejectedRowClass,
   getOutsideMagReasonLabel,
   projectDetailPath,
   ProjectPlumStatusTableCell,
@@ -43,6 +44,8 @@ interface ProjectTableNavRowProps {
   gridTemplate: string
   goToDetail: () => void
   hasDraft?: boolean
+  /** «Данные не приняты» (ERP-221) — красная подсветка, важнее жёлтой черновиковой. */
+  dataRejected?: boolean
   children: ReactNode
 }
 
@@ -50,6 +53,7 @@ function ProjectTableNavRow({
   gridTemplate,
   goToDetail,
   hasDraft,
+  dataRejected,
   children,
 }: ProjectTableNavRowProps) {
   return (
@@ -60,7 +64,9 @@ function ProjectTableNavRow({
       tabIndex={0}
       onClick={goToDetail}
       onKeyDown={(e) => handleRowKeyDown(e, goToDetail)}
-      className={stageRowHighlightClass(hasDraft)}
+      className={
+        dataRejected ? dataRejectedRowClass(dataRejected) : stageRowHighlightClass(hasDraft)
+      }
     >
       {children}
     </GridTableRow>
@@ -129,7 +135,12 @@ export function ProjectsTableRow({
 
   if (columnView === 'outside-mag') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -155,7 +166,12 @@ export function ProjectsTableRow({
 
   if (columnView === 'general') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -179,7 +195,12 @@ export function ProjectsTableRow({
 
   if (columnView === 'closing-active') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectHallCell project={project} />
@@ -197,7 +218,12 @@ export function ProjectsTableRow({
 
   if (columnView === 'closing-general') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -219,7 +245,12 @@ export function ProjectsTableRow({
 
   if (columnView === 'closing-economics') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
         </div>
@@ -240,7 +271,12 @@ export function ProjectsTableRow({
   // Запросы / Закрытые запросы (ЛК бухгалтера) — менеджер без редактирования.
   if (columnView === 'requests') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -257,7 +293,12 @@ export function ProjectsTableRow({
 
   if (columnView === 'closed-requests') {
     return (
-      <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+      <ProjectTableNavRow
+        gridTemplate={gridTemplate}
+        goToDetail={goToDetail}
+        hasDraft={hasDraft}
+        dataRejected={project.dataRejected}
+      >
         <div className="contents">
           <ProjectTitleCell project={project} />
           <ProjectLoftCell project={project} />
@@ -276,7 +317,12 @@ export function ProjectsTableRow({
   }
 
   return (
-    <ProjectTableNavRow gridTemplate={gridTemplate} goToDetail={goToDetail} hasDraft={hasDraft}>
+    <ProjectTableNavRow
+      gridTemplate={gridTemplate}
+      goToDetail={goToDetail}
+      hasDraft={hasDraft}
+      dataRejected={project.dataRejected}
+    >
       <div className="contents">
         <ProjectTitleCell project={project} />
       </div>

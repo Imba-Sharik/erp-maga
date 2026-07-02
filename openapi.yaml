@@ -1756,6 +1756,64 @@ paths:
               schema:
                 $ref: '#/components/schemas/PipelineError'
           description: ''
+  /api/v1/projects/{id}/data-confirmation/:
+    patch:
+      operationId: projects_data_confirmation_partial_update
+      description: 'Доступно только Руководителю (`lead`) на этапе `data_confirmed`.
+        `rejected` — системная пауза: статус сохранён, назначенному менеджеру MAG
+        уходит ERP-уведомление (без Telegram), переход на `bonus_calculated` запрещён;
+        этап НЕ меняется и не откатывается. `confirmed` — снимает паузу, переход к
+        бонусу разрешён. Это отдельное действие, а не переход этапа (воронку не двигает).'
+      summary: Статус проверки данных (Руководитель, data_confirmed)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDataConfirmationUpdateRequest'
+            examples:
+              ДанныеНеПриняты:
+                value:
+                  status: rejected
+                summary: Данные не приняты
+              ДанныеПодтверждены:
+                value:
+                  status: confirmed
+                summary: Данные подтверждены
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDataConfirmationUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDataConfirmationUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataConfirmationSchema'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineError'
+          description: ''
   /api/v1/projects/{id}/documents/:
     patch:
       operationId: projects_documents_partial_update
@@ -2372,7 +2430,6 @@ paths:
               DataConfirmed→BonusCalculated:
                 value:
                   to_stage: bonus_calculated
-                  data_confirmed_status: confirmed
                 summary: data_confirmed → bonus_calculated
               BonusCalculated→BonusApproved:
                 value:
@@ -2392,10 +2449,10 @@ paths:
                 value:
                   to_stage: closed
                 summary: bonus_approved → closed
-              RejectData(откатДанных):
+              RejectData(пауза«ДанныеНеПриняты»,БезОткатаСтадии):
                 value:
                   to_stage: reject_data
-                summary: reject_data (откат данных)
+                summary: reject_data (пауза «Данные не приняты», без отката стадии)
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ProjectTransitionRequest'
@@ -2534,7 +2591,6 @@ paths:
               DataConfirmed→BonusCalculated:
                 value:
                   to_stage: bonus_calculated
-                  data_confirmed_status: confirmed
                 summary: data_confirmed → bonus_calculated
               BonusCalculated→BonusApproved:
                 value:
@@ -2554,10 +2610,10 @@ paths:
                 value:
                   to_stage: closed
                 summary: bonus_approved → closed
-              RejectData(откатДанных):
+              RejectData(пауза«ДанныеНеПриняты»,БезОткатаСтадии):
                 value:
                   to_stage: reject_data
-                summary: reject_data (откат данных)
+                summary: reject_data (пауза «Данные не приняты», без отката стадии)
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ProjectTransitionRequest'
@@ -3517,6 +3573,25 @@ components:
           type: string
         comment:
           type: string
+    DataConfirmationSchema:
+      type: object
+      properties:
+        data_confirmed_status:
+          enum:
+          - confirmed
+          - rejected
+          - null
+          type: string
+          description: |-
+            * `confirmed` - confirmed
+            * `rejected` - rejected
+          x-spec-enum-id: c1eb6617a9413969
+          nullable: true
+        data_rejected:
+          type: boolean
+      required:
+      - data_confirmed_status
+      - data_rejected
     DocumentStatusItemRequest:
       type: object
       properties:
@@ -4395,6 +4470,10 @@ components:
           x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
           title: Последняя активная стадия
+        data_rejected:
+          type: boolean
+          readOnly: true
+          title: Данные не приняты руководителем
         source_payload:
           readOnly: true
           title: Последний payload Plum
@@ -4436,6 +4515,7 @@ components:
       - city
       - city_labels
       - created_at
+      - data_rejected
       - event_date
       - event_date_locked
       - event_format
@@ -4663,6 +4743,20 @@ components:
           type: string
         contract_comment:
           type: string
+    PatchedDataConfirmationUpdateRequest:
+      type: object
+      description: PATCH /projects/{id}/data-confirmation/ — статус проверки данных
+        Руководителем.
+      properties:
+        status:
+          enum:
+          - confirmed
+          - rejected
+          type: string
+          description: |-
+            * `confirmed` - confirmed
+            * `rejected` - rejected
+          x-spec-enum-id: c1eb6617a9413969
     PatchedDocumentsUpdateRequest:
       type: object
       properties:
@@ -5024,6 +5118,10 @@ components:
           type: boolean
           description: Можно PATCH /projects/{id}/bonus/ (lead на достигнутой стадии
             bonus_calculated при наличии расчёта) — правка бонуса по статьям.
+        can_set_data_confirmation:
+          type: boolean
+          description: Можно PATCH /projects/{id}/data-confirmation/ (lead на стадии
+            data_confirmed) — статус проверки данных «confirmed»/«rejected».
         can_claim:
           type: boolean
           description: Менеджер может взять проект из пула (PATCH mag_manager_id =
@@ -5057,6 +5155,7 @@ components:
       - can_edit_expenses
       - can_edit_primary_contact
       - can_edit_sales
+      - can_set_data_confirmation
       - data_rejected
       - is_read_only
       - last_active_stage
@@ -5454,6 +5553,10 @@ components:
           x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
           title: Последняя активная стадия
+        data_rejected:
+          type: boolean
+          readOnly: true
+          title: Данные не приняты руководителем
         source_payload:
           readOnly: true
           title: Последний payload Plum
@@ -5477,6 +5580,7 @@ components:
       - city
       - city_labels
       - created_at
+      - data_rejected
       - event_date
       - event_date_locked
       - event_format
@@ -6117,6 +6221,9 @@ components:
           x-spec-enum-id: 25e705ebe72e127b
           readOnly: true
           title: Последняя активная стадия
+        data_rejected:
+          type: boolean
+          readOnly: true
         source_payload:
           readOnly: true
           title: Последний payload Plum
@@ -6400,9 +6507,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/UserBrief'
           nullable: true
-          readOnly: true
-        data_rejected:
-          type: boolean
           readOnly: true
         was_not_ready_for_event:
           type: boolean
@@ -6755,7 +6859,7 @@ components:
           - reject_data
           - return_from_out_of_mag
           type: string
-          x-spec-enum-id: 69e1ee0236235aae
+          x-spec-enum-id: 1c8cad51d9ad9847
           description: |-
             Следующая стадия или действие: reject_data, return_from_out_of_mag
 
@@ -6774,7 +6878,7 @@ components:
             * `closed` - Проект закрыт
             * `archived` - Архив
             * `out_of_mag_scope` - Вне контура MAG
-            * `reject_data` - Отклонить данные (откат)
+            * `reject_data` - Отклонить данные (пауза, без отката стадии)
             * `return_from_out_of_mag` - Вернуть из «Вне контура MAG»
         target_stage:
           enum:
@@ -6796,7 +6900,7 @@ components:
           - reject_data
           - return_from_out_of_mag
           type: string
-          x-spec-enum-id: 69e1ee0236235aae
+          x-spec-enum-id: 1c8cad51d9ad9847
           description: |-
             Alias для to_stage. При return_from_out_of_mag обязателен и задаёт стадию возврата: только предпроектный этап не позже last_active_stage. Данные этапов строго после target_stage до last_active_stage удаляются (как при откате: договор, расчёт продаж и т.д. — по цепочке rollback).
 
@@ -6815,7 +6919,7 @@ components:
             * `closed` - Проект закрыт
             * `archived` - Архив
             * `out_of_mag_scope` - Вне контура MAG
-            * `reject_data` - Отклонить данные (откат)
+            * `reject_data` - Отклонить данные (пауза, без отката стадии)
             * `return_from_out_of_mag` - Вернуть из «Вне контура MAG»
         client_company:
           type: string
@@ -6943,15 +7047,6 @@ components:
             * `not_required` - not_required
           x-spec-enum-id: ed4d6536636ecea2
           nullable: true
-        data_confirmed_status:
-          enum:
-          - confirmed
-          - rejected
-          type: string
-          description: |-
-            * `confirmed` - confirmed
-            * `rejected` - rejected
-          x-spec-enum-id: c1eb6617a9413969
         approved_bonus:
           type: string
           format: decimal

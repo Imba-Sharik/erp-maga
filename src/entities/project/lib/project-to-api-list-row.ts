@@ -69,5 +69,6 @@ export function projectToApiListRow(project: Project): ApiProject {
     updated_at: project.updatedAt,
     created_at: project.createdAt,
     is_from_plum: project.isFromPlum,
+    data_rejected: Boolean(project.dataRejected),
   } as ApiProject & { is_from_plum?: boolean }
 }

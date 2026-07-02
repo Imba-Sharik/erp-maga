@@ -173,6 +173,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     ...('documents_confirmed_at' in b && b.documents_confirmed_at
       ? { documentsConfirmedAt: b.documents_confirmed_at }
       : {}),
+    dataRejected: Boolean(b.data_rejected),
     ...(hasAnyEconomics(economics) ? { economics } : {}),
   }
 }

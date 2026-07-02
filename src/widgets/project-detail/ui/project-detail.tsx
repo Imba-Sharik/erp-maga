@@ -17,6 +17,7 @@ import { ProjectDetailAside } from '@/widgets/project-detail-aside'
 import { ProjectDocuments } from '@/widgets/project-documents'
 import { ProjectReminders } from '@/widgets/project-reminders'
 
+import { ProjectDataRejectedBanner } from './project-data-rejected-banner'
 import { ProjectDetailMainCard } from './project-detail-main-card'
 import { ProjectDetailStages } from './project-detail-stages'
 import { ProjectDetailTabsRow } from './project-detail-tabs-row'
@@ -32,6 +33,9 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
   // Руководителю (director) баннер не показываем (ERP-197): он и так открывает любой
   // проект в режиме просмотра, и подпись про «другого менеджера» для него — лишний шум.
   const showReadOnlyBanner = readOnly && Boolean(project.manager) && currentUser.role !== 'director'
+  // «Данные не приняты» (ERP-221) — сигнал менеджеру. Руководителю не показываем:
+  // он управляет статусом в блоке этапа и видит его там же (как с read-only баннером).
+  const showDataRejectedBanner = Boolean(project.dataRejected) && currentUser.role !== 'director'
   const showOutsideMagButton =
     STAGE_FUNNEL[project.stage] === 'pre_project' && !isOutsideMagStage(project.stage) && !readOnly
 
@@ -57,6 +61,7 @@ export function ProjectDetail({ project }: { project: ProjectDetailEntity }) {
       <div className="grid grid-cols-1 items-start gap-5 @[1200px]:grid-cols-[minmax(0,1fr)_405px]">
         <div className="flex w-full min-w-0 flex-col gap-4">
           <ProjectDetailMainCard project={project} currentStage={flow.currentStage} />
+          {showDataRejectedBanner ? <ProjectDataRejectedBanner /> : null}
           {showReadOnlyBanner ? <ProjectReadOnlyBanner /> : null}
           <ProjectDetailTabsRow
             showOutsideMagButton={showOutsideMagButton}
