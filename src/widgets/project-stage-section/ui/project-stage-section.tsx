@@ -160,6 +160,8 @@ export function ProjectStageSection({
           onArticleChange={onArticleChange}
           onAdvance={onAdvance}
           isAdvancing={isAdvancing}
+          onReplaceArticles={onReplaceArticles}
+          onSavePassed={editPassedHandler ? () => editPassedHandler({}) : undefined}
         />
       </StageSectionDraftFrame>
     )

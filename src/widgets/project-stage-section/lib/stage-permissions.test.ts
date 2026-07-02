@@ -15,13 +15,6 @@ const systemField: StageFieldConfig = {
   type: 'date',
   source: 'system',
 }
-const passedReadOnlyField: StageFieldConfig = {
-  name: 'clientCompany',
-  label: '',
-  type: 'text',
-  source: 'manager',
-  passedReadOnly: true,
-}
 const accountantOnlyField: StageFieldConfig = {
   name: 'projectDocsStatus',
   label: '',
@@ -48,10 +41,6 @@ describe('canEditField — passed (блок-гейт у бэка, здесь л�
   it('ролевая матрица этапа НЕ применяется (блок уже разрешил бэк-флаг)', () => {
     // accountant нет в editCurrent contract_signed, но passed-гейт это не смотрит.
     expect(canEditField('contract_signed', 'accountant', managerField, 'passed')).toBe(true)
-  })
-
-  it('passedReadOnly-поле нельзя править задним числом (block-ручка его не персистит)', () => {
-    expect(canEditField('plum_request', 'director', passedReadOnlyField, 'passed')).toBe(false)
   })
 
   it('системные поля не правит никто и в passed', () => {

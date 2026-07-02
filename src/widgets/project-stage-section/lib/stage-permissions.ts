@@ -21,7 +21,6 @@ export function canEditField(
   context: 'current' | 'passed' = 'current',
 ): boolean {
   if (context === 'current' && !canEditCurrentStage(stage, role)) return false
-  if (context === 'passed' && field.passedReadOnly) return false
   if (field.source === 'system') return false
   const editRoles = field.editRoles ?? field.roles
   if (editRoles && !editRoles.includes(role)) return false

@@ -450,6 +450,8 @@ export function mapBackendProjectDetail(
     canEditExpenses: Boolean(pipeline?.can_edit_expenses),
     canEditPrimaryContact: Boolean(pipeline?.can_edit_primary_contact),
     canEditCalculation: Boolean(pipeline?.can_edit_calculation),
+    canEditEventHeld: Boolean(pipeline?.can_edit_event_held),
+    canEditBonus: Boolean(pipeline?.can_edit_bonus),
     enteredSystemAt: b.created_at,
     isFromPlum: base.isFromPlum,
     plumId: b.plum_event_id,

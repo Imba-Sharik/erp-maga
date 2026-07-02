@@ -28,12 +28,6 @@ export interface StageFieldConfig {
   roles?: readonly StageFieldRole[]
   /** Кто может редактировать; по умолчанию совпадает с `roles`. */
   editRoles?: readonly StageFieldRole[]
-  /**
-   * Поле нельзя править ЗАДНИМ числом: на текущем этапе оно вводится и сохраняется
-   * через переход, но block-ручка правки пройденного этапа его не персистит
-   * (напр. идентификация клиента plum_request — `/client/` принимает лишь mag_comment).
-   */
-  passedReadOnly?: boolean
   /** Тип документа в API (для загрузки файлов). */
   documentType?: StageDocumentType
   /** Подпись кнопки прикрепления (для `type: 'estimate'` / документов). */
@@ -76,7 +70,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'text',
       source: 'manager',
       required: true,
-      passedReadOnly: true,
     },
     {
       name: 'phone',
@@ -84,7 +77,6 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'phone',
       source: 'manager',
       required: true,
-      passedReadOnly: true,
     },
     {
       name: 'createdAt',
@@ -98,14 +90,12 @@ export const STAGE_FIELDS: Record<ProjectStage, StageFieldConfig[]> = {
       type: 'text',
       source: 'manager',
       required: true,
-      passedReadOnly: true,
     },
     {
       name: 'email',
       label: 'Email',
       type: 'text',
       source: 'manager',
-      passedReadOnly: true,
     },
     {
       name: 'magComment',

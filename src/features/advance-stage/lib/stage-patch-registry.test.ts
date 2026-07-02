@@ -6,7 +6,7 @@ import { createInitialArticles } from '@/entities/project-article'
 import { isStagePatchable, STAGE_PATCH_ADAPTERS } from './stage-patch-registry'
 
 describe('isStagePatchable', () => {
-  it('маршруты есть у заявки, первичного контакта, расчёта, договора, продаж и расходов', () => {
+  it('маршруты есть у всех редактируемых руководителем блоков', () => {
     for (const stage of [
       'plum_request',
       'primary_contact_done',
@@ -14,6 +14,8 @@ describe('isStagePatchable', () => {
       'contract_signed',
       'ready_to_event',
       'expenses_entered',
+      'event_held',
+      'bonus_calculated',
     ] as ProjectStage[]) {
       expect(isStagePatchable(stage)).toBe(true)
     }
@@ -21,9 +23,9 @@ describe('isStagePatchable', () => {
 
   it('этапы без серверной ручки непатчабельны', () => {
     for (const stage of [
-      'event_held',
       'documents_confirmed',
-      'bonus_calculated',
+      'data_confirmed',
+      'bonus_approved',
       'closed',
     ] as ProjectStage[]) {
       expect(isStagePatchable(stage)).toBe(false)
@@ -77,5 +79,27 @@ describe('STAGE_PATCH_ADAPTERS.buildBody', () => {
       taxRate: null,
     })
     expect(body).toMatchObject({ comment: 'уточнил смету' })
+  })
+
+  it('event_held собирает тело из комментария после мероприятия', () => {
+    const body = STAGE_PATCH_ADAPTERS.event_held?.buildBody({
+      values: { postEventComment: 'прошло отлично' },
+      articles: createInitialArticles(),
+      taxRate: null,
+    })
+    expect(body).toMatchObject({ post_event_comment: 'прошло отлично' })
+  })
+
+  it('bonus_calculated собирает override бонуса по статьям', () => {
+    const articles = createInitialArticles()
+    articles.main.equipment.bonusAmount = 5000
+    const body = STAGE_PATCH_ADAPTERS.bonus_calculated?.buildBody({
+      values: {},
+      articles,
+      taxRate: null,
+    })
+    expect(body).toMatchObject({
+      articles: [{ block: 'main', kind: 'equipment', bonus_amount: '5000.00' }],
+    })
   })
 })

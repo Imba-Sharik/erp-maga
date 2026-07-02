@@ -1,8 +1,10 @@
-import { ChevronDown, CircleDollarSign, TrendingDown } from 'lucide-react'
+import { ChevronDown, CircleDollarSign, Pencil, TrendingDown } from 'lucide-react'
+import { useRef } from 'react'
 
 import { useUserRole } from '@/entities/user-role'
 import { canEditCurrentStage, type ProjectDetail, type StageFormData } from '@/entities/project'
 import { RollbackStageButton } from '@/features/rollback-stage'
+import { Button } from '@/shared/ui/button'
 import {
   ARTICLE_LABELS,
   BACKLINE_ARTICLE_KINDS,
@@ -19,6 +21,7 @@ import type { StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 
+import { usePassedEditToggle } from '../lib/use-passed-edit-toggle'
 import { MoneyInput } from './money-input'
 import { StageBlockShell } from './stage-block-shell'
 import { StageField } from './stage-field'
@@ -122,6 +125,13 @@ interface StagePassedBonusProps {
   onAdvance?: (values?: Partial<StageFormData>) => void
   isAdvancing?: boolean
   hasDraftHighlight?: boolean
+  /**
+   * Сохранить правку бонуса задним числом (PATCH). Задано — на пройденной секции
+   * появляется «Редактировать»; суммы берутся из общего `articles` (см. useStageFlow).
+   */
+  onSavePassed?: () => void
+  /** Восстановить статьи при отмене инлайн-правки пройденного этапа. */
+  onReplaceArticles?: (next: ProjectArticles) => void
 }
 
 export function StagePassedBonus({
@@ -134,10 +144,32 @@ export function StagePassedBonus({
   onAdvance,
   isAdvancing,
   hasDraftHighlight,
+  onSavePassed,
+  onReplaceArticles,
 }: StagePassedBonusProps) {
   const role = useUserRole()
   const canEdit = canEditCurrentStage('bonus_calculated', role)
-  const editable = !presentation.readOnly && canEdit && isCurrent
+  // Правка на текущем этапе (роль) либо задним числом Руководителем (серверный флаг →
+  // onSavePassed от родителя + активный режим правки).
+  const passedEdit = usePassedEditToggle()
+  const editablePassed = !isCurrent && Boolean(onSavePassed) && passedEdit.editing
+  const editable = (!presentation.readOnly && canEdit && isCurrent) || editablePassed
+
+  const snapshotRef = useRef<ProjectArticles | null>(null)
+  const handleStartPassedEdit = () => {
+    snapshotRef.current = articles
+    passedEdit.startEdit()
+  }
+  const handleCancelPassedEdit = () => {
+    if (snapshotRef.current) onReplaceArticles?.(snapshotRef.current)
+    snapshotRef.current = null
+    passedEdit.cancelEdit()
+  }
+  const handleSavePassedEdit = () => {
+    snapshotRef.current = null
+    onSavePassed?.()
+    passedEdit.finishEdit()
+  }
 
   const rows = buildBonusRows(articles)
   const mainRows = rows.filter((row) => row.block === 'main')
@@ -152,6 +184,39 @@ export function StagePassedBonus({
   const handleBonusChange = (block: ArticleBlock, kind: ArticleKind, amount: number) => {
     onArticleChange(block, kind, { bonusAmount: amount })
   }
+
+  const passedEditActions =
+    !isCurrent && Boolean(onSavePassed) ? (
+      passedEdit.editing ? (
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancelPassedEdit}
+            className="border-border-strong h-[38px] rounded-[10px] px-4 text-sm"
+          >
+            Отмена
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSavePassedEdit}
+            className="h-[38px] rounded-[10px] px-4 text-sm"
+          >
+            Сохранить
+          </Button>
+        </>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleStartPassedEdit}
+          className="border-border-strong bg-card h-[38px] rounded-[10px] px-4 text-sm"
+        >
+          <Pencil className="size-3.5" />
+          Редактировать
+        </Button>
+      )
+    ) : undefined
 
   return (
     <StageBlockShell
@@ -170,7 +235,9 @@ export function StagePassedBonus({
       headerActions={
         isCurrent ? (
           <RollbackStageButton project={project} readOnly={presentation.readOnly} />
-        ) : undefined
+        ) : (
+          passedEditActions
+        )
       }
     >
       <Collapsible defaultOpen className="flex flex-col">

@@ -3,6 +3,7 @@ import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { projectsAuditLogListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsAuditLogList'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsOutOfMagListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsOutOfMagList'
+import { projectsPipelineRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsPipelineRetrieve'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
 import type { PaginatedOutOfMagProjectList } from '@/shared/api/generated/types/PaginatedOutOfMagProjectList'
 import { invalidateKanbanBoardQueries } from '../projects-kanban'
@@ -36,6 +37,9 @@ export function invalidateProjectAfterTransition(
   projectId: number,
 ): void {
   queryClient.invalidateQueries({ queryKey: projectsRetrieveQueryKey(projectId) })
+  // Pipeline-state — источник per-block флагов can_edit_*: без инвалидации после
+  // перехода/отката видимость кнопок «Редактировать» протухает до ремаунта.
+  queryClient.invalidateQueries({ queryKey: projectsPipelineRetrieveQueryKey(projectId) })
   queryClient.invalidateQueries({ queryKey: projectsAuditLogListQueryKey(projectId) })
   invalidateProjectsListQueries(queryClient)
   invalidateOutsideMagQueries(queryClient)

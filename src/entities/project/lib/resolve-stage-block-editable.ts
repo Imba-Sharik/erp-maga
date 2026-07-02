@@ -9,6 +9,8 @@ type BlockEditFlags = Pick<
   | 'canEditExpenses'
   | 'canEditPrimaryContact'
   | 'canEditCalculation'
+  | 'canEditEventHeld'
+  | 'canEditBonus'
 >
 
 /**
@@ -22,6 +24,8 @@ type BlockEditFlags = Pick<
  * - `contract_signed`    → договор
  * - `ready_to_event`     → продажи
  * - `expenses_entered`   → расходы
+ * - `event_held`         → комментарий после мероприятия
+ * - `bonus_calculated`   → бонус по статьям
  *
  * Этапы без block-ручки (нет PATCH-маршрута) → `undefined`: правка задним числом для
  * них не предусмотрена (синхронно с {@link isStagePatchable}).
@@ -43,6 +47,10 @@ export function resolveStageBlockEditable(
       return project.canEditSales
     case 'expenses_entered':
       return project.canEditExpenses
+    case 'event_held':
+      return project.canEditEventHeld
+    case 'bonus_calculated':
+      return project.canEditBonus
     default:
       return undefined
   }
