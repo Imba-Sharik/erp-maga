@@ -46,6 +46,9 @@ interface ProjectStageSectionProps {
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
+  /** Добавить/удалить бэклайн задним числом (POST/DELETE `/backline/`) на пройденном этапе. */
+  onAddBackline: () => Promise<void>
+  onRemoveBackline: () => Promise<void>
   /** Заменить статьи целиком — для отмены инлайн-правки финансового этапа. */
   onReplaceArticles: (next: ProjectArticles) => void
   /** Получить запись произвольного этапа (например, `data_confirmed` для отображения «Кто подтвердил» на этапе бонуса). */
@@ -68,6 +71,8 @@ export function ProjectStageSection({
   onArticleChange,
   onTaxRateChange,
   onToggleBackline,
+  onAddBackline,
+  onRemoveBackline,
   onReplaceArticles,
   getRecord,
 }: ProjectStageSectionProps) {
@@ -98,6 +103,8 @@ export function ProjectStageSection({
     onArticleChange,
     onTaxRateChange,
     onToggleBackline,
+    onAddBackline,
+    onRemoveBackline,
     onReplaceArticles,
     onAdvance: () => onAdvance(),
     isAdvancing,

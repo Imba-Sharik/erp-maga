@@ -17,6 +17,8 @@ import { stageDraftActions } from '@/entities/stage-draft'
 import { getTransitionErrorMessage, invalidateProjectAfterTransition } from '@/shared/api'
 import { projectsListQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsList'
 import { projectsRetrieveQueryKey } from '@/shared/api/generated/hooks/projectsController/useProjectsRetrieve'
+import { useProjectsBacklineCreate } from '@/shared/api/generated/hooks/projectsController/useProjectsBacklineCreate'
+import { useProjectsBacklineDestroy } from '@/shared/api/generated/hooks/projectsController/useProjectsBacklineDestroy'
 import { useProjectsBonusPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsBonusPartialUpdate'
 import { useProjectsCalculationPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsCalculationPartialUpdate'
 import { useProjectsClientPartialUpdate } from '@/shared/api/generated/hooks/projectsController/useProjectsClientPartialUpdate'
@@ -77,7 +79,16 @@ export interface StageFlow {
   taxRate: number | null
   updateArticle: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   setTaxRate: (rate: number | null) => void
+  /** Локальный флип бэклайна на ТЕКУЩЕМ этапе — бэк создаёт блок при переходе (transition). */
   toggleBackline: () => void
+  /**
+   * Добавить/удалить бэклайн на ПРОЙДЕННОМ этапе. Структура бэклайна — отдельный ресурс
+   * бэка (POST/DELETE `/backline/`), поэтому правка задним числом требует реального
+   * создания блока (иначе PATCH `/sales/` падает с `no_backline`). Промис резолвится
+   * на успехе — вызывающий может, например, ре-базировать снапшот отмены.
+   */
+  addBackline: () => Promise<void>
+  removeBackline: () => Promise<void>
   /** Заменить статьи целиком — для отмены инлайн-правки финансового этапа (restore snapshot). */
   replaceArticles: (next: ProjectArticles) => void
 }
@@ -176,6 +187,8 @@ export function useStageFlow({
   const calculationPatchMutation = useProjectsCalculationPartialUpdate()
   const eventHeldPatchMutation = useProjectsEventHeldPartialUpdate()
   const bonusPatchMutation = useProjectsBonusPartialUpdate()
+  const backlineCreateMutation = useProjectsBacklineCreate()
+  const backlineDestroyMutation = useProjectsBacklineDestroy()
   // Черновик с прошлого визита — только свой (по пользователю) и только если этап не сменился.
   const initialDraft = useMemo(() => {
     const draft =
@@ -504,6 +517,47 @@ export function useStageFlow({
     }))
   }, [])
 
+  // Правка задним числом: бэклайн — отдельный ресурс, POST/DELETE `/backline/`. Бэк
+  // создаёт/удаляет пару блоков (sales + expense); на успехе оптимистично флипаем
+  // локальные статьи и инвалидируем проект. Без projectId — только локальный флип.
+  const addBackline = useCallback((): Promise<void> => {
+    if (projectId === undefined) {
+      setArticles((prev) =>
+        prev.backline ? prev : { ...prev, backline: createEmptyBacklineBlock() },
+      )
+      return Promise.resolve()
+    }
+    return backlineCreateMutation
+      .mutateAsync({ id: projectId, data: { id: projectId } })
+      .then(() => {
+        setArticles((prev) =>
+          prev.backline ? prev : { ...prev, backline: createEmptyBacklineBlock() },
+        )
+        invalidateProjectAfterTransition(queryClient, projectId)
+      })
+      .catch((error: unknown) => {
+        toast.error(getTransitionErrorMessage(error, 'Не удалось добавить бэклайн'))
+        throw error
+      })
+  }, [projectId, queryClient, backlineCreateMutation])
+
+  const removeBackline = useCallback((): Promise<void> => {
+    if (projectId === undefined) {
+      setArticles((prev) => (prev.backline ? { ...prev, backline: null } : prev))
+      return Promise.resolve()
+    }
+    return backlineDestroyMutation
+      .mutateAsync({ id: projectId })
+      .then(() => {
+        setArticles((prev) => ({ ...prev, backline: null }))
+        invalidateProjectAfterTransition(queryClient, projectId)
+      })
+      .catch((error: unknown) => {
+        toast.error(getTransitionErrorMessage(error, 'Не удалось удалить бэклайн'))
+        throw error
+      })
+  }, [projectId, queryClient, backlineDestroyMutation])
+
   const replaceArticles = useCallback((next: ProjectArticles) => {
     financeDirtyRef.current = true
     setArticles(next)
@@ -573,6 +627,8 @@ export function useStageFlow({
     updateArticle,
     setTaxRate,
     toggleBackline,
+    addBackline,
+    removeBackline,
     replaceArticles,
   }
 }
