@@ -14,6 +14,14 @@ import { draftKey, useStageDrafts } from '@/entities/stage-draft'
 const INITIAL_VISIBLE = 25
 const STEP = 25
 
+/**
+ * Оболочка колонки kanban — отдельная скруглённая карточка (редизайн Figma
+ * 108:434): белый фон, рамка #d3d3d3 (border-medium), радиус 20px. Используется
+ * и для загруженной колонки, и для placeholder-состояний.
+ */
+export const COLUMN_SHELL_CLASS =
+  'bg-card border-border-medium flex h-full w-70 shrink-0 flex-col overflow-hidden rounded-[20px] border @[1400px]:w-auto @[1400px]:min-w-65 @[1400px]:flex-1'
+
 function columnCountLabel(visible: number, backendTotal: number | undefined): string {
   if (backendTotal === undefined) return String(visible)
   if (visible !== backendTotal) return `${visible} / ${backendTotal}`
@@ -69,7 +77,7 @@ export function PipelineKanbanColumn({
   }
 
   return (
-    <div className="flex h-full w-70 shrink-0 flex-col @[1400px]:w-auto @[1400px]:min-w-65 @[1400px]:flex-1">
+    <div className={COLUMN_SHELL_CLASS}>
       <div className="bg-card shrink-0">
         <div className="flex flex-col gap-2 px-4 pt-3.5">
           <div className="flex items-center justify-between gap-2">

@@ -19,7 +19,7 @@ export function DirectorAllProjectsPage() {
         </div>
         <Button
           type="button"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 hidden h-10 rounded-[10px] px-4 @3xl:inline-flex"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 hidden h-10 rounded-[15px] px-4 @3xl:inline-flex"
           onClick={() => setCreateOpen(true)}
         >
           Добавить проект

@@ -22,7 +22,10 @@ function HeaderTodayDate({ className }: { className?: string }) {
   return (
     <time
       dateTime={toIsoLocalDay(today)}
-      className={cn('text-muted-foreground text-xs', className)}
+      className={cn(
+        'border-border-medium bg-card text-foreground-soft inline-flex h-7.5 items-center justify-center rounded-[10px] border px-3 text-xs leading-none',
+        className,
+      )}
     >
       {formatRuHeaderDate(today)}
     </time>
@@ -44,7 +47,7 @@ function AppLayoutHeader() {
         <AppBreadcrumb />
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:pr-4">
-        <HeaderTodayDate className="hidden sm:block" />
+        <HeaderTodayDate className="hidden sm:inline-flex" />
         <HeaderNotificationsButton />
       </div>
     </header>

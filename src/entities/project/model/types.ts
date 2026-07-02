@@ -1,6 +1,7 @@
 import type { ProjectArticles } from '@/entities/project-article'
 import type { StageDocumentFile } from '@/entities/project-document'
 import type { StageDocumentType } from '@/entities/stage-document-file'
+import type { ProjectHallItem } from '@/shared/api/generated/types/ProjectHallItem'
 
 export type ProjectBackOrigin = {
   to: string
@@ -66,6 +67,12 @@ export interface Project {
    * вместо пары «loft · hall», если задана.
    */
   hallLoft?: string
+  /**
+   * Залы мероприятия как есть из API (`halls[]`). Нужны карточке для чипов залов
+   * с раскрытием «+N» (ERP-237-подобный редизайн). `loft`/`hall`/`hallLoft` —
+   * производные строки; сырой массив живёт тут, когда бэк его отдаёт.
+   */
+  halls?: ProjectHallItem[]
   /** Имя ВЕДУЩЕГО менеджера (`mag_manager.full_name`). */
   manager: string
   /**

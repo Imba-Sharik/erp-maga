@@ -61,7 +61,7 @@ export function ProjectsTableToolbar({
               type="button"
               onClick={onAddProject}
               aria-label="Добавить проект"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 size-10 shrink-0 rounded-[10px] p-0 text-lg leading-none @3xl:hidden"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 size-10 shrink-0 rounded-[15px] p-0 text-lg leading-none @3xl:hidden"
             >
               +
             </Button>
