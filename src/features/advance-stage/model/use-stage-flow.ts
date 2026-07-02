@@ -264,13 +264,11 @@ export function useStageFlow({
     (next: ProjectStage, values?: Partial<StageFormData>) => {
       const now = new Date().toISOString()
       setRecords((prev) => {
+        // Штампы dataConfirmedBy/At здесь не ставим: подтверждение данных — отдельное
+        // действие (PATCH /data-confirmation/), штампуется при выборе статуса в селекте.
         const completedValues: Partial<StageFormData> = {
           ...prev[currentStage]?.values,
           ...values,
-        }
-        if (currentStage === 'data_confirmed' && values?.dataConfirmedStatus) {
-          completedValues.dataConfirmedBy = currentUser.fullName
-          completedValues.dataConfirmedAt = now
         }
 
         return {
@@ -323,14 +321,9 @@ export function useStageFlow({
         taxRate,
       })
 
-      // Страховка (ERP-221): при «Не приняты» кнопки «Следующий этап» нет — статус
-      // уходит сразу из селекта (use-update-data-confirmed-status). Если rejected всё же
-      // дошёл сюда, бэк ответит no-op (этап останется data_confirmed): оптимистично НЕ
-      // двигаем, иначе проштампуем этап завершённым и заведём фантомный bonus_calculated;
-      // полагаемся на серверный ProjectDetail.
-      const isNoopReject =
-        currentStage === 'data_confirmed' && values?.dataConfirmedStatus === 'rejected'
-
+      // «Не приняты» больше не проходит через transitions (ERP-221): статус уходит
+      // сразу из селекта отдельной ручкой, кнопка «Следующий этап» при паузе скрыта,
+      // а сам бэк отвечает 400 на переход к бонусу при data_rejected.
       advancingRef.current = true
       transitionMutation.mutate(
         { id: projectId, data: body },
@@ -339,7 +332,7 @@ export function useStageFlow({
             // Сервер — источник правды о результирующем этапе (как в use-rollback-stage):
             // пишем свежий ProjectDetail в кэш, а sync-эффект подхватывает реальный этап.
             queryClient.setQueryData(projectsRetrieveQueryKey(projectId), detail)
-            if (!isNoopReject) applyAdvanceLocally(next, values)
+            applyAdvanceLocally(next, values)
             invalidateProjectAfterTransition(queryClient, projectId)
             void queryClient.invalidateQueries({ queryKey: notificationsListQueryKey() })
           },

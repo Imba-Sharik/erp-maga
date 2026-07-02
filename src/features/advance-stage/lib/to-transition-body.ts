@@ -104,10 +104,9 @@ export function buildTransitionBody({
     body.sublease_docs_status = apiDocStatus(v.subleaseDocsStatus, currentStage)
     body.staff_receipts_status = apiDocStatus(v.staffReceiptsStatus, currentStage)
   }
-  if (v.dataConfirmedStatus) {
-    body.data_confirmed_status =
-      v.dataConfirmedStatus as ProjectTransitionRequest['data_confirmed_status']
-  }
+  // Статус проверки данных в transition больше не передаётся (ERP-220/221):
+  // он ставится отдельной ручкой PATCH /data-confirmation/, а переход
+  // data_confirmed → bonus_calculated бэк гейтит по сохранённому data_rejected.
 
   // tax_rate обязателен для перехода ready_to_event → event_held.
   // UI не даёт перейти с пустым процентом; null здесь — лишь страховка → шлём 0.
