@@ -323,9 +323,11 @@ export function useStageFlow({
         taxRate,
       })
 
-      // «Не приняты» на data_confirmed — бэк это no-op (этап остаётся data_confirmed).
-      // Оптимистично НЕ двигаем, иначе локально проштампуем data_confirmed завершённым и
-      // заведём фантомный bonus_calculated; полагаемся на серверный ProjectDetail.
+      // Страховка (ERP-221): при «Не приняты» кнопки «Следующий этап» нет — статус
+      // уходит сразу из селекта (use-update-data-confirmed-status). Если rejected всё же
+      // дошёл сюда, бэк ответит no-op (этап останется data_confirmed): оптимистично НЕ
+      // двигаем, иначе проштампуем этап завершённым и заведём фантомный bonus_calculated;
+      // полагаемся на серверный ProjectDetail.
       const isNoopReject =
         currentStage === 'data_confirmed' && values?.dataConfirmedStatus === 'rejected'
 
