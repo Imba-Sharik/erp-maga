@@ -1,4 +1,10 @@
-import type { ProjectDetail, ProjectStage, StageFormData } from '@/entities/project'
+import {
+  resolveStageBlockEditable,
+  resolveStageEditAccess,
+  type ProjectDetail,
+  type ProjectStage,
+  type StageFormData,
+} from '@/entities/project'
 import type {
   ArticleBlock,
   ArticleKind,
@@ -6,7 +12,8 @@ import type {
   ProjectArticles,
 } from '@/entities/project-article'
 import { useStageHasDraftHighlight } from '@/entities/stage-draft'
-import type { StageRecord } from '@/features/advance-stage'
+import { useUserRole } from '@/entities/user-role'
+import { isStagePatchable, type StageRecord } from '@/features/advance-stage'
 import type { StagePresentationConfig } from '@/shared/lib/stage-presentation'
 
 import { StagePassedBonus } from './stage-passed-bonus'
@@ -39,15 +46,14 @@ interface ProjectStageSectionProps {
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
+  /** Добавить/удалить бэклайн задним числом (POST/DELETE `/backline/`) на пройденном этапе. */
+  onAddBackline: () => Promise<void>
+  onRemoveBackline: () => Promise<void>
+  /** Заменить статьи целиком — для отмены инлайн-правки финансового этапа. */
+  onReplaceArticles: (next: ProjectArticles) => void
   /** Получить запись произвольного этапа (например, `data_confirmed` для отображения «Кто подтвердил» на этапе бонуса). */
   getRecord: (stage: ProjectStage) => StageRecord | undefined
 }
-
-/** Этапы, у которых пройденный вид допускает inline-редактирование задним числом. */
-const EDITABLE_AFTER_PASS: ReadonlySet<ProjectStage> = new Set<ProjectStage>([
-  'contract_signed',
-  'documents_confirmed',
-])
 
 export function ProjectStageSection({
   presentation,
@@ -65,10 +71,29 @@ export function ProjectStageSection({
   onArticleChange,
   onTaxRateChange,
   onToggleBackline,
+  onAddBackline,
+  onRemoveBackline,
+  onReplaceArticles,
   getRecord,
 }: ProjectStageSectionProps) {
   const hasDraftHighlight = useStageHasDraftHighlight(project.id, stage)
   const readOnly = presentation.readOnly
+  const role = useUserRole()
+
+  // Единый резолвер прав: правку пройденного блока разрешает серверный флаг can_edit_*
+  // (развязан с глобальным read-only), а кнопка показывается только если у этапа есть
+  // реальный PATCH-маршрут (isStagePatchable).
+  const access = resolveStageEditAccess({
+    stage,
+    role,
+    isCurrent,
+    readOnly,
+    blockEditable: resolveStageBlockEditable(project, stage),
+  })
+  const editPassedHandler =
+    access.canEditPassed && onPatchStageValues && isStagePatchable(stage)
+      ? (values: Partial<StageFormData>) => onPatchStageValues(stage, values)
+      : undefined
 
   const financeProps = {
     presentation,
@@ -78,8 +103,13 @@ export function ProjectStageSection({
     onArticleChange,
     onTaxRateChange,
     onToggleBackline,
+    onAddBackline,
+    onRemoveBackline,
+    onReplaceArticles,
     onAdvance: () => onAdvance(),
     isAdvancing,
+    // Финансовый Save шлёт пустые values — статьи реестр читает из общего articles.
+    onSavePassed: editPassedHandler ? () => editPassedHandler({}) : undefined,
   }
 
   // Пропущенный этап — отдельная вёрстка с возможностью дозаполнить.
@@ -137,6 +167,8 @@ export function ProjectStageSection({
           onArticleChange={onArticleChange}
           onAdvance={onAdvance}
           isAdvancing={isAdvancing}
+          onReplaceArticles={onReplaceArticles}
+          onSavePassed={editPassedHandler ? () => editPassedHandler({}) : undefined}
         />
       </StageSectionDraftFrame>
     )
@@ -173,11 +205,7 @@ export function ProjectStageSection({
         hasDraftHighlight={hasDraftHighlight}
         readOnly={readOnly}
         onAdvance={onAdvance}
-        onEditPassed={
-          EDITABLE_AFTER_PASS.has(stage) && onPatchStageValues
-            ? (values) => onPatchStageValues(stage, values)
-            : undefined
-        }
+        onEditPassed={editPassedHandler}
       />
     </StageSectionDraftFrame>
   )

@@ -117,6 +117,10 @@ export function MeetingsCalendarPage() {
   }, [rawManager])
   const setMagManagerSelection = (ids: string[]) =>
     setFilterParam('manager', ids.length > 0 ? ids : 'all')
+  // ERP-232: после создания встречи сбрасываем фильтр «Отв. менеджер» к дефолту по роли
+  // (удаляем параметр). Иначе новая встреча (владелец — текущий пользователь) остаётся
+  // отфильтрованной, и кажется, будто она не создалась.
+  const resetMagManagerFilter = useCallback(() => setFilterParam('manager', null), [setFilterParam])
   const magManagerIds = useMemo(
     () => magManagerSelection ?? (isManagerRole && ownManagerIdStr ? [ownManagerIdStr] : []),
     [magManagerSelection, isManagerRole, ownManagerIdStr],
@@ -316,6 +320,7 @@ export function MeetingsCalendarPage() {
           date={selectedDateKey}
           managerId={createManagerId}
           queryParams={queryParams}
+          onCreated={resetMagManagerFilter}
         />
       ) : null}
 

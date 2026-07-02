@@ -57,6 +57,9 @@ export function ProjectDetailStages({ project, flow, readOnly = false }: Project
     onArticleChange: flow.updateArticle,
     onTaxRateChange: flow.setTaxRate,
     onToggleBackline: flow.toggleBackline,
+    onAddBackline: flow.addBackline,
+    onRemoveBackline: flow.removeBackline,
+    onReplaceArticles: flow.replaceArticles,
     getRecord: flow.getRecord,
   }
 

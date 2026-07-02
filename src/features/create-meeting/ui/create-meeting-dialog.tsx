@@ -51,6 +51,8 @@ export interface CreateMeetingDialogProps {
   date: string
   managerId: number
   queryParams: ListMeetingsParams
+  /** Вызывается после успешного создания — страница сбрасывает фильтр «Отв. менеджер» (ERP-232). */
+  onCreated?: () => void
 }
 
 export function CreateMeetingDialog({
@@ -59,6 +61,7 @@ export function CreateMeetingDialog({
   date,
   managerId,
   queryParams,
+  onCreated,
 }: CreateMeetingDialogProps) {
   const role = useUserRole()
   const form = useForm<MeetingCreateFormValues>({
@@ -83,6 +86,7 @@ export function CreateMeetingDialog({
     onSuccess: () => {
       onOpenChange(false)
       form.reset(EMPTY_VALUES)
+      onCreated?.()
     },
   })
 

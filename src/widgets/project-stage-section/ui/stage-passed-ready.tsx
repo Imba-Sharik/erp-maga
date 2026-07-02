@@ -21,8 +21,12 @@ interface StagePassedReadyProps {
   onArticleChange: (block: ArticleBlock, kind: ArticleKind, patch: Partial<ArticleValues>) => void
   onTaxRateChange: (rate: number | null) => void
   onToggleBackline: () => void
+  onAddBackline: () => Promise<void>
+  onRemoveBackline: () => Promise<void>
   onAdvance?: () => void
   isAdvancing?: boolean
+  onSavePassed?: () => void
+  onReplaceArticles?: (next: ProjectArticles) => void
 }
 
 export function StagePassedReady({ presentation, ...props }: StagePassedReadyProps) {
