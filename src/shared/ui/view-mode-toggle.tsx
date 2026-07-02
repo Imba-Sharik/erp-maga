@@ -2,21 +2,21 @@ import { Columns3, Table } from 'lucide-react'
 
 import { cn } from '@/shared/lib/utils'
 
-export type ClosingViewMode = 'kanban' | 'table'
+export type ViewMode = 'kanban' | 'table'
 
-const OPTIONS: { value: ClosingViewMode; label: string; Icon: typeof Columns3 }[] = [
+const OPTIONS: { value: ViewMode; label: string; Icon: typeof Columns3 }[] = [
   { value: 'kanban', label: 'Канбан', Icon: Columns3 },
   { value: 'table', label: 'Таблица', Icon: Table },
 ]
 
-interface ClosingViewToggleProps {
-  value: ClosingViewMode
-  onChange: (value: ClosingViewMode) => void
+interface ViewModeToggleProps {
+  value: ViewMode
+  onChange: (value: ViewMode) => void
   className?: string
 }
 
-/** Сегментный переключатель «канбан ⇄ таблица» для раздела «Закрытие». */
-export function ClosingViewToggle({ value, onChange, className }: ClosingViewToggleProps) {
+/** Сегментный переключатель «канбан ⇄ таблица» — для «Закрытия» и «Все проекты». */
+export function ViewModeToggle({ value, onChange, className }: ViewModeToggleProps) {
   return (
     <div
       role="group"

@@ -1,18 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { CreateProjectDialog } from '@/features/create-project'
-import { PROJECTS_LIST_DEFAULT_ORDERING } from '@/shared/constants'
 import { Button } from '@/shared/ui/button'
-import { ProjectsBoard } from '@/widgets/projects-board'
+
+import { AllProjectsView } from './all-projects-view'
 
 export function ManagerProjectsPage() {
   const [createOpen, setCreateOpen] = useState(false)
-  const listDateParams = useMemo(
-    () => ({
-      ordering: PROJECTS_LIST_DEFAULT_ORDERING,
-    }),
-    [],
-  )
 
   return (
     <div className="@container flex h-full min-h-0 flex-1 flex-col gap-6">
@@ -34,7 +28,11 @@ export function ManagerProjectsPage() {
 
       <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
 
-      <ProjectsBoard listDateParams={listDateParams} onAddProject={() => setCreateOpen(true)} />
+      <AllProjectsView
+        defaultView="kanban"
+        managerEditable={false}
+        onAddProject={() => setCreateOpen(true)}
+      />
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import { PlumEventStatusFilterSelect, ProjectsSortSelect } from '@/entities/project'
 import { useUserRole } from '@/entities/user-role'
@@ -28,6 +29,10 @@ interface ProjectsBoardToolbarProps {
   onAddProject?: () => void
   /** Селекты рядом с поиском (слева), без растягивания вправо */
   filtersAlign?: 'start' | 'spread'
+  /** Переключатель «канбан ⇄ таблица» — рендерится в конце ряда фильтров */
+  viewModeToggle?: ReactNode
+  /** Доп. контент в конце блока фильтров (напр. свитч «Архивные проекты») */
+  trailing?: ReactNode
 }
 
 export function ProjectsBoardToolbar({
@@ -45,6 +50,8 @@ export function ProjectsBoardToolbar({
   onChangePlumEventStatus,
   onAddProject,
   filtersAlign = 'spread',
+  viewModeToggle,
+  trailing,
 }: ProjectsBoardToolbarProps) {
   const role = useUserRole()
   const isManagerRole = role === 'manager'
@@ -65,25 +72,74 @@ export function ProjectsBoardToolbar({
     if (shouldResetHall(next, hall)) onChangeHall(null)
   }
 
+  const searchField = (
+    <>
+      <Search className="text-muted-foreground absolute top-1/2 left-2 size-3.5 -translate-y-1/2 @4xl:left-3 @4xl:size-4" />
+      <Input
+        type="search"
+        placeholder="Поиск проектов"
+        value={search}
+        onChange={(e) => onChangeSearch(e.target.value)}
+        className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pr-1.5 pl-7 text-xs placeholder:text-xs @4xl:pr-3 @4xl:pl-9 @4xl:text-sm @4xl:placeholder:text-sm"
+      />
+    </>
+  )
+
+  const filterFields = (
+    <>
+      <ProjectsSortSelect value={sort} onChange={onChangeSort} className={SORT_SLOT_CLASS} />
+      {showCityFilter ? (
+        <VenueFilterSelect
+          filter="city"
+          value={city}
+          options={cityOptions}
+          onChange={onChangeCity}
+          triggerClassName={TRIGGER_CLASS}
+        />
+      ) : null}
+      <VenueFilterSelect
+        filter="hall"
+        value={hall}
+        options={hallOptionsForLoft}
+        onChange={onChangeHall}
+        triggerClassName={TRIGGER_CLASS}
+        disabled={selectDisabled}
+      />
+      {showLoftFilter ? (
+        <VenueFilterSelect
+          filter="loft"
+          value={loft}
+          options={loftOptions}
+          onChange={handleChangeLoft}
+          triggerClassName={TRIGGER_CLASS}
+          disabled={selectDisabled}
+        />
+      ) : null}
+      <PlumEventStatusFilterSelect
+        values={plumEventStatus}
+        onChange={onChangePlumEventStatus}
+        triggerClassName={TRIGGER_CLASS}
+      />
+      {viewModeToggle}
+      {trailing}
+    </>
+  )
+
+  // «Закрытие»: поиск и фильтры — единый переносящийся блок (поиск во всю ширину
+  // на мобиле, фиксированный на десктопе, дальше в ряд идут селекты и тогл).
+  if (filtersAtStart) {
+    return (
+      <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 @4xl:gap-2.5">
+        <div className="relative w-full @4xl:w-64">{searchField}</div>
+        {filterFields}
+      </div>
+    )
+  }
+
   return (
-    <div
-      className={
-        filtersAtStart
-          ? 'flex min-w-0 shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-center @4xl:justify-start @4xl:gap-4'
-          : 'flex min-w-0 shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-center @4xl:justify-between @4xl:gap-4'
-      }
-    >
+    <div className="flex min-w-0 shrink-0 flex-col gap-3 @4xl:flex-row @4xl:items-start @4xl:justify-between @4xl:gap-4">
       <div className="flex items-center gap-2 @4xl:w-75">
-        <div className="relative min-w-0 flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-2 size-3.5 -translate-y-1/2 @4xl:left-3 @4xl:size-4" />
-          <Input
-            type="search"
-            placeholder="Поиск проектов"
-            value={search}
-            onChange={(e) => onChangeSearch(e.target.value)}
-            className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pr-1.5 pl-7 text-xs placeholder:text-xs @4xl:pr-3 @4xl:pl-9 @4xl:text-sm @4xl:placeholder:text-sm"
-          />
-        </div>
+        <div className="relative min-w-0 flex-1">{searchField}</div>
         {onAddProject && (
           <Button
             type="button"
@@ -96,46 +152,8 @@ export function ProjectsBoardToolbar({
         )}
       </div>
 
-      <div
-        className={
-          filtersAtStart
-            ? 'flex min-w-0 flex-wrap items-center gap-2 @4xl:gap-2.5'
-            : 'flex min-w-0 flex-1 flex-wrap items-center gap-2 @4xl:flex-none @4xl:gap-2.5'
-        }
-      >
-        <ProjectsSortSelect value={sort} onChange={onChangeSort} className={SORT_SLOT_CLASS} />
-        {showCityFilter ? (
-          <VenueFilterSelect
-            filter="city"
-            value={city}
-            options={cityOptions}
-            onChange={onChangeCity}
-            triggerClassName={TRIGGER_CLASS}
-          />
-        ) : null}
-        <VenueFilterSelect
-          filter="hall"
-          value={hall}
-          options={hallOptionsForLoft}
-          onChange={onChangeHall}
-          triggerClassName={TRIGGER_CLASS}
-          disabled={selectDisabled}
-        />
-        {showLoftFilter ? (
-          <VenueFilterSelect
-            filter="loft"
-            value={loft}
-            options={loftOptions}
-            onChange={handleChangeLoft}
-            triggerClassName={TRIGGER_CLASS}
-            disabled={selectDisabled}
-          />
-        ) : null}
-        <PlumEventStatusFilterSelect
-          values={plumEventStatus}
-          onChange={onChangePlumEventStatus}
-          triggerClassName={TRIGGER_CLASS}
-        />
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 @4xl:flex-none @4xl:gap-2.5">
+        {filterFields}
       </div>
     </div>
   )

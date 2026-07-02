@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Search } from 'lucide-react'
 
 import { Button } from '@/shared/ui/button'
@@ -25,6 +26,8 @@ interface ProjectsTableToolbarProps {
   onAddProject?: () => void
   showPendingToggle?: boolean
   columnViewOptions?: readonly { value: ProjectsTableColumnView; label: string }[]
+  /** Переключатель «канбан ⇄ таблица» — рендерится рядом с выбором вида колонок */
+  viewModeToggle?: ReactNode
 }
 
 export function ProjectsTableToolbar({
@@ -37,6 +40,7 @@ export function ProjectsTableToolbar({
   onAddProject,
   showPendingToggle = true,
   columnViewOptions = DEFAULT_COLUMN_VIEW_OPTIONS,
+  viewModeToggle,
 }: ProjectsTableToolbarProps) {
   return (
     <div className="@container flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4">
@@ -64,7 +68,7 @@ export function ProjectsTableToolbar({
           )}
         </div>
 
-        <div className="flex items-center gap-3 @3xl:gap-0">
+        <div className="flex flex-wrap items-center gap-3 @3xl:flex-nowrap @3xl:gap-2.5">
           <Select
             value={columnView}
             onValueChange={(v) => onColumnViewChange(v as ProjectsTableColumnView)}
@@ -80,12 +84,15 @@ export function ProjectsTableToolbar({
               ))}
             </SelectContent>
           </Select>
+          {viewModeToggle}
+          {/* Мобила: подпись и тумблер — одной строкой (nowrap), сам свитч
+              уходит вправо и переносится целиком на новую строку при нехватке места. */}
           {showPendingToggle && (
             <ToggleSwitch
               label="Ожидают обработки"
               checked={pendingOnly}
               onChange={onTogglePending}
-              className="shrink flex-wrap gap-2 text-xs @3xl:hidden"
+              className="ml-auto text-xs @3xl:hidden"
             />
           )}
         </div>
