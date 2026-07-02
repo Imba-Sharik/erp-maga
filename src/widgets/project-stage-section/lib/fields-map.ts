@@ -28,12 +28,6 @@ export interface StageFieldConfig {
   roles?: readonly StageFieldRole[]
   /** Кто может редактировать; по умолчанию совпадает с `roles`. */
   editRoles?: readonly StageFieldRole[]
-  /**
-   * Поле нельзя править ЗАДНИМ числом: на текущем этапе оно вводится и сохраняется
-   * через переход, но block-ручка правки пройденного этапа его не персистит
-   * (напр. идентификация клиента plum_request — `/client/` принимает лишь mag_comment).
-   */
-  passedReadOnly?: boolean
   /** Тип документа в API (для загрузки файлов). */
   documentType?: StageDocumentType
   /** Подпись кнопки прикрепления (для `type: 'estimate'` / документов). */
