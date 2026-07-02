@@ -1,6 +1,8 @@
 import { Pencil, Trash2, User } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { Badge } from '@/shared/ui/badge'
 import { cn } from '@/shared/lib/utils'
+import { getCalendarEventTypeLabel, getCalendarEventTypeTagClass } from '@/shared/constants'
 import { formatMeetingVenueLine } from '../lib/format-meeting-venue'
 import type { Meeting } from '../model/types'
 
@@ -23,6 +25,8 @@ export function MeetingCard({
   className,
 }: MeetingCardProps) {
   const venueLabel = formatMeetingVenueLine(meeting.halls)
+  const eventTypeLabel = getCalendarEventTypeLabel(meeting.eventType)
+  const eventTypeTagClass = getCalendarEventTypeTagClass(meeting.eventType)
 
   return (
     <article
@@ -65,11 +69,20 @@ export function MeetingCard({
       <p className="text-foreground-soft text-sm wrap-break-word whitespace-pre-wrap">
         {meeting.comment}
       </p>
-      {managerName ? (
-        <p className="text-muted-foreground flex items-center justify-end gap-1 text-xs">
-          <User className="size-3 shrink-0" />
-          <span className="truncate">{managerName}</span>
-        </p>
+      {eventTypeLabel || managerName ? (
+        <div className="flex items-center justify-between gap-2">
+          {eventTypeLabel ? (
+            <Badge className={eventTypeTagClass}>{eventTypeLabel}</Badge>
+          ) : (
+            <span />
+          )}
+          {managerName ? (
+            <p className="text-muted-foreground flex items-center gap-1 text-xs">
+              <User className="size-3 shrink-0" />
+              <span className="truncate">{managerName}</span>
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </article>
   )

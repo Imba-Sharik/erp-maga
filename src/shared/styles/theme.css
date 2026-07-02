@@ -69,7 +69,15 @@
   --blue-border: #b7cce4;
   --blue-surface: #e9ecff;
 
+  --violet-fg: #4c4076;
   --violet-solid: #6b5b95;
+  --violet-border: #d8d0ea;
+  --violet-surface: #f2eefb;
+
+  --teal-fg: #2f6b66;
+  --teal-solid: #3aa39b;
+  --teal-border: #b7e4df;
+  --teal-surface: #e6faf7;
 }
 
 /* --------------------------------------------------------------------------
@@ -129,6 +137,27 @@
   --info-surface: var(--blue-surface);
   --info-border: var(--blue-border);
   --violet: var(--violet-solid);
+
+  /* Теги типов события календаря (ERP-237). Пастельные хью, свой тон на тип;
+     как и статусы — не переопределяются в тёмной теме (остаются светлыми). */
+  --event-meeting: var(--blue-fg);
+  --event-meeting-surface: var(--blue-surface);
+  --event-meeting-border: var(--blue-border);
+  --event-installation: var(--amber-fg);
+  --event-installation-surface: var(--amber-surface);
+  --event-installation-border: var(--amber-border);
+  --event-activity: var(--violet-fg);
+  --event-activity-surface: var(--violet-surface);
+  --event-activity-border: var(--violet-border);
+  --event-day-off: var(--green-fg);
+  --event-day-off-surface: var(--green-surface);
+  --event-day-off-border: var(--green-border);
+  --event-vacation: var(--teal-fg);
+  --event-vacation-surface: var(--teal-surface);
+  --event-vacation-border: var(--teal-border);
+  --event-out-of-office: var(--red-solid);
+  --event-out-of-office-surface: var(--red-surface);
+  --event-out-of-office-border: var(--red-border);
 
   /* Бренд / воронки / подсветка черновика. */
   --funnel-preproject: var(--blue-solid);
@@ -258,6 +287,26 @@
   --color-info-surface: var(--info-surface);
   --color-info-border: var(--info-border);
   --color-violet: var(--violet);
+
+  /* Теги типов события (ERP-237). */
+  --color-event-meeting: var(--event-meeting);
+  --color-event-meeting-surface: var(--event-meeting-surface);
+  --color-event-meeting-border: var(--event-meeting-border);
+  --color-event-installation: var(--event-installation);
+  --color-event-installation-surface: var(--event-installation-surface);
+  --color-event-installation-border: var(--event-installation-border);
+  --color-event-activity: var(--event-activity);
+  --color-event-activity-surface: var(--event-activity-surface);
+  --color-event-activity-border: var(--event-activity-border);
+  --color-event-day-off: var(--event-day-off);
+  --color-event-day-off-surface: var(--event-day-off-surface);
+  --color-event-day-off-border: var(--event-day-off-border);
+  --color-event-vacation: var(--event-vacation);
+  --color-event-vacation-surface: var(--event-vacation-surface);
+  --color-event-vacation-border: var(--event-vacation-border);
+  --color-event-out-of-office: var(--event-out-of-office);
+  --color-event-out-of-office-surface: var(--event-out-of-office-surface);
+  --color-event-out-of-office-border: var(--event-out-of-office-border);
 
   /* Бренд / воронки / черновик. */
   --color-funnel-preproject: var(--funnel-preproject);
