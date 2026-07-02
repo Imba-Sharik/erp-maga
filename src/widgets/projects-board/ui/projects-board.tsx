@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import {
   PROJECTS_SORT_DEFAULT,
@@ -32,9 +33,11 @@ interface AssistantTarget {
 interface ProjectsBoardProps {
   listDateParams: BoardListParams
   onAddProject?: () => void
+  /** Переключатель «канбан ⇄ таблица» — рендерится в тулбаре */
+  viewModeToggle?: ReactNode
 }
 
-export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardProps) {
+export function ProjectsBoard({ listDateParams, onAddProject, viewModeToggle }: ProjectsBoardProps) {
   // Фильтры/поиск/сортировка живут в URL (переживают F5, шарятся ссылкой) и дублируются в
   // localStorage (переживают закрытие вкладки / новое окно).
   const { getString, getArray, set } = useFilterParams({
@@ -98,6 +101,7 @@ export function ProjectsBoard({ listDateParams, onAddProject }: ProjectsBoardPro
         onChangeLoft={setLoft}
         onChangePlumEventStatus={setPlumEventStatus}
         onAddProject={onAddProject}
+        viewModeToggle={viewModeToggle}
       />
       <div className="flex h-full min-h-0 flex-1 flex-col">
         <ProjectsKanban
