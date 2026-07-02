@@ -6,6 +6,7 @@ import { useCurrentUser } from '@/entities/current-user'
 import { useUnreadNotificationCount } from '@/entities/notification'
 import { USER_ROLE_LABELS, useRoleNavItems, useUserRole } from '@/entities/user-role'
 import { DEV_ROLES_WITH_CREDS, useDevLogin, useLogout, type DevRole } from '@/features/auth'
+import { AppVersion } from '@/features/copy-app-version'
 import { cn } from '@/shared/lib/utils'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import {
@@ -121,13 +122,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <div className="mx-3 group-data-[collapsible=icon]:hidden">
-          <p
-            title={`build ${__BUILD_SHA__} · ${__BUILD_DATE__}`}
-            className="text-muted-foreground pb-1 text-start text-xs whitespace-nowrap"
-          >
-            v{__APP_VERSION__}
-            <span className="opacity-60"> · {__BUILD_SHA__}</span>
-          </p>
+          <AppVersion className="pb-1" />
           <div
             aria-hidden
             className="border-sidebar-border shrink-0 border-t group-data-[collapsible=icon]:mx-0"
