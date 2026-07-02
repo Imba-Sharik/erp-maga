@@ -40,7 +40,7 @@ export function ProjectsSortSelect({
         onClick={() => onChange(buildProjectsSortValue(field, isAsc ? 'desc' : 'asc'))}
         aria-label={`Порядок сортировки: ${isAsc ? 'по возрастанию' : 'по убыванию'}`}
         title={isAsc ? 'По возрастанию' : 'По убыванию'}
-        className="border-border-strong text-foreground-soft hover:bg-surface-muted bg-card shrink-0 rounded-[10px]"
+        className="border-border-medium text-foreground-soft hover:bg-surface-muted bg-card shrink-0 rounded-[15px]"
       >
         <DirectionIcon className="size-4" />
       </Button>
@@ -49,7 +49,7 @@ export function ProjectsSortSelect({
         onValueChange={(nextField) => onChange(buildProjectsSortValue(nextField, direction))}
         disabled={disabled}
       >
-        <SelectTrigger className="border-border-strong data-placeholder:text-disabled-foreground bg-card h-10! min-w-0 flex-1 rounded-[10px] text-xs @4xl:text-sm">
+        <SelectTrigger className="border-border-medium data-placeholder:text-disabled-foreground bg-card h-10! min-w-0 flex-1 rounded-[15px] text-xs @4xl:text-sm">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

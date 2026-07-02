@@ -8,7 +8,6 @@ import {
   type ClosingStage,
   type Project,
 } from '@/entities/project'
-import { Card } from '@/shared/ui/card'
 import type { BoardListParams } from '@/shared/api'
 import { KanbanColumnWithQuery } from '@/features/kanban-board'
 
@@ -28,7 +27,7 @@ export function ClosingKanban({
   renderAssistantMenu,
 }: ClosingKanbanProps) {
   return (
-    <Card className="border-border-strong @container flex h-full min-h-0 flex-1 flex-col overflow-visible py-0 shadow-none">
+    <div className="@container flex h-full min-h-0 flex-1 flex-col overflow-visible">
       <OverlayScrollbarsComponent
         options={{
           overflow: { x: 'scroll', y: 'hidden' },
@@ -40,7 +39,7 @@ export function ClosingKanban({
         }}
         className="projects-kanban-scroll-area h-full min-h-0 w-full min-w-0 flex-1"
       >
-        <div className="divide-border-medium flex h-full min-w-fit divide-x">
+        <div className="flex h-full min-w-fit gap-4">
           {CLOSING_STAGE_ORDER.map((stage) => (
             <ClosingKanbanColumnItem
               key={stage}
@@ -54,7 +53,7 @@ export function ClosingKanban({
           ))}
         </div>
       </OverlayScrollbarsComponent>
-    </Card>
+    </div>
   )
 }
 

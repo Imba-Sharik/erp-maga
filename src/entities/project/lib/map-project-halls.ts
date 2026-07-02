@@ -51,6 +51,20 @@ export function projectVenueFieldsFromHalls(halls: readonly ProjectHallItem[]): 
   }
 }
 
+/**
+ * Названия залов для чипов карточки. Из сырого `halls[]`, когда бэк его отдал,
+ * иначе разбираем строку `hall` (fallback для оптимистичных/календарных карточек).
+ */
+export function hallChipNames(project: {
+  halls?: readonly ProjectHallItem[]
+  hall: string
+}): string[] {
+  if (project.halls?.length) {
+    return uniqueNonEmpty(project.halls.map((h) => h.hall_name ?? ''))
+  }
+  return uniqueNonEmpty(project.hall ? project.hall.split(',') : [])
+}
+
 /** Минимальный `halls[]` для patch кэша, когда известны только подписи UI. */
 export function projectHallItemsFromVenue(loft: string, hall: string): ProjectHallItem[] {
   if (!loft.trim() && !hall.trim()) return []

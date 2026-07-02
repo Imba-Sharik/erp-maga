@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
 const TRIGGER_CLASS =
-  'h-10! w-full min-w-[calc(50%-4px)] flex-1 rounded-[10px] border-border-strong bg-card text-xs data-placeholder:text-disabled-foreground @4xl:w-41.5 @4xl:min-w-0 @4xl:flex-none @4xl:text-sm'
+  'h-10! w-full min-w-[calc(50%-4px)] flex-1 rounded-[15px] border-border-medium bg-card text-xs data-placeholder:text-disabled-foreground @4xl:w-41.5 @4xl:min-w-0 @4xl:flex-none @4xl:text-sm'
 
 // Слот сортировки: на мобиле занимает половину ряда (как фильтры), на десктопе шире —
 // внутри помимо селекта ещё стрелка направления и подписи длиннее («По дате мероприятия»).
@@ -80,7 +80,7 @@ export function ProjectsBoardToolbar({
         placeholder="Поиск проектов"
         value={search}
         onChange={(e) => onChangeSearch(e.target.value)}
-        className="border-border-strong placeholder:text-muted-foreground bg-card h-10 rounded-[10px] pr-1.5 pl-7 text-xs placeholder:text-xs @4xl:pr-3 @4xl:pl-9 @4xl:text-sm @4xl:placeholder:text-sm"
+        className="border-border-medium placeholder:text-muted-foreground bg-card h-10 rounded-[15px] pr-1.5 pl-7 text-xs placeholder:text-xs @4xl:pr-3 @4xl:pl-9 @4xl:text-sm @4xl:placeholder:text-sm"
       />
     </>
   )
@@ -145,7 +145,7 @@ export function ProjectsBoardToolbar({
             type="button"
             onClick={onAddProject}
             aria-label="Добавить проект"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 size-10 shrink-0 rounded-[10px] p-0 text-lg leading-none @4xl:hidden"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 size-10 shrink-0 rounded-[15px] p-0 text-lg leading-none @4xl:hidden"
           >
             +
           </Button>

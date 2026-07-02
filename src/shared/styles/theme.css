@@ -48,6 +48,15 @@
   --neutral-900: #1b1a17; /* основной текст (ink) */
   --neutral-950: #000000;
 
+  /* Холодные серые из редизайна карточек проекта (не тёплый бежевый ramp). */
+  --gray-chip: #eaeaea; /* фон чипов/иконок-кнопок */
+  --gray-card: #f9f9f9; /* фон карточки проекта */
+  --gray-avatar: #b4b4b4; /* заливка аватара вспом. менеджера */
+  --gray-avatar-border: #a9a9a9; /* бордер аватара вспом. */
+  --gray-avatar-empty-border: #c2c2c2; /* бордер пустого аватара «?» */
+  --blue-avatar-border: #4d77e2; /* бордер аватара ведущего */
+  --gray-divider: #d9d9d9; /* тонкий разделитель в карточке проекта */
+
   /* Статусные хью: fg (тёмный текст) / solid (насыщенный) / border / surface. */
   --green-fg: #295935;
   --green-solid: #3aa56b;
@@ -103,10 +112,13 @@
   --foreground-soft: var(--neutral-700); /* #454545 — вторичный текст/кнопки */
   --disabled-foreground: var(--neutral-300); /* #c7c7c7 — disabled/placeholder */
   --surface-subtle: var(--neutral-25); /* #faf9f6 — фон карточек */
+  --surface-subtle-neutral: var(--gray-card); /* #f9f9f9 — холодный фон карточек редизайна */
   --surface-muted: var(--neutral-50); /* #f4f2ec — приглушённая поверхность */
   --surface-divider: var(--neutral-75); /* #f0f0f0 — разделители */
+  --card-divider: var(--gray-divider); /* #d9d9d9 — разделитель в карточке проекта */
   --surface-hover: var(--neutral-100); /* #e9e6dd — hover-заливка */
   --chip-surface: var(--neutral-100); /* фон нейтрального чипа */
+  --chip-surface-neutral: var(--gray-chip); /* холодный серый чип (редизайн карточек) */
   --chip-foreground: var(--neutral-600); /* текст нейтрального чипа */
   --border-medium: var(--neutral-200); /* #d3d3d3 — resting-граница карточки */
   --border-strong: var(--neutral-400); /* #b1b1b1 — hover/active-граница */
@@ -135,6 +147,14 @@
   --funnel-closing: var(--green-solid);
   --draft-highlight: var(--amber-solid);
   --draft-highlight-muted: var(--amber-fg);
+
+  /* Аватары менеджеров карточки проекта: заливка + бордер. */
+  --avatar-lead: var(--blue-solid); /* #5e83e3 */
+  --avatar-lead-border: var(--blue-avatar-border);
+  --avatar-assistant: var(--gray-avatar);
+  --avatar-assistant-border: var(--gray-avatar-border);
+  --avatar-empty: var(--gray-chip); /* #eaeaea */
+  --avatar-empty-border: var(--gray-avatar-empty-border);
 
   /* Sidebar (shadcn-скелет). */
   --sidebar: oklch(0.96 0.008 90);
@@ -179,10 +199,12 @@
   --foreground-soft: var(--muted-foreground);
   --disabled-foreground: var(--muted-foreground);
   --surface-subtle: var(--card);
+  --surface-subtle-neutral: var(--card);
   --surface-muted: var(--muted);
   --surface-divider: var(--border);
   --surface-hover: var(--muted);
   --chip-surface: var(--muted);
+  --chip-surface-neutral: var(--muted);
   --chip-foreground: var(--muted-foreground);
   --border-medium: var(--border);
   --border-strong: var(--muted-foreground);
@@ -232,10 +254,13 @@
   --color-foreground-soft: var(--foreground-soft);
   --color-disabled-foreground: var(--disabled-foreground);
   --color-surface-subtle: var(--surface-subtle);
+  --color-surface-subtle-neutral: var(--surface-subtle-neutral);
   --color-surface-muted: var(--surface-muted);
   --color-surface-divider: var(--surface-divider);
+  --color-card-divider: var(--card-divider);
   --color-surface-hover: var(--surface-hover);
   --color-chip-surface: var(--chip-surface);
+  --color-chip-surface-neutral: var(--chip-surface-neutral);
   --color-chip-foreground: var(--chip-foreground);
   --color-border-medium: var(--border-medium);
   --color-border-strong: var(--border-strong);
@@ -264,6 +289,14 @@
   --color-funnel-closing: var(--funnel-closing);
   --color-draft-highlight: var(--draft-highlight);
   --color-draft-highlight-muted: var(--draft-highlight-muted);
+
+  /* Аватары менеджеров карточки. */
+  --color-avatar-lead: var(--avatar-lead);
+  --color-avatar-lead-border: var(--avatar-lead-border);
+  --color-avatar-assistant: var(--avatar-assistant);
+  --color-avatar-assistant-border: var(--avatar-assistant-border);
+  --color-avatar-empty: var(--avatar-empty);
+  --color-avatar-empty-border: var(--avatar-empty-border);
 
   /* Радиусы. */
   --radius-sm: calc(var(--radius) - 4px);

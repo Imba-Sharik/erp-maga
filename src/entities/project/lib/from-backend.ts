@@ -149,6 +149,7 @@ export function mapBackendProject(b: BackendProjectListable): Project | null {
     loft: venue.loft,
     hall: venue.hall,
     ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
+    ...(b.halls?.length ? { halls: b.halls } : {}),
     manager: b.mag_manager?.full_name ?? '',
     leadManagerId: b.mag_manager ? String(b.mag_manager.id) : null,
     ...(assistantManagers.length ? { assistantManagers } : {}),
@@ -234,6 +235,7 @@ export function mapBackendCalendarProject(b: ProjectCalendarItemSchema): Project
     loft: venue.loft,
     hall: venue.hall,
     ...(venue.hallLoft ? { hallLoft: venue.hallLoft } : {}),
+    ...(b.halls?.length ? { halls: b.halls } : {}),
     manager: b.mag_manager?.full_name ?? '',
     // Лёгкая календарная схема не несёт флаги доступа — claim/read-only тут не нужны.
     canClaim: false,

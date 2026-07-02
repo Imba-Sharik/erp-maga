@@ -6,7 +6,7 @@ import type { ProjectStageEnumKey } from '@/shared/api/generated/types/Project'
 
 import type { BoardListParams, KanbanBoardScope } from '../lib/kanban-board-query'
 import { useKanbanColumnQuery } from '../lib/use-kanban-column-query'
-import { PipelineKanbanColumn } from './pipeline-kanban-column'
+import { COLUMN_SHELL_CLASS, PipelineKanbanColumn } from './pipeline-kanban-column'
 import { ProjectsKanbanColumn } from './projects-kanban-column'
 
 interface KanbanColumnWithQueryBaseProps {
@@ -31,9 +31,6 @@ interface ClosingKanbanColumnProps extends KanbanColumnWithQueryBaseProps {
 }
 
 export type KanbanColumnWithQueryProps = PreprojectKanbanColumnProps | ClosingKanbanColumnProps
-
-const COLUMN_SHELL_CLASS =
-  'flex h-full w-70 shrink-0 flex-col @[1400px]:w-auto @[1400px]:min-w-65 @[1400px]:flex-1'
 
 export function KanbanColumnWithQuery(props: KanbanColumnWithQueryProps) {
   const { scope, apiStage, title, listParams } = props
