@@ -44,7 +44,7 @@ export function ProjectsTableToolbar({
 }: ProjectsTableToolbarProps) {
   return (
     <div className="@container flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-between @3xl:gap-4">
-      <div className="flex w-full flex-col gap-2.5 @3xl:flex-row @3xl:items-center @3xl:gap-3">
+      <div className="flex w-full min-w-0 flex-col gap-2.5 @3xl:flex-1 @3xl:flex-row @3xl:items-center @3xl:gap-3">
         <div className="flex items-center gap-2 @3xl:w-75">
           <div className="relative min-w-0 flex-1">
             <Search className="text-muted-foreground absolute top-1/2 left-2 size-3.5 -translate-y-1/2 @3xl:left-3 @3xl:size-4" />
@@ -103,7 +103,7 @@ export function ProjectsTableToolbar({
           label="Ожидают обработки"
           checked={pendingOnly}
           onChange={onTogglePending}
-          className="hidden @3xl:flex"
+          className="hidden shrink-0 @3xl:flex"
         />
       )}
     </div>
